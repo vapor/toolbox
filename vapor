@@ -18,6 +18,14 @@ import Foundation
 enum Error: ErrorProtocol {
     case System(Int32)
     case Cancelled
+    var code: Int32 {
+      switch self {
+      case .Cancelled:
+        return 2
+      case .System(let code):
+        return code
+      }
+    }
 }
 
 func run(_ command: String) throws {
@@ -438,8 +446,22 @@ extension Heroku {
       let packageName = getPackageName()
       print("Setting up Heroku for \(packageName) ...")
       print()
-      print("Custom Buildpack? (return to use default)")
 
+      let herokuIsAlreadyInitialized = passes("git remote get-url heroku")
+      if herokuIsAlreadyInitialized {
+        print("Found existing heroku app")
+        print()
+      } else {
+        print("Custom Heroku App Name? (return to let Heroku create)")
+        let herokuAppName = getInput()
+        do {
+          try run("heroku create \(herokuAppName)")
+        } catch {
+          fail("unable to create heroku app")
+        }
+      }
+
+      print("Custom Buildpack? (return to use default)")
       var buildpack = ""
       if let input = readLine(strippingNewline: true) where !buildpack.isEmpty {
         buildpack = input
@@ -447,15 +469,15 @@ extension Heroku {
         // TODO: Move default to KyleF when supported
         buildpack = "https://github.com/qutheory/heroku-buildpack-swift"
       }
-      print("Using buildpack: \(buildpack)")
-      print()
 
-      print("Custom Heroku App Name? (return to let Heroku create)")
-      let herokuAppName = getInput()
       do {
-        try run("heroku create \(herokuAppName) --buildpack \(buildpack)")
+        try run("heroku buildpacks:set \(buildpack)")
+        print("Using buildpack: \(buildpack)")
+        print()
+      } catch let e as Error where e.code == 256 {
+        print()
       } catch {
-        fail("")
+        fail("unable to set buildpack: \(buildpack)")
       }
 
       print("Creating Procfile ...")
