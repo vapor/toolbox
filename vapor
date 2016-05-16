@@ -264,6 +264,75 @@ struct New: Command {
 
 commands.append(New)
 
+// MARK: SelfUpdate
+
+struct SelfUpdate: Command {
+    static let id = "self-update"
+
+    static func execute(with args: [String], in directory: String) {
+      let name = "vapor-cli.tmp"
+      let quiet = args.contains("--verbose") ? "" : "-q"
+
+      do {
+          print("Downloading...")
+          try run("wget \(quiet) cli.qutheory.io -O \(name)")
+      } catch {
+          print("Could not download Vapor CLI.")
+          print("Make sure you have 'wget' installed.")
+          return
+      }
+
+      do {
+          try run("chmod +x \(name)")
+          try run("mv \(name) \(directory)")
+      } catch {
+          print("Could not move Vapor CLI to install location.")
+          print("Trying with 'sudo'.")
+          do {
+              try run("sudo mv \(name) \(directory)")
+          } catch {
+              fail("Could not move Vapor CLI to install location, giving up.")
+          }
+      }
+
+      print("Vapor CLI updated.")
+    }
+}
+
+commands.append(SelfUpdate)
+
+// MARK: Xcode
+
+#if os(OSX)
+
+struct Xcode: Command {
+    static let id = "xcode"
+
+    static func execute(with args: [String], in directory: String) {
+      print("Generating Xcode Project...")
+
+      do {
+          try run("swift build --generate-xcodeproj")
+      } catch {
+          print("Could not generate Xcode Project.")
+          return
+      }
+
+      print("Opening Xcode...")
+
+      do {
+          try run("open *.xcodeproj")
+      } catch {
+          fail("Could not open Xcode Project.")
+      }
+    }
+}
+
+commands.append(Xcode)
+
+#endif
+
+
 // Older
 
 class Vapor {
