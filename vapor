@@ -141,7 +141,7 @@ extension Array where Element: Equatable {
         self = self.filter { $0 != element }
     }
 
-    mutating func remove(matching: Element -> Bool) {
+    mutating func remove(matching: (Element) -> Bool) {
         self = self.filter { !matching($0) }
     }
 }
@@ -150,7 +150,6 @@ extension Array where Element: Equatable {
 
 protocol Command {
     static var id: String { get }
-    static var help: String { get }
     static var description: String { get }
 
     static var dependencies: [String] { get }
@@ -159,7 +158,6 @@ protocol Command {
 
 extension Command {
     static var dependencies: [String] { return [] }
-    static var help: String { return "" }
     static var description: String { return "" }
 }
 
@@ -191,7 +189,7 @@ struct Help: Command {
 
         var help = "Available Commands:\n\n"
         help += commands
-            .map { cmd in "\t\(cmd.id): \(cmd.description)"}
+            .map { cmd in "\t\(cmd.id):\n\(cmd.description)"}
             .joined(separator: "\n")
         help += "\n"
         print(help)
@@ -246,6 +244,15 @@ struct Build: Command {
     }
 }
 
+extension Build {
+  static var description: String {
+    var d = "\t\tbuild <module-name>\n"
+    d += "\t\tBuilds source files and links Vapor libs.\n"
+    d += "\t\tDefaults to App/ folder structure.\n"
+    return d
+  }
+}
+
 commands.append(Build)
 
 // MARK: Run
@@ -272,6 +279,14 @@ struct Run: Command {
             fail("Could not run project.")
         }
     }
+}
+
+extension Run {
+  static var description: String {
+    var d = "\t\truns executable built by vapor build.\n"
+    d += "\t\tuse --release for release configuration."
+    return d
+  }
 }
 
 commands.append(Run)
@@ -323,6 +338,16 @@ struct New: Command {
     }
 }
 
+extension New {
+  static var description: String {
+    var d = "\t\tnew <project-name>\n"
+    d += "\t\tClones the Vapor Example to a given\n"
+    d += "\t\tfolder name and initializes an empty\n"
+    d += "\t\tGit repository inside it.\n"
+    return d
+  }
+}
+
 commands.append(New)
 
 // MARK: SelfUpdate
@@ -362,6 +387,14 @@ struct SelfUpdate: Command {
     }
 }
 
+extension SelfUpdate {
+  static var description: String {
+    var d = "\t\tDownloads the latest version of\n"
+    d += "\t\tthe Vapor command line interface."
+    return d
+  }
+}
+
 commands.append(SelfUpdate)
 
 // MARK: Xcode
@@ -389,6 +422,12 @@ struct Xcode: Command {
             fail("Could not open Xcode Project.")
         }
     }
+}
+
+extension Xcode {
+  static var description: String {
+    return "\t\tGenerates and opens an Xcode Project."
+  }
 }
 
 commands.append(Xcode)
