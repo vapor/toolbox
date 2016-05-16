@@ -150,7 +150,7 @@ extension Array where Element: Equatable {
 
 protocol Command {
     static var id: String { get }
-    static var description: String { get }
+    static var help: [String] { get }
 
     static var dependencies: [String] { get }
     static func execute(with args: [String], in directory: String)
@@ -158,7 +158,21 @@ protocol Command {
 
 extension Command {
     static var dependencies: [String] { return [] }
-    static var description: String { return "" }
+    static var help: [String] { return [] }
+}
+
+extension Command {
+  static var description: String {
+    guard help.count > 0 else {
+      return "  \(id):\n"
+    }
+    
+    return "  \(id):\n"
+      + help
+      .map { "    \($0)"}
+      .joined(separator: "\n")
+      + "\n"
+  }
 }
 
 extension Command {
@@ -189,7 +203,7 @@ struct Help: Command {
 
         var help = "Available Commands:\n\n"
         help += commands
-            .map { cmd in "\t\(cmd.id):\n\(cmd.description)"}
+            .map { cmd in cmd.description }//"  \(cmd.id):\n\(cmd.description)\n"}
             .joined(separator: "\n")
         help += "\n"
         print(help)
@@ -250,11 +264,12 @@ struct Build: Command {
 }
 
 extension Build {
-  static var description: String {
-    var d = "\t\tbuild <module-name>\n"
-    d += "\t\tBuilds source files and links Vapor libs.\n"
-    d += "\t\tDefaults to App/ folder structure.\n"
-    return d
+  static var help: [String] {
+    return [
+      "build <module-name>",
+      "Builds source files and links Vapor libs.",
+      "Defaults to App/ folder structure."
+    ]
   }
 }
 
@@ -287,10 +302,11 @@ struct Run: Command {
 }
 
 extension Run {
-  static var description: String {
-    var d = "\t\truns executable built by vapor build.\n"
-    d += "\t\tuse --release for release configuration."
-    return d
+  static var help: [String] {
+    return [
+      "runs executable built by vapor build.",
+      "use --release for release configuration."
+    ]
   }
 }
 
@@ -344,12 +360,13 @@ struct New: Command {
 }
 
 extension New {
-  static var description: String {
-    var d = "\t\tnew <project-name>\n"
-    d += "\t\tClones the Vapor Example to a given\n"
-    d += "\t\tfolder name and initializes an empty\n"
-    d += "\t\tGit repository inside it.\n"
-    return d
+  static var help: [String] {
+    return [
+      "new <project-name>",
+      "Clones the Vapor Example to a given",
+      "folder name and initializes an empty",
+      "Git repository inside it."
+    ]
   }
 }
 
@@ -393,10 +410,11 @@ struct SelfUpdate: Command {
 }
 
 extension SelfUpdate {
-  static var description: String {
-    var d = "\t\tDownloads the latest version of\n"
-    d += "\t\tthe Vapor command line interface."
-    return d
+  static var help: [String] {
+    return [
+      "Downloads the latest version of",
+      "the Vapor command line interface."
+    ]
   }
 }
 
@@ -430,8 +448,10 @@ struct Xcode: Command {
 }
 
 extension Xcode {
-  static var description: String {
-    return "\t\tGenerates and opens an Xcode Project."
+  static var help: [String] {
+    return [
+      "Generates and opens an Xcode Project."
+    ]
   }
 }
 
@@ -468,6 +488,14 @@ struct Heroku: Command {
         let passthroughArgs = Array(iterator)
         subcommand.execute(with: passthroughArgs, in: directory)
     }
+}
+
+extension Heroku {
+  static var help: [String] {
+    return [
+      "Configures a new heroku project"
+    ]
+  }
 }
 
 extension Heroku {
