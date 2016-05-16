@@ -193,6 +193,11 @@ struct Help: Command {
             .joined(separator: "\n")
         help += "\n"
         print(help)
+
+        print("Community:")
+        print("  Join our Slack if you have questions,")
+        print("  need help, or want to contribute.")
+        print("  http://slack.qutheory.io")
     }
 }
 
