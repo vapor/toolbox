@@ -6,199 +6,249 @@
     import Glibc
 #endif
 
-class Vapor {
-    /// Space separated args from shell
-    var arguments: [String]
+import Foundation
 
-    /// True if the --release flag was passed
-    var release = false
+// MARK: Utilities
 
-    /// Enables more detailed logs
-    var verbose = false
+@noreturn func fail(_ message: String) {
+    print("Error: \(message)")
+    exit(1)
+}
 
-    /// Any arguments starting with --
-    var flags: [String]
-
-    /**
-        Intializes the CLI from an
-        array of arguments received from the shell.
-
-        - parameter arguments: Space separated args from shell
-    */
-    init(arguments: [String]) {
-        var commands: [String] = []
-        var flags: [String] = []
-
-        for argument in arguments {
-            if argument.characters.first == "-" {
-                if argument == "--release" {
-                    release = true
-                } else if argument == "--verbose" {
-                    verbose = true
-                    flags.append(argument)
-                } else {
-                    flags.append(argument)
-                }
-            } else {
-                commands.append(argument)
-            }
-        }
-
-        self.arguments = commands
-        self.flags = flags
-
-        if commands.count < 2 {
-            printUsage()
-            fail("Invalid number of arguments.")
+enum Error: ErrorProtocol {
+    case System(Int32)
+    case Cancelled
+    var code: Int32 {
+        switch self {
+        case .Cancelled:
+            return 2
+        case .System(let code):
+            return code
         }
     }
-    /**
-        Starts the CLI and determines
-        which command should run, if any.
-    */
-    func start() {
-        if let command = Command(rawValue: arguments[1]) {
+}
 
-            #if os(OSX)
-            switch command {
-            case .Clean:
-                clean()
-            case .Build:
-                build()
-            case .Run:
-                run()
-            case .New:
-                newProject()
-            case .Help:
-                help()
-            case .SelfUpdate:
-                selfUpdate()
-            case .Xcode:
-                xcode()
-            }
-            #else
-            switch command {
-            case .Clean:
-                clean()
-            case .Build:
-                build()
-            case .Run:
-                run()
-            case .New:
-                newProject()
-            case .Help:
-                help()
-            case .SelfUpdate:
-                selfUpdate()
-            }
-            #endif
+func run(_ command: String) throws {
+    let result = system(command)
 
-        } else {
-            fail("Unknown command: \(Process.arguments[1])")
-        }
+    if result == 2 {
+        throw Error.Cancelled
+    } else if result != 0 {
+        throw Error.System(result)
     }
+}
 
-    enum Error: ErrorProtocol {
-        case System(Int32)
-        case Cancelled
-    }
+func passes(_ command: String) -> Bool {
+    return system(command) == 0
+}
 
-    /**
-        The available commands.
-    */
-    enum Command: String {
-        case Clean = "clean"
-        case Build = "build"
-        case Run = "run"
-        case New = "new"
-        case Help = "help"
-        case SelfUpdate = "self-update"
-        #if os(OSX)
-        case Xcode = "xcode"
-        #endif
+func getInput() -> String {
+    return readLine(strippingNewline: true) ?? ""
+}
 
-        #if os(OSX)
-        static var all: [Command] = [.Clean, .Build, .Run, .New, .Help, .SelfUpdate, .Xcode]
-        #else
-        static var all: [Command] = [.Clean, .Build, .Run, .New, .Help, .SelfUpdate]
-        #endif
-    }
+func commandExists(_ command: String) -> Bool {
+    return system("hash \(command) 2>/dev/null") == 0
+}
 
-    /**
-        Prints out usage information
-        including available commands.
-    */
-    func printUsage() {
-        let names = Command.all.map { command in
-            return command.rawValue
-        }
+func gitHistoryIsClean() -> Bool {
+    return system("test -z \"$(git status --porcelain)\" || exit 1") == 0
+}
 
-        print("Usage: \(arguments[0]) [\(names.joined(separator: "|"))]")
-    }
-
-    /**
-        Attempts to run the supplied
-        command or throws an error.
-
-        - parameter command: Command to run
-    */
-    func run(_ command: String) throws {
-        let result = system(command)
-
-        if result == 2 {
-            throw Error.Cancelled
-        } else if result != 0 {
-            throw Error.System(result)
-        }
-    }
-
-    /**
-        Runs the supplied command in
-        the shell or prints the supplied
-        error message if the command fails.
-
-        - parameter command: Command to run
-        - parameter errorMessage: Prints if command fails
-    */
-    func run(_ command: String, orFail errorMessage: String) {
-        do {
-            try run(command)
-        } catch {
-            fail(errorMessage)
-        }
-    }
-
-    /**
-        Prints out an error message
-        and exits the script.
-
-        - parameter message: Error message to print
-    */
-    func fail(_ message: String) {
+func readPackageSwiftFile() -> String {
+    let file = "./Package.swift"
+    do {
+        return try String(contentsOfFile: file)
+    } catch {
         print()
-        print("Error: \(message)")
-        exit(1)
+        print("Unable to find Package.swift")
+        print("Make sure you've run `vapor new` or setup your Swift project manually")
+        fail("")
+    }
+}
+
+func extractPackageName(from packageFile: String) -> String {
+    let packageName = packageFile
+        .components(separatedBy: "\n")
+        .lazy
+        .map { $0.trimmedSpaces() }
+        .filter { $0.hasPrefix("name") }
+        .first?
+        .components(separatedBy: "\"")
+        .lazy
+        .filter { !$0.hasPrefix("name") }
+        .first
+
+    guard let name = packageName else {
+        fail("Unable to extract package name")
     }
 
-    /**
-        Removes the Packages and .build
-        folders from the current directory.
-    */
-    func clean() {
-        run("rm -rf Packages .build", orFail: "Could not clean")
-        print("Cleaned.")
+    return name
+}
+
+func getPackageName() -> String {
+    let packageFile = readPackageSwiftFile()
+    let packageName = extractPackageName(from: packageFile)
+    return packageName
+}
+
+extension String {
+    func trimmedSpaces() -> String {
+        // while characters
+        var mutable = self
+        while let next = mutable.characters.first where next == " " {
+            mutable.remove(at: mutable.startIndex)
+        }
+        while let next = mutable.characters.last where next == " " {
+            mutable.remove(at: mutable.startIndex)
+        }
+        return mutable
     }
 
-    /**
-        Attempts to compile the Vapor
-        project in the current directory.
-    */
-    func build() {
+#if os(Linux)
+    func hasPrefix(_ str: String) -> Bool {
+        let strGen = str.characters.makeIterator()
+        let selfGen = self.characters.makeIterator()
+        let seq = zip(strGen, selfGen)
+        for (lhs, rhs) in seq where lhs != rhs {
+                return false
+        }
+        return true
+    }
+
+    func hasSuffix(_ str: String) -> Bool {
+        let strGen = str.characters.reversed().makeIterator()
+        let selfGen = self.characters.reversed().makeIterator()
+        let seq = zip(strGen, selfGen)
+        for (lhs, rhs) in seq where lhs != rhs {
+                return false
+        }
+        return true
+    }
+#endif
+}
+
+extension Sequence where Iterator.Element == String {
+    func valueFor(argument name: String) -> String? {
+        for argument in self where argument.hasPrefix("--\(name)=") {
+            return argument.characters.split(separator: "=").last.flatMap(String.init)
+        }
+        return nil
+    }
+}
+
+extension Array where Element: Equatable {
+    mutating func remove(_ element: Element) {
+        self = self.filter { $0 != element }
+    }
+
+    mutating func remove(matching: (Element) -> Bool) {
+        self = self.filter { !matching($0) }
+    }
+}
+
+// MARK: Command
+
+protocol Command {
+    static var id: String { get }
+    static var help: [String] { get }
+
+    static var dependencies: [String] { get }
+    static func execute(with args: [String], in directory: String)
+}
+
+extension Command {
+    static var dependencies: [String] { return [] }
+    static var help: [String] { return [] }
+}
+
+extension Command {
+  static var description: String {
+    guard help.count > 0 else {
+      return "  \(id):\n"
+    }
+    
+    return "  \(id):\n"
+      + help
+      .map { "    \($0)"}
+      .joined(separator: "\n")
+      + "\n"
+  }
+}
+
+extension Command {
+    static func assertDependenciesSatisfied() {
+        for dependency in dependencies where !commandExists(dependency) {
+            fail("\(id) requires \(dependency)")
+        }
+    }
+}
+
+// MARK: Tree
+
+var commands: [Command.Type] = []
+
+func getCommand(id: String) -> Command.Type? {
+    return commands
+        .lazy
+        .filter { $0.id == id }
+        .first
+}
+
+// MARK: Help
+
+struct Help: Command {
+    static let id = "help"
+    static func execute(with args: [String], in directory: String) {
+        print("Usage: \(directory) [\(commands.map({ $0.id }).joined(separator: "|"))]")
+
+        var help = "Available Commands:\n\n"
+        help += commands
+            .map { cmd in cmd.description }//"  \(cmd.id):\n\(cmd.description)\n"}
+            .joined(separator: "\n")
+        help += "\n"
+        print(help)
+
+        print("Community:")
+        print("  Join our Slack if you have questions,")
+        print("  need help, or want to contribute.")
+        print("  http://slack.qutheory.io")
+    }
+}
+
+commands.append(Help)
+
+// MARK: Clean
+
+struct Clean: Command {
+    static let id = "clean"
+    static func execute(with args: [String], in directory: String) {
+        guard args.isEmpty else {
+            fail("\(id) doesn't take any additional parameters")
+        }
+
         do {
-            var buildFlags = flags.joined(separator: " ")
-            if release {
-                buildFlags += " -c release"
-            }
+            try run("rm -rf Packages .build")
+            print("Cleaned.")
+        } catch {
+            fail("Could not clean.")
+        }
+    }
+}
+
+commands.append(Clean)
+
+// MARK: Build
+
+struct Build: Command {
+    static let id = "build"
+    static func execute(with args: [String], in directory: String) {
+        var flags = args
+        if args.contains("--release") {
+            flags = flags.filter { $0 != "--release" }
+            flags.append("-c release")
+        }
+        do {
+            let buildFlags = flags.joined(separator: " ")
             try run("swift build \(buildFlags)")
         } catch Error.Cancelled {
             fail("Build cancelled.")
@@ -211,72 +261,131 @@ class Vapor {
             fail("Could not build project.")
         }
     }
+}
 
-    /**
-        Attempts to run the Vapor
-        project in the current directory.
-    */
-    func run() {
+extension Build {
+  static var help: [String] {
+    return [
+      "build <module-name>",
+      "Builds source files and links Vapor libs.",
+      "Defaults to App/ folder structure."
+    ]
+  }
+}
+
+commands.append(Build)
+
+// MARK: Run
+
+struct Run: Command {
+    static let id = "run"
+    static func execute(with args: [String], in directory: String) {
         print("Running...")
         do {
-            var name = "App"
-            let folder = release ? "release" : "debug"
+            var parameters = args
+            let name = args.valueFor(argument: "name") ?? "App"
+            parameters.remove { $0.hasPrefix("--name") }
 
-            if arguments.count >= 3 {
-                name = arguments[2]
-            }
+            let folder = args.contains("--release") ? "release" : "debug"
+            parameters.remove("--release")
 
-            let flagString = flags.joined(separator: " ")
-            try run(".build/\(folder)/\(name) \(flagString)")
+            // All remaining arguments are passed on to app
+            let passthroughArgs = args.joined(separator: " ")
+            // TODO: Check that file exists
+            try run(".build/\(folder)/\(name) \(passthroughArgs)")
         } catch Error.Cancelled {
             fail("Run cancelled.")
         } catch {
             fail("Could not run project.")
         }
     }
+}
 
-    /**
-        Clones the Vapor Example
-        project as a boilerplate.
-    */
-    func newProject() {
-        if arguments.count < 3 {
-            print("Usage: \(arguments[0]) \(arguments[1]) <project-name>")
+extension Run {
+  static var help: [String] {
+    return [
+      "runs executable built by vapor build.",
+      "use --release for release configuration."
+    ]
+  }
+}
+
+commands.append(Run)
+
+// MARK: New
+
+struct New: Command {
+    static let id = "new"
+    static func execute(with args: [String], in directory: String) {
+        guard let name = args.first else {
+            print("Usage: \(directory) \(id) <project-name>")
             fail("Invalid number of arguments.")
         }
-        let name = arguments[2]
 
+        let verbose = args.contains("--verbose")
         let wgetArgs = verbose ? "" : "-q"
         let tarArgs = verbose ? "v" : ""
 
         do {
             let escapedName = "\"\(name)\"" // FIX: Doesn’t support names with quotes
             try run("mkdir \(escapedName)")
+
+            guard commandExists("wget") else {
+                fail("wget required to create new project. Recommended to install through Homebrew: http://brew.sh/")
+            }
             try run("wget \(wgetArgs) https://github.com/qutheory/vapor-example/archive/master.tar.gz -O \(escapedName)/vapor-example.tar.gz")
             try run("tar -\(tarArgs)xzf \(escapedName)/vapor-example.tar.gz --strip-components=1 --directory \(escapedName)")
             try run("rm \(escapedName)/vapor-example.tar.gz")
+            #if os(OSX)
+                try run("cd \(escapedName) && swift build -X")
+            #endif
+
+            if commandExists("git") {
+                print("Initializing git repository if necessary")
+                system("git init \(escapedName)")
+                system("cd \(escapedName) && git add . && git commit -m \"initial vapor project setup\"")
+                print()
+            }
 
             print()
             print("Project \"\(name)\" has been created.")
+            print("Type `cd \(name)` to enter project directory")
             print("Enjoy!")
             print()
+            system("open \(escapedName)/*.xcodeproj")
         } catch {
-            fail("Could not clone repository")
+                fail("Could not clone repository")
         }
     }
+}
 
-    /**
-        Updates this CLI script
-        in the bin from the latest version online.
-    */
-    func selfUpdate() {
+extension New {
+  static var help: [String] {
+    return [
+      "new <project-name>",
+      "Clones the Vapor Example to a given",
+      "folder name and initializes an empty",
+      "Git repository inside it."
+    ]
+  }
+}
+
+commands.append(New)
+
+// MARK: SelfUpdate
+
+struct SelfUpdate: Command {
+    static let id = "self-update"
+
+    static var dependencies = ["wget"]
+
+    static func execute(with args: [String], in directory: String) {
         let name = "vapor-cli.tmp"
-        let flags = verbose ? "" : "-q"
-        let installLoc = arguments[0]
+        let quiet = args.contains("--verbose") ? "" : "-q"
 
         do {
             print("Downloading...")
-            try run("wget \(flags) cli.qutheory.io -O \(name)")
+            try run("wget \(quiet) cli.qutheory.io -O \(name)")
         } catch {
             print("Could not download Vapor CLI.")
             print("Make sure you have 'wget' installed.")
@@ -285,41 +394,47 @@ class Vapor {
 
         do {
             try run("chmod +x \(name)")
-            try run("mv \(name) \(installLoc)")
+            try run("mv \(name) \(directory)")
         } catch {
             print("Could not move Vapor CLI to install location.")
             print("Trying with 'sudo'.")
             do {
-                try run("sudo mv \(name) \(installLoc)")
+                try run("sudo mv \(name) \(directory)")
             } catch {
-                print("Still could not move Vapor CLI to install location, giving up.")
-                return
+                fail("Could not move Vapor CLI to install location, giving up.")
             }
         }
 
         print("Vapor CLI updated.")
     }
+}
 
-    #if os(OSX)
-    /**
-        Generates and opens an Xcode
-        project for Vapor module in the current dir.
-    */
-    func xcode() {
+extension SelfUpdate {
+  static var help: [String] {
+    return [
+      "Downloads the latest version of",
+      "the Vapor command line interface."
+    ]
+  }
+}
+
+commands.append(SelfUpdate)
+
+// MARK: Xcode
+
+#if os(OSX)
+
+struct Xcode: Command {
+    static let id = "xcode"
+
+    static func execute(with args: [String], in directory: String) {
         print("Generating Xcode Project...")
 
         do {
             try run("swift build --generate-xcodeproj")
-        } catch Error.System(let result) {
-            if result == 256 {
-                print()
-                print("Clean the project and try again.")
-                print("Run: vapor clean")
-            }
-            fail("Could not generate Xcode Project.")
         } catch {
-            print("other")
-            fail("Could not generate Xcode Project.")
+            print("Could not generate Xcode Project.")
+            return
         }
 
         print("Opening Xcode...")
@@ -330,61 +445,180 @@ class Vapor {
             fail("Could not open Xcode Project.")
         }
     }
-    #endif
+}
 
-    /**
-        Displays information about how to use
-        the CLI and what its various commands do.
-    */
-    func help() {
-        print()
-        printUsage()
-        print()
-        print("Flags:")
-        print("  --release")
-        print("    Builds and runs with optimizations")
-        print()
-        print("  --verbose")
-        print()
-        print("Options:")
-        print("  build [file1, file2, ...]")
-        print("    Builds source files and links Vapor libs.")
-        print("    Defaults to App/ folder structure.")
-        print()
-        print("  run")
-        print("    Runs the executable built by vapor build.")
-        print("    To pass arguments to the program, ")
-        print("    run it manually .build/VaporApp")
-        print()
-        print("  new <project-name>")
-        print("    Clones the Vapor Example to a given ")
-        print("    folder name and initializes an empty")
-        print("    Git repository inside it.")
-        print()
-        print("  self-update")
-        print("    Downloads the latest version of")
-        print("    the Vapor command line interface.")
+extension Xcode {
+  static var help: [String] {
+    return [
+      "Generates and opens an Xcode Project."
+    ]
+  }
+}
 
-        #if os(OSX)
-        print()
-        print("  xcode")
-        print("    Generates and opens an Xcode Project.")
-        #endif
+commands.append(Xcode)
 
-        print()
-        print("  clean")
-        print()
-        print("  help")
-        print()
-        print("Community:")
-        print("  Join our Slack if you have questions, ")
-        print("  need help, or want to contribute.")
-        print("  http://slack.qutheory.io")
-        print()
+#endif
+
+// MARK: Heroku
+
+protocol Subcommand: Command {}
+
+struct Heroku: Command {
+    static let id = "heroku"
+
+    static var subcommands: [Subcommand.Type] = []
+
+    static var supportedCommands: String {
+        return subcommands.map { $0.id } .joined(separator: "|")
+    }
+
+    static func subcommand(forId id: String) -> Subcommand.Type? {
+        return subcommands
+            .lazy
+            .filter { $0.id == id }
+            .first
+    }
+
+    static func execute(with args: [String], in directory: String) {
+        var iterator = args.makeIterator()
+        guard let subcommand = iterator.next().flatMap(subcommand(forId:)) else {
+            fail("heroku subcommand not found. supported: \(supportedCommands)")
+        }
+
+        let passthroughArgs = Array(iterator)
+        subcommand.execute(with: passthroughArgs, in: directory)
     }
 }
 
-let cli = Vapor(arguments: Process.arguments)
-cli.start()
+extension Heroku {
+  static var help: [String] {
+    return [
+      "Configures a new heroku project"
+    ]
+  }
+}
 
+extension Heroku {
+    struct Init: Subcommand {
+        static let id = "init"
+        static func execute(with args: [String], in directory: String) {
+            guard args.isEmpty else { fail("heroku init takes no args") }
+            guard commandExists("git") else {
+                fail("git is required to setup heroku, make sure it's installed")
+            }
+            guard commandExists("heroku") else {
+                fail("heroku cli and logged in user is required: https://toolbelt.heroku.com/")
+            }
+
+            if !gitHistoryIsClean() {
+                print("Found Uncommitted Changes")
+                print("Setting up heroku requires adding a commit to the repository")
+                print("Please commit your current changes before setting up heroku")
+                fail("")
+            }
+
+            let packageName = getPackageName()
+            print("Setting up Heroku for \(packageName) ...")
+            print()
+
+            let herokuIsAlreadyInitialized = passes("git remote get-url heroku")
+            if herokuIsAlreadyInitialized {
+                print("Found existing heroku app")
+                print()
+            } else {
+                print("Custom Heroku App Name? (return to let Heroku create)")
+                let herokuAppName = getInput()
+                do {
+                    try run("heroku create \(herokuAppName)")
+                } catch {
+                    fail("unable to create heroku app")
+                }
+            }
+
+            print("Custom Buildpack? (return to use default)")
+            var buildpack = ""
+            if let input = readLine(strippingNewline: true) where !buildpack.isEmpty {
+                buildpack = input
+            } else {
+                // TODO: Move default to KyleF when supported
+                buildpack = "https://github.com/qutheory/heroku-buildpack-swift"
+            }
+
+            do {
+                try run("heroku buildpacks:set \(buildpack)")
+                print("Using buildpack: \(buildpack)")
+                print()
+            } catch let e as Error where e.code == 256 {
+                print()
+            } catch {
+                fail("unable to set buildpack: \(buildpack)")
+            }
+
+            print("Creating Procfile ...")
+            // TODO: Discuss
+            // Should it be
+            //    let procContents = "web: \(packageName) --port=\\$PORT"
+            // It causes errors like that and forces `App` as process.
+            // Forces us to use Vapor CLI
+            // Maybe that's something we want
+            let procContents = "web: App --port=\\$PORT"
+            do {
+                // Overwrites existing Procfile
+                try run("echo \"\(procContents)\" > ./Procfile")
+            } catch {
+                fail("Unable to make Procfile")
+            }
+
+            print()
+            print("Would you like to push to heroku now? (y/n)")
+            let input = getInput().lowercased()
+            if input.hasPrefix("n") {
+                print("\n\n")
+                print("Make sure to push your changes to heroku using:")
+                print("\t'git push heroku master'")
+                print("You may need to scale up dynos")
+                print("\t'heroku ps:scale web=1'")
+                exit(0)
+            }
+
+            print()
+            print("Pushing to heroku ... this could take a while")
+            print()
+
+            system("git add .")
+            system("git commit -m \"setting up heroku\"")
+            system("git push heroku master")
+
+            print("spinning up dynos ...")
+            do {
+                try run("heroku ps:scale web=1")
+            } catch {
+                fail("unable to spin up dynos")
+            }
+        }
+    }
+}
+
+Heroku.subcommands.append(Heroku.Init.self)
+commands.append(Heroku)
+
+// MARK: CLI
+
+var iterator = Process.arguments.makeIterator()
+
+guard let directory = iterator.next() else {
+    fail("no directory")
+}
+guard let commandId = iterator.next() else {
+    print("Usage: \(directory) [\(commands.map({ $0.id }).joined(separator: "|"))]")
+    fail("no command")
+}
+guard let command = getCommand(id: commandId) else {
+    fail("command \(commandId) doesn't exist")
+}
+
+command.assertDependenciesSatisfied()
+
+let arguments = Array(iterator)
+command.execute(with: arguments, in: directory)
 exit(0)
