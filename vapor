@@ -540,8 +540,7 @@ extension Heroku {
             if let input = readLine(strippingNewline: true) where !buildpack.isEmpty {
                 buildpack = input
             } else {
-                // TODO: Move default to KyleF when supported
-                buildpack = "https://github.com/qutheory/heroku-buildpack-swift"
+                buildpack = "https://github.com/kylef/heroku-buildpack-swift"
             }
 
             do {
