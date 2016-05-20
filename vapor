@@ -332,6 +332,7 @@ commands.append(Run)
 
 struct New: Command {
     static let id = "new"
+
     static func execute(with args: [String], in directory: String) {
         guard let name = args.first else {
             print("Usage: \(directory) \(id) <project-name>")
@@ -339,17 +340,14 @@ struct New: Command {
         }
 
         let verbose = args.contains("--verbose")
-        let wgetArgs = verbose ? "" : "-q"
+        let curlArgs = verbose ? "" : "-s"
         let tarArgs = verbose ? "v" : ""
 
         do {
             let escapedName = "\"\(name)\"" // FIX: Doesn’t support names with quotes
             try run("mkdir \(escapedName)")
 
-            guard commandExists("wget") else {
-                fail("wget required to create new project. Recommended to install through Homebrew: http://brew.sh/")
-            }
-            try run("wget \(wgetArgs) https://github.com/qutheory/vapor-example/archive/master.tar.gz -O \(escapedName)/vapor-example.tar.gz")
+            try run("curl -L \(curlArgs) https://github.com/qutheory/vapor-example/archive/master.tar.gz -o \(escapedName)/vapor-example.tar.gz")
             try run("tar -\(tarArgs)xzf \(escapedName)/vapor-example.tar.gz --strip-components=1 --directory \(escapedName)")
             try run("rm \(escapedName)/vapor-example.tar.gz")
             #if os(OSX)
@@ -393,18 +391,15 @@ commands.append(New)
 struct SelfUpdate: Command {
     static let id = "self-update"
 
-    static var dependencies = ["wget"]
-
     static func execute(with args: [String], in directory: String) {
         let name = "vapor-cli.tmp"
-        let quiet = args.contains("--verbose") ? "" : "-q"
+        let quiet = args.contains("--verbose") ? "" : "-s"
 
         do {
             print("Downloading...")
-            try run("wget \(quiet) cli.qutheory.io -O \(name)")
+            try run("curl -L \(quiet) cli.qutheory.io -o \(name)")
         } catch {
             print("Could not download Vapor CLI.")
-            print("Make sure you have 'wget' installed.")
             return
         }
 
@@ -482,6 +477,8 @@ protocol Subcommand: Command {}
 struct Heroku: Command {
     static let id = "heroku"
 
+    static var dependencies = ["git", "heroku"]
+
     static var subcommands: [Subcommand.Type] = []
 
     static var supportedCommands: String {
@@ -519,12 +516,6 @@ extension Heroku {
         static let id = "init"
         static func execute(with args: [String], in directory: String) {
             guard args.isEmpty else { fail("heroku init takes no args") }
-            guard commandExists("git") else {
-                fail("git is required to setup heroku, make sure it's installed")
-            }
-            guard commandExists("heroku") else {
-                fail("heroku cli and logged in user is required: https://toolbelt.heroku.com/")
-            }
 
             if !gitHistoryIsClean() {
                 print("Found Uncommitted Changes")
