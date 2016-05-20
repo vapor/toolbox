@@ -368,7 +368,7 @@ struct New: Command {
             print()
             system("open \(escapedName)/*.xcodeproj")
         } catch {
-                fail("Could not clone repository")
+            fail("Could not clone repository")
         }
     }
 }
