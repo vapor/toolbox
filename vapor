@@ -243,7 +243,7 @@ struct Build: Command {
     static let id = "build"
     static func execute(with args: [String], in directory: String) {
         do {
-            try run("swit build --fetch")
+            try run("swift build --fetch")
         } catch Error.Cancelled {
             fail("Fetch cancelled")
         } catch {
