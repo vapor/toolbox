@@ -153,11 +153,13 @@ protocol Command {
     static var help: [String] { get }
 
     static var dependencies: [String] { get }
+    static var subCommands: [Command.Type] { get }
     static func execute(with args: [String], in directory: String)
 }
 
 extension Command {
     static var dependencies: [String] { return [] }
+    static var subCommands: [Command.Type] { return [] }
     static var help: [String] { return [] }
 }
 
@@ -166,12 +168,24 @@ extension Command {
     guard help.count > 0 else {
       return "  \(id):\n"
     }
-    
+
+    // Sven: The following is not very readable but I stuck with the theme of how the
+    // description is built. It would be easier if we would just use:
+    //    let subCmdHelpSection = "\n" + subCommands.map { $0.description }.joined(separator: "\n")
+    // This does work but the indentation is on the same level as the main commands, which looks bad
+    let subCmdHelpFragments = subCommands.map {
+        "\n    \($0.id):\n"
+        + $0.help
+            .map { "      \($0)" }
+            .joined(separator: "\n")
+    }
+    let subCmdHelpSection = "\n" + subCmdHelpFragments.joined(separator: "\n")
+
     return "  \(id):\n"
-      + help
-      .map { "    \($0)"}
-      .joined(separator: "\n")
-      + "\n"
+        + help
+            .map { "    \($0)"}
+            .joined(separator: "\n")
+        + subCmdHelpSection
   }
 }
 
@@ -607,6 +621,81 @@ extension Heroku {
 
 Heroku.subcommands.append(Heroku.Init.self)
 commands.append(Heroku)
+
+// MARK: Docker
+
+struct Docker: Command {
+    static let id = "docker"
+
+    static var subCommands: [Command.Type] = [Docker.Init.self, Docker.Run.self, Docker.Enter.self]
+
+    static func execute(with args: [String], in directory: String) {
+
+    }
+}
+
+extension Docker {
+    static var help: [String] {
+        return [
+                   "Setup and run vapor app via docker",
+                   "sub commands: " + subCommands.map { "\($0.id)" }.joined(separator: "|"),
+        ]
+    }
+}
+
+extension Docker {
+    struct Init: Command {
+        static let id = "init"
+
+        static func execute(with args: [String], in directory: String) {
+
+        }
+
+        static var help: [String] {
+            return [
+                       "Build the docker image, using the swift",
+                       "version specified in .swift-version."
+            ]
+        }
+    }
+}
+
+extension Docker {
+    struct Run: Command {
+        static let id = "run"
+
+        static func execute(with args: [String], in directory: String) {
+
+        }
+
+        static var help: [String] {
+            return [
+                       "Run the app in a docker container with the",
+                       "image created by running 'init'"
+            ]
+        }
+    }
+}
+
+
+extension Docker {
+    struct Enter: Command {
+        static let id = "enter"
+
+        static func execute(with args: [String], in directory: String) {
+
+        }
+
+        static var help: [String] {
+            return [
+                       "Enter the docker container (useful for",
+                       "debugging purposes)"
+            ]
+        }
+    }
+}
+
+commands.append(Docker)
 
 // MARK: CLI
 
