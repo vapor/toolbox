@@ -740,6 +740,8 @@ extension Docker {
                 } else {
                     fail("docker run command failed, command was\n\(cmd)")
                 }
+            } catch {
+                fail("docker run command failed, command was\n\(cmd)")
             }
         }
 
