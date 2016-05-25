@@ -91,15 +91,20 @@ func getPackageName() -> String {
     return packageName
 }
 
+func isWhitespace(_ character: Character) -> Bool {
+    let ws: Set = [Character(" "), Character("\n"), Character("\t"), Character("\r")]
+    return ws.contains(character)
+}
+
 extension String {
     func trimmedSpaces() -> String {
         // while characters
         var mutable = self
-        while let next = mutable.characters.first where next == " " {
+        while let next = mutable.characters.first where isWhitespace(next) {
             mutable.remove(at: mutable.startIndex)
         }
-        while let next = mutable.characters.last where next == " " {
-            mutable.remove(at: mutable.startIndex)
+        while let next = mutable.characters.last where isWhitespace(next) {
+            mutable.remove(at: mutable.index(before: mutable.endIndex))
         }
         return mutable
     }
@@ -159,8 +164,28 @@ protocol Command {
 
 extension Command {
     static var dependencies: [String] { return [] }
-    static var subCommands: [Command.Type] { return [] }
     static var help: [String] { return [] }
+}
+
+// sub command related methods
+extension Command {
+    static var subCommands: [Command.Type] { return [] }
+
+    static func subCommand(forId id: String) -> Command.Type? {
+        return subCommands.lazy.filter { $0.id == id }.first
+    }
+
+    static func executeSubCommand(with args: [String], in directory: String) {
+        var iterator = args.makeIterator()
+        guard let cmdId = iterator.next() else {
+            fail("\(id) requires a sub command:\n" + description)
+        }
+        guard let subcommand = subCommand(forId: cmdId) else {
+            fail("Unknown \(id) subcommand '\(cmdId)':\n" + description)
+        }
+        let passthroughArgs = Array(iterator)
+        subcommand.execute(with: passthroughArgs, in: directory)
+    }
 }
 
 extension Command {
@@ -630,7 +655,7 @@ struct Docker: Command {
     static var subCommands: [Command.Type] = [Docker.Init.self, Docker.Run.self, Docker.Enter.self]
 
     static func execute(with args: [String], in directory: String) {
-
+        executeSubCommand(with: args, in: directory)
     }
 }
 
@@ -648,7 +673,16 @@ extension Docker {
         static let id = "init"
 
         static func execute(with args: [String], in directory: String) {
-
+            do {
+                let swiftVersion = try String(contentsOfFile: ".swift-version").trimmedSpaces()
+                print("Building docker image with Swift version: \(swiftVersion)")
+                print("This may take a few minutes if no layers are cached...")
+                let img = "qutheory/swift:\(swiftVersion)"
+                let cmd = "docker build --rm -t \(img) --build-arg SWIFT_VERSION=\(swiftVersion) ."
+                try run(cmd)
+            } catch {
+                fail("unabled to rund 'docker build'")
+            }
         }
 
         static var help: [String] {
@@ -665,7 +699,7 @@ extension Docker {
         static let id = "run"
 
         static func execute(with args: [String], in directory: String) {
-
+            // TODO: add command
         }
 
         static var help: [String] {
