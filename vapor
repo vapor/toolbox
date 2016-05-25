@@ -724,7 +724,7 @@ extension Docker {
                     fail("Could not determine Swift version (check your .swift-version file)")
             }
 
-            let cmd = "docker run --rm -it -p 8080:8080 \(imageName)"
+            let cmd = "docker run --rm -it -v $(PWD):/vapor -p 8080:8080 \(imageName)"
             do {
                 print("Launching app with image \(imageName)")
                 try run(cmd)

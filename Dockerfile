@@ -33,9 +33,10 @@ ENV PATH /usr/bin:$PATH
 # vapor specific part
 
 WORKDIR /vapor
-ADD . /vapor
-RUN swift build
-
+VOLUME /vapor
 EXPOSE 8080
 
-CMD .build/debug/App
+# mount in local sources via:  -v $(PWD):/vapor
+# the vapor CLI command does this
+
+CMD swift build && .build/debug/App
