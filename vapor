@@ -669,19 +669,38 @@ extension Docker {
 }
 
 extension Docker {
+    static let swiftVersion: String? = {
+        return try? String(contentsOfFile: ".swift-version").trimmedSpaces()
+    }()
+
+    static let imageName: String? = {
+        if let version = swiftVersion {
+            return "qutheory/swift:\(version)"
+        } else {
+            return nil
+        }
+    }()
+}
+
+extension Docker {
     struct Init: Command {
         static let id = "init"
 
         static func execute(with args: [String], in directory: String) {
+            guard let
+                swiftVersion = Docker.swiftVersion,
+                imageName = Docker.imageName
+                else {
+                fail("Could not determine Swift version (check your .swift-version file)")
+            }
+
             do {
-                let swiftVersion = try String(contentsOfFile: ".swift-version").trimmedSpaces()
                 print("Building docker image with Swift version: \(swiftVersion)")
                 print("This may take a few minutes if no layers are cached...")
-                let img = "qutheory/swift:\(swiftVersion)"
-                let cmd = "docker build --rm -t \(img) --build-arg SWIFT_VERSION=\(swiftVersion) ."
+                let cmd = "docker build --rm -t \(imageName) --build-arg SWIFT_VERSION=\(swiftVersion) ."
                 try run(cmd)
             } catch {
-                fail("unabled to rund 'docker build'")
+                fail("unable to run 'docker build'")
             }
         }
 
@@ -717,7 +736,18 @@ extension Docker {
         static let id = "enter"
 
         static func execute(with args: [String], in directory: String) {
-
+            guard let
+                imageName = Docker.imageName
+                else {
+                    fail("Could not determine Swift version (check your .swift-version file)")
+            }
+            do {
+                print("Starting bash in image \(imageName)")
+                let cmd = "docker run -it --rm --privileged=true --entrypoint bash \(imageName)"
+                try run(cmd)
+            } catch {
+                fail("unable to enter docker container")
+            }
         }
 
         static var help: [String] {
