@@ -91,14 +91,19 @@ func getPackageName() -> String {
     return packageName
 }
 
+func isWhitespace(_ character: Character) -> Bool {
+    let ws: Set = [Character(" "), Character("\n"), Character("\t"), Character("\r")]
+    return ws.contains(character)
+}
+
 extension String {
     func trimmedSpaces() -> String {
         // while characters
         var mutable = self
-        while let next = mutable.characters.first where next == " " {
+        while let next = mutable.characters.first where isWhitespace(next) {
             mutable.remove(at: mutable.startIndex)
         }
-        while let next = mutable.characters.last where next == " " {
+        while let next = mutable.characters.last where isWhitespace(next) {
             mutable.remove(at: mutable.index(before: mutable.endIndex))
         }
         return mutable
@@ -153,6 +158,7 @@ protocol Command {
     static var help: [String] { get }
 
     static var dependencies: [String] { get }
+    static var subCommands: [Command.Type] { get }
     static func execute(with args: [String], in directory: String)
 }
 
@@ -161,17 +167,50 @@ extension Command {
     static var help: [String] { return [] }
 }
 
+// sub command related methods
+extension Command {
+    static var subCommands: [Command.Type] { return [] }
+
+    static func subCommand(forId id: String) -> Command.Type? {
+        return subCommands.lazy.filter { $0.id == id }.first
+    }
+
+    static func executeSubCommand(with args: [String], in directory: String) {
+        var iterator = args.makeIterator()
+        guard let cmdId = iterator.next() else {
+            fail("\(id) requires a sub command:\n" + description)
+        }
+        guard let subcommand = subCommand(forId: cmdId) else {
+            fail("Unknown \(id) subcommand '\(cmdId)':\n" + description)
+        }
+        let passthroughArgs = Array(iterator)
+        subcommand.execute(with: passthroughArgs, in: directory)
+    }
+}
+
 extension Command {
   static var description: String {
     guard help.count > 0 else {
       return "  \(id):\n"
     }
-    
+
+    // Sven: The following is not very readable but I stuck with the theme of how the
+    // description is built. It would be easier if we would just use:
+    //    let subCmdHelpSection = "\n" + subCommands.map { $0.description }.joined(separator: "\n")
+    // This does work but the indentation is on the same level as the main commands, which looks bad
+    let subCmdHelpFragments = subCommands.map {
+        "\n    \($0.id):\n"
+        + $0.help
+            .map { "      \($0)" }
+            .joined(separator: "\n")
+    }
+    let subCmdHelpSection = "\n" + subCmdHelpFragments.joined(separator: "\n")
+
     return "  \(id):\n"
-      + help
-      .map { "    \($0)"}
-      .joined(separator: "\n")
-      + "\n"
+        + help
+            .map { "    \($0)"}
+            .joined(separator: "\n")
+        + subCmdHelpSection
   }
 }
 
@@ -607,6 +646,144 @@ extension Heroku {
 
 Heroku.subcommands.append(Heroku.Init.self)
 commands.append(Heroku)
+
+// MARK: Docker
+
+struct Docker: Command {
+    static let id = "docker"
+
+    static var subCommands: [Command.Type] = [Docker.Init.self, Docker.Run.self, Docker.Enter.self]
+
+    static func execute(with args: [String], in directory: String) {
+        executeSubCommand(with: args, in: directory)
+    }
+}
+
+extension Docker {
+    static var help: [String] {
+        return [
+                   "Setup and run vapor app via docker",
+                   "sub commands: " + subCommands.map { "\($0.id)" }.joined(separator: "|"),
+        ]
+    }
+}
+
+extension Docker {
+    static let swiftVersion: String? = {
+        return try? String(contentsOfFile: ".swift-version").trimmedSpaces()
+    }()
+
+    static let imageName: String? = {
+        if let version = swiftVersion {
+            return "qutheory/swift:\(version)"
+        } else {
+            return nil
+        }
+    }()
+}
+
+extension Docker {
+    struct Init: Command {
+        static let id = "init"
+
+        static func execute(with args: [String], in directory: String) {
+            guard let
+                swiftVersion = Docker.swiftVersion,
+                imageName = Docker.imageName
+                else {
+                fail("Could not determine Swift version (check your .swift-version file)")
+            }
+
+            do {
+                print("Building docker image with Swift version: \(swiftVersion)")
+                print("This may take a few minutes if no layers are cached...")
+                let cmd = "docker build --rm -t \(imageName) --build-arg SWIFT_VERSION=\(swiftVersion) ."
+                try run(cmd)
+            } catch {
+                fail("unable to run 'docker build'")
+            }
+        }
+
+        static var help: [String] {
+            return [
+                       "Build the docker image, using the swift",
+                       "version specified in .swift-version."
+            ]
+        }
+    }
+}
+
+extension Docker {
+    struct Run: Command {
+        static let id = "run"
+
+        static func execute(with args: [String], in directory: String) {
+            guard let
+                imageName = Docker.imageName
+                else {
+                    fail("Could not determine Swift version (check your .swift-version file)")
+            }
+
+            let cmd = "docker run --rm -it -v $(PWD):/vapor -p 8080:8080 \(imageName)"
+            do {
+                print("Launching app with image \(imageName)")
+                try run(cmd)
+            } catch Error.System(let result) {
+                if result == 33280 {
+                    // Sven: Attempt to identify if the user has ctrl-c'd out of the container
+                    // so we don't show an error in that case.
+                    // Call to system returns the exit status of the shell as returned by waitpid(2).
+                    // This doesn't align with 33280 which is why I'm hard-coding the value but
+                    // testing showed that other means of terminating the command returns different
+                    // values.
+                } else {
+                    fail("docker run command failed, command was\n\(cmd)")
+                }
+            } catch {
+                fail("docker run command failed, command was\n\(cmd)")
+            }
+        }
+
+        static var help: [String] {
+            return [
+                       "Run the app in a docker container with the",
+                       "image created by running 'init'"
+            ]
+        }
+    }
+}
+
+
+extension Docker {
+    struct Enter: Command {
+        static let id = "enter"
+
+        static func execute(with args: [String], in directory: String) {
+            guard let
+                imageName = Docker.imageName
+                else {
+                    fail("Could not determine Swift version (check your .swift-version file)")
+            }
+
+            do {
+                print("Starting bash in image \(imageName)")
+                let cmd = "docker run -it --rm --privileged=true --entrypoint bash \(imageName)"
+                try run(cmd)
+            } catch {
+                fail("unable to enter docker container")
+            }
+        }
+
+        static var help: [String] {
+            return [
+                       "Enter the docker container (useful for",
+                       "debugging purposes)"
+            ]
+        }
+    }
+}
+
+commands.append(Docker)
 
 // MARK: CLI
 
