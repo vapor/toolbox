@@ -729,7 +729,6 @@ extension Docker {
                 print("Launching app with image \(imageName)")
                 try run(cmd)
             } catch Error.System(let result) {
-                print("res: \(result) \(result & 0x7f)")
                 if result == 33280 {
                     // Sven: Attempt to identify if the user has ctrl-c'd out of the container
                     // so we don't show an error in that case.
