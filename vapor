@@ -718,7 +718,29 @@ extension Docker {
         static let id = "run"
 
         static func execute(with args: [String], in directory: String) {
-            // TODO: add command
+            guard let
+                imageName = Docker.imageName
+                else {
+                    fail("Could not determine Swift version (check your .swift-version file)")
+            }
+
+            let cmd = "docker run --rm -it -p 8080:8080 \(imageName)"
+            do {
+                print("Launching app with image \(imageName)")
+                try run(cmd)
+            } catch Error.System(let result) {
+                print("res: \(result) \(result & 0x7f)")
+                if result == 33280 {
+                    // Sven: Attempt to identify if the user has ctrl-c'd out of the container
+                    // so we don't show an error in that case.
+                    // Call to system returns the exit status of the shell as returned by waitpid(2).
+                    // This doesn't align with 33280 which is why I'm hard-coding the value but
+                    // testing showed that other means of terminating the command returns different
+                    // values.
+                } else {
+                    fail("docker run command failed, command was\n\(cmd)")
+                }
+            }
         }
 
         static var help: [String] {
@@ -741,6 +763,7 @@ extension Docker {
                 else {
                     fail("Could not determine Swift version (check your .swift-version file)")
             }
+
             do {
                 print("Starting bash in image \(imageName)")
                 let cmd = "docker run -it --rm --privileged=true --entrypoint bash \(imageName)"
