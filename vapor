@@ -99,7 +99,7 @@ extension String {
             mutable.remove(at: mutable.startIndex)
         }
         while let next = mutable.characters.last where next == " " {
-            mutable.remove(at: mutable.startIndex)
+            mutable.remove(at: mutable.index(before: mutable.endIndex))
         }
         return mutable
     }
