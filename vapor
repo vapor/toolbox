@@ -767,7 +767,7 @@ extension Docker {
 
             do {
                 print("Starting bash in image \(imageName)")
-                let cmd = "docker run -it --rm --privileged=true --entrypoint bash \(imageName)"
+                let cmd = "docker run -it --rm --entrypoint bash \(imageName)"
                 try run(cmd)
             } catch {
                 fail("unable to enter docker container")
