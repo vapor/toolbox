@@ -405,16 +405,16 @@ struct Bootstrap: Command {
         do {
             try run(cmd)
         } catch {
-            fail("Could not compile \(src), try running the folloing command in order to debug this issue:\n\(cmd)")
+            fail("Could not compile \(src), try running the following command in order to debug this issue:\n\(cmd)")
         }
     }
 
     static var help: [String] {
         return [
-                   "bootstrap <directory>",
-                   "Compiles and installs the vapor binary in the",
-                   "specified location (defaults to current directory).",
-                   "Only supported on Mac OSX for the moment."
+            "bootstrap <directory>",
+            "Compiles and installs the vapor binary in the",
+            "specified location (defaults to current directory).",
+            "Only supported on Mac OSX for the moment."
         ]
     }
 }
