@@ -450,8 +450,7 @@ struct SelfUpdate: Command {
             print("Downloading...")
             try run("curl -L \(quiet) cli.qutheory.io -o \(name)")
         } catch {
-            print("Could not download Vapor CLI.")
-            return
+            fail("Could not download Vapor CLI.")
         }
 
         do {
@@ -705,8 +704,7 @@ extension Docker {
                 print("Downloading Dockerfile...")
                 try run("curl -L \(quiet) docker.qutheory.io -o Dockerfile")
             } catch {
-                print("Could not download Dockerfile.")
-                return
+                fail("Could not download Dockerfile.")
             }
 
             print("Dockerfile created.")
