@@ -251,9 +251,9 @@ struct Build: Command {
         }
 
         do {
-            try run("rm -rf Packages/Sources/Vapor-*/Development")
-            try run("rm -rf Packages/Sources/Vapor-*/Performance")
-            try run("rm -rf Packages/Sources/Vapor-*/Generator")
+            try run("rm -rf Packages/Vapor-*/Sources/Development")
+            try run("rm -rf Packages/Vapor-*/Sources/Performance")
+            try run("rm -rf Packages/Vapor-*/Sources/Generator")
         } catch {
             print("Failed to remove extra schemes")
         }
