@@ -496,6 +496,15 @@ struct Xcode: Command {
         print("Generating Xcode Project...")
 
         do {
+            try run("swift build --fetch")
+            try run("rm -rf Packages/Vapor-*/Sources/Development")
+            try run("rm -rf Packages/Vapor-*/Sources/Performance")
+            try run("rm -rf Packages/Vapor-*/Sources/Generator")
+        } catch {
+            print("Failed to remove extra schemes")
+        }
+
+        do {
             try run("swift build --generate-xcodeproj")
         } catch {
             print("Could not generate Xcode Project.")
