@@ -664,7 +664,7 @@ commands.append(Heroku)
 struct Docker: Command {
     static let id = "docker"
 
-    static var subCommands: [Command.Type] = [Docker.Init.self, Docker.Run.self, Docker.Enter.self]
+    static var subCommands: [Command.Type] = [Docker.Init.self, Docker.Build.self, Docker.Run.self, Docker.Enter.self]
 
     static func execute(with args: [String], in directory: String) {
         executeSubCommand(with: args, in: directory)
@@ -697,6 +697,34 @@ extension Docker {
 extension Docker {
     struct Init: Command {
         static let id = "init"
+
+        static func execute(with args: [String], in directory: String) {
+            let quiet = args.contains("--verbose") ? "" : "-s"
+
+            do {
+                print("Downloading Dockerfile...")
+                try run("curl -L \(quiet) docker.qutheory.io -o Dockerfile")
+            } catch {
+                print("Could not download Dockerfile.")
+                return
+            }
+
+            print("Dockerfile created.")
+            print("You may now adjust the file or")
+            print("run `docker build`.")
+        }
+
+        static var help: [String] {
+            return [
+                "Creates a Dockerfile",
+            ]
+        }
+    }
+}
+
+extension Docker {
+    struct Build: Command {
+        static let id = "build"
 
         static func execute(with args: [String], in directory: String) {
             guard let
@@ -773,7 +801,7 @@ extension Docker {
         static var help: [String] {
             return [
                 "Run the app in a docker container with the",
-                "image created by running 'init'"
+                "image created by running 'docker build'"
             ]
         }
     }
@@ -795,8 +823,12 @@ extension Docker {
                 print("Starting bash in image \(imageName)")
                 let cmd = "docker run -it --rm --entrypoint bash \(imageName)"
                 try run(cmd)
+            } catch Error.System(let result) {
+                if result != 33280 {
+                    fail("Could not enter Docker container")
+                }
             } catch {
-                fail("unable to enter docker container")
+                fail("Could not enter Docker container")
             }
         }
 
