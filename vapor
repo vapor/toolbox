@@ -827,7 +827,7 @@ extension Docker {
 
             do {
                 print("Starting bash in image \(imageName)")
-                let cmd = "docker run -it --rm --entrypoint bash \(imageName)"
+                let cmd = "docker run --rm -it -v $(PWD):/vapor --entrypoint bash \(imageName)"
                 try run(cmd)
             } catch Error.System(let result) {
                 if result != 33280 {
