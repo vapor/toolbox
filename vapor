@@ -395,7 +395,7 @@ struct New: Command {
             try run("tar -\(tarArgs)xzf \(escapedName)/vapor-example.tar.gz --strip-components=1 --directory \(escapedName)")
             try run("rm \(escapedName)/vapor-example.tar.gz")
             #if os(OSX)
-                try run("cd \(escapedName) && swift build -X")
+                try run("cd \(escapedName) && vapor xcode")
             #endif
 
             if commandExists("git") {
