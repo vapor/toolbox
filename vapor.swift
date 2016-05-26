@@ -386,6 +386,41 @@ extension New {
 
 commands.append(New)
 
+// MARK: Bootstrap
+
+struct Bootstrap: Command {
+    static let id = "bootstrap"
+
+    static func execute(with args: [String], in directory: String) {
+        let binary: String = {
+            if let p = args.first {
+                return p.hasSuffix("/") ? p : p + "/"
+            } else {
+                return "./"
+            }
+        }() + "vapor"
+
+        let src = Process.arguments[0]
+        let cmd = "env SDKROOT=$(xcrun -show-sdk-path -sdk macosx) swiftc \(src) -o \(binary)"
+        do {
+            try run(cmd)
+        } catch {
+            fail("Could not compile \(src), try running the folloing command in order to debug this issue:\n\(cmd)")
+        }
+    }
+
+    static var help: [String] {
+        return [
+                   "bootstrap <directory>",
+                   "Compiles and installs the vapor binary in the",
+                   "specified location (defaults to current directory).",
+                   "Only supported on Mac OSX for the moment."
+        ]
+    }
+}
+
+commands.append(Bootstrap)
+
 // MARK: SelfUpdate
 
 struct SelfUpdate: Command {
