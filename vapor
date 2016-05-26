@@ -11,6 +11,7 @@ import Foundation
 // MARK: Utilities
 
 @noreturn func fail(_ message: String) {
+    print()
     print("Error: \(message)")
     exit(1)
 }
@@ -401,6 +402,7 @@ struct New: Command {
             }
 
             print()
+            print()
             print("Project \"\(name)\" has been created.")
             print("Type `cd \(name)` to enter project directory")
             print("Enjoy!")
@@ -662,8 +664,8 @@ struct Docker: Command {
 extension Docker {
     static var help: [String] {
         return [
-                   "Setup and run vapor app via docker",
-                   "sub commands: " + subCommands.map { "\($0.id)" }.joined(separator: "|"),
+            "Setup and run vapor app via docker",
+            "sub commands: " + subCommands.map { "\($0.id)" }.joined(separator: "|"),
         ]
     }
 }
@@ -699,15 +701,27 @@ extension Docker {
                 print("This may take a few minutes if no layers are cached...")
                 let cmd = "docker build --rm -t \(imageName) --build-arg SWIFT_VERSION=\(swiftVersion) ."
                 try run(cmd)
+            } catch Error.System(let result) {
+                if result == 32512 {
+                    print()
+                    print("Make sure you have the Docker Toolbox installed")
+                    print("https://www.docker.com/products/docker-toolbox")
+                    print("Tested with Docker Toolbox 1.11.1")
+                }
+                if result == 256 {
+                    print()
+                    print("Make sure you have the Docker daemon running")
+                }
+                fail("Could not initialize Docker")
             } catch {
-                fail("unable to run 'docker build'")
+                fail("Could not initialize Docker")
             }
         }
 
         static var help: [String] {
             return [
-                       "Build the docker image, using the swift",
-                       "version specified in .swift-version."
+                "Build the docker image, using the swift",
+                "version specified in .swift-version."
             ]
         }
     }
@@ -746,8 +760,8 @@ extension Docker {
 
         static var help: [String] {
             return [
-                       "Run the app in a docker container with the",
-                       "image created by running 'init'"
+                "Run the app in a docker container with the",
+                "image created by running 'init'"
             ]
         }
     }
@@ -776,8 +790,8 @@ extension Docker {
 
         static var help: [String] {
             return [
-                       "Enter the docker container (useful for",
-                       "debugging purposes)"
+                "Enter the docker container (useful for",
+                "debugging purposes)"
             ]
         }
     }
