@@ -51,6 +51,10 @@ func commandExists(_ command: String) -> Bool {
     return system("hash \(command) 2>/dev/null") == 0
 }
 
+func fileExists(_ fileName: String) -> Bool {
+    return system("ls \(fileName) > /dev/null 2>&1") == 0
+}
+
 func gitHistoryIsClean() -> Bool {
     return system("test -z \"$(git status --porcelain)\" || exit 1") == 0
 }
@@ -700,6 +704,10 @@ extension Docker {
         static func execute(with args: [String], in directory: String) {
             let quiet = args.contains("--verbose") ? "" : "-s"
 
+            if fileExists("Dockerfile") {
+                fail("A Dockerfile already exists in the current directory.\nPlease move it and try again or run `vapor docker build`.")
+            }
+
             do {
                 print("Downloading Dockerfile...")
                 try run("curl -L \(quiet) docker.qutheory.io -o Dockerfile")
@@ -709,7 +717,7 @@ extension Docker {
 
             print("Dockerfile created.")
             print("You may now adjust the file or")
-            print("run `docker build`.")
+            print("run `vapor docker build`.")
         }
 
         static var help: [String] {
