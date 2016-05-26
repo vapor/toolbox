@@ -402,10 +402,20 @@ struct New: Command {
             }
 
             print()
+            print("                   #         ")
+            print("                 #   #       ")
+            print("               #       #     ")
+            print("             #           #   ")
+            print("           #               # ")
+            print("          #                 #")
+            print("          #             *   #")
+            print("           #          *    # ")
+            print("             #           #   ")
+            print("                #  #  #      ")
             print()
-            print("Project \"\(name)\" has been created.")
+            print("   Project \"\(name)\" has been created.")
             print("Type `cd \(name)` to enter project directory")
-            print("Enjoy!")
+            print("                 Enjoy!")
             print()
             system("open \(escapedName)/*.xcodeproj")
         } catch {
@@ -711,6 +721,8 @@ extension Docker {
                 if result == 256 {
                     print()
                     print("Make sure you have the Docker daemon running")
+                    print("or try running the following snippet:")
+                    print("`eval \"$(docker-machine env default)\"`")
                 }
                 fail("Could not initialize Docker")
             } catch {
