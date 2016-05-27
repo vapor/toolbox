@@ -22,10 +22,10 @@ enum Error: ErrorProtocol { // Errors pertaining to running commands
     case terminalSize
 }
 
-let WhiteSpace = [Character(" "), Character("\n"), Character("\t"), Character("\r")]
+let whiteSpace = [Character(" "), Character("\n"), Character("\t"), Character("\r")]
 
 extension String {
-    func trim(trimCharacters: [Character] = WhiteSpace) -> String {
+    func trim(trimCharacters: [Character] = whiteSpace) -> String {
         // while characters
         var mutable = self
         while let next = mutable.characters.first where trimCharacters.contains(next) {
