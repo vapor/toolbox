@@ -8,12 +8,12 @@ osx_image: xcode7.3
 install:
   - eval "$(curl -sL https://gist.githubusercontent.com/kylef/5c0475ff02b7c7671d2a/raw/02090c7ede5a637b76e6df1710e83cd0bbe7dcdf/swiftenv-install.sh)"
 script:
-  - sudo ./vapor.swift bootstrap /usr/local/bin/ # compile & install
-  - ./vapor.swift self-update # self-update, will overwrite `./vapor` (do not relocate)
-  - vapor help # help
-  - vapor new test-project # new
+  - ./vapor.swift bootstrap # compile & install
+  - ./vapor.swift self-update # self-update, will overwrite `./vapor.swift` which we'll ignore
+  - ./vapor help # help
+  - ./vapor new test-project # new
   - cd test-project
-  - vapor clean # clean
-  - vapor build # build
-  - vapor run & # run
+  - ../vapor clean # clean
+  - ../vapor build # build
+  - ../vapor run & # run
   
