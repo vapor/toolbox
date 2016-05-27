@@ -22,14 +22,16 @@ enum Error: ErrorProtocol { // Errors pertaining to running commands
     case terminalSize
 }
 
+let WhiteSpace = [Character(" "), Character("\n"), Character("\t"), Character("\r")]
+
 extension String {
-    func trim(trimCharacter: Character = Character(" ")) -> String {
+    func trim(trimCharacters: [Character] = WhiteSpace) -> String {
         // while characters
         var mutable = self
-        while let next = mutable.characters.first where next == trimCharacter {
+        while let next = mutable.characters.first where trimCharacters.contains(next) {
             mutable.remove(at: mutable.startIndex)
         }
-        while let next = mutable.characters.last where next == trimCharacter {
+        while let next = mutable.characters.last where trimCharacters.contains(next) {
             mutable.remove(at: mutable.index(before: mutable.endIndex))
         }
         return mutable
@@ -129,8 +131,8 @@ func getPackageName() -> String {
 func terminalSize() throws -> (width: Int, height: Int) {
     // Get the columns and lines from tput
     let tput = "/usr/bin/tput"
-    let cols = try runWithOutput("\(tput) cols").trim(trimCharacter: "\n")
-    let lines = try runWithOutput("\(tput) lines").trim(trimCharacter: "\n")
+    let cols = try runWithOutput("\(tput) cols").trim(trimCharacters: ["\n"])
+    let lines = try runWithOutput("\(tput) lines").trim(trimCharacters: ["\n"])
     
     if let cols = Int(cols), lines = Int(lines) {
         return (cols, lines)
