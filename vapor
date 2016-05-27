@@ -11,20 +11,51 @@ import Foundation
 // MARK: Utilities
 
 @noreturn func fail(_ message: String) {
+    print()
     print("Error: \(message)")
     exit(1)
 }
 
-enum Error: ErrorProtocol {
-    case System(Int32)
-    case Cancelled
-    var code: Int32 {
-        switch self {
-        case .Cancelled:
-            return 2
-        case .System(let code):
-            return code
+enum Error: ErrorProtocol { // Errors pertaining to running commands
+    case system(Int32)
+    case cancelled
+    case terminalSize
+}
+
+extension String {
+    func trim(trimCharacter: Character = Character(" ")) -> String {
+        // while characters
+        var mutable = self
+        while let next = mutable.characters.first where next == trimCharacter {
+            mutable.remove(at: mutable.startIndex)
         }
+        while let next = mutable.characters.last where next == trimCharacter {
+            mutable.remove(at: mutable.index(before: mutable.endIndex))
+        }
+        return mutable
+    }
+}
+
+func runWithOutput(_ command: String) throws -> String { // Command needs to use the absolute path for the executable
+    // Run the command
+    let fp = popen(command, "r")
+    
+    defer {
+        pclose(fp)
+    }
+    
+    if let fp = fp {
+        // Get the output of the command
+        let pathSize: Int32 = 1035
+        let path : UnsafeMutablePointer<Int8> = UnsafeMutablePointer(allocatingCapacity: Int(pathSize))
+        var output = ""
+        while fgets(path, pathSize - 1, fp) != nil {
+            output += String(cString: path)
+        }
+        
+        return output
+    } else {
+        throw Error.system(1)
     }
 }
 
@@ -32,9 +63,9 @@ func run(_ command: String) throws {
     let result = system(command)
 
     if result == 2 {
-        throw Error.Cancelled
+        throw Error.cancelled
     } else if result != 0 {
-        throw Error.System(result)
+        throw Error.system(result)
     }
 }
 
@@ -48,6 +79,10 @@ func getInput() -> String {
 
 func commandExists(_ command: String) -> Bool {
     return system("hash \(command) 2>/dev/null") == 0
+}
+
+func fileExists(_ fileName: String) -> Bool {
+    return system("ls \(fileName) > /dev/null 2>&1") == 0
 }
 
 func gitHistoryIsClean() -> Bool {
@@ -70,7 +105,7 @@ func extractPackageName(from packageFile: String) -> String {
     let packageName = packageFile
         .components(separatedBy: "\n")
         .lazy
-        .map { $0.trimmedSpaces() }
+        .map { $0.trim() }
         .filter { $0.hasPrefix("name") }
         .first?
         .components(separatedBy: "\"")
@@ -91,40 +126,138 @@ func getPackageName() -> String {
     return packageName
 }
 
+func terminalSize() throws -> (width: Int, height: Int) {
+    // Get the columns and lines from tput
+    let tput = "/usr/bin/tput"
+    let cols = try runWithOutput("\(tput) cols").trim(trimCharacter: "\n")
+    let lines = try runWithOutput("\(tput) lines").trim(trimCharacter: "\n")
+    
+    if let cols = Int(cols), lines = Int(lines) {
+        return (cols, lines)
+    } else {
+        throw Error.terminalSize
+    }
+}
+
+enum ANSIColor: String {
+    case black = "\u{001B}[0;30m"
+    case red = "\u{001B}[0;31m"
+    case green = "\u{001B}[0;32m"
+    case yellow = "\u{001B}[0;33m"
+    case blue = "\u{001B}[0;34m"
+    case magenta = "\u{001B}[0;35m"
+    case cyan = "\u{001B}[0;36m"
+    case white = "\u{001B}[0;37m"
+    case reset = "\u{001B}[0;0m"
+}
+
+func printFancy(_ strings: [String]) {
+    printFancy(strings.joined(separator: "\n"))
+}
+
+func printFancy(_ string: String) {
+    let centered: String
+    do {
+        let size = try terminalSize()
+        centered = string.centerTextBlock(width: size.width)
+    } catch {
+        centered = string        
+    }
+
+    let fancy = centered.colored(with: [
+        "*": .magenta, 
+        "~": .blue, 
+        "+": .cyan, // Droplet
+        "_": .magenta, 
+        "/": .magenta, 
+        "\\": .magenta, 
+        "|": .magenta, 
+        "-": .magenta, 
+        ")": .magenta // Title
+    ])
+
+    print(fancy)
+}
+
 extension String {
-    func trimmedSpaces() -> String {
-        // while characters
-        var mutable = self
-        while let next = mutable.characters.first where next == " " {
-            mutable.remove(at: mutable.startIndex)
+    func centerTextBlock(width: Int, paddingCharacter: Character = " ") -> String {
+        // Split the string into lines
+        var lines = characters.split(separator: Character("\n")).map(String.init)
+        
+        // Make sure there's more than one line
+        guard lines.count > 0 else {
+            return ""
         }
-        while let next = mutable.characters.last where next == " " {
-            mutable.remove(at: mutable.index(before: mutable.endIndex))
+        
+        // Find the longest line
+        var longestLine = 0
+        for line in lines {
+            if line.characters.count > longestLine {
+                longestLine = line.characters.count
+            }
         }
-        return mutable
+        
+        // Calculate the padding and make sure it's greater than or equal to 0
+        let padding = max(0, (width - longestLine) / 2)
+        
+        // Apply the padding to each line
+        for i in 0..<lines.count {
+            for _ in 0..<padding {
+                lines[i].insert(paddingCharacter, at: startIndex)
+            }
+        }
+        
+        return lines.joined(separator: "\n")
     }
+    
+    #if os(Linux)
+        func hasPrefix(_ str: String) -> Bool {
+            let strGen = str.characters.makeIterator()
+            let selfGen = self.characters.makeIterator()
+            let seq = zip(strGen, selfGen)
+            for (lhs, rhs) in seq where lhs != rhs {
+                    return false
+            }
+            return true
+        }
 
-#if os(Linux)
-    func hasPrefix(_ str: String) -> Bool {
-        let strGen = str.characters.makeIterator()
-        let selfGen = self.characters.makeIterator()
-        let seq = zip(strGen, selfGen)
-        for (lhs, rhs) in seq where lhs != rhs {
-                return false
+        func hasSuffix(_ str: String) -> Bool {
+            let strGen = str.characters.reversed().makeIterator()
+            let selfGen = self.characters.reversed().makeIterator()
+            let seq = zip(strGen, selfGen)
+            for (lhs, rhs) in seq where lhs != rhs {
+                    return false
+            }
+            return true
         }
-        return true
-    }
+    #endif
 
-    func hasSuffix(_ str: String) -> Bool {
-        let strGen = str.characters.reversed().makeIterator()
-        let selfGen = self.characters.reversed().makeIterator()
-        let seq = zip(strGen, selfGen)
-        for (lhs, rhs) in seq where lhs != rhs {
-                return false
+    func colored(with colors: [Character: ANSIColor], default defaultColor: ANSIColor = .reset) -> String {
+        // Check the string is long enough
+        guard characters.count > 0 else {
+            return ""
         }
-        return true
+        
+        // Create a new string
+        var newString = ""
+        
+        // Add the string to the new string and color it
+        var currentColor: ANSIColor = defaultColor
+        for character in characters {
+            // Check if there is a new color for this character than the one before
+            if (colors[character] ?? defaultColor) != currentColor {
+                currentColor = colors[character] ?? defaultColor // Update the current color
+                newString += currentColor.rawValue // Add the color the new string
+            }
+            
+            newString += String(character) // Add the character to the string
+        }
+        
+        // Reset the colors
+        newString += ANSIColor.reset.rawValue
+        
+        return newString
     }
-#endif
 }
 
 extension Sequence where Iterator.Element == String {
@@ -146,6 +279,34 @@ extension Array where Element: Equatable {
     }
 }
 
+
+let asciiArt: [String] = [
+    "               **",
+    "             **~~**",
+    "           **~~~~~~**",
+    "         **~~~~~~~~~~**",
+    "       **~~~~~~~~~~~~~~**",
+    "     **~~~~~~~~~~~~~~~~~~**",
+    "   **~~~~~~~~~~~~~~~~~~~~~~**",
+    "  **~~~~~~~~~~~~~~~~~~~~~~~~**",
+    " **~~~~~~~~~~~~~~~~~~~~~~~~~~**",
+    "**~~~~~~~~~~~~~~~~~~~~~~~~~~~~**",
+    "**~~~~~~~~~~~~~~~~~~~~~~~~~~~~**",
+    "**~~~~~~~~~~~~~~~~~~~~~++++~~~**",
+    " **~~~~~~~~~~~~~~~~~~~++++~~~**",
+    "  ***~~~~~~~~~~~~~~~++++~~~***",
+    "    ****~~~~~~~~~~++++~~****",
+    "       *****~~~~~~~~~*****",
+    "          *************",
+    " ",
+    " _       __    ___   ___   ___",
+    "\\ \\  /  / /\\  | |_) / / \\ | |_)",
+    " \\_\\/  /_/--\\ |_|   \\_\\_/ |_| \\",
+    "   a web framework for Swift",
+    " "
+]
+
+
 // MARK: Command
 
 protocol Command {
@@ -153,6 +314,7 @@ protocol Command {
     static var help: [String] { get }
 
     static var dependencies: [String] { get }
+    static var subCommands: [Command.Type] { get }
     static func execute(with args: [String], in directory: String)
 }
 
@@ -161,17 +323,54 @@ extension Command {
     static var help: [String] { return [] }
 }
 
+// sub command related methods
+extension Command {
+    static var subCommands: [Command.Type] { return [] }
+
+    static func subCommand(forId id: String) -> Command.Type? {
+        return subCommands.lazy.filter { $0.id == id }.first
+    }
+
+    static func executeSubCommand(with args: [String], in directory: String) {
+        var iterator = args.makeIterator()
+        guard let cmdId = iterator.next() else {
+            fail("\(id) requires a sub command:\n" + description)
+        }
+        guard let subcommand = subCommand(forId: cmdId) else {
+            fail("Unknown \(id) subcommand '\(cmdId)':\n" + description)
+        }
+        let passthroughArgs = Array(iterator)
+        subcommand.execute(with: passthroughArgs, in: directory)
+    }
+}
+
 extension Command {
   static var description: String {
+    let coloredId = ANSIColor.magenta.rawValue + id + ANSIColor.reset.rawValue
+
     guard help.count > 0 else {
-      return "  \(id):\n"
+      return "  \(coloredId):\n"
     }
-    
-    return "  \(id):\n"
-      + help
-      .map { "    \($0)"}
-      .joined(separator: "\n")
-      + "\n"
+
+    // Sven: The following is not very readable but I stuck with the theme of how the
+    // description is built. It would be easier if we would just use:
+    //    let subCmdHelpSection = "\n" + subCommands.map { $0.description }.joined(separator: "\n")
+    // This does work but the indentation is on the same level as the main commands, which looks bad
+    let subCmdHelpFragments: [String] = subCommands.map { subCommand in
+        let coloredSubId = ANSIColor.yellow.rawValue + subCommand.id + ANSIColor.reset.rawValue
+
+        return "\n      \(coloredSubId):\n" 
+            + subCommand.help
+            .map { "          \($0)" }
+            .joined(separator: "\n")
+    }
+    let subCmdHelpSection = "\n" + subCmdHelpFragments.joined(separator: "\n")
+
+    return "  \(coloredId):\n"
+        + help
+            .map { "      \($0)"}
+            .joined(separator: "\n")
+        + subCmdHelpSection
   }
 }
 
@@ -201,7 +400,7 @@ struct Help: Command {
     static func execute(with args: [String], in directory: String) {
         print("Usage: \(directory) [\(commands.map({ $0.id }).joined(separator: "|"))]")
 
-        var help = "Available Commands:\n\n"
+        var help = "\nAvailable Commands:\n\n"
         help += commands
             .map { cmd in cmd.description }//"  \(cmd.id):\n\(cmd.description)\n"}
             .joined(separator: "\n")
@@ -209,9 +408,10 @@ struct Help: Command {
         print(help)
 
         print("Community:")
-        print("  Join our Slack if you have questions,")
-        print("  need help, or want to contribute.")
-        print("  http://slack.qutheory.io")
+        print("    Join our Slack if you have questions,")
+        print("    need help, or want to contribute.")
+        print("    http://slack.qutheory.io")
+        print()
     }
 }
 
@@ -244,16 +444,16 @@ struct Build: Command {
     static func execute(with args: [String], in directory: String) {
         do {
             try run("swift build --fetch")
-        } catch Error.Cancelled {
+        } catch Error.cancelled {
             fail("Fetch cancelled")
         } catch {
             fail("Could not fetch dependencies.")
         }
 
         do {
-            try run("rm -rf Packages/Sources/Vapor-*/Development")
-            try run("rm -rf Packages/Sources/Vapor-*/Performance")
-            try run("rm -rf Packages/Sources/Vapor-*/Generator")
+            try run("rm -rf Packages/Vapor-*/Sources/Development")
+            try run("rm -rf Packages/Vapor-*/Sources/Performance")
+            try run("rm -rf Packages/Vapor-*/Sources/Generator")
         } catch {
             print("Failed to remove extra schemes")
         }
@@ -266,7 +466,7 @@ struct Build: Command {
         do {
             let buildFlags = flags.joined(separator: " ")
             try run("swift build \(buildFlags)")
-        } catch Error.Cancelled {
+        } catch Error.cancelled {
             fail("Build cancelled.")
         } catch {
             print()
@@ -309,7 +509,7 @@ struct Run: Command {
             let passthroughArgs = args.joined(separator: " ")
             // TODO: Check that file exists
             try run(".build/\(folder)/\(name) \(passthroughArgs)")
-        } catch Error.Cancelled {
+        } catch Error.cancelled {
             fail("Run cancelled.")
         } catch {
             fail("Could not run project.")
@@ -347,26 +547,37 @@ struct New: Command {
             let escapedName = "\"\(name)\"" // FIX: Doesn’t support names with quotes
             try run("mkdir \(escapedName)")
 
+            print("Cloning example...")
+
             try run("curl -L \(curlArgs) https://github.com/qutheory/vapor-example/archive/master.tar.gz -o \(escapedName)/vapor-example.tar.gz")
+
+            print("Unpacking...")
+
             try run("tar -\(tarArgs)xzf \(escapedName)/vapor-example.tar.gz --strip-components=1 --directory \(escapedName)")
             try run("rm \(escapedName)/vapor-example.tar.gz")
             #if os(OSX)
-                try run("cd \(escapedName) && swift build -X")
+                try run("cd \(escapedName) && vapor xcode")
             #endif
 
             if commandExists("git") {
-                print("Initializing git repository if necessary")
+                print("Initializing git repository if necessary...")
                 system("git init \(escapedName)")
                 system("cd \(escapedName) && git add . && git commit -m \"initial vapor project setup\"")
                 print()
             }
 
             print()
-            print("Project \"\(name)\" has been created.")
-            print("Type `cd \(name)` to enter project directory")
-            print("Enjoy!")
+            printFancy(asciiArt)
             print()
-            system("open \(escapedName)/*.xcodeproj")
+            printFancy([
+                "    Project \"\(name)\" has been created.",
+                "Type `cd \(name)` to enter project directory",
+                "                   Enjoy!",
+            ])
+            print()
+            #if os(OSX)
+                system("open \(escapedName)/*.xcodeproj")
+            #endif
         } catch {
             fail("Could not clone repository")
         }
@@ -374,14 +585,14 @@ struct New: Command {
 }
 
 extension New {
-  static var help: [String] {
-    return [
-      "new <project-name>",
-      "Clones the Vapor Example to a given",
-      "folder name and initializes an empty",
-      "Git repository inside it."
-    ]
-  }
+    static var help: [String] {
+        return [
+            "new <project-name>",
+            "Clones the Vapor Example to a given",
+            "folder name and initializes an empty",
+            "Git repository inside it."
+        ]
+    }
 }
 
 commands.append(New)
@@ -434,8 +645,7 @@ struct SelfUpdate: Command {
             print("Downloading...")
             try run("curl -L \(quiet) cli.qutheory.io -o \(name)")
         } catch {
-            print("Could not download Vapor CLI.")
-            return
+            fail("Could not download Vapor CLI.")
         }
 
         do {
@@ -475,6 +685,15 @@ struct Xcode: Command {
 
     static func execute(with args: [String], in directory: String) {
         print("Generating Xcode Project...")
+
+        do {
+            try run("swift build --fetch")
+            try run("rm -rf Packages/Vapor-*/Sources/Development")
+            try run("rm -rf Packages/Vapor-*/Sources/Performance")
+            try run("rm -rf Packages/Vapor-*/Sources/Generator")
+        } catch {
+            print("Failed to remove extra schemes")
+        }
 
         do {
             try run("swift build --generate-xcodeproj")
@@ -589,7 +808,7 @@ extension Heroku {
                 try run("heroku buildpacks:set \(buildpack)")
                 print("Using buildpack: \(buildpack)")
                 print()
-            } catch let e as Error where e.code == 256 {
+            } catch Error.system(let code) where code == 256 {
                 print()
             } catch {
                 fail("unable to set buildpack: \(buildpack)")
@@ -642,6 +861,193 @@ extension Heroku {
 
 Heroku.subcommands.append(Heroku.Init.self)
 commands.append(Heroku)
+
+// MARK: Docker
+
+struct Docker: Command {
+    static let id = "docker"
+
+    static var subCommands: [Command.Type] = [Docker.Init.self, Docker.Build.self, Docker.Run.self, Docker.Enter.self]
+
+    static func execute(with args: [String], in directory: String) {
+        executeSubCommand(with: args, in: directory)
+    }
+}
+
+extension Docker {
+    static var help: [String] {
+        return [
+            "Setup and run vapor app via docker",
+            "sub commands: " + subCommands.map { "\($0.id)" }.joined(separator: "|"),
+        ]
+    }
+}
+
+extension Docker {
+    static let swiftVersion: String? = {
+        return try? String(contentsOfFile: ".swift-version").trim()
+    }()
+
+    static let imageName: String? = {
+        if let version = swiftVersion {
+            return "qutheory/swift:\(version)"
+        } else {
+            return nil
+        }
+    }()
+}
+
+extension Docker {
+    struct Init: Command {
+        static let id = "init"
+
+        static func execute(with args: [String], in directory: String) {
+            let quiet = args.contains("--verbose") ? "" : "-s"
+
+            if fileExists("Dockerfile") {
+                fail("A Dockerfile already exists in the current directory.\nPlease move it and try again or run `vapor docker build`.")
+            }
+
+            do {
+                print("Downloading Dockerfile...")
+                try run("curl -L \(quiet) docker.qutheory.io -o Dockerfile")
+            } catch {
+                fail("Could not download Dockerfile.")
+            }
+
+            print("Dockerfile created.")
+            print("You may now adjust the file or")
+            print("run `vapor docker build`.")
+        }
+
+        static var help: [String] {
+            return [
+                "Creates a Dockerfile",
+            ]
+        }
+    }
+}
+
+extension Docker {
+    struct Build: Command {
+        static let id = "build"
+
+        static func execute(with args: [String], in directory: String) {
+            guard let
+                swiftVersion = Docker.swiftVersion,
+                imageName = Docker.imageName
+                else {
+                fail("Could not determine Swift version (check your .swift-version file)")
+            }
+
+            do {
+                print("Building docker image with Swift version: \(swiftVersion)")
+                print("This may take a few minutes if no layers are cached...")
+                let cmd = "docker build --rm -t \(imageName) --build-arg SWIFT_VERSION=\(swiftVersion) ."
+                try run(cmd)
+            } catch Error.system(let result) {
+                if result == 32512 {
+                    print()
+                    print("Make sure you have the Docker Toolbox installed")
+                    print("https://www.docker.com/products/docker-toolbox")
+                    print("Tested with Docker Toolbox 1.11.1")
+                }
+                if result == 256 {
+                    print()
+                    print("Make sure you have the Docker daemon running")
+                    print("or try running the following snippet:")
+                    print("`eval \"$(docker-machine env default)\"`")
+                }
+                fail("Could not initialize Docker")
+            } catch {
+                fail("Could not initialize Docker")
+            }
+        }
+
+        static var help: [String] {
+            return [
+                "Build the docker image, using the swift",
+                "version specified in .swift-version."
+            ]
+        }
+    }
+}
+
+extension Docker {
+    struct Run: Command {
+        static let id = "run"
+
+        static func execute(with args: [String], in directory: String) {
+            guard let
+                imageName = Docker.imageName
+                else {
+                    fail("Could not determine Swift version (check your .swift-version file)")
+            }
+
+            let cmd = "docker run --rm -it -v $(PWD):/vapor -p 8080:8080 \(imageName)"
+            do {
+                print("Launching app with image \(imageName)")
+                try run(cmd)
+            } catch Error.system(let result) {
+                if result == 33280 {
+                    // Sven: Attempt to identify if the user has ctrl-c'd out of the container
+                    // so we don't show an error in that case.
+                    // Call to system returns the exit status of the shell as returned by waitpid(2).
+                    // This doesn't align with 33280 which is why I'm hard-coding the value but
+                    // testing showed that other means of terminating the command returns different
+                    // values.
+                } else {
+                    fail("docker run command failed, command was\n\(cmd)")
+                }
+            } catch {
+                fail("docker run command failed, command was\n\(cmd)")
+            }
+        }
+
+        static var help: [String] {
+            return [
+                "Run the app in a docker container with the",
+                "image created by running 'docker build'"
+            ]
+        }
+    }
+}
+
+
+extension Docker {
+    struct Enter: Command {
+        static let id = "enter"
+
+        static func execute(with args: [String], in directory: String) {
+            guard let
+                imageName = Docker.imageName
+                else {
+                    fail("Could not determine Swift version (check your .swift-version file)")
+            }
+
+            do {
+                print("Starting bash in image \(imageName)")
+                let cmd = "docker run --rm -it -v $(PWD):/vapor --entrypoint bash \(imageName)"
+                try run(cmd)
+            } catch Error.system(let result) {
+                if result != 33280 {
+                    fail("Could not enter Docker container")
+                }
+            } catch {
+                fail("Could not enter Docker container")
+            }
+        }
+
+        static var help: [String] {
+            return [
+                "Enter the docker container (useful for",
+                "debugging purposes)"
+            ]
+        }
+    }
+}
+
+commands.append(Docker)
 
 // MARK: CLI
 
