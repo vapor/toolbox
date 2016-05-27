@@ -612,6 +612,11 @@ struct Bootstrap: Command {
         }() + "vapor"
 
         let src = Process.arguments[0]
+
+        if !src.hasSuffix(".swift") {
+            fail("Cannot compile '\(src)', it needs to have a '.swift' suffix")
+        }
+
         let compile = "swiftc \(src) -o \(binary)"
         #if os(OSX)
             let cmd = "env SDKROOT=$(xcrun -show-sdk-path -sdk macosx) \(compile)"
