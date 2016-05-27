@@ -547,7 +547,12 @@ struct New: Command {
             let escapedName = "\"\(name)\"" // FIX: Doesn’t support names with quotes
             try run("mkdir \(escapedName)")
 
+            print("Cloning example...")
+
             try run("curl -L \(curlArgs) https://github.com/qutheory/vapor-example/archive/master.tar.gz -o \(escapedName)/vapor-example.tar.gz")
+
+            print("Unpacking...")
+
             try run("tar -\(tarArgs)xzf \(escapedName)/vapor-example.tar.gz --strip-components=1 --directory \(escapedName)")
             try run("rm \(escapedName)/vapor-example.tar.gz")
             #if os(OSX)
@@ -555,7 +560,7 @@ struct New: Command {
             #endif
 
             if commandExists("git") {
-                print("Initializing git repository if necessary")
+                print("Initializing git repository if necessary...")
                 system("git init \(escapedName)")
                 system("cd \(escapedName) && git add . && git commit -m \"initial vapor project setup\"")
                 print()
