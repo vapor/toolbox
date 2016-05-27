@@ -612,7 +612,13 @@ struct Bootstrap: Command {
         }() + "vapor"
 
         let src = Process.arguments[0]
-        let cmd = "env SDKROOT=$(xcrun -show-sdk-path -sdk macosx) swiftc \(src) -o \(binary)"
+        let compile = "swiftc \(src) -o \(binary)"
+        #if os(OSX)
+            let cmd = "env SDKROOT=$(xcrun -show-sdk-path -sdk macosx) \(compile)"
+        #else
+            let cmd = compile
+        #endif
+
         do {
             try run(cmd)
         } catch {
