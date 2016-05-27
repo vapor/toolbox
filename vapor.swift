@@ -258,6 +258,10 @@ extension String {
         
         return newString
     }
+
+    func colored(with color: ANSIColor) -> String {
+        return color.rawValue + self + ANSIColor.reset.rawValue
+    }
 }
 
 extension Sequence where Iterator.Element == String {
@@ -345,33 +349,40 @@ extension Command {
 }
 
 extension Command {
-  static var description: String {
-    let coloredId = ANSIColor.magenta.rawValue + id + ANSIColor.reset.rawValue
+    static var description: String {
+        // Sub Commands
+        let subCommandRows: [String] = subCommands.map { subCommand in
+            var output = "      \(subCommand.id.colored(with: .blue)):" 
 
-    guard help.count > 0 else {
-      return "  \(coloredId):\n"
+            if subCommand.help.count > 0 {
+                output += "\n"
+                output += subCommand.help.map { row in 
+                    return "          \(row)"
+                }.joined(separator: "\n")
+                output += "\n"
+            }
+
+            return output
+        }
+        let subCommandOutput = "\n" + subCommandRows.joined(separator: "\n")
+
+        // Command
+        var output = "  \(id.colored(with: .magenta)):"
+
+        if help.count > 0 {
+            output += "\n"
+
+            output += help.map { row in
+                return "      \(row)"
+            }.joined(separator: "\n")
+
+            output += "\n"
+        }
+
+        output += subCommandOutput
+
+        return output
     }
-
-    // Sven: The following is not very readable but I stuck with the theme of how the
-    // description is built. It would be easier if we would just use:
-    //    let subCmdHelpSection = "\n" + subCommands.map { $0.description }.joined(separator: "\n")
-    // This does work but the indentation is on the same level as the main commands, which looks bad
-    let subCmdHelpFragments: [String] = subCommands.map { subCommand in
-        let coloredSubId = ANSIColor.yellow.rawValue + subCommand.id + ANSIColor.reset.rawValue
-
-        return "\n      \(coloredSubId):\n" 
-            + subCommand.help
-            .map { "          \($0)" }
-            .joined(separator: "\n")
-    }
-    let subCmdHelpSection = "\n" + subCmdHelpFragments.joined(separator: "\n")
-
-    return "  \(coloredId):\n"
-        + help
-            .map { "      \($0)"}
-            .joined(separator: "\n")
-        + subCmdHelpSection
-  }
 }
 
 extension Command {
@@ -597,95 +608,123 @@ extension New {
 
 commands.append(New)
 
-// MARK: Bootstrap
+// MARK: Self
 
-struct Bootstrap: Command {
-    static let id = "bootstrap"
+extension SelfCommands {
+    struct Update: Command {
+        static let id = "update"
 
-    static func execute(with args: [String], in directory: String) {
-        let binary: String = {
-            if let p = args.first {
-                return p.hasSuffix("/") ? p : p + "/"
-            } else {
-                return "./"
-            }
-        }() + "vapor"
+        static func execute(with args: [String], in directory: String) {
+            let name = "vapor-cli.tmp"
+            let quiet = args.contains("--verbose") ? "" : "-s"
 
-        let src = Process.arguments[0]
-
-        if !src.hasSuffix(".swift") {
-            fail("Cannot compile '\(src)', it needs to have a '.swift' suffix")
-        }
-
-        let compile = "swiftc \(src) -o \(binary)"
-        #if os(OSX)
-            let cmd = "env SDKROOT=$(xcrun -show-sdk-path -sdk macosx) \(compile)"
-        #else
-            let cmd = compile
-        #endif
-
-        do {
-            try run(cmd)
-        } catch {
-            fail("Could not compile \(src), try running the following command in order to debug this issue:\n\(cmd)")
-        }
-    }
-
-    static var help: [String] {
-        return [
-            "bootstrap <directory>",
-            "Compiles and installs the vapor binary in the",
-            "specified location (defaults to current directory).",
-            "Only supported on Mac OSX for the moment."
-        ]
-    }
-}
-
-commands.append(Bootstrap)
-
-// MARK: SelfUpdate
-
-struct SelfUpdate: Command {
-    static let id = "self-update"
-
-    static func execute(with args: [String], in directory: String) {
-        let name = "vapor-cli.tmp"
-        let quiet = args.contains("--verbose") ? "" : "-s"
-
-        do {
-            print("Downloading...")
-            try run("curl -L \(quiet) cli.qutheory.io -o \(name)")
-        } catch {
-            fail("Could not download Vapor CLI.")
-        }
-
-        do {
-            try run("chmod +x \(name)")
-            try run("mv \(name) \(directory)")
-        } catch {
-            print("Could not move Vapor CLI to install location.")
-            print("Trying with 'sudo'.")
             do {
-                try run("sudo mv \(name) \(directory)")
+                print("Downloading...")
+                try run("curl -L \(quiet) cli.qutheory.io -o \(name)")
             } catch {
-                fail("Could not move Vapor CLI to install location, giving up.")
+                fail("Could not download Vapor CLI.")
             }
+
+            do {
+                try run("chmod +x \(name)")
+                try run("mv \(name) \(directory)")
+            } catch {
+                print("Could not move Vapor CLI to install location.")
+                print("Trying with 'sudo'.")
+                do {
+                    try run("sudo mv \(name) \(directory)")
+                } catch {
+                    fail("Could not move Vapor CLI to install location, giving up.")
+                }
+            }
+
+            print("Vapor CLI updated.")
         }
 
-        print("Vapor CLI updated.")
+        static var help: [String] {
+            return [
+                "Downloads the latest version of",
+                "the Vapor command line interface."
+            ]
+        }
     }
 }
 
-extension SelfUpdate {
-  static var help: [String] {
-    return [
-      "Downloads the latest version of",
-      "the Vapor command line interface."
-    ]
-  }
+extension SelfCommands {
+    struct Compile: Command {
+        static let id = "compile"
+
+        static func execute(with args: [String], in directory: String) {
+            let source = "vapor-cli.swift"
+
+            do {
+                try run("cp \(directory) \(source)")
+            } catch {
+                fail("Could not copy source.")
+            }
+
+            print("Compiling...")
+
+            let name = "vapor-cli.tmp"
+            let compile = "swiftc \(source) -o \(name)"
+            #if os(OSX)
+                let cmd = "env SDKROOT=$(xcrun -show-sdk-path -sdk macosx) \(compile)"
+            #else
+                let cmd = compile
+            #endif
+
+            do {
+                try run(cmd)
+            } catch {
+                fail("Could not compile \(src), try running the following command in order to debug this issue:\n\(cmd)")
+            }
+
+            do {
+                try run("chmod +x \(name)")
+                try run("mv \(name) \(directory)")
+            } catch {
+                print("Could not move Vapor CLI to install location.")
+                print("Trying with 'sudo'.")
+                do {
+                    try run("sudo mv \(name) \(directory)")
+                } catch {
+                    fail("Could not move Vapor CLI to install location, giving up.")
+                }
+            }
+
+            do {
+                try run("rm \(source)")
+            } catch {
+                
+            }
+
+            print("Vapor CLI compiled.")
+        }
+
+        static var help: [String] {
+            return [
+                "Compiles and caches the CLI",
+                "to improve performance."
+            ]
+        }
+    }
 }
 
-commands.append(SelfUpdate)
+
+struct SelfCommands: Command {
+    static let id = "self"
+
+    static var subCommands: [Command.Type] = [
+        SelfCommands.Update.self,
+        SelfCommands.Compile.self
+    ]
+
+    static func execute(with args: [String], in directory: String) {
+        executeSubCommand(with: args, in: directory)
+    }
+}
+
+commands.append(SelfCommands)
 
 // MARK: Xcode
 
@@ -737,48 +776,30 @@ commands.append(Xcode)
 
 // MARK: Heroku
 
-protocol Subcommand: Command {}
-
 struct Heroku: Command {
     static let id = "heroku"
 
     static var dependencies = ["git", "heroku"]
 
-    static var subcommands: [Subcommand.Type] = []
-
-    static var supportedCommands: String {
-        return subcommands.map { $0.id } .joined(separator: "|")
-    }
-
-    static func subcommand(forId id: String) -> Subcommand.Type? {
-        return subcommands
-            .lazy
-            .filter { $0.id == id }
-            .first
-    }
+    static var subCommands: [Command.Type] = [
+        Heroku.Init.self,
+    ]
 
     static func execute(with args: [String], in directory: String) {
-        var iterator = args.makeIterator()
-        guard let subcommand = iterator.next().flatMap(subcommand(forId:)) else {
-            fail("heroku subcommand not found. supported: \(supportedCommands)")
-        }
-
-        let passthroughArgs = Array(iterator)
-        subcommand.execute(with: passthroughArgs, in: directory)
+        executeSubCommand(with: args, in: directory)
     }
 }
 
 extension Heroku {
-  static var help: [String] {
-    return [
-      "Configures a new heroku project"
-    ]
-  }
-}
-
-extension Heroku {
-    struct Init: Subcommand {
+    struct Init: Command {
         static let id = "init"
+
+        static var help: [String] {
+            return [
+                "Configures a new heroku project"
+            ]
+        }
+
         static func execute(with args: [String], in directory: String) {
             guard args.isEmpty else { fail("heroku init takes no args") }
 
@@ -870,7 +891,6 @@ extension Heroku {
     }
 }
 
-Heroku.subcommands.append(Heroku.Init.self)
 commands.append(Heroku)
 
 // MARK: Docker
@@ -878,7 +898,12 @@ commands.append(Heroku)
 struct Docker: Command {
     static let id = "docker"
 
-    static var subCommands: [Command.Type] = [Docker.Init.self, Docker.Build.self, Docker.Run.self, Docker.Enter.self]
+    static var subCommands: [Command.Type] = [
+        Docker.Init.self, 
+        Docker.Build.self, 
+        Docker.Run.self, 
+        Docker.Enter.self
+    ]
 
     static func execute(with args: [String], in directory: String) {
         executeSubCommand(with: args, in: directory)
