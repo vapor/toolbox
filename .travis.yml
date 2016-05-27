@@ -13,6 +13,7 @@ script:
   - vapor self compile              # compile
 
   # docker
+  - rm Dockerfile                   # docker init won't run if file exists
   - vapor docker init
 
   # heroku
