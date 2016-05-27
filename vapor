@@ -570,7 +570,9 @@ struct New: Command {
                 "                   Enjoy!",
             ])
             print()
-            system("open \(escapedName)/*.xcodeproj")
+            #if os(OSX)
+                system("open \(escapedName)/*.xcodeproj")
+            #endif
         } catch {
             fail("Could not clone repository")
         }
