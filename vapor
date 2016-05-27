@@ -16,21 +16,10 @@ import Foundation
     exit(1)
 }
 
-enum Error: ErrorProtocol { // Generic errors in the code
-    case TerminalSize
-}
-
-enum RunError: ErrorProtocol { // Errors pertaining to running commands
-    case System(Int32)
-    case Cancelled
-    var code: Int32 {
-        switch self {
-        case .Cancelled:
-            return 2
-        case .System(let code):
-            return code
-        }
-    }
+enum Error: ErrorProtocol { // Errors pertaining to running commands
+    case system(Int32)
+    case cancelled
+    case terminalSize
 }
 
 extension String {
@@ -66,7 +55,7 @@ func runWithOutput(_ command: String) throws -> String { // Command needs to use
         
         return output
     } else {
-        throw RunError.System(1)
+        throw Error.system(1)
     }
 }
 
@@ -74,9 +63,9 @@ func run(_ command: String) throws {
     let result = system(command)
 
     if result == 2 {
-        throw RunError.Cancelled
+        throw Error.cancelled
     } else if result != 0 {
-        throw RunError.System(result)
+        throw Error.system(result)
     }
 }
 
@@ -137,7 +126,7 @@ func getPackageName() -> String {
     return packageName
 }
 
-func terminalSize() throws -> (Int, Int) { // TODO: Create C wrapper for ioctl in Swift (see http://stackoverflow.com/questions/1022957/getting-terminal-width-in-c and http://stackoverflow.com/questions/24188546/how-to-get-access-to-ioctl)
+func terminalSize() throws -> (width: Int, height: Int) {
     // Get the columns and lines from tput
     let tput = "/usr/bin/tput"
     let cols = try runWithOutput("\(tput) cols").trim(trimCharacter: "\n")
@@ -146,7 +135,7 @@ func terminalSize() throws -> (Int, Int) { // TODO: Create C wrapper for ioctl i
     if let cols = Int(cols), lines = Int(lines) {
         return (cols, lines)
     } else {
-        throw Error.TerminalSize
+        throw Error.terminalSize
     }
 }
 
@@ -162,50 +151,32 @@ enum ANSIColor: String {
     case reset = "\u{001B}[0;0m"
 }
 
-let asciiArtRaw =
-        "               **\n" +
-        "              ****\n" +
-        "            ***~~***\n" +
-        "           **~~~~~~**\n" +
-        "          **~~~~~~~~**\n" +
-        "        ***~~++~~~~~~***\n" +
-        "       **~~+++~~~~~~~~~**\n" +
-        "      **~~++++~~~~~~~~~~**\n" +
-        "     **~~++++~~~~~~~~~~~~**\n" +
-        "    **~~++++~~~~~~~~~~~~~~**\n" +
-        "   **~~++++~~~~~~~~~~~~~~~~**\n" +
-        "  **~~~~~~~~~~~~~~~~~~~~~~~~**\n" +
-        " **~~~~~~~~~~~~~~~~~~~~~~~~~**\n" +
-        "***~~~~~~~~~~~~~~~~~~~~~~~~~***\n" +
-        "***~~~~~~~~~~~~~~~~~~~~~~~~~***\n" +
-        " **~~~~~~~~~~~~~~~~~~~~~~~~~**\n" +
-        "  **~~~~~~~~~~~~~~~~~~~~~~~**\n" +
-        "   **~~~~~~~~~~~~~~~~~~~~~**\n" +
-        "    ***~~~~~~~~~~~~~~~~~***\n" +
-        "      ****~~~~~~~~~~~****\n" +
-        "         *************\n" +
-        "             ******\n" +
-        " _       __    ___   ___   ___\n" +
-        "\\ \\  /  / /\\  | |_) / / \\ | |_)\n" +
-        " \\_\\/  /_/--\\ |_|   \\_\\_/ |_| \\\n" +
-        "\n" +
-        "   a web framework for Swift"
+func printFancy(_ strings: [String]) {
+    printFancy(strings.joined(separator: "\n"))
+}
 
-func asciiArt() -> String {
-    // Center the art
-    let centeredArt: String
+func printFancy(_ string: String) {
+    let centered: String
     do {
-        centeredArt = asciiArtRaw.centerTextBlock(width: try terminalSize().0) // Spaces the art to the size of the terminal
-    } catch { // Can't get the terminal size, return the un-centered art
-        centeredArt = asciiArtRaw
+        let size = try terminalSize()
+        centered = string.centerTextBlock(width: size.width)
+    } catch {
+        centered = string        
     }
-    
-    // Return the colored art
-    return centeredArt.color(withColors: [
-           "*": .magenta, "~": .blue, "+": .cyan, // Droplet
-            "_": .magenta, "/": .magenta, "\\": .magenta, "|": .magenta, "-": .magenta, ")": .magenta // Title
-        ]
-    )
+
+    let fancy = centered.colored(with: [
+        "*": .magenta, 
+        "~": .blue, 
+        "+": .cyan, // Droplet
+        "_": .magenta, 
+        "/": .magenta, 
+        "\\": .magenta, 
+        "|": .magenta, 
+        "-": .magenta, 
+        ")": .magenta // Title
+    ])
+
+    print(fancy)
 }
 
 extension String {
@@ -239,7 +210,29 @@ extension String {
         return lines.joined(separator: "\n")
     }
     
-    func color(withColors colors: [Character: ANSIColor], defaultColor: ANSIColor = .black) -> String {
+    #if os(Linux)
+        func hasPrefix(_ str: String) -> Bool {
+            let strGen = str.characters.makeIterator()
+            let selfGen = self.characters.makeIterator()
+            let seq = zip(strGen, selfGen)
+            for (lhs, rhs) in seq where lhs != rhs {
+                    return false
+            }
+            return true
+        }
+
+        func hasSuffix(_ str: String) -> Bool {
+            let strGen = str.characters.reversed().makeIterator()
+            let selfGen = self.characters.reversed().makeIterator()
+            let seq = zip(strGen, selfGen)
+            for (lhs, rhs) in seq where lhs != rhs {
+                    return false
+            }
+            return true
+        }
+    #endif
+
+    func colored(with colors: [Character: ANSIColor], default defaultColor: ANSIColor = .reset) -> String {
         // Check the string is long enough
         guard characters.count > 0 else {
             return ""
@@ -265,28 +258,6 @@ extension String {
         
         return newString
     }
-    
-#if os(Linux)
-    func hasPrefix(_ str: String) -> Bool {
-        let strGen = str.characters.makeIterator()
-        let selfGen = self.characters.makeIterator()
-        let seq = zip(strGen, selfGen)
-        for (lhs, rhs) in seq where lhs != rhs {
-                return false
-        }
-        return true
-    }
-
-    func hasSuffix(_ str: String) -> Bool {
-        let strGen = str.characters.reversed().makeIterator()
-        let selfGen = self.characters.reversed().makeIterator()
-        let seq = zip(strGen, selfGen)
-        for (lhs, rhs) in seq where lhs != rhs {
-                return false
-        }
-        return true
-    }
-#endif
 }
 
 extension Sequence where Iterator.Element == String {
@@ -307,6 +278,34 @@ extension Array where Element: Equatable {
         self = self.filter { !matching($0) }
     }
 }
+
+
+let asciiArt: [String] = [
+    "               **",
+    "             **~~**",
+    "           **~~~~~~**",
+    "         **~~~~~~~~~~**",
+    "       **~~~~~~~~~~~~~~**",
+    "     **~~~~~~~~~~~~~~~~~~**",
+    "   **~~~~~~~~~~~~~~~~~~~~~~**",
+    "  **~~~~~~~~~~~~~~~~~~~~~~~~**",
+    " **~~~~~~~~~~~~~~~~~~~~~~~~~~**",
+    "**~~~~~~~~~~~~~~~~~~~~~~~~~~~~**",
+    "**~~~~~~~~~~~~~~~~~~~~~~~~~~~~**",
+    "**~~~~~~~~~~~~~~~~~~~~~++++~~~**",
+    " **~~~~~~~~~~~~~~~~~~~++++~~~**",
+    "  ***~~~~~~~~~~~~~~~++++~~~***",
+    "    ****~~~~~~~~~~++++~~****",
+    "       *****~~~~~~~~~*****",
+    "          *************",
+    " ",
+    " _       __    ___   ___   ___",
+    "\\ \\  /  / /\\  | |_) / / \\ | |_)",
+    " \\_\\/  /_/--\\ |_|   \\_\\_/ |_| \\",
+    "   a web framework for Swift",
+    " "
+]
+
 
 // MARK: Command
 
@@ -347,25 +346,29 @@ extension Command {
 
 extension Command {
   static var description: String {
+    let coloredId = ANSIColor.magenta.rawValue + id + ANSIColor.reset.rawValue
+
     guard help.count > 0 else {
-      return "  \(id):\n"
+      return "  \(coloredId):\n"
     }
 
     // Sven: The following is not very readable but I stuck with the theme of how the
     // description is built. It would be easier if we would just use:
     //    let subCmdHelpSection = "\n" + subCommands.map { $0.description }.joined(separator: "\n")
     // This does work but the indentation is on the same level as the main commands, which looks bad
-    let subCmdHelpFragments = subCommands.map {
-        "\n    \($0.id):\n"
-        + $0.help
-            .map { "      \($0)" }
+    let subCmdHelpFragments: [String] = subCommands.map { subCommand in
+        let coloredSubId = ANSIColor.yellow.rawValue + subCommand.id + ANSIColor.reset.rawValue
+
+        return "\n      \(coloredSubId):\n" 
+            + subCommand.help
+            .map { "          \($0)" }
             .joined(separator: "\n")
     }
     let subCmdHelpSection = "\n" + subCmdHelpFragments.joined(separator: "\n")
 
-    return "  \(id):\n"
+    return "  \(coloredId):\n"
         + help
-            .map { "    \($0)"}
+            .map { "      \($0)"}
             .joined(separator: "\n")
         + subCmdHelpSection
   }
@@ -395,13 +398,9 @@ func getCommand(id: String) -> Command.Type? {
 struct Help: Command {
     static let id = "help"
     static func execute(with args: [String], in directory: String) {
-        print()
-        print(asciiArt())
-        print()
-        
         print("Usage: \(directory) [\(commands.map({ $0.id }).joined(separator: "|"))]")
 
-        var help = "Available Commands:\n\n"
+        var help = "\nAvailable Commands:\n\n"
         help += commands
             .map { cmd in cmd.description }//"  \(cmd.id):\n\(cmd.description)\n"}
             .joined(separator: "\n")
@@ -409,9 +408,10 @@ struct Help: Command {
         print(help)
 
         print("Community:")
-        print("  Join our Slack if you have questions,")
-        print("  need help, or want to contribute.")
-        print("  http://slack.qutheory.io")
+        print("    Join our Slack if you have questions,")
+        print("    need help, or want to contribute.")
+        print("    http://slack.qutheory.io")
+        print()
     }
 }
 
@@ -444,7 +444,7 @@ struct Build: Command {
     static func execute(with args: [String], in directory: String) {
         do {
             try run("swift build --fetch")
-        } catch RunError.Cancelled {
+        } catch Error.cancelled {
             fail("Fetch cancelled")
         } catch {
             fail("Could not fetch dependencies.")
@@ -466,7 +466,7 @@ struct Build: Command {
         do {
             let buildFlags = flags.joined(separator: " ")
             try run("swift build \(buildFlags)")
-        } catch RunError.Cancelled {
+        } catch Error.cancelled {
             fail("Build cancelled.")
         } catch {
             print()
@@ -509,7 +509,7 @@ struct Run: Command {
             let passthroughArgs = args.joined(separator: " ")
             // TODO: Check that file exists
             try run(".build/\(folder)/\(name) \(passthroughArgs)")
-        } catch RunError.Cancelled {
+        } catch Error.cancelled {
             fail("Run cancelled.")
         } catch {
             fail("Could not run project.")
@@ -562,11 +562,13 @@ struct New: Command {
             }
 
             print()
-            print(asciiArt())
+            printFancy(asciiArt)
             print()
-            print("Project \"\(name)\" has been created.")
-            print("Type `cd \(name)` to enter project directory")
-            print("                 Enjoy!")
+            printFancy([
+                "    Project \"\(name)\" has been created.",
+                "Type `cd \(name)` to enter project directory",
+                "                   Enjoy!",
+            ])
             print()
             system("open \(escapedName)/*.xcodeproj")
         } catch {
@@ -576,14 +578,14 @@ struct New: Command {
 }
 
 extension New {
-  static var help: [String] {
-    return [
-      "new <project-name>",
-      "Clones the Vapor Example to a given",
-      "folder name and initializes an empty",
-      "Git repository inside it."
-    ]
-  }
+    static var help: [String] {
+        return [
+            "new <project-name>",
+            "Clones the Vapor Example to a given",
+            "folder name and initializes an empty",
+            "Git repository inside it."
+        ]
+    }
 }
 
 commands.append(New)
@@ -764,7 +766,7 @@ extension Heroku {
                 try run("heroku buildpacks:set \(buildpack)")
                 print("Using buildpack: \(buildpack)")
                 print()
-            } catch let e as RunError where e.code == 256 {
+            } catch Error.system(let code) where code == 256 {
                 print()
             } catch {
                 fail("unable to set buildpack: \(buildpack)")
@@ -901,7 +903,7 @@ extension Docker {
                 print("This may take a few minutes if no layers are cached...")
                 let cmd = "docker build --rm -t \(imageName) --build-arg SWIFT_VERSION=\(swiftVersion) ."
                 try run(cmd)
-            } catch RunError.System(let result) {
+            } catch Error.system(let result) {
                 if result == 32512 {
                     print()
                     print("Make sure you have the Docker Toolbox installed")
@@ -944,7 +946,7 @@ extension Docker {
             do {
                 print("Launching app with image \(imageName)")
                 try run(cmd)
-            } catch RunError.System(let result) {
+            } catch Error.system(let result) {
                 if result == 33280 {
                     // Sven: Attempt to identify if the user has ctrl-c'd out of the container
                     // so we don't show an error in that case.
@@ -985,7 +987,7 @@ extension Docker {
                 print("Starting bash in image \(imageName)")
                 let cmd = "docker run --rm -it -v $(PWD):/vapor --entrypoint bash \(imageName)"
                 try run(cmd)
-            } catch RunError.System(let result) {
+            } catch Error.system(let result) {
                 if result != 33280 {
                     fail("Could not enter Docker container")
                 }

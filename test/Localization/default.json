@@ -1,0 +1,7 @@
+{
+    "welcome": {
+        "title": "Default Welcome Message",
+        "body": "Default welcome body."
+    },
+    "other-key": "example"
+}
