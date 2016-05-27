@@ -16,7 +16,11 @@ import Foundation
     exit(1)
 }
 
-enum Error: ErrorProtocol {
+enum Error: ErrorProtocol { // Generic errors in the code
+    case TerminalSize
+}
+
+enum RunError: ErrorProtocol { // Errors pertaining to running commands
     case System(Int32)
     case Cancelled
     var code: Int32 {
@@ -29,13 +33,50 @@ enum Error: ErrorProtocol {
     }
 }
 
+extension String {
+    func trim(trimCharacter: Character = Character(" ")) -> String {
+        // while characters
+        var mutable = self
+        while let next = mutable.characters.first where next == trimCharacter {
+            mutable.remove(at: mutable.startIndex)
+        }
+        while let next = mutable.characters.last where next == trimCharacter {
+            mutable.remove(at: mutable.index(before: mutable.endIndex))
+        }
+        return mutable
+    }
+}
+
+func runWithOutput(_ command: String) throws -> String { // Command needs to use the absolute path for the executable
+    // Run the command
+    let fp = popen(command, "r")
+    
+    defer {
+        pclose(fp)
+    }
+    
+    if let fp = fp {
+        // Get the output of the command
+        let pathSize: Int32 = 1035
+        let path : UnsafeMutablePointer<Int8> = UnsafeMutablePointer(allocatingCapacity: Int(pathSize))
+        var output = ""
+        while fgets(path, pathSize - 1, fp) != nil {
+            output += String(cString: path)
+        }
+        
+        return output
+    } else {
+        throw RunError.System(1)
+    }
+}
+
 func run(_ command: String) throws {
     let result = system(command)
 
     if result == 2 {
-        throw Error.Cancelled
+        throw RunError.Cancelled
     } else if result != 0 {
-        throw Error.System(result)
+        throw RunError.System(result)
     }
 }
 
@@ -75,7 +116,7 @@ func extractPackageName(from packageFile: String) -> String {
     let packageName = packageFile
         .components(separatedBy: "\n")
         .lazy
-        .map { $0.trimmedSpaces() }
+        .map { $0.trim() }
         .filter { $0.hasPrefix("name") }
         .first?
         .components(separatedBy: "\"")
@@ -96,24 +137,135 @@ func getPackageName() -> String {
     return packageName
 }
 
-func isWhitespace(_ character: Character) -> Bool {
-    let ws: Set = [Character(" "), Character("\n"), Character("\t"), Character("\r")]
-    return ws.contains(character)
+func terminalSize() throws -> (Int, Int) { // TODO: Create C wrapper for ioctl in Swift (see http://stackoverflow.com/questions/1022957/getting-terminal-width-in-c and http://stackoverflow.com/questions/24188546/how-to-get-access-to-ioctl)
+    // Get the columns and lines from tput
+    let tput = "/usr/bin/tput"
+    let cols = try runWithOutput("\(tput) cols").trim(trimCharacter: "\n")
+    let lines = try runWithOutput("\(tput) lines").trim(trimCharacter: "\n")
+    
+    if let cols = Int(cols), lines = Int(lines) {
+        return (cols, lines)
+    } else {
+        throw Error.TerminalSize
+    }
+}
+
+enum ANSIColor: String {
+    case black = "\u{001B}[0;30m"
+    case red = "\u{001B}[0;31m"
+    case green = "\u{001B}[0;32m"
+    case yellow = "\u{001B}[0;33m"
+    case blue = "\u{001B}[0;34m"
+    case magenta = "\u{001B}[0;35m"
+    case cyan = "\u{001B}[0;36m"
+    case white = "\u{001B}[0;37m"
+    case reset = "\u{001B}[0;0m"
+}
+
+let asciiArtRaw =
+        "               **\n" +
+        "              ****\n" +
+        "            ***~~***\n" +
+        "           **~~~~~~**\n" +
+        "          **~~~~~~~~**\n" +
+        "        ***~~++~~~~~~***\n" +
+        "       **~~+++~~~~~~~~~**\n" +
+        "      **~~++++~~~~~~~~~~**\n" +
+        "     **~~++++~~~~~~~~~~~~**\n" +
+        "    **~~++++~~~~~~~~~~~~~~**\n" +
+        "   **~~++++~~~~~~~~~~~~~~~~**\n" +
+        "  **~~~~~~~~~~~~~~~~~~~~~~~~**\n" +
+        " **~~~~~~~~~~~~~~~~~~~~~~~~~**\n" +
+        "***~~~~~~~~~~~~~~~~~~~~~~~~~***\n" +
+        "***~~~~~~~~~~~~~~~~~~~~~~~~~***\n" +
+        " **~~~~~~~~~~~~~~~~~~~~~~~~~**\n" +
+        "  **~~~~~~~~~~~~~~~~~~~~~~~**\n" +
+        "   **~~~~~~~~~~~~~~~~~~~~~**\n" +
+        "    ***~~~~~~~~~~~~~~~~~***\n" +
+        "      ****~~~~~~~~~~~****\n" +
+        "         *************\n" +
+        "             ******\n" +
+        " _       __    ___   ___   ___\n" +
+        "\\ \\  /  / /\\  | |_) / / \\ | |_)\n" +
+        " \\_\\/  /_/--\\ |_|   \\_\\_/ |_| \\\n" +
+        "\n" +
+        "   a web framework for Swift"
+
+func asciiArt() -> String {
+    // Center the art
+    let centeredArt: String
+    do {
+        centeredArt = asciiArtRaw.centerTextBlock(width: try terminalSize().0) // Spaces the art to the size of the terminal
+    } catch { // Can't get the terminal size, return the un-centered art
+        centeredArt = asciiArtRaw
+    }
+    
+    // Return the colored art
+    return centeredArt.color(withColors: [
+           "*": .magenta, "~": .blue, "+": .cyan, // Droplet
+            "_": .magenta, "/": .magenta, "\\": .magenta, "|": .magenta, "-": .magenta, ")": .magenta // Title
+        ]
+    )
 }
 
 extension String {
-    func trimmedSpaces() -> String {
-        // while characters
-        var mutable = self
-        while let next = mutable.characters.first where isWhitespace(next) {
-            mutable.remove(at: mutable.startIndex)
+    func centerTextBlock(width: Int, paddingCharacter: Character = " ") -> String {
+        // Split the string into lines
+        var lines = characters.split(separator: Character("\n")).map(String.init)
+        
+        // Make sure there's more than one line
+        guard lines.count > 0 else {
+            return ""
         }
-        while let next = mutable.characters.last where isWhitespace(next) {
-            mutable.remove(at: mutable.index(before: mutable.endIndex))
+        
+        // Find the longest line
+        var longestLine = 0
+        for line in lines {
+            if line.characters.count > longestLine {
+                longestLine = line.characters.count
+            }
         }
-        return mutable
+        
+        // Calculate the padding and make sure it's greater than or equal to 0
+        let padding = max(0, (width - longestLine) / 2)
+        
+        // Apply the padding to each line
+        for i in 0..<lines.count {
+            for _ in 0..<padding {
+                lines[i].insert(paddingCharacter, at: startIndex)
+            }
+        }
+        
+        return lines.joined(separator: "\n")
     }
-
+    
+    func color(withColors colors: [Character: ANSIColor], defaultColor: ANSIColor = .black) -> String {
+        // Check the string is long enough
+        guard characters.count > 0 else {
+            return ""
+        }
+        
+        // Create a new string
+        var newString = ""
+        
+        // Add the string to the new string and color it
+        var currentColor: ANSIColor = defaultColor
+        for character in characters {
+            // Check if there is a new color for this character than the one before
+            if (colors[character] ?? defaultColor) != currentColor {
+                currentColor = colors[character] ?? defaultColor // Update the current color
+                newString += currentColor.rawValue // Add the color the new string
+            }
+            
+            newString += String(character) // Add the character to the string
+        }
+        
+        // Reset the colors
+        newString += ANSIColor.reset.rawValue
+        
+        return newString
+    }
+    
 #if os(Linux)
     func hasPrefix(_ str: String) -> Bool {
         let strGen = str.characters.makeIterator()
@@ -243,6 +395,10 @@ func getCommand(id: String) -> Command.Type? {
 struct Help: Command {
     static let id = "help"
     static func execute(with args: [String], in directory: String) {
+        print()
+        print(asciiArt())
+        print()
+        
         print("Usage: \(directory) [\(commands.map({ $0.id }).joined(separator: "|"))]")
 
         var help = "Available Commands:\n\n"
@@ -288,7 +444,7 @@ struct Build: Command {
     static func execute(with args: [String], in directory: String) {
         do {
             try run("swift build --fetch")
-        } catch Error.Cancelled {
+        } catch RunError.Cancelled {
             fail("Fetch cancelled")
         } catch {
             fail("Could not fetch dependencies.")
@@ -310,7 +466,7 @@ struct Build: Command {
         do {
             let buildFlags = flags.joined(separator: " ")
             try run("swift build \(buildFlags)")
-        } catch Error.Cancelled {
+        } catch RunError.Cancelled {
             fail("Build cancelled.")
         } catch {
             print()
@@ -353,7 +509,7 @@ struct Run: Command {
             let passthroughArgs = args.joined(separator: " ")
             // TODO: Check that file exists
             try run(".build/\(folder)/\(name) \(passthroughArgs)")
-        } catch Error.Cancelled {
+        } catch RunError.Cancelled {
             fail("Run cancelled.")
         } catch {
             fail("Could not run project.")
@@ -406,18 +562,9 @@ struct New: Command {
             }
 
             print()
-            print("                   #         ")
-            print("                 #   #       ")
-            print("               #       #     ")
-            print("             #           #   ")
-            print("           #               # ")
-            print("          #                 #")
-            print("          #             *   #")
-            print("           #          *    # ")
-            print("             #           #   ")
-            print("                #  #  #      ")
+            print(asciiArt())
             print()
-            print("   Project \"\(name)\" has been created.")
+            print("Project \"\(name)\" has been created.")
             print("Type `cd \(name)` to enter project directory")
             print("                 Enjoy!")
             print()
@@ -617,7 +764,7 @@ extension Heroku {
                 try run("heroku buildpacks:set \(buildpack)")
                 print("Using buildpack: \(buildpack)")
                 print()
-            } catch let e as Error where e.code == 256 {
+            } catch let e as RunError where e.code == 256 {
                 print()
             } catch {
                 fail("unable to set buildpack: \(buildpack)")
@@ -694,7 +841,7 @@ extension Docker {
 
 extension Docker {
     static let swiftVersion: String? = {
-        return try? String(contentsOfFile: ".swift-version").trimmedSpaces()
+        return try? String(contentsOfFile: ".swift-version").trim()
     }()
 
     static let imageName: String? = {
@@ -754,7 +901,7 @@ extension Docker {
                 print("This may take a few minutes if no layers are cached...")
                 let cmd = "docker build --rm -t \(imageName) --build-arg SWIFT_VERSION=\(swiftVersion) ."
                 try run(cmd)
-            } catch Error.System(let result) {
+            } catch RunError.System(let result) {
                 if result == 32512 {
                     print()
                     print("Make sure you have the Docker Toolbox installed")
@@ -797,7 +944,7 @@ extension Docker {
             do {
                 print("Launching app with image \(imageName)")
                 try run(cmd)
-            } catch Error.System(let result) {
+            } catch RunError.System(let result) {
                 if result == 33280 {
                     // Sven: Attempt to identify if the user has ctrl-c'd out of the container
                     // so we don't show an error in that case.
@@ -838,7 +985,7 @@ extension Docker {
                 print("Starting bash in image \(imageName)")
                 let cmd = "docker run --rm -it -v $(PWD):/vapor --entrypoint bash \(imageName)"
                 try run(cmd)
-            } catch Error.System(let result) {
+            } catch RunError.System(let result) {
                 if result != 33280 {
                     fail("Could not enter Docker container")
                 }
