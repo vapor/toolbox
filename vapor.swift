@@ -611,6 +611,33 @@ commands.append(New)
 // MARK: Self
 
 extension SelfCommands {
+    struct Install: Command {
+        static let id = "install"
+
+        static func execute(with args: [String], in directory: String) {
+            do {
+                try run("mv \(directory) /usr/local/bin/vapor")
+            } catch {
+                print("Could not move Vapor CLI to install location.")
+                print("Trying with 'sudo'.")
+                do {
+                    try run("sudo mv \(directory) /usr/local/bin/vapor")
+                } catch {
+                    fail("Could not move Vapor CLI to install location, giving up.")
+                }
+            }
+        }
+
+        static var help: [String] {
+            return [
+                "Moves the CLI into the bin so",
+                "that it is available in the PATH"
+            ]
+        }
+    }
+}
+
+extension SelfCommands {
     struct Update: Command {
         static let id = "update"
 
@@ -716,7 +743,8 @@ struct SelfCommands: Command {
 
     static var subCommands: [Command.Type] = [
         SelfCommands.Update.self,
-        SelfCommands.Compile.self
+        SelfCommands.Compile.self,
+        SelfCommands.Install.self
     ]
 
     static func execute(with args: [String], in directory: String) {
