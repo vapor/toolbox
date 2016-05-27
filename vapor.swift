@@ -676,7 +676,7 @@ extension SelfCommands {
             do {
                 try run(cmd)
             } catch {
-                fail("Could not compile \(src), try running the following command in order to debug this issue:\n\(cmd)")
+                fail("Could not compile.")
             }
 
             do {
@@ -695,7 +695,7 @@ extension SelfCommands {
             do {
                 try run("rm \(source)")
             } catch {
-                
+
             }
 
             print("Vapor CLI compiled.")
