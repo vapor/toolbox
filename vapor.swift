@@ -843,7 +843,7 @@ extension Heroku {
             print("Setting up Heroku for \(packageName) ...")
             print()
 
-            let herokuIsAlreadyInitialized = passes("git remote get-url heroku")
+            let herokuIsAlreadyInitialized = passes("git remote show heroku")
             if herokuIsAlreadyInitialized {
                 print("Found existing heroku app")
                 print()
