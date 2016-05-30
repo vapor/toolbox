@@ -17,16 +17,12 @@ extension Command {
 extension Command {
     static var subCommands: [Command.Type] { return [] }
 
-    static func subCommand(forId id: String) -> Command.Type? {
-        return subCommands.lazy.filter { $0.id == id }.first
-    }
-
     static func executeSubCommand(with args: [String], in directory: String) {
         var iterator = args.makeIterator()
         guard let cmdId = iterator.next() else {
             fail("\(id) requires a sub command:\n" + description)
         }
-        guard let subcommand = subCommand(forId: cmdId) else {
+        guard let subcommand = getCommand(id: cmdId, commands:subCommands) else {
             fail("Unknown \(id) subcommand '\(cmdId)':\n" + description)
         }
         let passthroughArgs = Array(iterator)
