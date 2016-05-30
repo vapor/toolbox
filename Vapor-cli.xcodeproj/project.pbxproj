@@ -1,0 +1,282 @@
+// !$*UTF8*$!
+{
+    archiveVersion = 1;
+    classes = {};
+    objectVersion = 46;
+    rootObject = __RootObject_;
+    objects = {
+        __RootObject_ = {
+            isa = PBXProject;
+            attributes = {LastUpgradeCheck = 9999;};
+            buildConfigurationList = ___RootConfs_;
+            compatibilityVersion = 'Xcode 3.2';
+            developmentRegion = English;
+            hasScannedForEncodings = 0;
+            knownRegions = (en);
+            mainGroup = ___RootGroup_;
+            productRefGroup = ____Products_;
+            projectDirPath = '';
+            projectRoot = '';
+            targets = (______Target_vapor);
+        };
+        '__PBXFileRef_Package.swift' = {
+            isa = PBXFileReference;
+            lastKnownFileType = sourcecode.swift;
+            name = 'Package.swift';
+            path = 'Package.swift';
+            sourceTree = '<group>';
+        };
+        ___RootGroup_ = {
+            isa = PBXGroup;
+            children = ('__PBXFileRef_Package.swift', _____Configs_, _____Sources_, Dependencies_, _______Tests_, ____Products_);
+            sourceTree = '<group>';
+        };
+        _______Group_vapor = {
+            isa = PBXGroup;
+            name = vapor;
+            path = 'Sources/vapor';
+            sourceTree = '<group>';
+            children = ('__PBXFileRef_Sources/vapor/array_ext.swift', '__PBXFileRef_Sources/vapor/cmd_build.swift', '__PBXFileRef_Sources/vapor/cmd_clean.swift', '__PBXFileRef_Sources/vapor/cmd_docker.swift', '__PBXFileRef_Sources/vapor/cmd_help.swift', '__PBXFileRef_Sources/vapor/cmd_heroku.swift', '__PBXFileRef_Sources/vapor/cmd_new.swift', '__PBXFileRef_Sources/vapor/cmd_run.swift', '__PBXFileRef_Sources/vapor/cmd_self.swift', '__PBXFileRef_Sources/vapor/cmd_xcode.swift', '__PBXFileRef_Sources/vapor/command.swift', '__PBXFileRef_Sources/vapor/main.swift', '__PBXFileRef_Sources/vapor/sequence_ext.swift', '__PBXFileRef_Sources/vapor/string_ext.swift', '__PBXFileRef_Sources/vapor/utils.swift');
+        };
+        '__PBXFileRef_Sources/vapor/array_ext.swift' = {
+            isa = PBXFileReference;
+            lastKnownFileType = sourcecode.swift;
+            name = 'array_ext.swift';
+            sourceTree = '<group>';
+        };
+        '__PBXFileRef_Sources/vapor/cmd_build.swift' = {
+            isa = PBXFileReference;
+            lastKnownFileType = sourcecode.swift;
+            name = 'cmd_build.swift';
+            sourceTree = '<group>';
+        };
+        '__PBXFileRef_Sources/vapor/cmd_clean.swift' = {
+            isa = PBXFileReference;
+            lastKnownFileType = sourcecode.swift;
+            name = 'cmd_clean.swift';
+            sourceTree = '<group>';
+        };
+        '__PBXFileRef_Sources/vapor/cmd_docker.swift' = {
+            isa = PBXFileReference;
+            lastKnownFileType = sourcecode.swift;
+            name = 'cmd_docker.swift';
+            sourceTree = '<group>';
+        };
+        '__PBXFileRef_Sources/vapor/cmd_help.swift' = {
+            isa = PBXFileReference;
+            lastKnownFileType = sourcecode.swift;
+            name = 'cmd_help.swift';
+            sourceTree = '<group>';
+        };
+        '__PBXFileRef_Sources/vapor/cmd_heroku.swift' = {
+            isa = PBXFileReference;
+            lastKnownFileType = sourcecode.swift;
+            name = 'cmd_heroku.swift';
+            sourceTree = '<group>';
+        };
+        '__PBXFileRef_Sources/vapor/cmd_new.swift' = {
+            isa = PBXFileReference;
+            lastKnownFileType = sourcecode.swift;
+            name = 'cmd_new.swift';
+            sourceTree = '<group>';
+        };
+        '__PBXFileRef_Sources/vapor/cmd_run.swift' = {
+            isa = PBXFileReference;
+            lastKnownFileType = sourcecode.swift;
+            name = 'cmd_run.swift';
+            sourceTree = '<group>';
+        };
+        '__PBXFileRef_Sources/vapor/cmd_self.swift' = {
+            isa = PBXFileReference;
+            lastKnownFileType = sourcecode.swift;
+            name = 'cmd_self.swift';
+            sourceTree = '<group>';
+        };
+        '__PBXFileRef_Sources/vapor/cmd_xcode.swift' = {
+            isa = PBXFileReference;
+            lastKnownFileType = sourcecode.swift;
+            name = 'cmd_xcode.swift';
+            sourceTree = '<group>';
+        };
+        '__PBXFileRef_Sources/vapor/command.swift' = {
+            isa = PBXFileReference;
+            lastKnownFileType = sourcecode.swift;
+            name = 'command.swift';
+            sourceTree = '<group>';
+        };
+        '__PBXFileRef_Sources/vapor/main.swift' = {
+            isa = PBXFileReference;
+            lastKnownFileType = sourcecode.swift;
+            name = 'main.swift';
+            sourceTree = '<group>';
+        };
+        '__PBXFileRef_Sources/vapor/sequence_ext.swift' = {
+            isa = PBXFileReference;
+            lastKnownFileType = sourcecode.swift;
+            name = 'sequence_ext.swift';
+            sourceTree = '<group>';
+        };
+        '__PBXFileRef_Sources/vapor/string_ext.swift' = {
+            isa = PBXFileReference;
+            lastKnownFileType = sourcecode.swift;
+            name = 'string_ext.swift';
+            sourceTree = '<group>';
+        };
+        '__PBXFileRef_Sources/vapor/utils.swift' = {
+            isa = PBXFileReference;
+            lastKnownFileType = sourcecode.swift;
+            name = 'utils.swift';
+            sourceTree = '<group>';
+        };
+        ______Target_vapor = {
+            isa = PBXNativeTarget;
+            buildConfigurationList = _______Confs_vapor;
+            buildPhases = (CompilePhase_vapor, ___LinkPhase_vapor);
+            buildRules = ();
+            dependencies = ();
+            name = vapor;
+            productName = vapor;
+            productReference = _____Product_vapor;
+            productType = 'com.apple.product-type.tool';
+        };
+        _____Product_vapor = {
+            isa = PBXFileReference;
+            explicitFileType = 'compiled.mach-o.executable';
+            path = 'vapor';
+            sourceTree = BUILT_PRODUCTS_DIR;
+        };
+        CompilePhase_vapor = {
+            isa = PBXSourcesBuildPhase;
+            files = ('__src_cc_ref_Sources/vapor/array_ext.swift', '__src_cc_ref_Sources/vapor/cmd_build.swift', '__src_cc_ref_Sources/vapor/cmd_clean.swift', '__src_cc_ref_Sources/vapor/cmd_docker.swift', '__src_cc_ref_Sources/vapor/cmd_help.swift', '__src_cc_ref_Sources/vapor/cmd_heroku.swift', '__src_cc_ref_Sources/vapor/cmd_new.swift', '__src_cc_ref_Sources/vapor/cmd_run.swift', '__src_cc_ref_Sources/vapor/cmd_self.swift', '__src_cc_ref_Sources/vapor/cmd_xcode.swift', '__src_cc_ref_Sources/vapor/command.swift', '__src_cc_ref_Sources/vapor/main.swift', '__src_cc_ref_Sources/vapor/sequence_ext.swift', '__src_cc_ref_Sources/vapor/string_ext.swift', '__src_cc_ref_Sources/vapor/utils.swift');
+            runOnlyForDeploymentPostprocessing = 0;
+        };
+        '__src_cc_ref_Sources/vapor/array_ext.swift' = {
+            isa = PBXBuildFile;
+            fileRef = '__PBXFileRef_Sources/vapor/array_ext.swift';
+        };
+        '__src_cc_ref_Sources/vapor/cmd_build.swift' = {
+            isa = PBXBuildFile;
+            fileRef = '__PBXFileRef_Sources/vapor/cmd_build.swift';
+        };
+        '__src_cc_ref_Sources/vapor/cmd_clean.swift' = {
+            isa = PBXBuildFile;
+            fileRef = '__PBXFileRef_Sources/vapor/cmd_clean.swift';
+        };
+        '__src_cc_ref_Sources/vapor/cmd_docker.swift' = {
+            isa = PBXBuildFile;
+            fileRef = '__PBXFileRef_Sources/vapor/cmd_docker.swift';
+        };
+        '__src_cc_ref_Sources/vapor/cmd_help.swift' = {
+            isa = PBXBuildFile;
+            fileRef = '__PBXFileRef_Sources/vapor/cmd_help.swift';
+        };
+        '__src_cc_ref_Sources/vapor/cmd_heroku.swift' = {
+            isa = PBXBuildFile;
+            fileRef = '__PBXFileRef_Sources/vapor/cmd_heroku.swift';
+        };
+        '__src_cc_ref_Sources/vapor/cmd_new.swift' = {
+            isa = PBXBuildFile;
+            fileRef = '__PBXFileRef_Sources/vapor/cmd_new.swift';
+        };
+        '__src_cc_ref_Sources/vapor/cmd_run.swift' = {
+            isa = PBXBuildFile;
+            fileRef = '__PBXFileRef_Sources/vapor/cmd_run.swift';
+        };
+        '__src_cc_ref_Sources/vapor/cmd_self.swift' = {
+            isa = PBXBuildFile;
+            fileRef = '__PBXFileRef_Sources/vapor/cmd_self.swift';
+        };
+        '__src_cc_ref_Sources/vapor/cmd_xcode.swift' = {
+            isa = PBXBuildFile;
+            fileRef = '__PBXFileRef_Sources/vapor/cmd_xcode.swift';
+        };
+        '__src_cc_ref_Sources/vapor/command.swift' = {
+            isa = PBXBuildFile;
+            fileRef = '__PBXFileRef_Sources/vapor/command.swift';
+        };
+        '__src_cc_ref_Sources/vapor/main.swift' = {
+            isa = PBXBuildFile;
+            fileRef = '__PBXFileRef_Sources/vapor/main.swift';
+        };
+        '__src_cc_ref_Sources/vapor/sequence_ext.swift' = {
+            isa = PBXBuildFile;
+            fileRef = '__PBXFileRef_Sources/vapor/sequence_ext.swift';
+        };
+        '__src_cc_ref_Sources/vapor/string_ext.swift' = {
+            isa = PBXBuildFile;
+            fileRef = '__PBXFileRef_Sources/vapor/string_ext.swift';
+        };
+        '__src_cc_ref_Sources/vapor/utils.swift' = {
+            isa = PBXBuildFile;
+            fileRef = '__PBXFileRef_Sources/vapor/utils.swift';
+        };
+        ___LinkPhase_vapor = {
+            isa = PBXFrameworksBuildPhase;
+            files = ();
+            runOnlyForDeploymentPostprocessing = 0;
+        };
+        _______Confs_vapor = {
+            isa = XCConfigurationList;
+            buildConfigurations = (___DebugConf_vapor, _ReleaseConf_vapor);
+            defaultConfigurationIsVisible = 0;
+            defaultConfigurationName = Debug;
+        };
+        ___DebugConf_vapor = {
+            isa = XCBuildConfiguration;
+            buildSettings = { OTHER_SWIFT_FLAGS = '$(inherited)'; SWIFT_OPTIMIZATION_LEVEL = '-Onone'; LD_RUNPATH_SEARCH_PATHS = '$(TOOLCHAIN_DIR)/usr/lib/swift/macosx @executable_path'; SWIFT_FORCE_STATIC_LINK_STDLIB = 'NO'; SWIFT_FORCE_DYNAMIC_LINK_STDLIB = 'YES'; OTHER_LDFLAGS = '$(inherited)'; };
+            name = Debug;
+        };
+        _ReleaseConf_vapor = {
+            isa = XCBuildConfiguration;
+            buildSettings = { OTHER_SWIFT_FLAGS = '$(inherited)'; LD_RUNPATH_SEARCH_PATHS = '$(TOOLCHAIN_DIR)/usr/lib/swift/macosx @executable_path'; SWIFT_FORCE_STATIC_LINK_STDLIB = 'NO'; SWIFT_FORCE_DYNAMIC_LINK_STDLIB = 'YES'; OTHER_LDFLAGS = '$(inherited)'; };
+            name = Release;
+        };
+        __Dependency_vapor = {
+            isa = PBXTargetDependency;
+            target = ______Target_vapor;
+        };
+        '__PBXFileRef_Vapor-cli.xcodeproj/Configs/Project.xcconfig' = {
+            isa = PBXFileReference;
+            lastKnownFileType = text.xcconfig;
+            name = 'Project.xcconfig';
+            path = 'Vapor-cli.xcodeproj/Configs/Project.xcconfig';
+            sourceTree = '<group>';
+        };
+        _____Configs_ = {
+            isa = PBXGroup;
+            children = ('__PBXFileRef_Vapor-cli.xcodeproj/Configs/Project.xcconfig');
+            name = Configs;
+            sourceTree = '<group>';
+        };
+        _____Sources_ = {
+            isa = PBXGroup;
+            children = (_______Group_vapor);
+            name = Sources;
+            sourceTree = '<group>';
+        };
+        ____Products_ = {
+            isa = PBXGroup;
+            children = (_____Product_vapor);
+            name = Products;
+            sourceTree = '<group>';
+        };
+        _______Debug_ = {
+            isa = XCBuildConfiguration;
+            baseConfigurationReference = '__PBXFileRef_Vapor-cli.xcodeproj/Configs/Project.xcconfig';
+            buildSettings = {};
+            name = Debug;
+        };
+        _____Release_ = {
+            isa = XCBuildConfiguration;
+            baseConfigurationReference = '__PBXFileRef_Vapor-cli.xcodeproj/Configs/Project.xcconfig';
+            buildSettings = {};
+            name = Release;
+        };
+        ___RootConfs_ = {
+            isa = XCConfigurationList;
+            buildConfigurations = (_______Debug_, _____Release_);
+            defaultConfigurationIsVisible = 0;
+            defaultConfigurationName = Debug;
+        };
+    };
+}
