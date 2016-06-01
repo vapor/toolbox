@@ -706,12 +706,11 @@ extension SelfCommands {
                 try run("chmod +x \(name)")
                 try run("mv \(name) \(directory)")
             } catch {
-                print("Could not move Vapor CLI to install location.")
                 print("Trying with 'sudo'.")
                 do {
                     try run("sudo mv \(name) \(directory)")
                 } catch {
-                    fail("Could not move Vapor CLI to install location, giving up.")
+                    fail("Could not move Vapor CLI to install location.")
                 }
             }
 
