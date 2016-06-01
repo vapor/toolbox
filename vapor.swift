@@ -658,18 +658,10 @@ extension SelfCommands {
 
             do {
                 try run("chmod +x \(name)")
-                try run("mv \(name) \(directory)")
-                print("Vapor CLI updated.")
+                try run("\(name) self install")
             } catch {
-                print("Trying with 'sudo'.")
-                do {
-                    try run("sudo mv \(name) \(directory)")
-                    print("Vapor CLI updated.")
-                } catch {
-                    fail("Could not move Vapor CLI to install location.")
-                }
+                fail("Could not update CLI.")
             }
-
         }
 
         static var help: [String] {
