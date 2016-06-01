@@ -12,6 +12,8 @@ script:
   - ./vapor.swift self install      # install
   - vapor self compile              # compile
 
+  - vapor version                   # version
+
   # docker
   - rm Dockerfile                   # docker init won't run if file exists
   - vapor docker init
