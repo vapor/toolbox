@@ -8,6 +8,8 @@
 
 import Foundation
 
+let version = "0.5"
+
 // MARK: Utilities
 
 @noreturn func fail(_ message: String) {
@@ -406,6 +408,22 @@ func getCommand(id: String) -> Command.Type? {
         .filter { $0.id == id }
         .first
 }
+
+// MARK: version
+
+struct Version: Command {
+    static let id = "version"
+    static func execute(with args: [String], in directory: String) {
+        print("Vapor CLI version: \(version)")
+    }
+    static var help: [String] {
+        return [
+            "display Vapor CLI version"
+        ]
+    }
+}
+
+commands.append(Version)
 
 // MARK: Help
 
