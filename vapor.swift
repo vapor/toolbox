@@ -622,7 +622,7 @@ extension SelfCommands {
                 try run("mv \(directory) /usr/local/bin/vapor")
                 print("Vapor CLI installed.")
             } catch {
-                print("Trying with 'sudo'.")
+                print("Trying with sudo.")
                 do {
                     try run("sudo mv \(directory) /usr/local/bin/vapor")
                     print("Vapor CLI installed.")
@@ -658,7 +658,7 @@ extension SelfCommands {
 
             do {
                 try run("chmod +x \(name)")
-                try run("\(name) self install")
+                try run("./\(name) self install")
             } catch {
                 fail("Could not update CLI.")
             }
