@@ -15,6 +15,7 @@ let version = "0.5"
 @noreturn func fail(_ message: String) {
     print()
     print("Error: \(message)")
+    print("Note: Make sure you are using Swift 3.0 Preview 1")
     exit(1)
 }
 
@@ -474,7 +475,7 @@ struct Build: Command {
     static let id = "build"
     static func execute(with args: [String], in directory: String) {
         do {
-            try run("swift build --fetch")
+            try run("swift package fetch")
         } catch Error.cancelled {
             fail("Fetch cancelled")
         } catch {
@@ -501,9 +502,9 @@ struct Build: Command {
             fail("Build cancelled.")
         } catch {
             print()
-            print("Make sure you are running Apple Swift version 3.0.")
-            print("Vapor only supports the latest snapshot.")
-            print("Run swift --version to check your version.")
+            print("Need help getting your project to build?")
+            print("Join our Slack where hundreds of contributors")
+            print("are waiting to help: http://slack.qutheory.io")
 
             fail("Could not build project.")
         }
@@ -639,7 +640,7 @@ extension SelfCommands {
                 try run("mv \(directory) /usr/local/bin/vapor")
                 print("Vapor CLI installed.")
             } catch {
-                print("Trying with 'sudo'.")
+                print("Trying with sudo.")
                 do {
                     try run("sudo mv \(directory) /usr/local/bin/vapor")
                     print("Vapor CLI installed.")
@@ -675,18 +676,10 @@ extension SelfCommands {
 
             do {
                 try run("chmod +x \(name)")
-                try run("mv \(name) \(directory)")
-                print("Vapor CLI updated.")
+                try run("./\(name) self install")
             } catch {
-                print("Trying with 'sudo'.")
-                do {
-                    try run("sudo mv \(name) \(directory)")
-                    print("Vapor CLI updated.")
-                } catch {
-                    fail("Could not move Vapor CLI to install location.")
-                }
+                fail("Could not update CLI.")
             }
-
         }
 
         static var help: [String] {
@@ -731,12 +724,11 @@ extension SelfCommands {
                 try run("chmod +x \(name)")
                 try run("mv \(name) \(directory)")
             } catch {
-                print("Could not move Vapor CLI to install location.")
-                print("Trying with 'sudo'.")
+                print("Trying with sudo...")
                 do {
                     try run("sudo mv \(name) \(directory)")
                 } catch {
-                    fail("Could not move Vapor CLI to install location, giving up.")
+                    fail("Could not move Vapor CLI to install location.")
                 }
             }
 
@@ -795,10 +787,9 @@ struct Xcode: Command {
         }
 
         do {
-            try run("swift build --generate-xcodeproj")
+            try run("swift package generate-xcodeproj")
         } catch {
-            print("Could not generate Xcode Project.")
-            return
+            fail("Could not generate Xcode Project.")
         }
 
         print("Opening Xcode...")
