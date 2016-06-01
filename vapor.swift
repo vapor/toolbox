@@ -706,7 +706,7 @@ extension SelfCommands {
                 try run("chmod +x \(name)")
                 try run("mv \(name) \(directory)")
             } catch {
-                print("Trying with 'sudo'.")
+                print("Trying with sudo...")
                 do {
                     try run("sudo mv \(name) \(directory)")
                 } catch {
