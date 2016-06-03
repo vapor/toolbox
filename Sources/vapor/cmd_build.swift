@@ -3,7 +3,7 @@ struct Build: Command {
     static let id = "build"
     static func execute(with args: [String], in directory: String) {
         do {
-            try run("swift build --fetch")
+            try run("swift package fetch")
         } catch Error.cancelled {
             fail("Fetch cancelled")
         } catch {
@@ -30,9 +30,9 @@ struct Build: Command {
             fail("Build cancelled.")
         } catch {
             print()
-            print("Make sure you are running Apple Swift version 3.0.")
-            print("Vapor only supports the latest snapshot.")
-            print("Run swift --version to check your version.")
+            print("Need help getting your project to build?")
+            print("Join our Slack where hundreds of contributors")
+            print("are waiting to help: http://slack.qutheory.io")
 
             fail("Could not build project.")
         }

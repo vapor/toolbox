@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5A501E0C1D01AAC700A3BEFF /* cmd_version.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A501E0B1D01AAC700A3BEFF /* cmd_version.swift */; };
 		__src_cc_ref_Sources/vapor/array_ext.swift /* array_ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/vapor/array_ext.swift /* array_ext.swift */; };
 		__src_cc_ref_Sources/vapor/cmd_build.swift /* cmd_build.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/vapor/cmd_build.swift /* cmd_build.swift */; };
 		__src_cc_ref_Sources/vapor/cmd_clean.swift /* cmd_clean.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/vapor/cmd_clean.swift /* cmd_clean.swift */; };
@@ -25,6 +26,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5A501E0B1D01AAC700A3BEFF /* cmd_version.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = cmd_version.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Package.swift /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Sources/vapor/array_ext.swift /* array_ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = array_ext.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Sources/vapor/cmd_build.swift /* cmd_build.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = cmd_build.swift; sourceTree = "<group>"; };
@@ -102,6 +104,7 @@
 				__PBXFileRef_Sources/vapor/cmd_new.swift /* cmd_new.swift */,
 				__PBXFileRef_Sources/vapor/cmd_run.swift /* cmd_run.swift */,
 				__PBXFileRef_Sources/vapor/cmd_self.swift /* cmd_self.swift */,
+				5A501E0B1D01AAC700A3BEFF /* cmd_version.swift */,
 				__PBXFileRef_Sources/vapor/cmd_xcode.swift /* cmd_xcode.swift */,
 				__PBXFileRef_Sources/vapor/command.swift /* command.swift */,
 				__PBXFileRef_Sources/vapor/main.swift /* main.swift */,
@@ -167,6 +170,7 @@
 				__src_cc_ref_Sources/vapor/cmd_clean.swift /* cmd_clean.swift in Sources */,
 				__src_cc_ref_Sources/vapor/cmd_docker.swift /* cmd_docker.swift in Sources */,
 				__src_cc_ref_Sources/vapor/cmd_help.swift /* cmd_help.swift in Sources */,
+				5A501E0C1D01AAC700A3BEFF /* cmd_version.swift in Sources */,
 				__src_cc_ref_Sources/vapor/cmd_heroku.swift /* cmd_heroku.swift in Sources */,
 				__src_cc_ref_Sources/vapor/cmd_new.swift /* cmd_new.swift in Sources */,
 				__src_cc_ref_Sources/vapor/cmd_run.swift /* cmd_run.swift in Sources */,

@@ -9,6 +9,7 @@
 @noreturn func fail(_ message: String) {
     print()
     print("Error: \(message)")
+    print("Note: Make sure you are using Swift 3.0 Preview 1")
     exit(1)
 }
 

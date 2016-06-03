@@ -8,7 +8,7 @@ extension SelfCommands {
                 try run("mv \(directory) /usr/local/bin/vapor")
                 print("Vapor CLI installed.")
             } catch {
-                print("Trying with 'sudo'.")
+                print("Trying with sudo.")
                 do {
                     try run("sudo mv \(directory) /usr/local/bin/vapor")
                     print("Vapor CLI installed.")
@@ -44,18 +44,10 @@ extension SelfCommands {
 
             do {
                 try run("chmod +x \(name)")
-                try run("mv \(name) \(directory)")
-                print("Vapor CLI updated.")
+                try run("./\(name) self install")
             } catch {
-                print("Trying with 'sudo'.")
-                do {
-                    try run("sudo mv \(name) \(directory)")
-                    print("Vapor CLI updated.")
-                } catch {
-                    fail("Could not move Vapor CLI to install location.")
-                }
+                fail("Could not update CLI.")
             }
-
         }
 
         static var help: [String] {
@@ -100,12 +92,11 @@ extension SelfCommands {
                 try run("chmod +x \(name)")
                 try run("mv \(name) \(directory)")
             } catch {
-                print("Could not move Vapor CLI to install location.")
-                print("Trying with 'sudo'.")
+                print("Trying with sudo...")
                 do {
                     try run("sudo mv \(name) \(directory)")
                 } catch {
-                    fail("Could not move Vapor CLI to install location, giving up.")
+                    fail("Could not move Vapor CLI to install location.")
                 }
             }
 

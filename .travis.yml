@@ -11,6 +11,8 @@ script:
   - swift build
   - sudo cp .build/debug/vapor /usr/local/bin/vapor
 
+  - vapor version                   # version
+
   # docker
   - rm Dockerfile                   # docker init won't run if file exists
   - vapor docker init

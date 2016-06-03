@@ -8,11 +8,14 @@
 
 import Foundation
 
+let version = "0.5"
+
 struct VaporCLI {
     // this closure assignment is necessary to be able to exclude Xcode on Linux
     static let commands: [Command.Type] = {
         var c = [Command.Type]()
         c.append(Help)
+        c.append(Version)
         c.append(Clean)
         c.append(Build)
         c.append(Run)

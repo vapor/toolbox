@@ -8,7 +8,7 @@
             print("Generating Xcode Project...")
 
             do {
-                try run("swift build --fetch")
+                try run("swift package fetch")
                 try run("rm -rf Packages/Vapor-*/Sources/Development")
                 try run("rm -rf Packages/Vapor-*/Sources/Performance")
                 try run("rm -rf Packages/Vapor-*/Sources/Generator")
@@ -17,10 +17,9 @@
             }
 
             do {
-                try run("swift build --generate-xcodeproj")
+                try run("swift package generate-xcodeproj")
             } catch {
-                print("Could not generate Xcode Project.")
-                return
+                fail("Could not generate Xcode Project.")
             }
 
             print("Opening Xcode...")
