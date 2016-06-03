@@ -13,6 +13,10 @@ script:
   - chmod +x vapor.swift
   - sudo cp ./vapor.swift /usr/local/bin/vapor
   
+  # fixing error on Linux:
+  #   mv: try to overwrite ‘/usr/local/bin/vapor’, overriding mode 0755 (rwxr-xr-x)?
+  - sudo chmod ugo+w /usr/local/bin/vapor
+  
   - vapor self compile              # compile
 
   - vapor version                   # version
