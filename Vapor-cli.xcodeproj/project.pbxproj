@@ -27,6 +27,7 @@
 
 /* Begin PBXFileReference section */
 		5A501E0B1D01AAC700A3BEFF /* cmd_version.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = cmd_version.swift; sourceTree = "<group>"; };
+		5A501E0D1D01E22C00A3BEFF /* bootstrap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = bootstrap.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Package.swift /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Sources/vapor/array_ext.swift /* array_ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = array_ext.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Sources/vapor/cmd_build.swift /* cmd_build.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = cmd_build.swift; sourceTree = "<group>"; };
@@ -61,6 +62,7 @@
 		"___RootGroup_" = {
 			isa = PBXGroup;
 			children = (
+				5A501E0D1D01E22C00A3BEFF /* bootstrap.swift */,
 				__PBXFileRef_Package.swift /* Package.swift */,
 				"_____Configs_" /* Configs */,
 				"_____Sources_" /* Sources */,
