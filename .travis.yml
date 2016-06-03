@@ -29,5 +29,8 @@ script:
   - vapor run &                     # run
 
   # test update
-  - vapor self update       # will update to older version
+  # fixing error on Linux:
+  #   mv: try to overwrite ‘/usr/local/bin/vapor’, overriding mode 0755 (rwxr-xr-x)?
+  - sudo chmod ugo+w /usr/local/bin/vapor
   
+  - vapor self update       # will update to older version
