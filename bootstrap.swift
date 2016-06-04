@@ -29,8 +29,11 @@ func run(_ command: String) throws {
     }
 }
 
-func run(_ parts: [String]) throws {
-    let cmd = parts.joined(separator: " ")
+func run(_ parts: [String], silent: Bool = false) throws {
+    var cmd = parts.joined(separator: " ")
+    if silent {
+        cmd.append("> /dev/null 2>&1")
+    }
     try run(cmd)
 }
 
@@ -119,7 +122,7 @@ func rm(file: String) throws {
 func build(directory: String) throws {
     let cwd = "cd \(directory) &&"
     let cmd = [cwd, "swift", "build", "-c", "release"]
-    try run(cmd)
+    try run(cmd, silent: true)
 }
 
 func downloadURL(repository: String, branch: String = "master") -> String {
@@ -139,6 +142,12 @@ func bootstrap(repository: String, branch: String, targetDir: String) {
     guard isDir(path: targetDir) else {
         fail("Install location '\(targetDir)' is not a directory")
     }
+    if targetDir.characters.last == "/" {
+        print("trainling /")
+    } else {
+        print("ok")
+    }
+    return
 
     let url = downloadURL(repository: repository, branch: branch)
     let archive = "./tmp.tgz"
@@ -148,14 +157,13 @@ func bootstrap(repository: String, branch: String, targetDir: String) {
     do {
         if !exists(path: archive) {
             print("Downloading \(url) ...")
-            try download(url: url, output: archive, verbose: true)
+            try download(url: url, output: archive, verbose: false)
         }
     } catch {
         fail("Could not download SPM package")
     }
 
     do {
-        print("Unpacking \(archive) ...")
         try unpack(archive: archive, verbose: false)
     } catch {
         fail("Could not unpack archive")
@@ -170,16 +178,13 @@ func bootstrap(repository: String, branch: String, targetDir: String) {
 
     let target = "\(targetDir)/vapor"
     do {
-        print("Installing binary in \(targetDir) ...")
         let binary = "\(unpackedDir)/.build/release/vapor"
         try install(from: binary, to: target)
     } catch {
-        fail("Could not install binary")
+        fail("Could not install binary in \(targetDir)")
     }
 
-    print("Cleaning up ...")
-
-    do {
+    do { // remove build directory
         if exists(path: unpackedDir) {
             try rm(directory: unpackedDir)
         }
@@ -187,7 +192,7 @@ func bootstrap(repository: String, branch: String, targetDir: String) {
         fail("Could not remove directory '\(unpackedDir)'")
     }
     
-    do {
+    do { // remove tar.gz archive
         if exists(path: archive) {
             try rm(file: archive)
         }
@@ -207,4 +212,5 @@ let targetDir: String = {
         return "/usr/local/bin"
     }
 }()
+
 bootstrap(repository: "vapor-cli", branch: "spm", targetDir: targetDir)
