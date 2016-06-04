@@ -16,11 +16,10 @@
 enum Error: ErrorProtocol { // Errors pertaining to running commands
     case system(Int32)
     case cancelled
-    case terminalSize
+    case commandNotFound
 }
 
 func run(_ command: String) throws {
-    print("### CMD: \(command)")
     let result = system(command)
 
     if result == 2 {
@@ -50,7 +49,15 @@ func isDir(path: String) -> Bool {
     }
 }
 
+func hasCommand(_ name: String) -> Bool {
+    return system("which \(name) > /dev/null 2>&1") == 0
+}
+
 func curl(url: String, output: String, verbose: Bool = false, followRedirect: Bool = true) throws {
+    guard hasCommand("curl") else {
+        throw Error.commandNotFound
+    }
+
     var cmd = ["curl"]
     if !verbose {
         cmd.append("-s")
@@ -61,6 +68,29 @@ func curl(url: String, output: String, verbose: Bool = false, followRedirect: Bo
     cmd.append(url)
     cmd.append(contentsOf: ["-o", output])
     try run(cmd)
+}
+
+func wget(url: String, output: String, verbose: Bool = false) throws {
+    guard hasCommand("wget") else {
+        throw Error.commandNotFound
+    }
+
+    var cmd = ["wget"]
+    if !verbose {
+        cmd.append("-q")
+    }
+    cmd.append(url)
+    cmd.append(contentsOf: ["-O", output])
+    try run(cmd)
+}
+
+func download(url: String, output: String, verbose: Bool = false, followRedirect: Bool = true) throws {
+    do {
+        try curl(url: url, output: output, verbose: verbose, followRedirect: followRedirect)
+    } catch Error.commandNotFound {
+        // curl may not be available
+        try wget(url: url, output: output, verbose: verbose)
+    }
 }
 
 func unpack(archive: String, verbose: Bool = false) throws {
@@ -96,14 +126,14 @@ func downloadURL(repository: String, branch: String = "master") -> String {
     return "https://github.com/qutheory/\(repository)/archive/\(branch).tar.gz"
 }
 
-//func install(source: String, target: String) throws {
-////    S_IWUSR
-//    do {
-//        try run("mv \(from) \(to)")
-//    } catch {
-//        try run("sudo mv \(from) \(to)")
-//    }
-//}
+func install(from: String, to: String) throws {
+    let cmd = ["mv", from, to]
+    do {
+        try run(cmd)
+    } catch {
+        try run(["sudo"] + cmd)
+    }
+}
 
 func bootstrap(repository: String, branch: String, targetDir: String) {
     guard isDir(path: targetDir) else {
@@ -118,7 +148,7 @@ func bootstrap(repository: String, branch: String, targetDir: String) {
     do {
         if !exists(path: archive) {
             print("Downloading \(url) ...")
-            try curl(url: url, output: archive, verbose: true)
+            try download(url: url, output: archive, verbose: true)
         }
     } catch {
         fail("Could not download SPM package")
@@ -138,10 +168,11 @@ func bootstrap(repository: String, branch: String, targetDir: String) {
         fail("Could not build package")
     }
 
+    let target = "\(targetDir)/vapor"
     do {
         print("Installing binary in \(targetDir) ...")
         let binary = "\(unpackedDir)/.build/release/vapor"
-        try run("ls -l \(binary)")
+        try install(from: binary, to: target)
     } catch {
         fail("Could not install binary")
     }
@@ -164,7 +195,7 @@ func bootstrap(repository: String, branch: String, targetDir: String) {
         fail("Could not remove archive '\(archive)'")
     }
 
-    print("Done.")
+    print("Vapor CLI successfully installed in \(target)")
 }
 
 // main
