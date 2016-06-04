@@ -138,16 +138,19 @@ func install(from: String, to: String) throws {
     }
 }
 
+func trimTrailingSlash(path: String) -> String {
+    var p = path
+    if p.characters.last == "/" {
+        p.remove(at: p.index(before: p.endIndex))
+    }
+    return p
+}
+
 func bootstrap(repository: String, branch: String, targetDir: String) {
     guard isDir(path: targetDir) else {
         fail("Install location '\(targetDir)' is not a directory")
     }
-    if targetDir.characters.last == "/" {
-        print("trainling /")
-    } else {
-        print("ok")
-    }
-    return
+    let targetDir = trimTrailingSlash(path: targetDir)
 
     let url = downloadURL(repository: repository, branch: branch)
     let archive = "./tmp.tgz"
