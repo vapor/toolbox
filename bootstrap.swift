@@ -36,7 +36,18 @@ func run(_ parts: [String]) throws {
 }
 
 func exists(path: String) -> Bool {
-    return system("ls \(path) > /dev/null 2>&1") == 0
+    var s = stat()
+    return stat(path, &s) == 0
+}
+
+func isDir(path: String) -> Bool {
+    var s = stat()
+    let res = stat(path, &s)
+    if res != 0 {
+        return false
+    } else {
+        return (s.st_mode & S_IFDIR) != 0
+    }
 }
 
 func curl(url: String, output: String, verbose: Bool = false, followRedirect: Bool = true) throws {
@@ -81,13 +92,24 @@ func build(directory: String) throws {
     try run(cmd)
 }
 
-
 func downloadURL(repository: String, branch: String = "master") -> String {
     return "https://github.com/qutheory/\(repository)/archive/\(branch).tar.gz"
 }
 
+//func install(source: String, target: String) throws {
+////    S_IWUSR
+//    do {
+//        try run("mv \(from) \(to)")
+//    } catch {
+//        try run("sudo mv \(from) \(to)")
+//    }
+//}
 
-func bootstrap(repository: String, branch: String) {
+func bootstrap(repository: String, branch: String, targetDir: String) {
+    guard isDir(path: targetDir) else {
+        fail("Install location '\(targetDir)' is not a directory")
+    }
+
     let url = downloadURL(repository: repository, branch: branch)
     let archive = "./tmp.tgz"
     // this directory name is dermined by how github creates the tar.gz
@@ -116,6 +138,14 @@ func bootstrap(repository: String, branch: String) {
         fail("Could not build package")
     }
 
+    do {
+        print("Installing binary in \(targetDir) ...")
+        let binary = "\(unpackedDir)/.build/release/vapor"
+        try run("ls -l \(binary)")
+    } catch {
+        fail("Could not install binary")
+    }
+
     print("Cleaning up ...")
 
     do {
@@ -133,10 +163,17 @@ func bootstrap(repository: String, branch: String) {
     } catch {
         fail("Could not remove archive '\(archive)'")
     }
-    
+
     print("Done.")
 }
 
 // main
 
-bootstrap(repository: "vapor-cli", branch: "spm")
+let targetDir: String = {
+    if Process.arguments.count > 1 {
+        return Process.arguments[1]
+    } else {
+        return "/usr/local/bin"
+    }
+}()
+bootstrap(repository: "vapor-cli", branch: "spm", targetDir: targetDir)
