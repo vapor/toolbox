@@ -8,7 +8,7 @@
 
 import Foundation
 
-let version = "0.5"
+let version = "0.5.1"
 
 // MARK: Utilities
 
