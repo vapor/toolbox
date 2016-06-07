@@ -15,7 +15,7 @@ let version = "0.5"
 @noreturn func fail(_ message: String) {
     print()
     print("Error: \(message)")
-    print("Note: Make sure you are using Swift 3.0 Preview 1")
+    print("Note: Make sure you are using Swift 3.0 Snapshot 05-31")
     exit(1)
 }
 
@@ -486,6 +486,7 @@ struct Build: Command {
             try run("rm -rf Packages/Vapor-*/Sources/Development")
             try run("rm -rf Packages/Vapor-*/Sources/Performance")
             try run("rm -rf Packages/Vapor-*/Sources/Generator")
+            try run("rm -rf Packages/Socks-*/Sources/*Example*")
         } catch {
             print("Failed to remove extra schemes")
         }
@@ -782,6 +783,7 @@ struct Xcode: Command {
             try run("rm -rf Packages/Vapor-*/Sources/Development")
             try run("rm -rf Packages/Vapor-*/Sources/Performance")
             try run("rm -rf Packages/Vapor-*/Sources/Generator")
+            try run("rm -rf Packages/Socks-*/Sources/*Example*")
         } catch {
             print("Failed to remove extra schemes")
         }
