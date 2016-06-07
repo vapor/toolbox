@@ -486,7 +486,6 @@ struct Build: Command {
             try run("rm -rf Packages/Vapor-*/Sources/Development")
             try run("rm -rf Packages/Vapor-*/Sources/Performance")
             try run("rm -rf Packages/Vapor-*/Sources/Generator")
-            try run("rm -rf Packages/Socks-*/Sources/*Example*")
         } catch {
             print("Failed to remove extra schemes")
         }
@@ -783,7 +782,6 @@ struct Xcode: Command {
             try run("rm -rf Packages/Vapor-*/Sources/Development")
             try run("rm -rf Packages/Vapor-*/Sources/Performance")
             try run("rm -rf Packages/Vapor-*/Sources/Generator")
-            try run("rm -rf Packages/Socks-*/Sources/*Example*")
         } catch {
             print("Failed to remove extra schemes")
         }
