@@ -681,7 +681,7 @@ extension SelfCommands {
             return [
                 "Downloads the latest version of",
                 "the Vapor command line interface",
-                "and compiles it into a bonary."
+                "and compiles it into a binary."
             ]
         }
     }
