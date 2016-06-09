@@ -8,14 +8,14 @@
 
 import Foundation
 
-let version = "0.5"
+let version = "0.5.1"
 
 // MARK: Utilities
 
 @noreturn func fail(_ message: String) {
     print()
     print("Error: \(message)")
-    print("Note: Make sure you are using Swift 3.0 Preview 1")
+    print("Note: Make sure you are using Swift 3.0 Snapshot 05-31")
     exit(1)
 }
 
