@@ -8,7 +8,7 @@
 
 import Foundation
 
-let version = "0.5.2"
+let version = "0.5.3"
 
 // MARK: Utilities
 
@@ -16,7 +16,7 @@ let version = "0.5.2"
     print()
     print("Error: \(message)")
     if !cancelled {
-        print("Note: Make sure you are using Swift 3.0 Snapshot 05-31")
+        print("Note: Make sure you are using Swift 3.0 Snapshot 06-06")
     }
     exit(1)
 }
@@ -484,14 +484,6 @@ struct Build: Command {
             fail("Could not fetch dependencies.")
         }
 
-        do {
-            try run("rm -rf Packages/Vapor-*/Sources/Development")
-            try run("rm -rf Packages/Vapor-*/Sources/Performance")
-            try run("rm -rf Packages/Vapor-*/Sources/Generator")
-        } catch {
-            print("Failed to remove extra schemes")
-        }
-
         var flags = args
         if args.contains("--release") {
             flags = flags.filter { $0 != "--release" }
@@ -791,15 +783,6 @@ struct Xcode: Command {
 
     static func execute(with args: [String], in directory: String) {
         print("Generating Xcode Project...")
-
-        do {
-            try run("swift package fetch")
-            try run("rm -rf Packages/Vapor-*/Sources/Development")
-            try run("rm -rf Packages/Vapor-*/Sources/Performance")
-            try run("rm -rf Packages/Vapor-*/Sources/Generator")
-        } catch {
-            print("Failed to remove extra schemes")
-        }
 
         do {
             try run("swift package generate-xcodeproj")
