@@ -8,14 +8,16 @@
 
 import Foundation
 
-let version = "0.5.1"
+let version = "0.5.2"
 
 // MARK: Utilities
 
-@noreturn func fail(_ message: String) {
+@noreturn func fail(_ message: String, cancelled: Bool = false) {
     print()
     print("Error: \(message)")
-    print("Note: Make sure you are using Swift 3.0 Snapshot 05-31")
+    if !cancelled {
+        print("Note: Make sure you are using Swift 3.0 Snapshot 05-31")
+    }
     exit(1)
 }
 
@@ -477,7 +479,7 @@ struct Build: Command {
         do {
             try run("swift package fetch")
         } catch Error.cancelled {
-            fail("Fetch cancelled")
+            fail("Fetch cancelled", cancelled: true)
         } catch {
             fail("Could not fetch dependencies.")
         }
@@ -499,7 +501,7 @@ struct Build: Command {
             let buildFlags = flags.joined(separator: " ")
             try run("swift build \(buildFlags)")
         } catch Error.cancelled {
-            fail("Build cancelled.")
+            fail("Build cancelled.", cancelled: true)
         } catch {
             print()
             print("Need help getting your project to build?")
@@ -542,7 +544,7 @@ struct Run: Command {
             // TODO: Check that file exists
             try run(".build/\(folder)/\(name) \(passthroughArgs)")
         } catch Error.cancelled {
-            fail("Run cancelled.")
+            fail("Run cancelled.", cancelled: true)
         } catch {
             fail("Could not run project.")
         }
