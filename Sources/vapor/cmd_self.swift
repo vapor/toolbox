@@ -61,6 +61,8 @@ extension SelfCommands {
     }
 }
 
+
+// FIXME: Sven: this command is obsolete in the SPM built version. Keeping it in for the moment to make merges from master easier and will remove once it's clear this will be merged next. The whole install process needs some tweaking for SPM based installs (d/l bootstrap.swift + running it)
 extension SelfCommands {
     struct Compile: Command {
         static let id = "compile"
