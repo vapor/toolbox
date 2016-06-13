@@ -742,6 +742,27 @@ extension SelfCommands {
     }
 }
 
+extension SelfCommands {
+    struct Install: Command {
+        static let id = "install"
+
+        static func execute(with args: [String], in directory: String) {
+            do {
+                try SelfCommands.install(from: pathToSelf ?? "vapor-cli.tmp", to: "/usr/local/bin/vapor")
+            } catch {
+                fail("Could not install to bin")
+            }
+
+            print("Vapor CLI installed.")
+        }
+
+        static var help: [String] {
+            return [
+                "Installs the CLI to the /usr/local/bin"
+            ]
+        }
+    }
+}
 
 struct SelfCommands: Command {
     static let id = "self"
@@ -763,6 +784,7 @@ struct SelfCommands: Command {
     }
 
     static var subCommands: [Command.Type] = [
+        SelfCommands.Install.self,
         SelfCommands.Update.self,
         SelfCommands.Compile.self
     ]
