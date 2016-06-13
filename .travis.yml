@@ -10,6 +10,9 @@ install:
 script:
   - swift build
   - sudo cp .build/debug/vapor /usr/local/bin/vapor
+  # fixing error on Linux:
+  #   mv: try to overwrite ‘/usr/local/bin/vapor’, overriding mode 0755 (rwxr-xr-x)?
+  - sudo chmod ugo+w /usr/local/bin/vapor
 
   - vapor version                   # version
 
@@ -29,8 +32,4 @@ script:
   - vapor run &                     # run
 
   # test update
-  # fixing error on Linux:
-  #   mv: try to overwrite ‘/usr/local/bin/vapor’, overriding mode 0755 (rwxr-xr-x)?
-  - sudo chmod ugo+w /usr/local/bin/vapor
-  
   - vapor self update       # will update to older version

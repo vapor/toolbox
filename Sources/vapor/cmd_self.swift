@@ -1,28 +1,18 @@
 
+#if os(OSX)
+    import Darwin
+#else
+    import Glibc
+#endif
+
+
 extension SelfCommands {
-    struct Install: Command {
-        static let id = "install"
-
-        static func execute(with args: [String], in directory: String) {
-            do {
-                try run("mv \(directory) /usr/local/bin/vapor")
-                print("Vapor CLI installed.")
-            } catch {
-                print("Trying with sudo.")
-                do {
-                    try run("sudo mv \(directory) /usr/local/bin/vapor")
-                    print("Vapor CLI installed.")
-                } catch {
-                    fail("Could not move Vapor CLI to install location.")
-                }
-            }
-        }
-
-        static var help: [String] {
-            return [
-                       "Moves the CLI into the bin so",
-                       "that it is available in the PATH"
-            ]
+    static func install(from: String, to: String) throws {
+        do {
+            try run("chmod +x \(from)")
+            try run("mv \(from) \(to)")
+        } catch {
+            try run("sudo mv \(from) \(to)")
         }
     }
 }
@@ -32,6 +22,10 @@ extension SelfCommands {
         static let id = "update"
 
         static func execute(with args: [String], in directory: String) {
+            guard let target = pathToSelf else {
+                fail("Could not determine path to script.")
+            }
+
             let name = "vapor-cli.tmp"
             let quiet = args.contains("--verbose") ? "" : "-s"
 
@@ -43,17 +37,25 @@ extension SelfCommands {
             }
 
             do {
-                try run("chmod +x \(name)")
-                try run("./\(name) self install")
+                try SelfCommands.install(from: name, to: target)
             } catch {
                 fail("Could not update CLI.")
+            }
+
+            print("Vapor CLI updated.")
+
+            do {
+                try run("\(target) self compile")
+            } catch {
+                fail("Could not compile Vapor CLI.")
             }
         }
 
         static var help: [String] {
             return [
-                       "Downloads the latest version of",
-                       "the Vapor command line interface."
+                "Downloads the latest version of",
+                "the Vapor command line interface",
+                "and compiles it into a binary."
             ]
         }
     }
@@ -64,10 +66,18 @@ extension SelfCommands {
         static let id = "compile"
 
         static func execute(with args: [String], in directory: String) {
-            let source = "vapor-cli.swift"
+            guard let target = pathToSelf else {
+                fail("Could not determine path to script.")
+            }
+            guard !SelfCommands.isCompiled(path: target) else {
+                print("Script is already compiled") // don't use fail as it's not really an error
+                return
+            }
+
+            let tmp = "vapor-cli.swift"
 
             do {
-                try run("cp \(directory) \(source)")
+                try run("cp \(target) \(tmp)")
             } catch {
                 fail("Could not copy source.")
             }
@@ -75,7 +85,7 @@ extension SelfCommands {
             print("Compiling...")
 
             let name = "vapor-cli.tmp"
-            let compile = "swiftc \(source) -o \(name)"
+            let compile = "swiftc \(tmp) -o \(name)"
             #if os(OSX)
                 let cmd = "env SDKROOT=$(xcrun -show-sdk-path -sdk macosx) \(compile)"
             #else
@@ -89,19 +99,13 @@ extension SelfCommands {
             }
 
             do {
-                try run("chmod +x \(name)")
-                try run("mv \(name) \(directory)")
+                try SelfCommands.install(from: name, to: target)
             } catch {
-                print("Trying with sudo...")
-                do {
-                    try run("sudo mv \(name) \(directory)")
-                } catch {
-                    fail("Could not move Vapor CLI to install location.")
-                }
+                fail("Could not install compiled binary at '\(target)'")
             }
 
             do {
-                try run("rm \(source)")
+                try run("rm \(tmp)")
             } catch {
 
             }
@@ -111,8 +115,8 @@ extension SelfCommands {
 
         static var help: [String] {
             return [
-                       "Compiles and caches the CLI",
-                       "to improve performance."
+                "Compiles and caches the CLI",
+                "to improve performance."
             ]
         }
     }
@@ -122,12 +126,27 @@ extension SelfCommands {
 struct SelfCommands: Command {
     static let id = "self"
 
+    static var pathToSelf: String? {
+        if let path = Process.arguments.first {
+            if path == "vapor" {
+                return try? runWithOutput("which vapor").trim()
+            } else {
+                return path
+            }
+        }
+        return nil
+    }
+
+    static func isCompiled(path: String) -> Bool {
+        let cmd = "file \(path) | grep 'text executable' > /dev/null 2>&1"
+        return system(cmd) != 0
+    }
+
     static var subCommands: [Command.Type] = [
-                                                 SelfCommands.Update.self,
-                                                 SelfCommands.Compile.self,
-                                                 SelfCommands.Install.self
+        SelfCommands.Update.self,
+        SelfCommands.Compile.self
     ]
-    
+
     static func execute(with args: [String], in directory: String) {
         executeSubCommand(with: args, in: directory)
     }

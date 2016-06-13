@@ -8,7 +8,7 @@
 
 import Foundation
 
-let version = "0.5"
+let version = "0.5.2"
 
 struct VaporCLI {
     // this closure assignment is necessary to be able to exclude Xcode on Linux
@@ -32,6 +32,8 @@ struct VaporCLI {
 
 var iterator = Process.arguments.makeIterator()
 
+// FIXME: Sven: this is actually the path to the binary, not the directory
+// not sure why this is called directory, perhaps this used to be run through `dirname`?
 guard let directory = iterator.next() else {
     fail("no directory")
 }

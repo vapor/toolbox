@@ -6,10 +6,12 @@
 
 // Utility functions
 
-@noreturn func fail(_ message: String) {
+@noreturn func fail(_ message: String, cancelled: Bool = false) {
     print()
     print("Error: \(message)")
-    print("Note: Make sure you are using Swift 3.0 Preview 1")
+    if !cancelled {
+        print("Note: Make sure you are using Swift 3.0 Snapshot 05-31")
+    }
     exit(1)
 }
 

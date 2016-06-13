@@ -5,7 +5,7 @@ struct Build: Command {
         do {
             try run("swift package fetch")
         } catch Error.cancelled {
-            fail("Fetch cancelled")
+            fail("Fetch cancelled", cancelled: true)
         } catch {
             fail("Could not fetch dependencies.")
         }
@@ -27,7 +27,7 @@ struct Build: Command {
             let buildFlags = flags.joined(separator: " ")
             try run("swift build \(buildFlags)")
         } catch Error.cancelled {
-            fail("Build cancelled.")
+            fail("Build cancelled.", cancelled: true)
         } catch {
             print()
             print("Need help getting your project to build?")

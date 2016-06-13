@@ -16,7 +16,7 @@ struct Run: Command {
             // TODO: Check that file exists
             try run(".build/\(folder)/\(name) \(passthroughArgs)")
         } catch Error.cancelled {
-            fail("Run cancelled.")
+            fail("Run cancelled.", cancelled: true)
         } catch {
             fail("Could not run project.")
         }
