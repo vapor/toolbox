@@ -33,4 +33,5 @@ script:
   - vapor run &                     # run
 
   # test update
-  - vapor update                    # will update to older version
+  # FIXME: enable later - this can only work after cli.qutheory.io starts serving bootstrap.swift
+  #- vapor update                    # will update to older version
