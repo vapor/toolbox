@@ -20,7 +20,7 @@ struct VaporCLI {
         c.append(Build)
         c.append(Run)
         c.append(New)
-        c.append(SelfCommands)
+        c.append(Update)
         #if os(OSX)
             c.append(Xcode)
         #endif
