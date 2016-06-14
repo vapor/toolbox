@@ -146,12 +146,7 @@ func trimTrailingSlash(path: String) -> String {
     return p
 }
 
-func bootstrap(repository: String, branch: String, targetDir: String) {
-    guard isDir(path: targetDir) else {
-        fail("Install location '\(targetDir)' is not a directory")
-    }
-    let targetDir = trimTrailingSlash(path: targetDir)
-
+func bootstrap(repository: String, branch: String, path: String) {
     let url = downloadURL(repository: repository, branch: branch)
     let archive = "./tmp.tgz"
     // this directory name is dermined by how github creates the tar.gz
@@ -179,12 +174,15 @@ func bootstrap(repository: String, branch: String, targetDir: String) {
         fail("Could not build package")
     }
 
-    let target = "\(targetDir)/vapor"
+    let target = isDir(path: path)
+    ? (trimTrailingSlash(path: path) + "/vapor")
+    : path
+
     do {
         let binary = "\(unpackedDir)/.build/release/vapor"
         try install(from: binary, to: target)
     } catch {
-        fail("Could not install binary in \(targetDir)")
+        fail("Could not install binary as \(path)")
     }
 
     do { // remove build directory
@@ -208,12 +206,13 @@ func bootstrap(repository: String, branch: String, targetDir: String) {
 
 // main
 
-let targetDir: String = {
+let path: String = {
     if Process.arguments.count > 1 {
         return Process.arguments[1]
     } else {
-        return "/usr/local/bin"
+        return "/usr/local/bin/vapor"
     }
 }()
 
-bootstrap(repository: "vapor-cli", branch: "spm", targetDir: targetDir)
+// FIXME: switch to master before merge
+bootstrap(repository: "vapor-cli", branch: "spm", path: path)
