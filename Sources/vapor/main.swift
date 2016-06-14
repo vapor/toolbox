@@ -8,7 +8,7 @@
 
 import Foundation
 
-let version = "0.5.3"
+let version = "0.6.0"
 
 struct VaporCLI {
     // this closure assignment is necessary to be able to exclude Xcode on Linux
