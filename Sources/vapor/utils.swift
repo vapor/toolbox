@@ -10,7 +10,7 @@
     print()
     print("Error: \(message)")
     if !cancelled {
-        print("Note: Make sure you are using Swift 3.0 Snapshot 05-31")
+        print("Note: Make sure you are using Swift 3.0 Snapshot 06-06")
     }
     exit(1)
 }

@@ -8,15 +8,6 @@
             print("Generating Xcode Project...")
 
             do {
-                try run("swift package fetch")
-                try run("rm -rf Packages/Vapor-*/Sources/Development")
-                try run("rm -rf Packages/Vapor-*/Sources/Performance")
-                try run("rm -rf Packages/Vapor-*/Sources/Generator")
-            } catch {
-                print("Failed to remove extra schemes")
-            }
-
-            do {
                 try run("swift package generate-xcodeproj")
             } catch {
                 fail("Could not generate Xcode Project.")

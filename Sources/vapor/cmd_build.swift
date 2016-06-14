@@ -10,14 +10,6 @@ struct Build: Command {
             fail("Could not fetch dependencies.")
         }
 
-        do {
-            try run("rm -rf Packages/Vapor-*/Sources/Development")
-            try run("rm -rf Packages/Vapor-*/Sources/Performance")
-            try run("rm -rf Packages/Vapor-*/Sources/Generator")
-        } catch {
-            print("Failed to remove extra schemes")
-        }
-
         var flags = args
         if args.contains("--release") {
             flags = flags.filter { $0 != "--release" }
