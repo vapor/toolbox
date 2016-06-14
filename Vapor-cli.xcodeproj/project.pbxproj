@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		5A501E0C1D01AAC700A3BEFF /* cmd_version.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A501E0B1D01AAC700A3BEFF /* cmd_version.swift */; };
+		5A92353D1D10592700D08E6C /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 5A92353C1D10592700D08E6C /* README.md */; };
 		__src_cc_ref_Sources/vapor/array_ext.swift /* array_ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/vapor/array_ext.swift /* array_ext.swift */; };
 		__src_cc_ref_Sources/vapor/cmd_build.swift /* cmd_build.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/vapor/cmd_build.swift /* cmd_build.swift */; };
 		__src_cc_ref_Sources/vapor/cmd_clean.swift /* cmd_clean.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/vapor/cmd_clean.swift /* cmd_clean.swift */; };
@@ -28,6 +29,9 @@
 /* Begin PBXFileReference section */
 		5A501E0B1D01AAC700A3BEFF /* cmd_version.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = cmd_version.swift; sourceTree = "<group>"; };
 		5A501E0D1D01E22C00A3BEFF /* bootstrap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = bootstrap.swift; sourceTree = "<group>"; };
+		5A92353A1D1058B900D08E6C /* .travis.yml */ = {isa = PBXFileReference; lastKnownFileType = text; path = .travis.yml; sourceTree = "<group>"; };
+		5A92353B1D10592000D08E6C /* Dockerfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Dockerfile; sourceTree = "<group>"; };
+		5A92353C1D10592700D08E6C /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		__PBXFileRef_Package.swift /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Sources/vapor/array_ext.swift /* array_ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = array_ext.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Sources/vapor/cmd_build.swift /* cmd_build.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = cmd_build.swift; sourceTree = "<group>"; };
@@ -62,6 +66,9 @@
 		"___RootGroup_" = {
 			isa = PBXGroup;
 			children = (
+				5A92353A1D1058B900D08E6C /* .travis.yml */,
+				5A92353B1D10592000D08E6C /* Dockerfile */,
+				5A92353C1D10592700D08E6C /* README.md */,
 				5A501E0D1D01E22C00A3BEFF /* bootstrap.swift */,
 				__PBXFileRef_Package.swift /* Package.swift */,
 				"_____Configs_" /* Configs */,
@@ -178,6 +185,7 @@
 				__src_cc_ref_Sources/vapor/cmd_run.swift /* cmd_run.swift in Sources */,
 				__src_cc_ref_Sources/vapor/cmd_self.swift /* cmd_self.swift in Sources */,
 				__src_cc_ref_Sources/vapor/cmd_xcode.swift /* cmd_xcode.swift in Sources */,
+				5A92353D1D10592700D08E6C /* README.md in Sources */,
 				__src_cc_ref_Sources/vapor/command.swift /* command.swift in Sources */,
 				__src_cc_ref_Sources/vapor/main.swift /* main.swift in Sources */,
 				__src_cc_ref_Sources/vapor/sequence_ext.swift /* sequence_ext.swift in Sources */,
