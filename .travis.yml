@@ -10,14 +10,10 @@ install:
 script:
   # the first two steps are equivalent to the user installation instructions
   # here: https://vapor.readme.io/docs/install-cli
-  - chmod +x vapor.swift
-  - sudo cp ./vapor.swift /usr/local/bin/vapor
-  
+  - swift bootstrap.swift /usr/local/bin/vapor
   # fixing error on Linux:
   #   mv: try to overwrite ‘/usr/local/bin/vapor’, overriding mode 0755 (rwxr-xr-x)?
   - sudo chmod ugo+w /usr/local/bin/vapor
-  
-  - vapor self compile              # compile
 
   - vapor version                   # version
 
@@ -37,5 +33,5 @@ script:
   - vapor run &                     # run
 
   # test update
-  - vapor self update       # will update to older version
-  
+  # FIXME: enable later - this can only work after cli.qutheory.io starts serving bootstrap.swift
+  #- vapor update                    # will update to older version
