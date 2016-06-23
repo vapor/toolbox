@@ -1,5 +1,5 @@
 
-protocol Command {
+public protocol Command {
     static var id: String { get }
     static var help: [String] { get }
 
@@ -8,13 +8,13 @@ protocol Command {
     static func execute(with args: [String], in directory: String)
 }
 
-extension Command {
+public extension Command {
     static var dependencies: [String] { return [] }
     static var help: [String] { return [] }
 }
 
 // sub command related methods
-extension Command {
+public extension Command {
     static var subCommands: [Command.Type] { return [] }
 
     static func executeSubCommand(with args: [String], in directory: String) {
@@ -30,7 +30,7 @@ extension Command {
     }
 }
 
-extension Command {
+public extension Command {
     static var description: String {
         // Sub Commands
         let subCommandRows: [String] = subCommands.map { subCommand in
@@ -67,7 +67,7 @@ extension Command {
     }
 }
 
-extension Command {
+public extension Command {
     static func assertDependenciesSatisfied() {
         for dependency in dependencies where !commandExists(dependency) {
             fail("\(id) requires \(dependency)")

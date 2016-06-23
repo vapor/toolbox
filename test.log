@@ -1,0 +1,30 @@
+Thu 23 Jun 2016 15:54:21 BST
+Darwin Rhea.local 15.5.0 Darwin Kernel Version 15.5.0: Tue Apr 19 18:36:36 PDT 2016; root:xnu-3248.50.21~8/RELEASE_X86_64 x86_64
+Compile Swift Module 'vaporTestSuite' (1 sources)
+Linking .build/debug/Vapor-cliTests.xctest/Contents/MacOS/Vapor-cliTests
+Test Suite 'All tests' started at 2016-06-23 15:54:31.096
+Test Suite 'vapor-cliTests.xctest' started at 2016-06-23 15:54:31.097
+Test Suite 'ArrayExtTests' started at 2016-06-23 15:54:31.098
+Test Case '-[vaporTestSuite.ArrayExtTests testRemove]' started.
+Test Case '-[vaporTestSuite.ArrayExtTests testRemove]' passed (0.001 seconds).
+Test Suite 'ArrayExtTests' passed at 2016-06-23 15:54:31.099.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'vapor-cliTests.xctest' passed at 2016-06-23 15:54:31.099.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'All tests' passed at 2016-06-23 15:54:31.099.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.001 (0.003) seconds
+Thu Jun 23 14:54:31 UTC 2016
+Linux 2b8ad77119a5 4.4.13-moby #1 SMP Fri Jun 17 22:06:24 UTC 2016 x86_64 x86_64 x86_64 GNU/Linux
+Compile Swift Module 'vaporTestSuite' (1 sources)
+Linking .build/debug/Vapor-cliTests.xctest
+Test Suite 'All tests' started at 14:54:40.414
+Test Suite 'debug.xctest' started at 14:54:40.431
+Test Suite 'ArrayExtTests' started at 14:54:40.432
+Test Case 'ArrayExtTests.testRemove' started at 14:54:40.432
+Test Case 'ArrayExtTests.testRemove' passed (0.0 seconds).
+Test Suite 'ArrayExtTests' passed at 14:54:40.432
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.0 (0.0) seconds
+Test Suite 'debug.xctest' passed at 14:54:40.432
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.0 (0.0) seconds
+Test Suite 'All tests' passed at 14:54:40.432
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.0 (0.0) seconds

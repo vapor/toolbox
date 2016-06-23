@@ -1,3 +1,4 @@
+import Foundation
 
 struct Docker: Command {
     static let id = "docker"

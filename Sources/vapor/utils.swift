@@ -6,7 +6,7 @@
 
 // Utility functions
 
-@noreturn func fail(_ message: String, cancelled: Bool = false) {
+@noreturn public func fail(_ message: String, cancelled: Bool = false) {
     print()
     print("Error: \(message)")
     if !cancelled {
@@ -179,7 +179,7 @@ let asciiArt: [String] = [
      " "
 ]
 
-func getCommand(id: String, commands: [Command.Type]) -> Command.Type? {
+public func getCommand(id: String, commands: [Command.Type]) -> Command.Type? {
     return commands
         .lazy
         .filter { $0.id == id }
