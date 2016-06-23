@@ -1,5 +1,5 @@
 import XCTest
-@testable import vaporTestSuite
+@testable import VaporCLITestSuite
 
 XCTMain([
      testCase(ArrayExtTests.allTests),
