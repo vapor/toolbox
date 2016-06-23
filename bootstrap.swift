@@ -214,5 +214,4 @@ let path: String = {
     }
 }()
 
-// FIXME: switch to master before merge
-bootstrap(repository: "vapor-cli", branch: "spm", path: path)
+bootstrap(repository: "vapor-cli", branch: "master", path: path)
