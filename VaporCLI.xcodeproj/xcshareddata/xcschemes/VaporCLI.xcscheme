@@ -8,7 +8,16 @@
           BlueprintIdentifier = "______Target_vapor"
           BuildableName = "vapor"
           BlueprintName = "vapor"
-          ReferencedContainer = "container:Vapor-cli.xcodeproj">
+          ReferencedContainer = "container:VaporCLI.xcodeproj">
+        </BuildableReference>
+      </BuildActionEntry>
+      <BuildActionEntry buildForTesting = "YES" buildForRunning = "YES" buildForProfiling = "YES" buildForArchiving = "YES" buildForAnalyzing = "YES">
+        <BuildableReference
+          BuildableIdentifier = "primary"
+          BlueprintIdentifier = "______Target_VaporCLI"
+          BuildableName = "VaporCLI.framework"
+          BlueprintName = "VaporCLI"
+          ReferencedContainer = "container:VaporCLI.xcodeproj">
         </BuildableReference>
       </BuildActionEntry>
     </BuildActionEntries>
@@ -19,6 +28,16 @@
     selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
     shouldUseLaunchSchemeArgsEnv = "YES">
     <Testables>
+    <TestableReference
+      skipped = "NO">
+      <BuildableReference
+        BuildableIdentifier = "primary"
+        BlueprintIdentifier = "______Target_VaporCLITestSuite"
+        BuildableName = "VaporCLITestSuite.xctest"
+        BlueprintName = "VaporCLITestSuite"
+        ReferencedContainer = "container:VaporCLI.xcodeproj">
+      </BuildableReference>
+    </TestableReference>
     </Testables>
   </TestAction>
 </Scheme>
