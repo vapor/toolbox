@@ -9,7 +9,7 @@ set -euo pipefail
 function build_and_test() {
     date 2>&1 | tee -a $LOGFILE
     uname -a 2>&1 | tee -a $LOGFILE
-    swift build --clean && swift build && swift test 2>&1 | tee -a $LOGFILE
+    rm -rf .build && swift build --clean && swift build && swift test 2>&1 | tee -a $LOGFILE
 }
 
 if [ ! -f /.dockerenv ]; then

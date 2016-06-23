@@ -1,5 +1,5 @@
 import XCTest
-@testable import vapor
+@testable import VaporCLI
 
 class ArrayExtTests: XCTestCase {
     // required by LinuxMain.swift

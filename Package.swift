@@ -1,10 +1,10 @@
 import PackageDescription
 
 let package = Package(
-    name: "Vapor-cli",
+    name: "VaporCLI",
     exclude: ["bootstrap.swift"],
     targets: [
-        Target(name: "vapor"),
-        Target(name: "vapor-main", dependencies: [ .Target(name: "vapor") ])
+        Target(name: "VaporCLI"),
+        Target(name: "vapor", dependencies: [ .Target(name: "VaporCLI") ])
     ]
 )

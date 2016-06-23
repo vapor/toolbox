@@ -7,7 +7,7 @@
 #endif
 
 import Foundation
-import vapor
+import VaporCLI
 
 var iterator = Process.arguments.makeIterator()
 
@@ -17,7 +17,7 @@ guard let directory = iterator.next() else {
     fail("no directory")
 }
 guard let commandId = iterator.next() else {
-    // print("Usage: \(directory) [\(VaporCLI.commands.map({ $0.id }).joined(separator: "|"))]")
+    print("Usage: \(directory) [\(VaporCLI.commands.map({ $0.id }).joined(separator: "|"))]")
     fail("no command")
 }
 guard let command = getCommand(id: commandId, commands: VaporCLI.commands) else {
