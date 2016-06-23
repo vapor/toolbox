@@ -19,7 +19,7 @@ struct Update: Command {
 
         do {
             print("Downloading...")
-            try run("curl -L \(quiet) cli.qutheory.io -o \(name)")
+            try run("curl -L \(quiet) vapor-cli.qutheory.io -o \(name)")
         } catch {
             fail("Could not download Vapor CLI.")
         }
