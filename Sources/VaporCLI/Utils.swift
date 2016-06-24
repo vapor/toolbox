@@ -1,8 +1,4 @@
-#if os(OSX)
-    import Darwin
-#else
-    import Glibc
-#endif
+import Libc
 
 protocol PosixSubsystem {
     func system(_ command: String) -> Int32
@@ -10,7 +6,7 @@ protocol PosixSubsystem {
 
 public struct Shell: PosixSubsystem {
     public func system(_ command: String) -> Int32 {
-        return system(command)
+        return Libc.system(command)
     }
 }
 

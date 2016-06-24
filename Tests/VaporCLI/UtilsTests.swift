@@ -11,11 +11,16 @@ import XCTest
 
 
 struct TestShell: PosixSubsystem {
-    let execute: (String) -> ()
+    let onExecute: (String) -> ()
+    var result: Int32 = 0
+
+    init(onExecute: (String) -> () = {_ in }) {
+        self.onExecute = onExecute
+    }
 
     func system(_ command: String) -> Int32 {
-        self.execute(command)
-        return 0
+        self.onExecute(command)
+        return self.result
     }
 }
 
@@ -26,18 +31,49 @@ class UtilsTests: XCTestCase {
     static var allTests: [(String, (UtilsTests) -> () throws -> Void)] {
         return [
             ("test_getCommand", test_getCommand),
+            ("test_ShellCommand_run", test_ShellCommand_run),
+            ("test_ShellCommand_run_cancelled", test_ShellCommand_run_cancelled),
+            ("test_ShellCommand_run_error", test_ShellCommand_run_error),
         ]
     }
 
-    // FIXME: most functions in Utils.swift are currently very hard or impossible to test
-    func test_ShellCommand() {
+    func test_ShellCommand_run() {
         var executed = [String]()
-        let shell = TestShell(execute: { command in
-            executed.append(command)
-        })
-        let res = try? "ls -l".run(runner: shell)
-        XCTAssertEqual(res, 0)
-        XCTAssertEqual(executed, ["ls -l"])
+        let shell = TestShell(onExecute: { cmd in executed.append(cmd) })
+        do {
+            try ShellCommand("ls -l").run(runner: shell)
+            // don't even need to wrap the String as it's typealised to ShellCommand:
+            try "ls -la".run(runner: shell)
+            XCTAssertEqual(executed, ["ls -l", "ls -la"])
+        } catch {
+            XCTFail()
+        }
+    }
+
+    func test_ShellCommand_run_cancelled() {
+        var shell = TestShell()
+        shell.result = 2
+        do {
+            try "foo".run(runner: shell)
+            XCTFail()
+        } catch Error.cancelled {
+            // ok
+        } catch {
+            XCTFail()
+        }
+    }
+
+    func test_ShellCommand_run_error() {
+        var shell = TestShell()
+        shell.result = 1
+        do {
+            try "foo".run(runner: shell)
+            XCTFail()
+        } catch Error.system(let res) {
+            XCTAssertEqual(res, 1)
+        } catch {
+            XCTFail()
+        }
     }
 
     func test_getCommand() {

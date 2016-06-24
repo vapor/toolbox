@@ -7,85 +7,101 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5AF492641D1D264D00AEC1B0 /* CmdDockerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AF492631D1D264D00AEC1B0 /* CmdDockerTests.swift */; };
-		5AF492681D1D40B000AEC1B0 /* SequenceExtTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AF492671D1D40B000AEC1B0 /* SequenceExtTests.swift */; };
-		5AF4926A1D1D58AE00AEC1B0 /* StringExtTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AF492691D1D58AE00AEC1B0 /* StringExtTests.swift */; };
-		5AF4926C1D1D659100AEC1B0 /* UtilsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AF4926B1D1D659100AEC1B0 /* UtilsTests.swift */; };
+		_LinkFileRef_Libc_via_VaporCLI /* Libc.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_Libc" /* Libc.framework */; };
+		_LinkFileRef_Libc_via_VaporCLITestSuite /* Libc.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_Libc" /* Libc.framework */; };
+		_LinkFileRef_Libc_via_vapor /* Libc.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_Libc" /* Libc.framework */; };
 		_LinkFileRef_VaporCLI_via_VaporCLITestSuite /* VaporCLI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_VaporCLI" /* VaporCLI.framework */; };
 		_LinkFileRef_VaporCLI_via_vapor /* VaporCLI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_VaporCLI" /* VaporCLI.framework */; };
+		__src_cc_ref_Sources/Libc/libc.swift /* libc.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/Libc/libc.swift /* libc.swift */; };
+		"__src_cc_ref_Sources/VaporCLI/Array+ext.swift" /* Array+ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Sources/VaporCLI/Array+ext.swift" /* Array+ext.swift */; };
+		__src_cc_ref_Sources/VaporCLI/Build.swift /* Build.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/Build.swift /* Build.swift */; };
+		__src_cc_ref_Sources/VaporCLI/Clean.swift /* Clean.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/Clean.swift /* Clean.swift */; };
 		__src_cc_ref_Sources/VaporCLI/Command.swift /* Command.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/Command.swift /* Command.swift */; };
+		__src_cc_ref_Sources/VaporCLI/Docker.swift /* Docker.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/Docker.swift /* Docker.swift */; };
+		__src_cc_ref_Sources/VaporCLI/Help.swift /* Help.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/Help.swift /* Help.swift */; };
+		__src_cc_ref_Sources/VaporCLI/Heroku.swift /* Heroku.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/Heroku.swift /* Heroku.swift */; };
+		__src_cc_ref_Sources/VaporCLI/New.swift /* New.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/New.swift /* New.swift */; };
+		__src_cc_ref_Sources/VaporCLI/Run.swift /* Run.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/Run.swift /* Run.swift */; };
+		"__src_cc_ref_Sources/VaporCLI/Sequence+ext.swift" /* Sequence+ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Sources/VaporCLI/Sequence+ext.swift" /* Sequence+ext.swift */; };
+		"__src_cc_ref_Sources/VaporCLI/String+ext.swift" /* String+ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Sources/VaporCLI/String+ext.swift" /* String+ext.swift */; };
+		__src_cc_ref_Sources/VaporCLI/Update.swift /* Update.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/Update.swift /* Update.swift */; };
+		__src_cc_ref_Sources/VaporCLI/Utils.swift /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/Utils.swift /* Utils.swift */; };
 		__src_cc_ref_Sources/VaporCLI/VaporCLI.swift /* VaporCLI.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/VaporCLI.swift /* VaporCLI.swift */; };
-		__src_cc_ref_Sources/VaporCLI/array_ext.swift /* Array+ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/array_ext.swift /* Array+ext.swift */; };
-		__src_cc_ref_Sources/VaporCLI/cmd_build.swift /* Build.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_build.swift /* Build.swift */; };
-		__src_cc_ref_Sources/VaporCLI/cmd_clean.swift /* Clean.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_clean.swift /* Clean.swift */; };
-		__src_cc_ref_Sources/VaporCLI/cmd_docker.swift /* Docker.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_docker.swift /* Docker.swift */; };
-		__src_cc_ref_Sources/VaporCLI/cmd_help.swift /* Help.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_help.swift /* Help.swift */; };
-		__src_cc_ref_Sources/VaporCLI/cmd_heroku.swift /* Heroku.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_heroku.swift /* Heroku.swift */; };
-		__src_cc_ref_Sources/VaporCLI/cmd_new.swift /* New.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_new.swift /* New.swift */; };
-		__src_cc_ref_Sources/VaporCLI/cmd_run.swift /* Run.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_run.swift /* Run.swift */; };
-		__src_cc_ref_Sources/VaporCLI/cmd_update.swift /* Update.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_update.swift /* Update.swift */; };
-		__src_cc_ref_Sources/VaporCLI/cmd_version.swift /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_version.swift /* Version.swift */; };
-		__src_cc_ref_Sources/VaporCLI/cmd_xcode.swift /* Xcode.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_xcode.swift /* Xcode.swift */; };
-		__src_cc_ref_Sources/VaporCLI/sequence_ext.swift /* Sequence+ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/sequence_ext.swift /* Sequence+ext.swift */; };
-		__src_cc_ref_Sources/VaporCLI/string_ext.swift /* String+ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/string_ext.swift /* String+ext.swift */; };
-		__src_cc_ref_Sources/VaporCLI/utils.swift /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/utils.swift /* Utils.swift */; };
+		__src_cc_ref_Sources/VaporCLI/Version.swift /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/Version.swift /* Version.swift */; };
+		__src_cc_ref_Sources/VaporCLI/Xcode.swift /* Xcode.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/Xcode.swift /* Xcode.swift */; };
 		__src_cc_ref_Sources/vapor/main.swift /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/vapor/main.swift /* main.swift */; };
 		__src_cc_ref_Tests/VaporCLI/ArrayExtTests.swift /* ArrayExtTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Tests/VaporCLI/ArrayExtTests.swift /* ArrayExtTests.swift */; };
+		__src_cc_ref_Tests/VaporCLI/CmdDockerTests.swift /* CmdDockerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Tests/VaporCLI/CmdDockerTests.swift /* CmdDockerTests.swift */; };
+		__src_cc_ref_Tests/VaporCLI/SequenceExtTests.swift /* SequenceExtTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Tests/VaporCLI/SequenceExtTests.swift /* SequenceExtTests.swift */; };
+		__src_cc_ref_Tests/VaporCLI/StringExtTests.swift /* StringExtTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Tests/VaporCLI/StringExtTests.swift /* StringExtTests.swift */; };
+		__src_cc_ref_Tests/VaporCLI/UtilsTests.swift /* UtilsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Tests/VaporCLI/UtilsTests.swift /* UtilsTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		5AE156781D1C3B750080C50D /* PBXContainerItemProxy */ = {
+		5AF492731D1D93A000AEC1B0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = __RootObject_ /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "______Target_VaporCLI";
 			remoteInfo = VaporCLI;
 		};
+		5AF492741D1D93A000AEC1B0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = __RootObject_ /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = "______Target_Libc";
+			remoteInfo = Libc;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		5AE156791D1C3BC00080C50D /* .travis.yml */ = {isa = PBXFileReference; lastKnownFileType = text; path = .travis.yml; sourceTree = "<group>"; };
-		5AE1567A1D1C3BC90080C50D /* Dockerfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Dockerfile; sourceTree = "<group>"; };
-		5AE1567B1D1C3BD80080C50D /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		5AE1567C1D1C3BE30080C50D /* bootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = bootstrap.swift; sourceTree = "<group>"; };
-		5AF492631D1D264D00AEC1B0 /* CmdDockerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CmdDockerTests.swift; sourceTree = "<group>"; };
-		5AF492651D1D2CB600AEC1B0 /* LinuxMain.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = LinuxMain.swift; path = Tests/LinuxMain.swift; sourceTree = "<group>"; };
-		5AF492671D1D40B000AEC1B0 /* SequenceExtTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SequenceExtTests.swift; sourceTree = "<group>"; };
-		5AF492691D1D58AE00AEC1B0 /* StringExtTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringExtTests.swift; sourceTree = "<group>"; };
-		5AF4926B1D1D659100AEC1B0 /* UtilsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UtilsTests.swift; sourceTree = "<group>"; };
-		5AF4926D1D1D7A6000AEC1B0 /* test */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = test; sourceTree = "<group>"; };
+		__PBXFileRef_Libc_Info.plist /* Libc_Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Libc_Info.plist; path = VaporCLI.xcodeproj/Libc_Info.plist; sourceTree = SOURCE_ROOT; };
 		__PBXFileRef_Package.swift /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/Libc/libc.swift /* libc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = libc.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Sources/VaporCLI/Array+ext.swift" /* Array+ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+ext.swift"; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/VaporCLI/Build.swift /* Build.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Build.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/VaporCLI/Clean.swift /* Clean.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clean.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Sources/VaporCLI/Command.swift /* Command.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Command.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/VaporCLI/Docker.swift /* Docker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Docker.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/VaporCLI/Help.swift /* Help.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Help.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/VaporCLI/Heroku.swift /* Heroku.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Heroku.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/VaporCLI/New.swift /* New.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = New.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/VaporCLI/Run.swift /* Run.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Run.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Sources/VaporCLI/Sequence+ext.swift" /* Sequence+ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sequence+ext.swift"; sourceTree = "<group>"; };
+		"__PBXFileRef_Sources/VaporCLI/String+ext.swift" /* String+ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+ext.swift"; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/VaporCLI/Update.swift /* Update.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Update.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/VaporCLI/Utils.swift /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Sources/VaporCLI/VaporCLI.swift /* VaporCLI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaporCLI.swift; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/VaporCLI/array_ext.swift /* Array+ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+ext.swift"; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/VaporCLI/cmd_build.swift /* Build.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Build.swift; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/VaporCLI/cmd_clean.swift /* Clean.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clean.swift; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/VaporCLI/cmd_docker.swift /* Docker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Docker.swift; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/VaporCLI/cmd_help.swift /* Help.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Help.swift; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/VaporCLI/cmd_heroku.swift /* Heroku.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Heroku.swift; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/VaporCLI/cmd_new.swift /* New.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = New.swift; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/VaporCLI/cmd_run.swift /* Run.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Run.swift; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/VaporCLI/cmd_update.swift /* Update.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Update.swift; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/VaporCLI/cmd_version.swift /* Version.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Version.swift; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/VaporCLI/cmd_xcode.swift /* Xcode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Xcode.swift; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/VaporCLI/sequence_ext.swift /* Sequence+ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sequence+ext.swift"; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/VaporCLI/string_ext.swift /* String+ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+ext.swift"; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/VaporCLI/utils.swift /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/VaporCLI/Version.swift /* Version.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Version.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/VaporCLI/Xcode.swift /* Xcode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Xcode.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Sources/vapor/main.swift /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Tests/VaporCLI/ArrayExtTests.swift /* ArrayExtTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayExtTests.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Tests/VaporCLI/CmdDockerTests.swift /* CmdDockerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CmdDockerTests.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Tests/VaporCLI/SequenceExtTests.swift /* SequenceExtTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SequenceExtTests.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Tests/VaporCLI/StringExtTests.swift /* StringExtTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtTests.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Tests/VaporCLI/UtilsTests.swift /* UtilsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UtilsTests.swift; sourceTree = "<group>"; };
 		__PBXFileRef_VaporCLI.xcodeproj/Configs/Project.xcconfig /* Project.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Project.xcconfig; path = VaporCLI.xcodeproj/Configs/Project.xcconfig; sourceTree = "<group>"; };
 		__PBXFileRef_VaporCLITestSuite_Info.plist /* VaporCLITestSuite_Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = VaporCLITestSuite_Info.plist; path = VaporCLI.xcodeproj/VaporCLITestSuite_Info.plist; sourceTree = SOURCE_ROOT; };
 		__PBXFileRef_VaporCLI_Info.plist /* VaporCLI_Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = VaporCLI_Info.plist; path = VaporCLI.xcodeproj/VaporCLI_Info.plist; sourceTree = SOURCE_ROOT; };
+		"_____Product_Libc" /* Libc.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Libc.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"_____Product_VaporCLI" /* VaporCLI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VaporCLI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"_____Product_VaporCLITestSuite" /* VaporCLITestSuite.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = VaporCLITestSuite.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		"_____Product_vapor" /* vapor */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; path = vapor; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		"___LinkPhase_Libc" /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		"___LinkPhase_VaporCLI" /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
 			files = (
+				_LinkFileRef_Libc_via_VaporCLI /* Libc.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -94,6 +110,7 @@
 			buildActionMask = 0;
 			files = (
 				_LinkFileRef_VaporCLI_via_VaporCLITestSuite /* VaporCLI.framework in Frameworks */,
+				_LinkFileRef_Libc_via_VaporCLITestSuite /* Libc.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -102,23 +119,13 @@
 			buildActionMask = 0;
 			files = (
 				_LinkFileRef_VaporCLI_via_vapor /* VaporCLI.framework in Frameworks */,
+				_LinkFileRef_Libc_via_vapor /* Libc.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		5AE1567D1D1C3BF30080C50D /* Misc */ = {
-			isa = PBXGroup;
-			children = (
-				5AE156791D1C3BC00080C50D /* .travis.yml */,
-				5AE1567A1D1C3BC90080C50D /* Dockerfile */,
-				5AE1567B1D1C3BD80080C50D /* README.md */,
-				5AF4926D1D1D7A6000AEC1B0 /* test */,
-			);
-			name = Misc;
-			sourceTree = "<group>";
-		};
 		TestProducts_ /* Tests */ = {
 			isa = PBXGroup;
 			children = (
@@ -130,8 +137,6 @@
 		"___RootGroup_" = {
 			isa = PBXGroup;
 			children = (
-				5AE1567D1D1C3BF30080C50D /* Misc */,
-				5AE1567C1D1C3BE30080C50D /* bootstrap.swift */,
 				__PBXFileRef_Package.swift /* Package.swift */,
 				"_____Configs_" /* Configs */,
 				"_____Sources_" /* Sources */,
@@ -144,6 +149,7 @@
 			isa = PBXGroup;
 			children = (
 				TestProducts_ /* Tests */,
+				"_____Product_Libc" /* Libc.framework */,
 				"_____Product_vapor" /* vapor */,
 				"_____Product_VaporCLI" /* VaporCLI.framework */,
 			);
@@ -161,32 +167,43 @@
 		"_____Sources_" /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				"_______Group_Libc" /* Libc */,
 				"_______Group_vapor" /* vapor */,
 				"_______Group_VaporCLI" /* VaporCLI */,
 			);
 			name = Sources;
 			sourceTree = "<group>";
 		};
+		"_______Group_Libc" /* Libc */ = {
+			isa = PBXGroup;
+			children = (
+				__PBXFileRef_Sources/Libc/libc.swift /* libc.swift */,
+				__PBXFileRef_Libc_Info.plist /* Libc_Info.plist */,
+			);
+			name = Libc;
+			path = Sources/Libc;
+			sourceTree = "<group>";
+		};
 		"_______Group_VaporCLI" /* VaporCLI */ = {
 			isa = PBXGroup;
 			children = (
-				__PBXFileRef_Sources/VaporCLI/array_ext.swift /* Array+ext.swift */,
-				__PBXFileRef_Sources/VaporCLI/cmd_build.swift /* Build.swift */,
-				__PBXFileRef_Sources/VaporCLI/cmd_clean.swift /* Clean.swift */,
+				"__PBXFileRef_Sources/VaporCLI/Array+ext.swift" /* Array+ext.swift */,
+				__PBXFileRef_Sources/VaporCLI/Build.swift /* Build.swift */,
+				__PBXFileRef_Sources/VaporCLI/Clean.swift /* Clean.swift */,
 				__PBXFileRef_Sources/VaporCLI/Command.swift /* Command.swift */,
-				__PBXFileRef_Sources/VaporCLI/cmd_docker.swift /* Docker.swift */,
-				__PBXFileRef_Sources/VaporCLI/cmd_help.swift /* Help.swift */,
-				__PBXFileRef_Sources/VaporCLI/cmd_heroku.swift /* Heroku.swift */,
-				__PBXFileRef_Sources/VaporCLI/cmd_new.swift /* New.swift */,
-				__PBXFileRef_Sources/VaporCLI/cmd_run.swift /* Run.swift */,
-				__PBXFileRef_Sources/VaporCLI/sequence_ext.swift /* Sequence+ext.swift */,
-				__PBXFileRef_Sources/VaporCLI/string_ext.swift /* String+ext.swift */,
-				__PBXFileRef_Sources/VaporCLI/cmd_update.swift /* Update.swift */,
-				__PBXFileRef_Sources/VaporCLI/utils.swift /* Utils.swift */,
-				__PBXFileRef_VaporCLI_Info.plist /* VaporCLI_Info.plist */,
+				__PBXFileRef_Sources/VaporCLI/Docker.swift /* Docker.swift */,
+				__PBXFileRef_Sources/VaporCLI/Help.swift /* Help.swift */,
+				__PBXFileRef_Sources/VaporCLI/Heroku.swift /* Heroku.swift */,
+				__PBXFileRef_Sources/VaporCLI/New.swift /* New.swift */,
+				__PBXFileRef_Sources/VaporCLI/Run.swift /* Run.swift */,
+				"__PBXFileRef_Sources/VaporCLI/Sequence+ext.swift" /* Sequence+ext.swift */,
+				"__PBXFileRef_Sources/VaporCLI/String+ext.swift" /* String+ext.swift */,
+				__PBXFileRef_Sources/VaporCLI/Update.swift /* Update.swift */,
+				__PBXFileRef_Sources/VaporCLI/Utils.swift /* Utils.swift */,
 				__PBXFileRef_Sources/VaporCLI/VaporCLI.swift /* VaporCLI.swift */,
-				__PBXFileRef_Sources/VaporCLI/cmd_version.swift /* Version.swift */,
-				__PBXFileRef_Sources/VaporCLI/cmd_xcode.swift /* Xcode.swift */,
+				__PBXFileRef_Sources/VaporCLI/Version.swift /* Version.swift */,
+				__PBXFileRef_Sources/VaporCLI/Xcode.swift /* Xcode.swift */,
+				__PBXFileRef_VaporCLI_Info.plist /* VaporCLI_Info.plist */,
 			);
 			name = VaporCLI;
 			path = Sources/VaporCLI;
@@ -196,10 +213,10 @@
 			isa = PBXGroup;
 			children = (
 				__PBXFileRef_Tests/VaporCLI/ArrayExtTests.swift /* ArrayExtTests.swift */,
-				5AF492631D1D264D00AEC1B0 /* CmdDockerTests.swift */,
-				5AF492671D1D40B000AEC1B0 /* SequenceExtTests.swift */,
-				5AF492691D1D58AE00AEC1B0 /* StringExtTests.swift */,
-				5AF4926B1D1D659100AEC1B0 /* UtilsTests.swift */,
+				__PBXFileRef_Tests/VaporCLI/CmdDockerTests.swift /* CmdDockerTests.swift */,
+				__PBXFileRef_Tests/VaporCLI/SequenceExtTests.swift /* SequenceExtTests.swift */,
+				__PBXFileRef_Tests/VaporCLI/StringExtTests.swift /* StringExtTests.swift */,
+				__PBXFileRef_Tests/VaporCLI/UtilsTests.swift /* UtilsTests.swift */,
 				__PBXFileRef_VaporCLITestSuite_Info.plist /* VaporCLITestSuite_Info.plist */,
 			);
 			name = VaporCLITestSuite;
@@ -218,7 +235,6 @@
 		"_______Tests_" /* Tests */ = {
 			isa = PBXGroup;
 			children = (
-				5AF492651D1D2CB600AEC1B0 /* LinuxMain.swift */,
 				"_______Group_VaporCLITestSuite" /* VaporCLITestSuite */,
 			);
 			name = Tests;
@@ -227,6 +243,22 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		"______Target_Libc" /* Libc */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = "_______Confs_Libc" /* Build configuration list for PBXNativeTarget "Libc" */;
+			buildPhases = (
+				CompilePhase_Libc /* Sources */,
+				"___LinkPhase_Libc" /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Libc;
+			productName = Libc;
+			productReference = "_____Product_Libc" /* Libc.framework */;
+			productType = "com.apple.product-type.framework";
+		};
 		"______Target_VaporCLI" /* VaporCLI */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = "_______Confs_VaporCLI" /* Build configuration list for PBXNativeTarget "VaporCLI" */;
@@ -237,6 +269,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				__Dependency_Libc /* PBXTargetDependency */,
 			);
 			name = VaporCLI;
 			productName = VaporCLI;
@@ -297,6 +330,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+				"______Target_Libc" /* Libc */,
 				"______Target_vapor" /* vapor */,
 				"______Target_VaporCLI" /* VaporCLI */,
 				"______Target_VaporCLITestSuite" /* VaporCLITestSuite */,
@@ -305,26 +339,34 @@
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
+		CompilePhase_Libc /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 0;
+			files = (
+				__src_cc_ref_Sources/Libc/libc.swift /* libc.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CompilePhase_VaporCLI /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
-				__src_cc_ref_Sources/VaporCLI/array_ext.swift /* Array+ext.swift in Sources */,
-				__src_cc_ref_Sources/VaporCLI/cmd_build.swift /* Build.swift in Sources */,
-				__src_cc_ref_Sources/VaporCLI/cmd_clean.swift /* Clean.swift in Sources */,
-				__src_cc_ref_Sources/VaporCLI/cmd_docker.swift /* Docker.swift in Sources */,
-				__src_cc_ref_Sources/VaporCLI/cmd_help.swift /* Help.swift in Sources */,
-				__src_cc_ref_Sources/VaporCLI/cmd_heroku.swift /* Heroku.swift in Sources */,
-				__src_cc_ref_Sources/VaporCLI/cmd_new.swift /* New.swift in Sources */,
-				__src_cc_ref_Sources/VaporCLI/cmd_run.swift /* Run.swift in Sources */,
-				__src_cc_ref_Sources/VaporCLI/cmd_update.swift /* Update.swift in Sources */,
-				__src_cc_ref_Sources/VaporCLI/cmd_version.swift /* Version.swift in Sources */,
-				__src_cc_ref_Sources/VaporCLI/cmd_xcode.swift /* Xcode.swift in Sources */,
+				"__src_cc_ref_Sources/VaporCLI/Array+ext.swift" /* Array+ext.swift in Sources */,
+				__src_cc_ref_Sources/VaporCLI/Build.swift /* Build.swift in Sources */,
+				__src_cc_ref_Sources/VaporCLI/Clean.swift /* Clean.swift in Sources */,
 				__src_cc_ref_Sources/VaporCLI/Command.swift /* Command.swift in Sources */,
-				__src_cc_ref_Sources/VaporCLI/sequence_ext.swift /* Sequence+ext.swift in Sources */,
-				__src_cc_ref_Sources/VaporCLI/string_ext.swift /* String+ext.swift in Sources */,
-				__src_cc_ref_Sources/VaporCLI/utils.swift /* Utils.swift in Sources */,
+				__src_cc_ref_Sources/VaporCLI/Docker.swift /* Docker.swift in Sources */,
+				__src_cc_ref_Sources/VaporCLI/Help.swift /* Help.swift in Sources */,
+				__src_cc_ref_Sources/VaporCLI/Heroku.swift /* Heroku.swift in Sources */,
+				__src_cc_ref_Sources/VaporCLI/New.swift /* New.swift in Sources */,
+				__src_cc_ref_Sources/VaporCLI/Run.swift /* Run.swift in Sources */,
+				"__src_cc_ref_Sources/VaporCLI/Sequence+ext.swift" /* Sequence+ext.swift in Sources */,
+				"__src_cc_ref_Sources/VaporCLI/String+ext.swift" /* String+ext.swift in Sources */,
+				__src_cc_ref_Sources/VaporCLI/Update.swift /* Update.swift in Sources */,
+				__src_cc_ref_Sources/VaporCLI/Utils.swift /* Utils.swift in Sources */,
 				__src_cc_ref_Sources/VaporCLI/VaporCLI.swift /* VaporCLI.swift in Sources */,
+				__src_cc_ref_Sources/VaporCLI/Version.swift /* Version.swift in Sources */,
+				__src_cc_ref_Sources/VaporCLI/Xcode.swift /* Xcode.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -332,11 +374,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
-				5AF492681D1D40B000AEC1B0 /* SequenceExtTests.swift in Sources */,
 				__src_cc_ref_Tests/VaporCLI/ArrayExtTests.swift /* ArrayExtTests.swift in Sources */,
-				5AF4926A1D1D58AE00AEC1B0 /* StringExtTests.swift in Sources */,
-				5AF4926C1D1D659100AEC1B0 /* UtilsTests.swift in Sources */,
-				5AF492641D1D264D00AEC1B0 /* CmdDockerTests.swift in Sources */,
+				__src_cc_ref_Tests/VaporCLI/CmdDockerTests.swift /* CmdDockerTests.swift in Sources */,
+				__src_cc_ref_Tests/VaporCLI/SequenceExtTests.swift /* SequenceExtTests.swift in Sources */,
+				__src_cc_ref_Tests/VaporCLI/StringExtTests.swift /* StringExtTests.swift in Sources */,
+				__src_cc_ref_Tests/VaporCLI/UtilsTests.swift /* UtilsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -351,14 +393,33 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		__Dependency_Libc /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = "______Target_Libc" /* Libc */;
+			targetProxy = 5AF492741D1D93A000AEC1B0 /* PBXContainerItemProxy */;
+		};
 		__Dependency_VaporCLI /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "______Target_VaporCLI" /* VaporCLI */;
-			targetProxy = 5AE156781D1C3B750080C50D /* PBXContainerItemProxy */;
+			targetProxy = 5AF492731D1D93A000AEC1B0 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		_ReleaseConf_Libc /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(PLATFORM_DIR)/Developer/Library/Frameworks";
+				INFOPLIST_FILE = VaporCLI.xcodeproj/Libc_Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
+				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+			};
+			name = Release;
+		};
 		_ReleaseConf_VaporCLI /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -396,6 +457,21 @@
 				SWIFT_FORCE_STATIC_LINK_STDLIB = NO;
 			};
 			name = Release;
+		};
+		"___DebugConf_Libc" /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(PLATFORM_DIR)/Developer/Library/Frameworks";
+				INFOPLIST_FILE = VaporCLI.xcodeproj/Libc_Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
+				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
 		};
 		"___DebugConf_VaporCLI" /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -460,6 +536,15 @@
 			buildConfigurations = (
 				"_______Debug_" /* Debug */,
 				"_____Release_" /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		"_______Confs_Libc" /* Build configuration list for PBXNativeTarget "Libc" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				"___DebugConf_Libc" /* Debug */,
+				_ReleaseConf_Libc /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
