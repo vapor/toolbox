@@ -14,7 +14,7 @@ struct Run: Command {
             // All remaining arguments are passed on to app
             let passthroughArgs = args.joined(separator: " ")
             // TODO: Check that file exists
-            try run(".build/\(folder)/\(name) \(passthroughArgs)")
+            try ".build/\(folder)/\(name) \(passthroughArgs)".run(runner: shell)
         } catch Error.cancelled {
             fail("Run cancelled.", cancelled: true)
         } catch {

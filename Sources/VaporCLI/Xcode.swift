@@ -8,7 +8,7 @@
             print("Generating Xcode Project...")
 
             do {
-                try run("swift package generate-xcodeproj")
+                try "swift package generate-xcodeproj".run(runner: shell)
             } catch {
                 fail("Could not generate Xcode Project.")
             }
@@ -16,7 +16,7 @@
             print("Opening Xcode...")
 
             do {
-                try run("open *.xcodeproj")
+                try "open *.xcodeproj".run(runner: shell)
             } catch {
                 fail("Could not open Xcode Project.")
             }

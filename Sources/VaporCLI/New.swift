@@ -19,18 +19,18 @@ struct New: Command {
 
         do {
             let escapedName = "\"\(name)\"" // FIX: Doesn’t support names with quotes
-            try run("mkdir \(escapedName)")
+            try "mkdir \(escapedName)".run(runner: shell)
 
             print("Cloning example...")
 
-            try run("curl -L \(curlArgs) https://github.com/qutheory/vapor-example/archive/master.tar.gz -o \(escapedName)/vapor-example.tar.gz")
+            try "curl -L \(curlArgs) https://github.com/qutheory/vapor-example/archive/master.tar.gz -o \(escapedName)/vapor-example.tar.gz".run(runner: shell)
 
             print("Unpacking...")
 
-            try run("tar -\(tarArgs)xzf \(escapedName)/vapor-example.tar.gz --strip-components=1 --directory \(escapedName)")
-            try run("rm \(escapedName)/vapor-example.tar.gz")
+            try "tar -\(tarArgs)xzf \(escapedName)/vapor-example.tar.gz --strip-components=1 --directory \(escapedName)".run(runner: shell)
+            try "rm \(escapedName)/vapor-example.tar.gz".run(runner: shell)
             #if os(OSX)
-                try run("cd \(escapedName) && vapor xcode")
+                try "cd \(escapedName) && vapor xcode".run(runner: shell)
             #endif
 
             if commandExists("git") {

@@ -51,7 +51,7 @@ extension Heroku {
                 print("Custom Heroku App Name? (return to let Heroku create)")
                 let herokuAppName = getInput()
                 do {
-                    try run("heroku create \(herokuAppName)")
+                    try "heroku create \(herokuAppName)".run(runner: shell)
                 } catch {
                     fail("unable to create heroku app")
                 }
@@ -66,7 +66,7 @@ extension Heroku {
             }
 
             do {
-                try run("heroku buildpacks:set \(buildpack)")
+                try "heroku buildpacks:set \(buildpack)".run(runner: shell)
                 print("Using buildpack: \(buildpack)")
                 print()
             } catch Error.system(let code) where code == 256 {
@@ -85,7 +85,7 @@ extension Heroku {
             let procContents = "web: App --port=\\$PORT"
             do {
                 // Overwrites existing Procfile
-                try run("echo \"\(procContents)\" > ./Procfile")
+                try "echo \"\(procContents)\" > ./Procfile".run(runner: shell)
             } catch {
                 fail("Unable to make Procfile")
             }
@@ -112,7 +112,7 @@ extension Heroku {
             
             print("spinning up dynos ...")
             do {
-                try run("heroku ps:scale web=1")
+                try "heroku ps:scale web=1".run(runner: shell)
             } catch {
                 fail("unable to spin up dynos")
             }

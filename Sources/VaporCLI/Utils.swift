@@ -69,16 +69,6 @@ func runWithOutput(_ command: String) throws -> String { // Command needs to use
     }
 }
 
-func run(_ command: String) throws {
-    let result = system(command)
-
-    if result == 2 {
-        throw Error.cancelled
-    } else if result != 0 {
-        throw Error.system(result)
-    }
-}
-
 func passes(_ command: String) -> Bool {
     return system(command) == 0
 }
