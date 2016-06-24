@@ -4,6 +4,34 @@
     import Glibc
 #endif
 
+protocol PosixSubsystem {
+    func system(_ command: String) -> Int32
+}
+
+public struct Shell: PosixSubsystem {
+    public func system(_ command: String) -> Int32 {
+        return system(command)
+    }
+}
+
+protocol Runnable {
+    func run(runner: PosixSubsystem) throws
+}
+
+public typealias ShellCommand = String
+
+extension ShellCommand: Runnable {
+    func run(runner: PosixSubsystem) throws {
+        let result = runner.system(self)
+
+        if result == 2 {
+            throw Error.cancelled
+        } else if result != 0 {
+            throw Error.system(result)
+        }
+    }
+}
+
 // Utility functions
 
 @noreturn public func fail(_ message: String, cancelled: Bool = false) {
