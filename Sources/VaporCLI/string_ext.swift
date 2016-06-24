@@ -15,13 +15,13 @@ enum ANSIColor: String {
 }
 
 extension String {
-    func trim(trimCharacters: [Character] = whiteSpace) -> String {
+    func trim(characters: [Character] = whiteSpace) -> String {
         // while characters
         var mutable = self
-        while let next = mutable.characters.first where trimCharacters.contains(next) {
+        while let next = mutable.characters.first where characters.contains(next) {
             mutable.remove(at: mutable.startIndex)
         }
-        while let next = mutable.characters.last where trimCharacters.contains(next) {
+        while let next = mutable.characters.last where characters.contains(next) {
             mutable.remove(at: mutable.index(before: mutable.endIndex))
         }
         return mutable

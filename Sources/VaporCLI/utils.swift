@@ -115,8 +115,8 @@ func getPackageName() -> String {
 func terminalSize() throws -> (width: Int, height: Int) {
     // Get the columns and lines from tput
     let tput = "/usr/bin/tput"
-    let cols = try runWithOutput("\(tput) cols").trim(trimCharacters: ["\n"])
-    let lines = try runWithOutput("\(tput) lines").trim(trimCharacters: ["\n"])
+    let cols = try runWithOutput("\(tput) cols").trim(characters: ["\n"])
+    let lines = try runWithOutput("\(tput) lines").trim(characters: ["\n"])
 
     if let cols = Int(cols), lines = Int(lines) {
         return (cols, lines)
