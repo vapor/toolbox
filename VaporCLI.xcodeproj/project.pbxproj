@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5AF492641D1D264D00AEC1B0 /* CmdDockerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AF492631D1D264D00AEC1B0 /* CmdDockerTests.swift */; };
 		_LinkFileRef_VaporCLI_via_VaporCLITestSuite /* VaporCLI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_VaporCLI" /* VaporCLI.framework */; };
 		_LinkFileRef_VaporCLI_via_vapor /* VaporCLI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_VaporCLI" /* VaporCLI.framework */; };
 		__src_cc_ref_Sources/VaporCLI/Command.swift /* Command.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/Command.swift /* Command.swift */; };
@@ -44,6 +45,8 @@
 		5AE1567A1D1C3BC90080C50D /* Dockerfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Dockerfile; sourceTree = "<group>"; };
 		5AE1567B1D1C3BD80080C50D /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		5AE1567C1D1C3BE30080C50D /* bootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = bootstrap.swift; sourceTree = "<group>"; };
+		5AF492631D1D264D00AEC1B0 /* CmdDockerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CmdDockerTests.swift; sourceTree = "<group>"; };
+		5AF492651D1D2CB600AEC1B0 /* LinuxMain.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = LinuxMain.swift; path = Tests/LinuxMain.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Package.swift /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Sources/VaporCLI/Command.swift /* Command.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Command.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Sources/VaporCLI/VaporCLI.swift /* VaporCLI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaporCLI.swift; sourceTree = "<group>"; };
@@ -185,6 +188,7 @@
 			isa = PBXGroup;
 			children = (
 				__PBXFileRef_Tests/VaporCLI/ArrayExtTests.swift /* ArrayExtTests.swift */,
+				5AF492631D1D264D00AEC1B0 /* CmdDockerTests.swift */,
 				__PBXFileRef_VaporCLITestSuite_Info.plist /* VaporCLITestSuite_Info.plist */,
 			);
 			name = VaporCLITestSuite;
@@ -203,6 +207,7 @@
 		"_______Tests_" /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				5AF492651D1D2CB600AEC1B0 /* LinuxMain.swift */,
 				"_______Group_VaporCLITestSuite" /* VaporCLITestSuite */,
 			);
 			name = Tests;
@@ -317,6 +322,7 @@
 			buildActionMask = 0;
 			files = (
 				__src_cc_ref_Tests/VaporCLI/ArrayExtTests.swift /* ArrayExtTests.swift in Sources */,
+				5AF492641D1D264D00AEC1B0 /* CmdDockerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

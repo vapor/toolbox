@@ -1,30 +1,44 @@
-Thu 23 Jun 2016 16:40:54 BST
+Fri 24 Jun 2016 09:54:28 BST
 Darwin Rhea.local 15.5.0 Darwin Kernel Version 15.5.0: Tue Apr 19 18:36:36 PDT 2016; root:xnu-3248.50.21~8/RELEASE_X86_64 x86_64
-Compile Swift Module 'VaporCLITestSuite' (1 sources)
+Compile Swift Module 'VaporCLITestSuite' (2 sources)
 Linking .build/debug/VaporCLITests.xctest/Contents/MacOS/VaporCLITests
-Test Suite 'All tests' started at 2016-06-23 16:41:04.144
-Test Suite 'VaporCLITests.xctest' started at 2016-06-23 16:41:04.145
-Test Suite 'ArrayExtTests' started at 2016-06-23 16:41:04.145
+Test Suite 'All tests' started at 2016-06-24 09:54:39.205
+Test Suite 'VaporCLITests.xctest' started at 2016-06-24 09:54:39.206
+Test Suite 'ArrayExtTests' started at 2016-06-24 09:54:39.206
 Test Case '-[VaporCLITestSuite.ArrayExtTests testRemove]' started.
 Test Case '-[VaporCLITestSuite.ArrayExtTests testRemove]' passed (0.001 seconds).
-Test Suite 'ArrayExtTests' passed at 2016-06-23 16:41:04.145.
+Test Case '-[VaporCLITestSuite.ArrayExtTests testRemoveMatching]' started.
+Test Case '-[VaporCLITestSuite.ArrayExtTests testRemoveMatching]' passed (0.000 seconds).
+Test Suite 'ArrayExtTests' passed at 2016-06-24 09:54:39.207.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'CmdDockerTests' started at 2016-06-24 09:54:39.207
+Test Case '-[VaporCLITestSuite.CmdDockerTests test_subCommands]' started.
+Test Case '-[VaporCLITestSuite.CmdDockerTests test_subCommands]' passed (0.001 seconds).
+Test Suite 'CmdDockerTests' passed at 2016-06-24 09:54:39.208.
 	 Executed 1 test, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
-Test Suite 'VaporCLITests.xctest' passed at 2016-06-23 16:41:04.145.
-	 Executed 1 test, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
-Test Suite 'All tests' passed at 2016-06-23 16:41:04.146.
-	 Executed 1 test, with 0 failures (0 unexpected) in 0.001 (0.002) seconds
-Thu Jun 23 15:41:04 UTC 2016
-Linux 01a14aad47f4 4.4.13-moby #1 SMP Fri Jun 17 22:06:24 UTC 2016 x86_64 x86_64 x86_64 GNU/Linux
-Compile Swift Module 'VaporCLITestSuite' (1 sources)
+Test Suite 'VaporCLITests.xctest' passed at 2016-06-24 09:54:39.208.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'All tests' passed at 2016-06-24 09:54:39.208.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.002 (0.003) seconds
+Fri Jun 24 08:54:39 UTC 2016
+Linux 5fcbc75840ee 4.4.13-moby #1 SMP Fri Jun 17 22:06:24 UTC 2016 x86_64 x86_64 x86_64 GNU/Linux
+Compile Swift Module 'VaporCLITestSuite' (2 sources)
 Linking .build/debug/VaporCLITests.xctest
-Test Suite 'All tests' started at 15:41:12.010
-Test Suite 'debug.xctest' started at 15:41:12.025
-Test Suite 'ArrayExtTests' started at 15:41:12.025
-Test Case 'ArrayExtTests.testRemove' started at 15:41:12.025
+Test Suite 'All tests' started at 08:54:47.345
+Test Suite 'debug.xctest' started at 08:54:47.362
+Test Suite 'ArrayExtTests' started at 08:54:47.362
+Test Case 'ArrayExtTests.testRemove' started at 08:54:47.362
 Test Case 'ArrayExtTests.testRemove' passed (0.0 seconds).
-Test Suite 'ArrayExtTests' passed at 15:41:12.025
+Test Case 'ArrayExtTests.testRemoveMatching' started at 08:54:47.363
+Test Case 'ArrayExtTests.testRemoveMatching' passed (0.0 seconds).
+Test Suite 'ArrayExtTests' passed at 08:54:47.363
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.0 (0.0) seconds
+Test Suite 'CmdDockerTests' started at 08:54:47.363
+Test Case 'CmdDockerTests.test_subCommands' started at 08:54:47.363
+Test Case 'CmdDockerTests.test_subCommands' passed (0.0 seconds).
+Test Suite 'CmdDockerTests' passed at 08:54:47.363
 	 Executed 1 test, with 0 failures (0 unexpected) in 0.0 (0.0) seconds
-Test Suite 'debug.xctest' passed at 15:41:12.027
-	 Executed 1 test, with 0 failures (0 unexpected) in 0.0 (0.0) seconds
-Test Suite 'All tests' passed at 15:41:12.027
-	 Executed 1 test, with 0 failures (0 unexpected) in 0.0 (0.0) seconds
+Test Suite 'debug.xctest' passed at 08:54:47.363
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'All tests' passed at 08:54:47.363
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds

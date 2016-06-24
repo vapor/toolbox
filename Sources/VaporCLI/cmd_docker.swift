@@ -4,10 +4,10 @@ struct Docker: Command {
     static let id = "docker"
 
     static var subCommands: [Command.Type] = [
-                                                 Docker.Init.self,
-                                                 Docker.Build.self,
-                                                 Docker.Run.self,
-                                                 Docker.Enter.self
+        Docker.Init.self,
+        Docker.Build.self,
+        Docker.Run.self,
+        Docker.Enter.self
     ]
 
     static func execute(with args: [String], in directory: String) {
@@ -18,8 +18,8 @@ struct Docker: Command {
 extension Docker {
     static var help: [String] {
         return [
-                   "Setup and run vapor app via docker",
-                   "sub commands: " + subCommands.map { "\($0.id)" }.joined(separator: "|"),
+            "Setup and run vapor app via docker",
+            "sub commands: " + subCommands.map { "\($0.id)" }.joined(separator: "|"),
         ]
     }
 }
@@ -63,7 +63,7 @@ extension Docker {
 
         static var help: [String] {
             return [
-                       "Creates a Dockerfile",
+                "Creates a Dockerfile",
             ]
         }
     }
