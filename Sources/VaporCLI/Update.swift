@@ -9,7 +9,7 @@
 struct Update: Command {
     static let id = "update"
 
-    static func execute(with args: [String], in directory: String) {
+    static func execute(with args: [String], in directory: String, shell: PosixSubsystem) {
         guard let target = pathToSelf else {
             fail("Could not determine path to vapor binary.")
         }

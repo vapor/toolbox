@@ -1,7 +1,7 @@
 
 struct Help: Command {
     static let id = "help"
-    static func execute(with args: [String], in directory: String) {
+    static func execute(with args: [String], in directory: String, shell: PosixSubsystem) {
         print("Usage: \(directory) [\(VaporCLI.commands.map({ $0.id }).joined(separator: "|"))]")
 
         var help = "\nAvailable Commands:\n\n"

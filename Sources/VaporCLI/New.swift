@@ -7,7 +7,7 @@
 struct New: Command {
     static let id = "new"
 
-    static func execute(with args: [String], in directory: String) {
+    static func execute(with args: [String], in directory: String, shell: PosixSubsystem) {
         guard let name = args.first else {
             print("Usage: \(directory) \(id) <project-name>")
             fail("Invalid number of arguments.")

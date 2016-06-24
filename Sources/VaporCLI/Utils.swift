@@ -1,6 +1,6 @@
 import Libc
 
-protocol PosixSubsystem {
+public protocol PosixSubsystem {
     func system(_ command: String) -> Int32
 }
 
@@ -10,14 +10,14 @@ public struct Shell: PosixSubsystem {
     }
 }
 
-protocol Runnable {
+public protocol Runnable {
     func run(runner: PosixSubsystem) throws
 }
 
 public typealias ShellCommand = String
 
 extension ShellCommand: Runnable {
-    func run(runner: PosixSubsystem) throws {
+    public func run(runner: PosixSubsystem) throws {
         let result = runner.system(self)
 
         if result == 2 {

@@ -10,8 +10,8 @@ struct Docker: Command {
         Docker.Enter.self
     ]
 
-    static func execute(with args: [String], in directory: String) {
-        executeSubCommand(with: args, in: directory)
+    static func execute(with args: [String], in directory: String, shell: PosixSubsystem) {
+        executeSubCommand(with: args, in: directory, shell: shell)
     }
 }
 
@@ -42,7 +42,7 @@ extension Docker {
     struct Init: Command {
         static let id = "init"
 
-        static func execute(with args: [String], in directory: String) {
+        static func execute(with args: [String], in directory: String, shell: PosixSubsystem) {
             let quiet = args.contains("--verbose") ? "" : "-s"
 
             if fileExists("Dockerfile") {
@@ -73,7 +73,7 @@ extension Docker {
     struct Build: Command {
         static let id = "build"
 
-        static func execute(with args: [String], in directory: String) {
+        static func execute(with args: [String], in directory: String, shell: PosixSubsystem) {
             guard let
                 swiftVersion = Docker.swiftVersion,
                 imageName = Docker.imageName
@@ -118,7 +118,7 @@ extension Docker {
     struct Run: Command {
         static let id = "run"
 
-        static func execute(with args: [String], in directory: String) {
+        static func execute(with args: [String], in directory: String, shell: PosixSubsystem) {
             guard let
                 imageName = Docker.imageName
                 else {
@@ -159,7 +159,7 @@ extension Docker {
     struct Enter: Command {
         static let id = "enter"
 
-        static func execute(with args: [String], in directory: String) {
+        static func execute(with args: [String], in directory: String, shell: PosixSubsystem) {
             guard let
                 imageName = Docker.imageName
                 else {
