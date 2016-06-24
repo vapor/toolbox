@@ -4,5 +4,7 @@ import XCTest
 XCTMain([
     testCase(ArrayExtTests.allTests),
     testCase(CmdDockerTests.allTests),
-    testCase(SequenceExt.allTests),
+    testCase(SequenceExtTests.allTests),
+    testCase(StringExtTests.allTests),
+    testCase(UtilsTests.allTests),
 ])

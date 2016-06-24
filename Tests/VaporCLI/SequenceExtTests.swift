@@ -9,10 +9,10 @@
 import XCTest
 @testable import VaporCLI
 
-class SequenceExt: XCTestCase {
+class SequenceExtTests: XCTestCase {
 
     // required by LinuxMain.swift
-    static var allTests: [(String, (SequenceExt) -> () throws -> Void)] {
+    static var allTests: [(String, (SequenceExtTests) -> () throws -> Void)] {
         return [
             ("test_valueFor", test_valueFor),
         ]

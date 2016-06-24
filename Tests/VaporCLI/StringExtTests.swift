@@ -15,6 +15,8 @@ class StringExtTests: XCTestCase {
     static var allTests: [(String, (StringExtTests) -> () throws -> Void)] {
         return [
             ("test_trim", test_trim),
+            ("test_centerTextBlock", test_centerTextBlock),
+            ("test_colored", test_colored),
         ]
     }
 
@@ -40,16 +42,6 @@ class StringExtTests: XCTestCase {
         XCTAssertEqual("abc".centerTextBlock(width: 7), "  abc")
         XCTAssertEqual("abc".centerTextBlock(width: 7, paddingCharacter: "="), "==abc")
         XCTAssertEqual("abc\nde\nf".centerTextBlock(width: 7), "  abc\n  de\n  f")
-    }
-
-    func test_hasPrefix() {
-        XCTAssert("abc".hasPrefix("ab"))
-        XCTAssert(!"abc".hasPrefix("ba"))
-    }
-
-    func test_hasSuffix() {
-        XCTAssert("abc".hasSuffix("bc"))
-        XCTAssert(!"abc".hasSuffix("cb"))
     }
 
     func test_colored() {
