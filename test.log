@@ -1,73 +1,67 @@
-Fri 24 Jun 2016 13:28:56 BST
+Fri 24 Jun 2016 13:52:46 BST
 Darwin Rhea.local 15.5.0 Darwin Kernel Version 15.5.0: Tue Apr 19 18:36:36 PDT 2016; root:xnu-3248.50.21~8/RELEASE_X86_64 x86_64
 Compile Swift Module 'VaporCLITestSuite' (4 sources)
 Linking .build/debug/VaporCLITests.xctest/Contents/MacOS/VaporCLITests
-Test Suite 'All tests' started at 2016-06-24 13:29:07.382
-Test Suite 'VaporCLITests.xctest' started at 2016-06-24 13:29:07.383
-Test Suite 'ArrayExtTests' started at 2016-06-24 13:29:07.383
+Test Suite 'All tests' started at 2016-06-24 13:52:58.099
+Test Suite 'VaporCLITests.xctest' started at 2016-06-24 13:52:58.099
+Test Suite 'ArrayExtTests' started at 2016-06-24 13:52:58.100
 Test Case '-[VaporCLITestSuite.ArrayExtTests test_remove]' started.
 Test Case '-[VaporCLITestSuite.ArrayExtTests test_remove]' passed (0.002 seconds).
 Test Case '-[VaporCLITestSuite.ArrayExtTests test_removeMatching]' started.
 Test Case '-[VaporCLITestSuite.ArrayExtTests test_removeMatching]' passed (0.000 seconds).
-Test Suite 'ArrayExtTests' passed at 2016-06-24 13:29:07.386.
-	 Executed 2 tests, with 0 failures (0 unexpected) in 0.003 (0.003) seconds
-Test Suite 'CmdDockerTests' started at 2016-06-24 13:29:07.386
+Test Suite 'ArrayExtTests' passed at 2016-06-24 13:52:58.101.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'CmdDockerTests' started at 2016-06-24 13:52:58.102
 Test Case '-[VaporCLITestSuite.CmdDockerTests test_subCommands]' started.
 Test Case '-[VaporCLITestSuite.CmdDockerTests test_subCommands]' passed (0.006 seconds).
-Test Suite 'CmdDockerTests' passed at 2016-06-24 13:29:07.393.
-	 Executed 1 test, with 0 failures (0 unexpected) in 0.006 (0.007) seconds
-Test Suite 'SequenceExt' started at 2016-06-24 13:29:07.393
+Test Suite 'CmdDockerTests' passed at 2016-06-24 13:52:58.107.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.006 (0.006) seconds
+Test Suite 'SequenceExt' started at 2016-06-24 13:52:58.107
 Test Case '-[VaporCLITestSuite.SequenceExt test_valueFor]' started.
-Test Case '-[VaporCLITestSuite.SequenceExt test_valueFor]' passed (0.002 seconds).
-Test Suite 'SequenceExt' passed at 2016-06-24 13:29:07.396.
-	 Executed 1 test, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
-Test Suite 'StringExtTests' started at 2016-06-24 13:29:07.396
+Test Case '-[VaporCLITestSuite.SequenceExt test_valueFor]' passed (0.000 seconds).
+Test Suite 'SequenceExt' passed at 2016-06-24 13:52:58.108.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'StringExtTests' started at 2016-06-24 13:52:58.108
 Test Case '-[VaporCLITestSuite.StringExtTests test_centerTextBlock]' started.
 Test Case '-[VaporCLITestSuite.StringExtTests test_centerTextBlock]' passed (0.001 seconds).
 Test Case '-[VaporCLITestSuite.StringExtTests test_colored]' started.
-Test Case '-[VaporCLITestSuite.StringExtTests test_colored]' passed (0.001 seconds).
+Test Case '-[VaporCLITestSuite.StringExtTests test_colored]' passed (0.000 seconds).
 Test Case '-[VaporCLITestSuite.StringExtTests test_hasPrefix]' started.
 Test Case '-[VaporCLITestSuite.StringExtTests test_hasPrefix]' passed (0.000 seconds).
 Test Case '-[VaporCLITestSuite.StringExtTests test_hasSuffix]' started.
 Test Case '-[VaporCLITestSuite.StringExtTests test_hasSuffix]' passed (0.000 seconds).
 Test Case '-[VaporCLITestSuite.StringExtTests test_trim]' started.
-Test Case '-[VaporCLITestSuite.StringExtTests test_trim]' passed (0.001 seconds).
-Test Suite 'StringExtTests' passed at 2016-06-24 13:29:07.399.
-	 Executed 5 tests, with 0 failures (0 unexpected) in 0.003 (0.004) seconds
-Test Suite 'VaporCLITests.xctest' passed at 2016-06-24 13:29:07.399.
-	 Executed 9 tests, with 0 failures (0 unexpected) in 0.014 (0.016) seconds
-Test Suite 'All tests' passed at 2016-06-24 13:29:07.399.
-	 Executed 9 tests, with 0 failures (0 unexpected) in 0.014 (0.017) seconds
-Fri Jun 24 12:29:07 UTC 2016
-Linux f990ce9d0a0e 4.4.13-moby #1 SMP Fri Jun 17 22:06:24 UTC 2016 x86_64 x86_64 x86_64 GNU/Linux
+Test Case '-[VaporCLITestSuite.StringExtTests test_trim]' passed (0.000 seconds).
+Test Suite 'StringExtTests' passed at 2016-06-24 13:52:58.110.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'VaporCLITests.xctest' passed at 2016-06-24 13:52:58.110.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.009 (0.010) seconds
+Test Suite 'All tests' passed at 2016-06-24 13:52:58.110.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.009 (0.011) seconds
+Fri Jun 24 12:52:58 UTC 2016
+Linux 3068ef010cee 4.4.13-moby #1 SMP Fri Jun 17 22:06:24 UTC 2016 x86_64 x86_64 x86_64 GNU/Linux
 Compile Swift Module 'VaporCLITestSuite' (4 sources)
-/vapor/Tests/VaporCLI/StringExtTests.swift:46:19: error: ambiguous use of 'hasPrefix'
-        XCTAssert("abc".hasPrefix("ab"))
-                  ^
-Foundation.String:2:17: note: found this candidate
-    public func hasPrefix(_ prefix: String) -> Bool
-                ^
-<unknown>:0: note: found this candidate
-/vapor/Tests/VaporCLI/StringExtTests.swift:47:20: error: ambiguous use of 'hasPrefix'
-        XCTAssert(!"abc".hasPrefix("ba"))
-                   ^
-Foundation.String:2:17: note: found this candidate
-    public func hasPrefix(_ prefix: String) -> Bool
-                ^
-<unknown>:0: note: found this candidate
-/vapor/Tests/VaporCLI/StringExtTests.swift:51:19: error: ambiguous use of 'hasSuffix'
-        XCTAssert("abc".hasSuffix("bc"))
-                  ^
-Foundation.String:3:17: note: found this candidate
-    public func hasSuffix(_ suffix: String) -> Bool
-                ^
-<unknown>:0: note: found this candidate
-/vapor/Tests/VaporCLI/StringExtTests.swift:52:20: error: ambiguous use of 'hasSuffix'
-        XCTAssert(!"abc".hasSuffix("cb"))
-                   ^
-Foundation.String:3:17: note: found this candidate
-    public func hasSuffix(_ suffix: String) -> Bool
-                ^
-<unknown>:0: note: found this candidate
-<unknown>:0: error: build had 1 command failures
-swift-test: error: exit(1): /usr/bin/swift-build-tool -f /vapor/.build/debug.yaml test
+Linking .build/debug/VaporCLITests.xctest
+Test Suite 'All tests' started at 12:53:07.275
+Test Suite 'debug.xctest' started at 12:53:07.292
+Test Suite 'ArrayExtTests' started at 12:53:07.292
+Test Case 'ArrayExtTests.test_remove' started at 12:53:07.292
+Test Case 'ArrayExtTests.test_remove' passed (0.0 seconds).
+Test Case 'ArrayExtTests.test_removeMatching' started at 12:53:07.293
+Test Case 'ArrayExtTests.test_removeMatching' passed (0.0 seconds).
+Test Suite 'ArrayExtTests' passed at 12:53:07.293
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.0 (0.0) seconds
+Test Suite 'CmdDockerTests' started at 12:53:07.293
+Test Case 'CmdDockerTests.test_subCommands' started at 12:53:07.293
+Test Case 'CmdDockerTests.test_subCommands' passed (0.001 seconds).
+Test Suite 'CmdDockerTests' passed at 12:53:07.294
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'SequenceExt' started at 12:53:07.295
+Test Case 'SequenceExt.test_valueFor' started at 12:53:07.295
+Test Case 'SequenceExt.test_valueFor' passed (0.0 seconds).
+Test Suite 'SequenceExt' passed at 12:53:07.295
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.0 (0.0) seconds
+Test Suite 'debug.xctest' passed at 12:53:07.295
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'All tests' passed at 12:53:07.295
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds

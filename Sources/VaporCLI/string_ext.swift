@@ -59,28 +59,6 @@ extension String {
         return lines.joined(separator: "\n")
     }
 
-    #if os(Linux)
-    func hasPrefix(_ str: String) -> Bool {
-    let strGen = str.characters.makeIterator()
-    let selfGen = self.characters.makeIterator()
-    let seq = zip(strGen, selfGen)
-    for (lhs, rhs) in seq where lhs != rhs {
-    return false
-    }
-    return true
-    }
-
-    func hasSuffix(_ str: String) -> Bool {
-    let strGen = str.characters.reversed().makeIterator()
-    let selfGen = self.characters.reversed().makeIterator()
-    let seq = zip(strGen, selfGen)
-    for (lhs, rhs) in seq where lhs != rhs {
-    return false
-    }
-    return true
-    }
-    #endif
-
     func colored(with colors: [Character: ANSIColor], default defaultColor: ANSIColor = .reset) -> String {
         // Check the string is long enough
         guard characters.count > 0 else {
