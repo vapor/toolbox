@@ -10,6 +10,7 @@
 		5AF492641D1D264D00AEC1B0 /* CmdDockerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AF492631D1D264D00AEC1B0 /* CmdDockerTests.swift */; };
 		5AF492681D1D40B000AEC1B0 /* SequenceExt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AF492671D1D40B000AEC1B0 /* SequenceExt.swift */; };
 		5AF4926A1D1D58AE00AEC1B0 /* StringExtTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AF492691D1D58AE00AEC1B0 /* StringExtTests.swift */; };
+		5AF4926C1D1D659100AEC1B0 /* UtilsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AF4926B1D1D659100AEC1B0 /* UtilsTests.swift */; };
 		_LinkFileRef_VaporCLI_via_VaporCLITestSuite /* VaporCLI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_VaporCLI" /* VaporCLI.framework */; };
 		_LinkFileRef_VaporCLI_via_vapor /* VaporCLI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_VaporCLI" /* VaporCLI.framework */; };
 		__src_cc_ref_Sources/VaporCLI/Command.swift /* Command.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/Command.swift /* Command.swift */; };
@@ -51,6 +52,7 @@
 		5AF492651D1D2CB600AEC1B0 /* LinuxMain.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = LinuxMain.swift; path = Tests/LinuxMain.swift; sourceTree = "<group>"; };
 		5AF492671D1D40B000AEC1B0 /* SequenceExt.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SequenceExt.swift; sourceTree = "<group>"; };
 		5AF492691D1D58AE00AEC1B0 /* StringExtTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringExtTests.swift; sourceTree = "<group>"; };
+		5AF4926B1D1D659100AEC1B0 /* UtilsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UtilsTests.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Package.swift /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Sources/VaporCLI/Command.swift /* Command.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Command.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Sources/VaporCLI/VaporCLI.swift /* VaporCLI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaporCLI.swift; sourceTree = "<group>"; };
@@ -195,6 +197,7 @@
 				5AF492631D1D264D00AEC1B0 /* CmdDockerTests.swift */,
 				5AF492671D1D40B000AEC1B0 /* SequenceExt.swift */,
 				5AF492691D1D58AE00AEC1B0 /* StringExtTests.swift */,
+				5AF4926B1D1D659100AEC1B0 /* UtilsTests.swift */,
 				__PBXFileRef_VaporCLITestSuite_Info.plist /* VaporCLITestSuite_Info.plist */,
 			);
 			name = VaporCLITestSuite;
@@ -330,6 +333,7 @@
 				5AF492681D1D40B000AEC1B0 /* SequenceExt.swift in Sources */,
 				__src_cc_ref_Tests/VaporCLI/ArrayExtTests.swift /* ArrayExtTests.swift in Sources */,
 				5AF4926A1D1D58AE00AEC1B0 /* StringExtTests.swift in Sources */,
+				5AF4926C1D1D659100AEC1B0 /* UtilsTests.swift in Sources */,
 				5AF492641D1D264D00AEC1B0 /* CmdDockerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
