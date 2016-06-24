@@ -15,20 +15,20 @@
 		_LinkFileRef_VaporCLI_via_vapor /* VaporCLI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_VaporCLI" /* VaporCLI.framework */; };
 		__src_cc_ref_Sources/VaporCLI/Command.swift /* Command.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/Command.swift /* Command.swift */; };
 		__src_cc_ref_Sources/VaporCLI/VaporCLI.swift /* VaporCLI.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/VaporCLI.swift /* VaporCLI.swift */; };
-		__src_cc_ref_Sources/VaporCLI/array_ext.swift /* array_ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/array_ext.swift /* array_ext.swift */; };
-		__src_cc_ref_Sources/VaporCLI/cmd_build.swift /* cmd_build.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_build.swift /* cmd_build.swift */; };
-		__src_cc_ref_Sources/VaporCLI/cmd_clean.swift /* cmd_clean.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_clean.swift /* cmd_clean.swift */; };
-		__src_cc_ref_Sources/VaporCLI/cmd_docker.swift /* cmd_docker.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_docker.swift /* cmd_docker.swift */; };
-		__src_cc_ref_Sources/VaporCLI/cmd_help.swift /* cmd_help.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_help.swift /* cmd_help.swift */; };
-		__src_cc_ref_Sources/VaporCLI/cmd_heroku.swift /* cmd_heroku.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_heroku.swift /* cmd_heroku.swift */; };
-		__src_cc_ref_Sources/VaporCLI/cmd_new.swift /* cmd_new.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_new.swift /* cmd_new.swift */; };
-		__src_cc_ref_Sources/VaporCLI/cmd_run.swift /* cmd_run.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_run.swift /* cmd_run.swift */; };
-		__src_cc_ref_Sources/VaporCLI/cmd_update.swift /* cmd_update.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_update.swift /* cmd_update.swift */; };
-		__src_cc_ref_Sources/VaporCLI/cmd_version.swift /* cmd_version.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_version.swift /* cmd_version.swift */; };
-		__src_cc_ref_Sources/VaporCLI/cmd_xcode.swift /* cmd_xcode.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_xcode.swift /* cmd_xcode.swift */; };
-		__src_cc_ref_Sources/VaporCLI/sequence_ext.swift /* sequence_ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/sequence_ext.swift /* sequence_ext.swift */; };
-		__src_cc_ref_Sources/VaporCLI/string_ext.swift /* string_ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/string_ext.swift /* string_ext.swift */; };
-		__src_cc_ref_Sources/VaporCLI/utils.swift /* utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/utils.swift /* utils.swift */; };
+		__src_cc_ref_Sources/VaporCLI/array_ext.swift /* Array+ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/array_ext.swift /* Array+ext.swift */; };
+		__src_cc_ref_Sources/VaporCLI/cmd_build.swift /* Build.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_build.swift /* Build.swift */; };
+		__src_cc_ref_Sources/VaporCLI/cmd_clean.swift /* Clean.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_clean.swift /* Clean.swift */; };
+		__src_cc_ref_Sources/VaporCLI/cmd_docker.swift /* Docker.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_docker.swift /* Docker.swift */; };
+		__src_cc_ref_Sources/VaporCLI/cmd_help.swift /* Help.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_help.swift /* Help.swift */; };
+		__src_cc_ref_Sources/VaporCLI/cmd_heroku.swift /* Heroku.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_heroku.swift /* Heroku.swift */; };
+		__src_cc_ref_Sources/VaporCLI/cmd_new.swift /* New.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_new.swift /* New.swift */; };
+		__src_cc_ref_Sources/VaporCLI/cmd_run.swift /* Run.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_run.swift /* Run.swift */; };
+		__src_cc_ref_Sources/VaporCLI/cmd_update.swift /* Update.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_update.swift /* Update.swift */; };
+		__src_cc_ref_Sources/VaporCLI/cmd_version.swift /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_version.swift /* Version.swift */; };
+		__src_cc_ref_Sources/VaporCLI/cmd_xcode.swift /* Xcode.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/cmd_xcode.swift /* Xcode.swift */; };
+		__src_cc_ref_Sources/VaporCLI/sequence_ext.swift /* Sequence+ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/sequence_ext.swift /* Sequence+ext.swift */; };
+		__src_cc_ref_Sources/VaporCLI/string_ext.swift /* String+ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/string_ext.swift /* String+ext.swift */; };
+		__src_cc_ref_Sources/VaporCLI/utils.swift /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/utils.swift /* Utils.swift */; };
 		__src_cc_ref_Sources/vapor/main.swift /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/vapor/main.swift /* main.swift */; };
 		__src_cc_ref_Tests/VaporCLI/ArrayExtTests.swift /* ArrayExtTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Tests/VaporCLI/ArrayExtTests.swift /* ArrayExtTests.swift */; };
 /* End PBXBuildFile section */
@@ -53,23 +53,24 @@
 		5AF492671D1D40B000AEC1B0 /* SequenceExtTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SequenceExtTests.swift; sourceTree = "<group>"; };
 		5AF492691D1D58AE00AEC1B0 /* StringExtTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringExtTests.swift; sourceTree = "<group>"; };
 		5AF4926B1D1D659100AEC1B0 /* UtilsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UtilsTests.swift; sourceTree = "<group>"; };
+		5AF4926D1D1D7A6000AEC1B0 /* test */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = test; sourceTree = "<group>"; };
 		__PBXFileRef_Package.swift /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Sources/VaporCLI/Command.swift /* Command.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Command.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Sources/VaporCLI/VaporCLI.swift /* VaporCLI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaporCLI.swift; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/VaporCLI/array_ext.swift /* array_ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = array_ext.swift; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/VaporCLI/cmd_build.swift /* cmd_build.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = cmd_build.swift; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/VaporCLI/cmd_clean.swift /* cmd_clean.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = cmd_clean.swift; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/VaporCLI/cmd_docker.swift /* cmd_docker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = cmd_docker.swift; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/VaporCLI/cmd_help.swift /* cmd_help.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = cmd_help.swift; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/VaporCLI/cmd_heroku.swift /* cmd_heroku.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = cmd_heroku.swift; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/VaporCLI/cmd_new.swift /* cmd_new.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = cmd_new.swift; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/VaporCLI/cmd_run.swift /* cmd_run.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = cmd_run.swift; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/VaporCLI/cmd_update.swift /* cmd_update.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = cmd_update.swift; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/VaporCLI/cmd_version.swift /* cmd_version.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = cmd_version.swift; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/VaporCLI/cmd_xcode.swift /* cmd_xcode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = cmd_xcode.swift; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/VaporCLI/sequence_ext.swift /* sequence_ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = sequence_ext.swift; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/VaporCLI/string_ext.swift /* string_ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = string_ext.swift; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/VaporCLI/utils.swift /* utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = utils.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/VaporCLI/array_ext.swift /* Array+ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+ext.swift"; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/VaporCLI/cmd_build.swift /* Build.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Build.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/VaporCLI/cmd_clean.swift /* Clean.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clean.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/VaporCLI/cmd_docker.swift /* Docker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Docker.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/VaporCLI/cmd_help.swift /* Help.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Help.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/VaporCLI/cmd_heroku.swift /* Heroku.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Heroku.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/VaporCLI/cmd_new.swift /* New.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = New.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/VaporCLI/cmd_run.swift /* Run.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Run.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/VaporCLI/cmd_update.swift /* Update.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Update.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/VaporCLI/cmd_version.swift /* Version.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Version.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/VaporCLI/cmd_xcode.swift /* Xcode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Xcode.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/VaporCLI/sequence_ext.swift /* Sequence+ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sequence+ext.swift"; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/VaporCLI/string_ext.swift /* String+ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+ext.swift"; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/VaporCLI/utils.swift /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Sources/vapor/main.swift /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Tests/VaporCLI/ArrayExtTests.swift /* ArrayExtTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayExtTests.swift; sourceTree = "<group>"; };
 		__PBXFileRef_VaporCLI.xcodeproj/Configs/Project.xcconfig /* Project.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Project.xcconfig; path = VaporCLI.xcodeproj/Configs/Project.xcconfig; sourceTree = "<group>"; };
@@ -113,6 +114,7 @@
 				5AE156791D1C3BC00080C50D /* .travis.yml */,
 				5AE1567A1D1C3BC90080C50D /* Dockerfile */,
 				5AE1567B1D1C3BD80080C50D /* README.md */,
+				5AF4926D1D1D7A6000AEC1B0 /* test */,
 			);
 			name = Misc;
 			sourceTree = "<group>";
@@ -168,23 +170,23 @@
 		"_______Group_VaporCLI" /* VaporCLI */ = {
 			isa = PBXGroup;
 			children = (
-				__PBXFileRef_Sources/VaporCLI/array_ext.swift /* array_ext.swift */,
-				__PBXFileRef_Sources/VaporCLI/cmd_build.swift /* cmd_build.swift */,
-				__PBXFileRef_Sources/VaporCLI/cmd_clean.swift /* cmd_clean.swift */,
-				__PBXFileRef_Sources/VaporCLI/cmd_docker.swift /* cmd_docker.swift */,
-				__PBXFileRef_Sources/VaporCLI/cmd_help.swift /* cmd_help.swift */,
-				__PBXFileRef_Sources/VaporCLI/cmd_heroku.swift /* cmd_heroku.swift */,
-				__PBXFileRef_Sources/VaporCLI/cmd_new.swift /* cmd_new.swift */,
-				__PBXFileRef_Sources/VaporCLI/cmd_run.swift /* cmd_run.swift */,
-				__PBXFileRef_Sources/VaporCLI/cmd_update.swift /* cmd_update.swift */,
-				__PBXFileRef_Sources/VaporCLI/cmd_version.swift /* cmd_version.swift */,
-				__PBXFileRef_Sources/VaporCLI/cmd_xcode.swift /* cmd_xcode.swift */,
+				__PBXFileRef_Sources/VaporCLI/array_ext.swift /* Array+ext.swift */,
+				__PBXFileRef_Sources/VaporCLI/cmd_build.swift /* Build.swift */,
+				__PBXFileRef_Sources/VaporCLI/cmd_clean.swift /* Clean.swift */,
 				__PBXFileRef_Sources/VaporCLI/Command.swift /* Command.swift */,
-				__PBXFileRef_Sources/VaporCLI/sequence_ext.swift /* sequence_ext.swift */,
-				__PBXFileRef_Sources/VaporCLI/string_ext.swift /* string_ext.swift */,
-				__PBXFileRef_Sources/VaporCLI/utils.swift /* utils.swift */,
-				__PBXFileRef_Sources/VaporCLI/VaporCLI.swift /* VaporCLI.swift */,
+				__PBXFileRef_Sources/VaporCLI/cmd_docker.swift /* Docker.swift */,
+				__PBXFileRef_Sources/VaporCLI/cmd_help.swift /* Help.swift */,
+				__PBXFileRef_Sources/VaporCLI/cmd_heroku.swift /* Heroku.swift */,
+				__PBXFileRef_Sources/VaporCLI/cmd_new.swift /* New.swift */,
+				__PBXFileRef_Sources/VaporCLI/cmd_run.swift /* Run.swift */,
+				__PBXFileRef_Sources/VaporCLI/sequence_ext.swift /* Sequence+ext.swift */,
+				__PBXFileRef_Sources/VaporCLI/string_ext.swift /* String+ext.swift */,
+				__PBXFileRef_Sources/VaporCLI/cmd_update.swift /* Update.swift */,
+				__PBXFileRef_Sources/VaporCLI/utils.swift /* Utils.swift */,
 				__PBXFileRef_VaporCLI_Info.plist /* VaporCLI_Info.plist */,
+				__PBXFileRef_Sources/VaporCLI/VaporCLI.swift /* VaporCLI.swift */,
+				__PBXFileRef_Sources/VaporCLI/cmd_version.swift /* Version.swift */,
+				__PBXFileRef_Sources/VaporCLI/cmd_xcode.swift /* Xcode.swift */,
 			);
 			name = VaporCLI;
 			path = Sources/VaporCLI;
@@ -307,21 +309,21 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
-				__src_cc_ref_Sources/VaporCLI/array_ext.swift /* array_ext.swift in Sources */,
-				__src_cc_ref_Sources/VaporCLI/cmd_build.swift /* cmd_build.swift in Sources */,
-				__src_cc_ref_Sources/VaporCLI/cmd_clean.swift /* cmd_clean.swift in Sources */,
-				__src_cc_ref_Sources/VaporCLI/cmd_docker.swift /* cmd_docker.swift in Sources */,
-				__src_cc_ref_Sources/VaporCLI/cmd_help.swift /* cmd_help.swift in Sources */,
-				__src_cc_ref_Sources/VaporCLI/cmd_heroku.swift /* cmd_heroku.swift in Sources */,
-				__src_cc_ref_Sources/VaporCLI/cmd_new.swift /* cmd_new.swift in Sources */,
-				__src_cc_ref_Sources/VaporCLI/cmd_run.swift /* cmd_run.swift in Sources */,
-				__src_cc_ref_Sources/VaporCLI/cmd_update.swift /* cmd_update.swift in Sources */,
-				__src_cc_ref_Sources/VaporCLI/cmd_version.swift /* cmd_version.swift in Sources */,
-				__src_cc_ref_Sources/VaporCLI/cmd_xcode.swift /* cmd_xcode.swift in Sources */,
+				__src_cc_ref_Sources/VaporCLI/array_ext.swift /* Array+ext.swift in Sources */,
+				__src_cc_ref_Sources/VaporCLI/cmd_build.swift /* Build.swift in Sources */,
+				__src_cc_ref_Sources/VaporCLI/cmd_clean.swift /* Clean.swift in Sources */,
+				__src_cc_ref_Sources/VaporCLI/cmd_docker.swift /* Docker.swift in Sources */,
+				__src_cc_ref_Sources/VaporCLI/cmd_help.swift /* Help.swift in Sources */,
+				__src_cc_ref_Sources/VaporCLI/cmd_heroku.swift /* Heroku.swift in Sources */,
+				__src_cc_ref_Sources/VaporCLI/cmd_new.swift /* New.swift in Sources */,
+				__src_cc_ref_Sources/VaporCLI/cmd_run.swift /* Run.swift in Sources */,
+				__src_cc_ref_Sources/VaporCLI/cmd_update.swift /* Update.swift in Sources */,
+				__src_cc_ref_Sources/VaporCLI/cmd_version.swift /* Version.swift in Sources */,
+				__src_cc_ref_Sources/VaporCLI/cmd_xcode.swift /* Xcode.swift in Sources */,
 				__src_cc_ref_Sources/VaporCLI/Command.swift /* Command.swift in Sources */,
-				__src_cc_ref_Sources/VaporCLI/sequence_ext.swift /* sequence_ext.swift in Sources */,
-				__src_cc_ref_Sources/VaporCLI/string_ext.swift /* string_ext.swift in Sources */,
-				__src_cc_ref_Sources/VaporCLI/utils.swift /* utils.swift in Sources */,
+				__src_cc_ref_Sources/VaporCLI/sequence_ext.swift /* Sequence+ext.swift in Sources */,
+				__src_cc_ref_Sources/VaporCLI/string_ext.swift /* String+ext.swift in Sources */,
+				__src_cc_ref_Sources/VaporCLI/utils.swift /* Utils.swift in Sources */,
 				__src_cc_ref_Sources/VaporCLI/VaporCLI.swift /* VaporCLI.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
