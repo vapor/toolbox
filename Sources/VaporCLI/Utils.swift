@@ -1,4 +1,4 @@
-import Libc
+import libc
 
 public protocol PosixSubsystem {
     func system(_ command: String) -> Int32
@@ -6,7 +6,7 @@ public protocol PosixSubsystem {
 
 public struct Shell: PosixSubsystem {
     public func system(_ command: String) -> Int32 {
-        return Libc.system(command)
+        return libc.system(command)
     }
 }
 

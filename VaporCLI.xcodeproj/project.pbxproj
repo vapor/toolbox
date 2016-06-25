@@ -7,12 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		_LinkFileRef_Libc_via_VaporCLI /* Libc.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_Libc" /* Libc.framework */; };
-		_LinkFileRef_Libc_via_VaporCLITestSuite /* Libc.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_Libc" /* Libc.framework */; };
-		_LinkFileRef_Libc_via_vapor /* Libc.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_Libc" /* Libc.framework */; };
 		_LinkFileRef_VaporCLI_via_VaporCLITestSuite /* VaporCLI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_VaporCLI" /* VaporCLI.framework */; };
 		_LinkFileRef_VaporCLI_via_vapor /* VaporCLI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_VaporCLI" /* VaporCLI.framework */; };
-		__src_cc_ref_Sources/Libc/libc.swift /* libc.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/Libc/libc.swift /* libc.swift */; };
+		_LinkFileRef_libc_via_VaporCLI /* libc.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_libc" /* libc.framework */; };
+		_LinkFileRef_libc_via_VaporCLITestSuite /* libc.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_libc" /* libc.framework */; };
+		_LinkFileRef_libc_via_vapor /* libc.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_libc" /* libc.framework */; };
 		"__src_cc_ref_Sources/VaporCLI/Array+ext.swift" /* Array+ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Sources/VaporCLI/Array+ext.swift" /* Array+ext.swift */; };
 		__src_cc_ref_Sources/VaporCLI/Build.swift /* Build.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/Build.swift /* Build.swift */; };
 		__src_cc_ref_Sources/VaporCLI/Clean.swift /* Clean.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/Clean.swift /* Clean.swift */; };
@@ -29,6 +28,7 @@
 		__src_cc_ref_Sources/VaporCLI/VaporCLI.swift /* VaporCLI.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/VaporCLI.swift /* VaporCLI.swift */; };
 		__src_cc_ref_Sources/VaporCLI/Version.swift /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/Version.swift /* Version.swift */; };
 		__src_cc_ref_Sources/VaporCLI/Xcode.swift /* Xcode.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/VaporCLI/Xcode.swift /* Xcode.swift */; };
+		__src_cc_ref_Sources/libc/libc.swift /* libc.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/libc/libc.swift /* libc.swift */; };
 		__src_cc_ref_Sources/vapor/main.swift /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/vapor/main.swift /* main.swift */; };
 		__src_cc_ref_Tests/VaporCLI/ArrayExtTests.swift /* ArrayExtTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Tests/VaporCLI/ArrayExtTests.swift /* ArrayExtTests.swift */; };
 		__src_cc_ref_Tests/VaporCLI/CmdDockerTests.swift /* CmdDockerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Tests/VaporCLI/CmdDockerTests.swift /* CmdDockerTests.swift */; };
@@ -38,26 +38,24 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		5AF492731D1D93A000AEC1B0 /* PBXContainerItemProxy */ = {
+		5A2D507A1D1ED57F008F7FF4 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = __RootObject_ /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "______Target_VaporCLI";
 			remoteInfo = VaporCLI;
 		};
-		5AF492741D1D93A000AEC1B0 /* PBXContainerItemProxy */ = {
+		5A2D507B1D1ED57F008F7FF4 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = __RootObject_ /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = "______Target_Libc";
-			remoteInfo = Libc;
+			remoteGlobalIDString = "______Target_libc";
+			remoteInfo = libc;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		__PBXFileRef_Libc_Info.plist /* Libc_Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Libc_Info.plist; path = VaporCLI.xcodeproj/Libc_Info.plist; sourceTree = SOURCE_ROOT; };
 		__PBXFileRef_Package.swift /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/Libc/libc.swift /* libc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = libc.swift; sourceTree = "<group>"; };
 		"__PBXFileRef_Sources/VaporCLI/Array+ext.swift" /* Array+ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+ext.swift"; sourceTree = "<group>"; };
 		__PBXFileRef_Sources/VaporCLI/Build.swift /* Build.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Build.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Sources/VaporCLI/Clean.swift /* Clean.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clean.swift; sourceTree = "<group>"; };
@@ -74,6 +72,7 @@
 		__PBXFileRef_Sources/VaporCLI/VaporCLI.swift /* VaporCLI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaporCLI.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Sources/VaporCLI/Version.swift /* Version.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Version.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Sources/VaporCLI/Xcode.swift /* Xcode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Xcode.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/libc/libc.swift /* libc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = libc.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Sources/vapor/main.swift /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Tests/VaporCLI/ArrayExtTests.swift /* ArrayExtTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayExtTests.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Tests/VaporCLI/CmdDockerTests.swift /* CmdDockerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CmdDockerTests.swift; sourceTree = "<group>"; };
@@ -83,25 +82,19 @@
 		__PBXFileRef_VaporCLI.xcodeproj/Configs/Project.xcconfig /* Project.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Project.xcconfig; path = VaporCLI.xcodeproj/Configs/Project.xcconfig; sourceTree = "<group>"; };
 		__PBXFileRef_VaporCLITestSuite_Info.plist /* VaporCLITestSuite_Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = VaporCLITestSuite_Info.plist; path = VaporCLI.xcodeproj/VaporCLITestSuite_Info.plist; sourceTree = SOURCE_ROOT; };
 		__PBXFileRef_VaporCLI_Info.plist /* VaporCLI_Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = VaporCLI_Info.plist; path = VaporCLI.xcodeproj/VaporCLI_Info.plist; sourceTree = SOURCE_ROOT; };
-		"_____Product_Libc" /* Libc.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Libc.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		__PBXFileRef_libc_Info.plist /* libc_Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = libc_Info.plist; path = VaporCLI.xcodeproj/libc_Info.plist; sourceTree = SOURCE_ROOT; };
 		"_____Product_VaporCLI" /* VaporCLI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VaporCLI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"_____Product_VaporCLITestSuite" /* VaporCLITestSuite.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = VaporCLITestSuite.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		"_____Product_libc" /* libc.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = libc.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"_____Product_vapor" /* vapor */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; path = vapor; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		"___LinkPhase_Libc" /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 0;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		"___LinkPhase_VaporCLI" /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
 			files = (
-				_LinkFileRef_Libc_via_VaporCLI /* Libc.framework in Frameworks */,
+				_LinkFileRef_libc_via_VaporCLI /* libc.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -110,7 +103,14 @@
 			buildActionMask = 0;
 			files = (
 				_LinkFileRef_VaporCLI_via_VaporCLITestSuite /* VaporCLI.framework in Frameworks */,
-				_LinkFileRef_Libc_via_VaporCLITestSuite /* Libc.framework in Frameworks */,
+				_LinkFileRef_libc_via_VaporCLITestSuite /* libc.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		"___LinkPhase_libc" /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 0;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -119,7 +119,7 @@
 			buildActionMask = 0;
 			files = (
 				_LinkFileRef_VaporCLI_via_vapor /* VaporCLI.framework in Frameworks */,
-				_LinkFileRef_Libc_via_vapor /* Libc.framework in Frameworks */,
+				_LinkFileRef_libc_via_vapor /* libc.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -149,7 +149,7 @@
 			isa = PBXGroup;
 			children = (
 				TestProducts_ /* Tests */,
-				"_____Product_Libc" /* Libc.framework */,
+				"_____Product_libc" /* libc.framework */,
 				"_____Product_vapor" /* vapor */,
 				"_____Product_VaporCLI" /* VaporCLI.framework */,
 			);
@@ -167,21 +167,11 @@
 		"_____Sources_" /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				"_______Group_Libc" /* Libc */,
+				"_______Group_libc" /* libc */,
 				"_______Group_vapor" /* vapor */,
 				"_______Group_VaporCLI" /* VaporCLI */,
 			);
 			name = Sources;
-			sourceTree = "<group>";
-		};
-		"_______Group_Libc" /* Libc */ = {
-			isa = PBXGroup;
-			children = (
-				__PBXFileRef_Sources/Libc/libc.swift /* libc.swift */,
-				__PBXFileRef_Libc_Info.plist /* Libc_Info.plist */,
-			);
-			name = Libc;
-			path = Sources/Libc;
 			sourceTree = "<group>";
 		};
 		"_______Group_VaporCLI" /* VaporCLI */ = {
@@ -223,6 +213,16 @@
 			path = Tests/VaporCLI;
 			sourceTree = "<group>";
 		};
+		"_______Group_libc" /* libc */ = {
+			isa = PBXGroup;
+			children = (
+				__PBXFileRef_Sources/libc/libc.swift /* libc.swift */,
+				__PBXFileRef_libc_Info.plist /* libc_Info.plist */,
+			);
+			name = libc;
+			path = Sources/libc;
+			sourceTree = "<group>";
+		};
 		"_______Group_vapor" /* vapor */ = {
 			isa = PBXGroup;
 			children = (
@@ -243,22 +243,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		"______Target_Libc" /* Libc */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = "_______Confs_Libc" /* Build configuration list for PBXNativeTarget "Libc" */;
-			buildPhases = (
-				CompilePhase_Libc /* Sources */,
-				"___LinkPhase_Libc" /* Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = Libc;
-			productName = Libc;
-			productReference = "_____Product_Libc" /* Libc.framework */;
-			productType = "com.apple.product-type.framework";
-		};
 		"______Target_VaporCLI" /* VaporCLI */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = "_______Confs_VaporCLI" /* Build configuration list for PBXNativeTarget "VaporCLI" */;
@@ -269,7 +253,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				__Dependency_Libc /* PBXTargetDependency */,
+				__Dependency_libc /* PBXTargetDependency */,
 			);
 			name = VaporCLI;
 			productName = VaporCLI;
@@ -292,6 +276,22 @@
 			productName = VaporCLITestSuite;
 			productReference = "_____Product_VaporCLITestSuite" /* VaporCLITestSuite.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		"______Target_libc" /* libc */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = "_______Confs_libc" /* Build configuration list for PBXNativeTarget "libc" */;
+			buildPhases = (
+				CompilePhase_libc /* Sources */,
+				"___LinkPhase_libc" /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = libc;
+			productName = libc;
+			productReference = "_____Product_libc" /* libc.framework */;
+			productType = "com.apple.product-type.framework";
 		};
 		"______Target_vapor" /* vapor */ = {
 			isa = PBXNativeTarget;
@@ -330,7 +330,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				"______Target_Libc" /* Libc */,
+				"______Target_libc" /* libc */,
 				"______Target_vapor" /* vapor */,
 				"______Target_VaporCLI" /* VaporCLI */,
 				"______Target_VaporCLITestSuite" /* VaporCLITestSuite */,
@@ -339,14 +339,6 @@
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
-		CompilePhase_Libc /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 0;
-			files = (
-				__src_cc_ref_Sources/Libc/libc.swift /* libc.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		CompilePhase_VaporCLI /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
@@ -382,6 +374,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CompilePhase_libc /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 0;
+			files = (
+				__src_cc_ref_Sources/libc/libc.swift /* libc.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CompilePhase_vapor /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
@@ -393,33 +393,19 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		__Dependency_Libc /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "______Target_Libc" /* Libc */;
-			targetProxy = 5AF492741D1D93A000AEC1B0 /* PBXContainerItemProxy */;
-		};
 		__Dependency_VaporCLI /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "______Target_VaporCLI" /* VaporCLI */;
-			targetProxy = 5AF492731D1D93A000AEC1B0 /* PBXContainerItemProxy */;
+			targetProxy = 5A2D507A1D1ED57F008F7FF4 /* PBXContainerItemProxy */;
+		};
+		__Dependency_libc /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = "______Target_libc" /* libc */;
+			targetProxy = 5A2D507B1D1ED57F008F7FF4 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		_ReleaseConf_Libc /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ENABLE_TESTABILITY = YES;
-				FRAMEWORK_SEARCH_PATHS = "$(PLATFORM_DIR)/Developer/Library/Frameworks";
-				INFOPLIST_FILE = VaporCLI.xcodeproj/Libc_Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
-				OTHER_LDFLAGS = "$(inherited)";
-				OTHER_SWIFT_FLAGS = "$(inherited)";
-				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-			};
-			name = Release;
-		};
 		_ReleaseConf_VaporCLI /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -446,6 +432,20 @@
 			};
 			name = Release;
 		};
+		_ReleaseConf_libc /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(PLATFORM_DIR)/Developer/Library/Frameworks";
+				INFOPLIST_FILE = VaporCLI.xcodeproj/libc_Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
+				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+			};
+			name = Release;
+		};
 		_ReleaseConf_vapor /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -457,21 +457,6 @@
 				SWIFT_FORCE_STATIC_LINK_STDLIB = NO;
 			};
 			name = Release;
-		};
-		"___DebugConf_Libc" /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ENABLE_TESTABILITY = YES;
-				FRAMEWORK_SEARCH_PATHS = "$(PLATFORM_DIR)/Developer/Library/Frameworks";
-				INFOPLIST_FILE = VaporCLI.xcodeproj/Libc_Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
-				OTHER_LDFLAGS = "$(inherited)";
-				OTHER_SWIFT_FLAGS = "$(inherited)";
-				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-			};
-			name = Debug;
 		};
 		"___DebugConf_VaporCLI" /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -497,6 +482,21 @@
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
 				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_SWIFT_FLAGS = "$(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		"___DebugConf_libc" /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(PLATFORM_DIR)/Developer/Library/Frameworks";
+				INFOPLIST_FILE = VaporCLI.xcodeproj/libc_Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
+				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -540,15 +540,6 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		"_______Confs_Libc" /* Build configuration list for PBXNativeTarget "Libc" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				"___DebugConf_Libc" /* Debug */,
-				_ReleaseConf_Libc /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
-		};
 		"_______Confs_VaporCLI" /* Build configuration list for PBXNativeTarget "VaporCLI" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -563,6 +554,15 @@
 			buildConfigurations = (
 				"___DebugConf_VaporCLITestSuite" /* Debug */,
 				_ReleaseConf_VaporCLITestSuite /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		"_______Confs_libc" /* Build configuration list for PBXNativeTarget "libc" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				"___DebugConf_libc" /* Debug */,
+				_ReleaseConf_libc /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

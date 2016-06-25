@@ -5,9 +5,9 @@
       <BuildActionEntry buildForTesting = "YES" buildForRunning = "YES" buildForProfiling = "YES" buildForArchiving = "YES" buildForAnalyzing = "YES">
         <BuildableReference
           BuildableIdentifier = "primary"
-          BlueprintIdentifier = "______Target_Libc"
-          BuildableName = "Libc.framework"
-          BlueprintName = "Libc"
+          BlueprintIdentifier = "______Target_libc"
+          BuildableName = "libc.framework"
+          BlueprintName = "libc"
           ReferencedContainer = "container:VaporCLI.xcodeproj">
         </BuildableReference>
       </BuildActionEntry>
