@@ -4,6 +4,7 @@
 # for the motivation for this script
 
 LOGFILE=test.log
+PLATFORMS=${1:-"macos linux"}
 set -euo pipefail
 
 function build_and_test() {
@@ -16,11 +17,13 @@ if [ ! -f /.dockerenv ]; then
     # We're not in a docker container
     # this is where we start when run from the host
     rm $LOGFILE
-    build_and_test
-    # we're going to call this same script from inside a container next
-    # to run the Linux tests, effectively jumping to the else branch
-    IMG=qutheory/swift:$(cat .swift-version)
-    docker run --rm -it -v $PWD:/vapor --entrypoint /vapor/test $IMG
+    [[ $PLATFORMS =~ 'macos' ]] && build_and_test
+    if [[ $PLATFORMS =~ 'linux' ]]; then
+        # we're going to call this same script from inside a container next
+        # to run the Linux tests, effectively jumping to the else branch
+        IMG=qutheory/swift:$(cat .swift-version)
+        docker run --rm -it -v $PWD:/vapor --entrypoint /vapor/test $IMG
+    fi
 else
     # Now we're in a docker container and run the Linux tests
     build_and_test
