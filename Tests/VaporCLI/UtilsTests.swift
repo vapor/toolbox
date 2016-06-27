@@ -41,9 +41,9 @@ class UtilsTests: XCTestCase {
         var executed = [String]()
         let shell = TestShell(onExecute: { cmd in executed.append(cmd) })
         do {
-            try ShellCommand("ls -l").run(runner: shell)
+            try ShellCommand("ls -l").run(in: shell)
             // don't even need to wrap the String as it's typealised to ShellCommand:
-            try "ls -la".run(runner: shell)
+            try "ls -la".run(in: shell)
             XCTAssertEqual(executed, ["ls -l", "ls -la"])
         } catch {
             XCTFail()
@@ -54,7 +54,7 @@ class UtilsTests: XCTestCase {
         var shell = TestShell()
         shell.result = 2
         do {
-            try "foo".run(runner: shell)
+            try "foo".run(in: shell)
             XCTFail()
         } catch Error.cancelled {
             // ok
@@ -67,7 +67,7 @@ class UtilsTests: XCTestCase {
         var shell = TestShell()
         shell.result = 1
         do {
-            try "foo".run(runner: shell)
+            try "foo".run(in: shell)
             XCTFail()
         } catch Error.system(let res) {
             XCTAssertEqual(res, 1)

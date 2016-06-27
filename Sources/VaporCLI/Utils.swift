@@ -11,14 +11,14 @@ public struct Shell: PosixSubsystem {
 }
 
 public protocol Runnable {
-    func run(runner: PosixSubsystem) throws
+    func run(in: PosixSubsystem) throws
 }
 
 public typealias ShellCommand = String
 
 extension ShellCommand: Runnable {
-    public func run(runner: PosixSubsystem) throws {
-        let result = runner.system(self)
+    public func run(in shell: PosixSubsystem) throws {
+        let result = shell.system(self)
 
         if result == 2 {
             throw Error.cancelled

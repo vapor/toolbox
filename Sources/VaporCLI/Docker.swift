@@ -51,7 +51,7 @@ extension Docker {
 
             do {
                 print("Downloading Dockerfile...")
-                try "curl -L \(quiet) docker.qutheory.io -o Dockerfile".run(runner: shell)
+                try "curl -L \(quiet) docker.qutheory.io -o Dockerfile".run(in: shell)
             } catch {
                 fail("Could not download Dockerfile.")
             }
@@ -85,7 +85,7 @@ extension Docker {
                 print("Building docker image with Swift version: \(swiftVersion)")
                 print("This may take a few minutes if no layers are cached...")
                 let cmd = "docker build --rm -t \(imageName) --build-arg SWIFT_VERSION=\(swiftVersion) ."
-                try cmd.run(runner: shell)
+                try cmd.run(in: shell)
             } catch Error.system(let result) {
                 if result == 32512 {
                     print()
@@ -128,7 +128,7 @@ extension Docker {
             let cmd = "docker run --rm -it -v $(PWD):/vapor -p 8080:8080 \(imageName)"
             do {
                 print("Launching app with image \(imageName)")
-                try cmd.run(runner: shell)
+                try cmd.run(in: shell)
             } catch Error.system(let result) {
                 if result == 33280 {
                     // Sven: Attempt to identify if the user has ctrl-c'd out of the container
@@ -169,7 +169,7 @@ extension Docker {
             do {
                 print("Starting bash in image \(imageName)")
                 let cmd = "docker run --rm -it -v $(PWD):/vapor --entrypoint bash \(imageName)"
-                try cmd.run(runner: shell)
+                try cmd.run(in: shell)
             } catch Error.system(let result) {
                 if result != 33280 {
                     fail("Could not enter Docker container")
