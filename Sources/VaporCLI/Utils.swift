@@ -3,13 +3,6 @@ import libc
 public protocol PosixSubsystem {
     func system(_ command: String) -> Int32
     func fileExists(_ path: String) -> Bool
-    func fail(_ message: String, cancelled: Bool)
-}
-
-extension PosixSubsystem {
-    public func fail(_ message: String) {
-        self.fail(message, cancelled: false)
-    }
 }
 
 public struct Shell: PosixSubsystem {
@@ -22,14 +15,6 @@ public struct Shell: PosixSubsystem {
         return libc.system("ls \(path) > /dev/null 2>&1") == 0
     }
 
-    public func fail(_ message: String, cancelled: Bool) {
-        print()
-        print("Error: \(message)")
-        if !cancelled {
-            print("Note: Make sure you are using Swift 3.0 Snapshot 06-06")
-        }
-        libc.exit(1)
-    }
 }
 
 public protocol Runnable {
@@ -64,8 +49,9 @@ extension ShellCommand: Runnable {
     exit(1)
 }
 
-enum Error: ErrorProtocol { // Errors pertaining to running commands
+public enum Error: ErrorProtocol { // Errors pertaining to running commands
     case system(Int32)
+    case failed(String) // user facing error, thrown by execute
     case cancelled
     case terminalSize
 }

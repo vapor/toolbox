@@ -45,20 +45,27 @@ class CmdDockerTests: XCTestCase {
     // MARK: Init subcommmand
 
     func test_init() {
-        Docker.execute(with: ["init"], in: shell)
+        let _ = try? Docker.execute(with: ["init"], in: shell)
         let expected: [LogEntry] = [.ok("curl -L -s docker.qutheory.io -o Dockerfile")]
         XCTAssertEqual(log, expected)
     }
 
     func test_init_verbose() {
-        Docker.execute(with: ["init", "--verbose"], in: shell)
+        let _ = try? Docker.execute(with: ["init", "--verbose"], in: shell)
         XCTAssertEqual(log, [.ok("curl -L  docker.qutheory.io -o Dockerfile")])
     }
 
     func test_init_Dockerfile_exists() {
         shell.fileExists = true
-        Docker.execute(with: ["init"], in: shell)
-        XCTAssertEqual(log, [.failed("A Dockerfile already exists in the current directory.\nPlease move it and try again or run `vapor docker build`.")])
+        do {
+            try Docker.execute(with: ["init"], in: shell)
+            XCTFail("should not be reached, expected error to be thrown")
+        } catch Error.failed(let msg) {
+            XCTAssert(msg.hasPrefix("A Dockerfile already exists"))
+            XCTAssertEqual(log, [], "expected no commands to be run")
+        } catch {
+            XCTFail("unexpected error")
+        }
     }
 
     func test_init_download_failure() {
@@ -70,11 +77,15 @@ class CmdDockerTests: XCTestCase {
                 return .ok(cmd)
             }
         }
-        Docker.execute(with: ["init"], in: shell)
-        XCTAssertEqual(log, [
-            .error(7),
-            .failed("Could not download Dockerfile.")
-            ])
+        do {
+            try Docker.execute(with: ["init"], in: shell)
+            XCTFail("should not be reached, expected error to be thrown")
+        } catch Error.failed(let msg) {
+            XCTAssertEqual(msg, "Could not download Dockerfile.")
+            XCTAssertEqual(log, [.error(7)])
+        } catch {
+            XCTFail("unexpected error")
+        }
     }
 
     func test_init_help() {

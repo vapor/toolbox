@@ -10,8 +10,8 @@ struct Docker: Command {
         Docker.Enter.self
     ]
 
-    static func execute(with args: [String], in shell: PosixSubsystem) {
-        executeSubCommand(with: args, in: shell)
+    static func execute(with args: [String], in shell: PosixSubsystem) throws {
+        try executeSubCommand(with: args, in: shell)
     }
 }
 
@@ -42,22 +42,18 @@ extension Docker {
     struct Init: Command {
         static let id = "init"
 
-        static func execute(with args: [String], in shell: PosixSubsystem) {
+        static func execute(with args: [String], in shell: PosixSubsystem) throws {
             let quiet = args.contains("--verbose") ? "" : "-s"
 
             if shell.fileExists("Dockerfile") {
-                shell.fail("A Dockerfile already exists in the current directory.\nPlease move it and try again or run `vapor docker build`.")
-                // FIXME: need to propagate error up to exit command
-                return
+                throw Error.failed("A Dockerfile already exists in the current directory.\nPlease move it and try again or run `vapor docker build`.")
             }
 
             do {
                 print("Downloading Dockerfile...")
                 try "curl -L \(quiet) docker.qutheory.io -o Dockerfile".run(in: shell)
             } catch {
-                shell.fail("Could not download Dockerfile.")
-                // FIXME: need to propagate error up to exit command
-                return
+                throw Error.failed("Could not download Dockerfile.")
             }
 
             print("Dockerfile created.")
@@ -77,14 +73,12 @@ extension Docker {
     struct Build: Command {
         static let id = "build"
 
-        static func execute(with args: [String], in shell: PosixSubsystem) {
+        static func execute(with args: [String], in shell: PosixSubsystem) throws {
             guard let
                 swiftVersion = Docker.swiftVersion,
                 imageName = Docker.imageName
                 else {
-                    shell.fail("Could not determine Swift version (check your .swift-version file)")
-                    // FIXME: need to propagate error up to exit command
-                    return
+                    throw Error.failed("Could not determine Swift version (check your .swift-version file)")
             }
 
             do {
@@ -105,20 +99,16 @@ extension Docker {
                     print("or try running the following snippet:")
                     print("`eval \"$(docker-machine env default)\"`")
                 }
-                shell.fail("Could not initialize Docker")
-                // FIXME: need to propagate error up to exit command
-                return
+                throw Error.failed("Could not initialize Docker")
             } catch {
-                shell.fail("Could not initialize Docker")
-                // FIXME: need to propagate error up to exit command
-                return
+                throw Error.failed("Could not initialize Docker")
             }
         }
 
         static var help: [String] {
             return [
-                       "Build the docker image, using the swift",
-                       "version specified in .swift-version."
+                "Build the docker image, using the swift",
+                "version specified in .swift-version."
             ]
         }
     }
@@ -128,13 +118,11 @@ extension Docker {
     struct Run: Command {
         static let id = "run"
 
-        static func execute(with args: [String], in shell: PosixSubsystem) {
+        static func execute(with args: [String], in shell: PosixSubsystem) throws {
             guard let
                 imageName = Docker.imageName
                 else {
-                    shell.fail("Could not determine Swift version (check your .swift-version file)")
-                    // FIXME: need to propagate error up to exit command
-                    return
+                    throw Error.failed("Could not determine Swift version (check your .swift-version file)")
             }
 
             let cmd = "docker run --rm -it -v $(PWD):/vapor -p 8080:8080 \(imageName)"
@@ -150,21 +138,17 @@ extension Docker {
                     // testing showed that other means of terminating the command returns different
                     // values.
                 } else {
-                    shell.fail("docker run command failed, command was\n\(cmd)")
-                    // FIXME: need to propagate error up to exit command
-                    return
+                    throw Error.failed("docker run command failed, command was\n\(cmd)")
                 }
             } catch {
-                shell.fail("docker run command failed, command was\n\(cmd)")
-                // FIXME: need to propagate error up to exit command
-                return
+                throw Error.failed("docker run command failed, command was\n\(cmd)")
             }
         }
 
         static var help: [String] {
             return [
-                       "Run the app in a docker container with the",
-                       "image created by running 'docker build'"
+                "Run the app in a docker container with the",
+                "image created by running 'docker build'"
             ]
         }
     }
@@ -175,13 +159,11 @@ extension Docker {
     struct Enter: Command {
         static let id = "enter"
 
-        static func execute(with args: [String], in shell: PosixSubsystem) {
+        static func execute(with args: [String], in shell: PosixSubsystem) throws {
             guard let
                 imageName = Docker.imageName
                 else {
-                    shell.fail("Could not determine Swift version (check your .swift-version file)")
-                    // FIXME: need to propagate error up to exit command
-                    return
+                    throw Error.failed("Could not determine Swift version (check your .swift-version file)")
             }
 
             do {
@@ -190,21 +172,17 @@ extension Docker {
                 try cmd.run(in: shell)
             } catch Error.system(let result) {
                 if result != 33280 {
-                    shell.fail("Could not enter Docker container")
-                    // FIXME: need to propagate error up to exit command
-                    return
+                    throw Error.failed("Could not enter Docker container")
                 }
             } catch {
-                shell.fail("Could not enter Docker container")
-                // FIXME: need to propagate error up to exit command
-                return
+                throw Error.failed("Could not enter Docker container")
             }
         }
         
         static var help: [String] {
             return [
-                       "Enter the docker container (useful for",
-                       "debugging purposes)"
+                "Enter the docker container (useful for",
+                "debugging purposes)"
             ]
         }
     }

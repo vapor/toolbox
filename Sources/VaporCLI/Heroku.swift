@@ -14,8 +14,8 @@ struct Heroku: Command {
                                                  Heroku.Init.self,
                                                  ]
 
-    static func execute(with args: [String], in shell: PosixSubsystem) {
-        executeSubCommand(with: args, in: shell)
+    static func execute(with args: [String], in shell: PosixSubsystem) throws {
+        try executeSubCommand(with: args, in: shell)
     }
 }
 
