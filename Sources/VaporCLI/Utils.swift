@@ -2,11 +2,33 @@ import libc
 
 public protocol PosixSubsystem {
     func system(_ command: String) -> Int32
+    func fileExists(_ path: String) -> Bool
+    func fail(_ message: String, cancelled: Bool)
+}
+
+extension PosixSubsystem {
+    public func fail(_ message: String) {
+        self.fail(message, cancelled: false)
+    }
 }
 
 public struct Shell: PosixSubsystem {
+
     public func system(_ command: String) -> Int32 {
         return libc.system(command)
+    }
+
+    public func fileExists(_ path: String) -> Bool {
+        return libc.system("ls \(path) > /dev/null 2>&1") == 0
+    }
+
+    public func fail(_ message: String, cancelled: Bool) {
+        print()
+        print("Error: \(message)")
+        if !cancelled {
+            print("Note: Make sure you are using Swift 3.0 Snapshot 06-06")
+        }
+        libc.exit(1)
     }
 }
 
@@ -17,6 +39,7 @@ public protocol Runnable {
 public typealias ShellCommand = String
 
 extension ShellCommand: Runnable {
+
     public func run(in shell: PosixSubsystem) throws {
         let result = shell.system(self)
 
@@ -26,6 +49,7 @@ extension ShellCommand: Runnable {
             throw Error.system(result)
         }
     }
+    
 }
 
 // Utility functions
@@ -79,10 +103,6 @@ func getInput() -> String {
 
 func commandExists(_ command: String) -> Bool {
     return system("hash \(command) 2>/dev/null") == 0
-}
-
-func fileExists(_ fileName: String) -> Bool {
-    return system("ls \(fileName) > /dev/null 2>&1") == 0
 }
 
 func gitHistoryIsClean() -> Bool {

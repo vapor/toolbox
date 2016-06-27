@@ -45,15 +45,19 @@ extension Docker {
         static func execute(with args: [String], in directory: String, shell: PosixSubsystem) {
             let quiet = args.contains("--verbose") ? "" : "-s"
 
-            if fileExists("Dockerfile") {
-                fail("A Dockerfile already exists in the current directory.\nPlease move it and try again or run `vapor docker build`.")
+            if shell.fileExists("Dockerfile") {
+                shell.fail("A Dockerfile already exists in the current directory.\nPlease move it and try again or run `vapor docker build`.")
+                // FIXME: need to propagate error up to exit command
+                return
             }
 
             do {
                 print("Downloading Dockerfile...")
                 try "curl -L \(quiet) docker.qutheory.io -o Dockerfile".run(in: shell)
             } catch {
-                fail("Could not download Dockerfile.")
+                shell.fail("Could not download Dockerfile.")
+                // FIXME: need to propagate error up to exit command
+                return
             }
 
             print("Dockerfile created.")
@@ -78,7 +82,9 @@ extension Docker {
                 swiftVersion = Docker.swiftVersion,
                 imageName = Docker.imageName
                 else {
-                    fail("Could not determine Swift version (check your .swift-version file)")
+                    shell.fail("Could not determine Swift version (check your .swift-version file)")
+                    // FIXME: need to propagate error up to exit command
+                    return
             }
 
             do {
@@ -99,9 +105,13 @@ extension Docker {
                     print("or try running the following snippet:")
                     print("`eval \"$(docker-machine env default)\"`")
                 }
-                fail("Could not initialize Docker")
+                shell.fail("Could not initialize Docker")
+                // FIXME: need to propagate error up to exit command
+                return
             } catch {
-                fail("Could not initialize Docker")
+                shell.fail("Could not initialize Docker")
+                // FIXME: need to propagate error up to exit command
+                return
             }
         }
 
@@ -122,7 +132,9 @@ extension Docker {
             guard let
                 imageName = Docker.imageName
                 else {
-                    fail("Could not determine Swift version (check your .swift-version file)")
+                    shell.fail("Could not determine Swift version (check your .swift-version file)")
+                    // FIXME: need to propagate error up to exit command
+                    return
             }
 
             let cmd = "docker run --rm -it -v $(PWD):/vapor -p 8080:8080 \(imageName)"
@@ -138,10 +150,14 @@ extension Docker {
                     // testing showed that other means of terminating the command returns different
                     // values.
                 } else {
-                    fail("docker run command failed, command was\n\(cmd)")
+                    shell.fail("docker run command failed, command was\n\(cmd)")
+                    // FIXME: need to propagate error up to exit command
+                    return
                 }
             } catch {
-                fail("docker run command failed, command was\n\(cmd)")
+                shell.fail("docker run command failed, command was\n\(cmd)")
+                // FIXME: need to propagate error up to exit command
+                return
             }
         }
 
@@ -163,7 +179,9 @@ extension Docker {
             guard let
                 imageName = Docker.imageName
                 else {
-                    fail("Could not determine Swift version (check your .swift-version file)")
+                    shell.fail("Could not determine Swift version (check your .swift-version file)")
+                    // FIXME: need to propagate error up to exit command
+                    return
             }
 
             do {
@@ -172,10 +190,14 @@ extension Docker {
                 try cmd.run(in: shell)
             } catch Error.system(let result) {
                 if result != 33280 {
-                    fail("Could not enter Docker container")
+                    shell.fail("Could not enter Docker container")
+                    // FIXME: need to propagate error up to exit command
+                    return
                 }
             } catch {
-                fail("Could not enter Docker container")
+                shell.fail("Could not enter Docker container")
+                // FIXME: need to propagate error up to exit command
+                return
             }
         }
         

@@ -9,19 +9,39 @@
 import XCTest
 @testable import VaporCLI
 
+import libc
+enum Status {
+    case ok
+    case error(Error)
+}
 
-struct TestShell: PosixSubsystem {
+
+struct TestShell {
     let onExecute: (String) -> ()
     var result: Int32 = 0
+    var fileExists = false
+    var failed = false
+    var failureMessage: String?
 
     init(onExecute: (String) -> () = {_ in }) {
         self.onExecute = onExecute
     }
+}
+
+extension TestShell: PosixSubsystem {
 
     func system(_ command: String) -> Int32 {
         self.onExecute(command)
         return self.result
     }
+
+    func fileExists(_ path: String) -> Bool {
+        return fileExists
+    }
+
+    func fail(_ message: String, cancelled: Bool) {
+    }
+
 }
 
 
