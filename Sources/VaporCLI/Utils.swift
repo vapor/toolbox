@@ -54,6 +54,7 @@ extension ShellCommand: Runnable {
 
 // Utility functions
 
+// FIXME: remove once all commands are migrated to Shell.fail
 @noreturn public func fail(_ message: String, cancelled: Bool = false) {
     print()
     print("Error: \(message)")
