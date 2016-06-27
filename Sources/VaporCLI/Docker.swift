@@ -25,17 +25,19 @@ extension Docker {
 }
 
 extension Docker {
-    static let swiftVersion: String? = {
-        return try? String(contentsOfFile: ".swift-version").trim()
-    }()
+    internal static var _swiftVersionFile: ContentProvider = Path(".swift-version")
 
-    static let imageName: String? = {
-        if let version = swiftVersion {
+    static func swiftVersion() -> String? {
+        return _swiftVersionFile.contents?.trim()
+    }
+
+    static func imageName() -> String? {
+        if let version = swiftVersion() {
             return "qutheory/swift:\(version)"
         } else {
             return nil
         }
-    }()
+    }
 }
 
 extension Docker {
@@ -75,8 +77,8 @@ extension Docker {
 
         static func execute(with args: [String], in shell: PosixSubsystem) throws {
             guard let
-                swiftVersion = Docker.swiftVersion,
-                imageName = Docker.imageName
+                swiftVersion = Docker.swiftVersion(),
+                imageName = Docker.imageName()
                 else {
                     throw Error.failed("Could not determine Swift version (check your .swift-version file)")
             }
@@ -120,7 +122,7 @@ extension Docker {
 
         static func execute(with args: [String], in shell: PosixSubsystem) throws {
             guard let
-                imageName = Docker.imageName
+                imageName = Docker.imageName()
                 else {
                     throw Error.failed("Could not determine Swift version (check your .swift-version file)")
             }
@@ -161,7 +163,7 @@ extension Docker {
 
         static func execute(with args: [String], in shell: PosixSubsystem) throws {
             guard let
-                imageName = Docker.imageName
+                imageName = Docker.imageName()
                 else {
                     throw Error.failed("Could not determine Swift version (check your .swift-version file)")
             }

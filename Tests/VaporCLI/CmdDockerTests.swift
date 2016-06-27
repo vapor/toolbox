@@ -20,13 +20,17 @@ class CmdDockerTests: XCTestCase {
     static var allTests: [(String, (CmdDockerTests) -> () throws -> Void)] {
         return [
             ("test_subCommands", test_subCommands),
+            ("test_swiftVersion", test_swiftVersion),
             ("test_init", test_init),
             ("test_init_verbose", test_init_verbose),
             ("test_init_Dockerfile_exists", test_init_Dockerfile_exists),
             ("test_init_download_failure", test_init_download_failure),
             ("test_init_help", test_init_help),
+            ("test_build", test_build),
+            ("test_build_help", test_build_help),
         ]
     }
+
 
     override func setUp() {
         // reset command history and test shell
@@ -34,7 +38,9 @@ class CmdDockerTests: XCTestCase {
         shell = TestShell(logEvent: { log.append($0) })
     }
 
+
     // MARK: Tests - General
+
 
     func test_subCommands() {
         let expected: [Command.Type] = [Docker.Init.self, Docker.Build.self, Docker.Run.self, Docker.Enter.self]
@@ -42,7 +48,15 @@ class CmdDockerTests: XCTestCase {
         XCTAssertEqual(Docker.subCommands.map {"\($0)"}, expected.map {"\($0)"})
     }
 
+
+    func test_swiftVersion() {
+        Docker._swiftVersionFile = TestFile(contents: "version\n")
+        XCTAssertEqual(Docker.swiftVersion(), "version")
+    }
+
+
     // MARK: Init subcommmand
+
 
     func test_init() {
         let _ = try? Docker.execute(with: ["init"], in: shell)
@@ -50,10 +64,12 @@ class CmdDockerTests: XCTestCase {
         XCTAssertEqual(log, expected)
     }
 
+
     func test_init_verbose() {
         let _ = try? Docker.execute(with: ["init", "--verbose"], in: shell)
         XCTAssertEqual(log, [.ok("curl -L  docker.qutheory.io -o Dockerfile")])
     }
+
 
     func test_init_Dockerfile_exists() {
         shell.fileExists = true
@@ -67,6 +83,7 @@ class CmdDockerTests: XCTestCase {
             XCTFail("unexpected error")
         }
     }
+
 
     func test_init_download_failure() {
         shell.commandResults = { cmd in
@@ -88,7 +105,27 @@ class CmdDockerTests: XCTestCase {
         }
     }
 
+
     func test_init_help() {
         XCTAssert(Docker.Init.help.count > 0)
+    }
+
+
+    // MARK: Build subcommand
+
+
+    func test_build() {
+        Docker._swiftVersionFile = TestFile(contents: "v1")
+        do {
+            try Docker.execute(with: ["build"], in: shell)
+            XCTAssertEqual(log, [.ok("docker build --rm -t qutheory/swift:v1 --build-arg SWIFT_VERSION=v1 .")])
+        } catch {
+            XCTFail("unexpected error")
+        }
+    }
+
+
+    func test_build_help() {
+        XCTAssert(Docker.Build.help.count > 0)
     }
 }

@@ -1,9 +1,14 @@
 import libc
 
+
+// MARK: PosixSubsystem, Shell, Runnable, ShellCommand
+
+
 public protocol PosixSubsystem {
     func system(_ command: String) -> Int32
     func fileExists(_ path: String) -> Bool
 }
+
 
 public struct Shell: PosixSubsystem {
 
@@ -17,11 +22,14 @@ public struct Shell: PosixSubsystem {
 
 }
 
+
 public protocol Runnable {
     func run(in: PosixSubsystem) throws
 }
 
+
 public typealias ShellCommand = String
+
 
 extension ShellCommand: Runnable {
 
@@ -36,6 +44,25 @@ extension ShellCommand: Runnable {
     }
     
 }
+
+
+// MARK: ContentProvider, File
+
+
+protocol ContentProvider {
+    var contents: String? { get }
+}
+
+
+public typealias Path = String
+
+
+extension Path: ContentProvider {
+    public var contents: String? {
+        return try? String(contentsOfFile: self)
+    }
+}
+
 
 // Utility functions
 
