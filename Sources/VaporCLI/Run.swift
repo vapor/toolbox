@@ -1,7 +1,7 @@
 
 struct Run: Command {
     static let id = "run"
-    static func execute(with args: [String], in directory: String, shell: PosixSubsystem) {
+    static func execute(with args: [String], in shell: PosixSubsystem) {
         print("Running...")
         do {
             var parameters = args

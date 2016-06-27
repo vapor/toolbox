@@ -14,8 +14,8 @@ struct Heroku: Command {
                                                  Heroku.Init.self,
                                                  ]
 
-    static func execute(with args: [String], in directory: String, shell: PosixSubsystem) {
-        executeSubCommand(with: args, in: directory, shell: shell)
+    static func execute(with args: [String], in shell: PosixSubsystem) {
+        executeSubCommand(with: args, in: shell)
     }
 }
 
@@ -29,7 +29,7 @@ extension Heroku {
             ]
         }
 
-        static func execute(with args: [String], in directory: String, shell: PosixSubsystem) {
+        static func execute(with args: [String], in shell: PosixSubsystem) {
             guard args.isEmpty else { fail("heroku init takes no args") }
 
             if !gitHistoryIsClean() {

@@ -45,19 +45,19 @@ class CmdDockerTests: XCTestCase {
     // MARK: Init subcommmand
 
     func test_init() {
-        Docker.execute(with: ["init"], in: "", shell: shell)
+        Docker.execute(with: ["init"], in: shell)
         let expected: [LogEntry] = [.ok("curl -L -s docker.qutheory.io -o Dockerfile")]
         XCTAssertEqual(log, expected)
     }
 
     func test_init_verbose() {
-        Docker.execute(with: ["init", "--verbose"], in: "", shell: shell)
+        Docker.execute(with: ["init", "--verbose"], in: shell)
         XCTAssertEqual(log, [.ok("curl -L  docker.qutheory.io -o Dockerfile")])
     }
 
     func test_init_Dockerfile_exists() {
         shell.fileExists = true
-        Docker.execute(with: ["init"], in: "", shell: shell)
+        Docker.execute(with: ["init"], in: shell)
         XCTAssertEqual(log, [.failed("A Dockerfile already exists in the current directory.\nPlease move it and try again or run `vapor docker build`.")])
     }
 
@@ -70,7 +70,7 @@ class CmdDockerTests: XCTestCase {
                 return .ok(cmd)
             }
         }
-        Docker.execute(with: ["init"], in: "", shell: shell)
+        Docker.execute(with: ["init"], in: shell)
         XCTAssertEqual(log, [
             .error(7),
             .failed("Could not download Dockerfile.")

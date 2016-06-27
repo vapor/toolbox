@@ -1,7 +1,7 @@
 
 struct Clean: Command {
     static let id = "clean"
-    static func execute(with args: [String], in directory: String, shell: PosixSubsystem) {
+    static func execute(with args: [String], in shell: PosixSubsystem) {
         guard args.isEmpty else {
             fail("\(id) doesn't take any additional parameters")
         }

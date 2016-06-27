@@ -4,7 +4,7 @@
     struct Xcode: Command {
         static let id = "xcode"
 
-        static func execute(with args: [String], in directory: String, shell: PosixSubsystem) {
+        static func execute(with args: [String], in shell: PosixSubsystem) {
             print("Generating Xcode Project...")
 
             do {
