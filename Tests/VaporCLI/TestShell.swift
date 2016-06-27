@@ -27,11 +27,11 @@ enum LogEntry: Equatable {
 
 func ==(lhs: LogEntry, rhs: LogEntry) -> Bool {
     switch (lhs, rhs) {
-    case (.ok(let left), .ok(let right)):
+    case let (.ok(left), .ok(right)):
         return left == right
-    case (.error(let left), .error(let right)):
+    case let (.error(left), .error(right)):
         return left == right
-    case (.failed(let left), .failed(let right)):
+    case let (.failed(left), .failed(right)):
         return left == right
     default:
         return false
