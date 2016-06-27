@@ -10,7 +10,7 @@ import XCTest
 @testable import VaporCLI
 
 
-var executed = [String]()
+var log = [LogEntry]()
 var shell = TestShell()
 
 
@@ -28,8 +28,8 @@ class CmdDockerTests: XCTestCase {
 
     override func setUp() {
         // reset command history and test shell
-        executed = [String]()
-        shell = TestShell(onExecute: { cmd in executed.append(cmd) })
+        log = [LogEntry]()
+        shell = TestShell(logEvent: { log.append($0) })
     }
 
     func test_subCommands() {
@@ -40,18 +40,19 @@ class CmdDockerTests: XCTestCase {
 
     func test_execute_init() {
         Docker.execute(with: ["init"], in: "", shell: shell)
-        XCTAssertEqual(executed, ["curl -L -s docker.qutheory.io -o Dockerfile"])
+        let expected: [LogEntry] = [.ok("curl -L -s docker.qutheory.io -o Dockerfile")]
+        XCTAssertEqual(log, expected)
     }
 
     func test_execute_init_verbose() {
         Docker.execute(with: ["init", "--verbose"], in: "", shell: shell)
-        XCTAssertEqual(executed, ["curl -L  docker.qutheory.io -o Dockerfile"])
+        XCTAssertEqual(log, [.ok("curl -L  docker.qutheory.io -o Dockerfile")])
     }
 
     func test_execute_init_Dockerfile_exists() {
         shell.fileExists = true
         Docker.execute(with: ["init"], in: "", shell: shell)
-        XCTAssertEqual(executed, [])
+        XCTAssertEqual(log, [.failed("A Dockerfile already exists in the current directory.\nPlease move it and try again or run `vapor docker build`.")])
     }
 
 }

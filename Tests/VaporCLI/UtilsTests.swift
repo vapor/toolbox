@@ -9,41 +9,6 @@
 import XCTest
 @testable import VaporCLI
 
-import libc
-enum Status {
-    case ok
-    case error(Error)
-}
-
-
-struct TestShell {
-    let onExecute: (String) -> ()
-    var result: Int32 = 0
-    var fileExists = false
-    var failed = false
-    var failureMessage: String?
-
-    init(onExecute: (String) -> () = {_ in }) {
-        self.onExecute = onExecute
-    }
-}
-
-extension TestShell: PosixSubsystem {
-
-    func system(_ command: String) -> Int32 {
-        self.onExecute(command)
-        return self.result
-    }
-
-    func fileExists(_ path: String) -> Bool {
-        return fileExists
-    }
-
-    func fail(_ message: String, cancelled: Bool) {
-    }
-
-}
-
 
 class UtilsTests: XCTestCase {
 
@@ -58,13 +23,13 @@ class UtilsTests: XCTestCase {
     }
 
     func test_ShellCommand_run() {
-        var executed = [String]()
-        let shell = TestShell(onExecute: { cmd in executed.append(cmd) })
+        var executed = [LogEntry]()
+        let shell = TestShell(logEvent: { executed.append($0) })
         do {
             try ShellCommand("ls -l").run(in: shell)
             // don't even need to wrap the String as it's typealised to ShellCommand:
             try "ls -la".run(in: shell)
-            XCTAssertEqual(executed, ["ls -l", "ls -la"])
+            XCTAssertEqual(executed, [.ok("ls -l"), .ok("ls -la")])
         } catch {
             XCTFail()
         }
@@ -72,7 +37,7 @@ class UtilsTests: XCTestCase {
 
     func test_ShellCommand_run_cancelled() {
         var shell = TestShell()
-        shell.result = 2
+        shell.commandResults = { _ in .error(2) }
         do {
             try "foo".run(in: shell)
             XCTFail()
@@ -85,7 +50,7 @@ class UtilsTests: XCTestCase {
 
     func test_ShellCommand_run_error() {
         var shell = TestShell()
-        shell.result = 1
+        shell.commandResults = { _ in .error(1) }
         do {
             try "foo".run(in: shell)
             XCTFail()
