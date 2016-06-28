@@ -33,7 +33,7 @@
 		__src_cc_ref_Sources/libc/libc.swift /* libc.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/libc/libc.swift /* libc.swift */; };
 		__src_cc_ref_Sources/vapor/main.swift /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/vapor/main.swift /* main.swift */; };
 		__src_cc_ref_Tests/VaporCLI/ArrayExtTests.swift /* ArrayExtTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Tests/VaporCLI/ArrayExtTests.swift /* ArrayExtTests.swift */; };
-		__src_cc_ref_Tests/VaporCLI/CmdDockerTests.swift /* CmdDockerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Tests/VaporCLI/CmdDockerTests.swift /* CmdDockerTests.swift */; };
+		__src_cc_ref_Tests/VaporCLI/CmdDockerTests.swift /* DockerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Tests/VaporCLI/CmdDockerTests.swift /* DockerTests.swift */; };
 		__src_cc_ref_Tests/VaporCLI/SequenceExtTests.swift /* SequenceExtTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Tests/VaporCLI/SequenceExtTests.swift /* SequenceExtTests.swift */; };
 		__src_cc_ref_Tests/VaporCLI/StringExtTests.swift /* StringExtTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Tests/VaporCLI/StringExtTests.swift /* StringExtTests.swift */; };
 		__src_cc_ref_Tests/VaporCLI/UtilsTests.swift /* UtilsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Tests/VaporCLI/UtilsTests.swift /* UtilsTests.swift */; };
@@ -79,7 +79,7 @@
 		__PBXFileRef_Sources/libc/libc.swift /* libc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = libc.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Sources/vapor/main.swift /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = main.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		__PBXFileRef_Tests/VaporCLI/ArrayExtTests.swift /* ArrayExtTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayExtTests.swift; sourceTree = "<group>"; };
-		__PBXFileRef_Tests/VaporCLI/CmdDockerTests.swift /* CmdDockerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = CmdDockerTests.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
+		__PBXFileRef_Tests/VaporCLI/CmdDockerTests.swift /* DockerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = DockerTests.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		__PBXFileRef_Tests/VaporCLI/SequenceExtTests.swift /* SequenceExtTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SequenceExtTests.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Tests/VaporCLI/StringExtTests.swift /* StringExtTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtTests.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Tests/VaporCLI/UtilsTests.swift /* UtilsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = UtilsTests.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
@@ -207,7 +207,7 @@
 			isa = PBXGroup;
 			children = (
 				__PBXFileRef_Tests/VaporCLI/ArrayExtTests.swift /* ArrayExtTests.swift */,
-				__PBXFileRef_Tests/VaporCLI/CmdDockerTests.swift /* CmdDockerTests.swift */,
+				__PBXFileRef_Tests/VaporCLI/CmdDockerTests.swift /* DockerTests.swift */,
 				__PBXFileRef_Tests/VaporCLI/SequenceExtTests.swift /* SequenceExtTests.swift */,
 				__PBXFileRef_Tests/VaporCLI/StringExtTests.swift /* StringExtTests.swift */,
 				5AC9EAEB1D21795A00D5E118 /* TestFile.swift */,
@@ -373,7 +373,7 @@
 			buildActionMask = 0;
 			files = (
 				__src_cc_ref_Tests/VaporCLI/ArrayExtTests.swift /* ArrayExtTests.swift in Sources */,
-				__src_cc_ref_Tests/VaporCLI/CmdDockerTests.swift /* CmdDockerTests.swift in Sources */,
+				__src_cc_ref_Tests/VaporCLI/CmdDockerTests.swift /* DockerTests.swift in Sources */,
 				5AC9EAEC1D21795A00D5E118 /* TestFile.swift in Sources */,
 				__src_cc_ref_Tests/VaporCLI/SequenceExtTests.swift /* SequenceExtTests.swift in Sources */,
 				__src_cc_ref_Tests/VaporCLI/StringExtTests.swift /* StringExtTests.swift in Sources */,

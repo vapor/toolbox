@@ -1,5 +1,5 @@
 //
-//  CmdDockerTests.swift
+//  DockerTests.swift
 //  VaporCLI
 //
 //  Created by Sven A. Schmidt on 24/06/2016.
@@ -14,10 +14,10 @@ var log = [LogEntry]()
 var shell = TestShell()
 
 
-class CmdDockerTests: XCTestCase {
+class DockerTests: XCTestCase {
 
     // required by LinuxMain.swift
-    static var allTests: [(String, (CmdDockerTests) -> () throws -> Void)] {
+    static var allTests: [(String, (DockerTests) -> () throws -> Void)] {
         return [
             ("test_subCommands", test_subCommands),
             ("test_swiftVersion", test_swiftVersion),

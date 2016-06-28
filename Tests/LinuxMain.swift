@@ -3,7 +3,7 @@ import XCTest
 
 XCTMain([
     testCase(ArrayExtTests.allTests),
-    testCase(CmdDockerTests.allTests),
+    testCase(DockerTests.allTests),
     testCase(SequenceExtTests.allTests),
     testCase(StringExtTests.allTests),
     testCase(UtilsTests.allTests),
