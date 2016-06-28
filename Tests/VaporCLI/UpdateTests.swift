@@ -24,7 +24,6 @@ class UpdateTests: XCTestCase {
 
 
     override func setUp() {
-        // reset test shell
         TestSystem.reset()
         Update._argumentsProvider = TestProcess.self
         TestProcess.arguments = ["PATH/vapor"]

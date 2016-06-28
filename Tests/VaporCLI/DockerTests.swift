@@ -34,7 +34,6 @@ class DockerTests: XCTestCase {
 
 
     override func setUp() {
-        // reset test shell
         TestSystem.reset()
     }
 

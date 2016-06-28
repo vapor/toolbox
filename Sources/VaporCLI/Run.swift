@@ -1,7 +1,7 @@
 
 struct Run: Command {
     static let id = "run"
-    static func execute(with args: [String], in shell: PosixSubsystem) {
+    static func execute(with args: [String], in shell: PosixSubsystem) throws {
         print("Running...")
         do {
             var parameters = args
@@ -12,13 +12,14 @@ struct Run: Command {
             parameters.remove("--release")
 
             // All remaining arguments are passed on to app
-            let passthroughArgs = args.joined(separator: " ")
+            let passthroughArgs = parameters.joined(separator: " ")
             // TODO: Check that file exists
             try ".build/\(folder)/\(name) \(passthroughArgs)".run(in: shell)
         } catch Error.cancelled {
-            fail("Run cancelled.", cancelled: true)
+            // re-throw with updated message
+            throw Error.cancelled("Run cancelled.")
         } catch {
-            fail("Could not run project.")
+            throw Error.failed("Could not run project.")
         }
     }
 }
@@ -26,8 +27,8 @@ struct Run: Command {
 extension Run {
     static var help: [String] {
         return [
-                   "runs executable built by vapor build.",
-                   "use --release for release configuration."
+            "runs executable built by vapor build.",
+            "use --release for release configuration."
         ]
     }
 }

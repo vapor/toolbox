@@ -28,7 +28,6 @@ class BuildTests: XCTestCase {
 
 
     override func setUp() {
-        // reset test shell
         TestSystem.reset()
     }
 
