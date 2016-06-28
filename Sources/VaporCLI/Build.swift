@@ -3,7 +3,7 @@ struct Build: Command {
     static let id = "build"
     static func execute(with args: [String], in shell: PosixSubsystem) throws {
         do {
-            try "swift package fetch".run(in: shell)
+            try shell.run("swift package fetch")
         } catch Error.cancelled {
             // re-throw with updated message
             throw Error.cancelled("Fetch cancelled")
@@ -18,7 +18,7 @@ struct Build: Command {
         }
         do {
             let buildFlags = flags.joined(separator: " ")
-            try "swift build \(buildFlags)".run(in: shell)
+            try shell.run("swift build \(buildFlags)")
         } catch Error.cancelled {
             // re-throw with updated message
             throw Error.cancelled("Build cancelled")

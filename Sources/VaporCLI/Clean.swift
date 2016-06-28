@@ -7,7 +7,7 @@ struct Clean: Command {
         }
 
         do {
-            try "rm -rf Packages .build".run(in: shell)
+            try shell.run("rm -rf Packages .build")
             print("Cleaned.")
         } catch {
             fail("Could not clean.")
