@@ -21,6 +21,7 @@ class CmdDockerTests: XCTestCase {
         return [
             ("test_subCommands", test_subCommands),
             ("test_swiftVersion", test_swiftVersion),
+            ("test_imageName", test_imageName),
             ("test_init", test_init),
             ("test_init_verbose", test_init_verbose),
             ("test_init_Dockerfile_exists", test_init_Dockerfile_exists),
@@ -28,6 +29,10 @@ class CmdDockerTests: XCTestCase {
             ("test_init_help", test_init_help),
             ("test_build", test_build),
             ("test_build_help", test_build_help),
+            ("test_run", test_run),
+            ("test_run_help", test_run_help),
+            ("test_enter", test_enter),
+            ("test_enter_help", test_enter_help),
         ]
     }
 
@@ -55,6 +60,12 @@ class CmdDockerTests: XCTestCase {
     }
 
 
+    func test_imageName() {
+        Docker._swiftVersionFile = TestFile(contents: "v2\n")
+        XCTAssertEqual(Docker.imageName(), Optional("qutheory/swift:v2"))
+    }
+
+    
     // MARK: Init subcommmand
 
 
@@ -128,4 +139,43 @@ class CmdDockerTests: XCTestCase {
     func test_build_help() {
         XCTAssert(Docker.Build.help.count > 0)
     }
+
+
+    // MARK: Run subcommand
+
+
+    func test_run() {
+        Docker._swiftVersionFile = TestFile(contents: "v1")
+        do {
+            try Docker.execute(with: ["run"], in: shell)
+            XCTAssertEqual(log, [.ok("docker run --rm -it -v $(PWD):/vapor -p 8080:8080 qutheory/swift:v1")])
+        } catch {
+            XCTFail("unexpected error")
+        }
+    }
+
+
+    func test_run_help() {
+        XCTAssert(Docker.Run.help.count > 0)
+    }
+
+
+    // MARK: Enter subcommand
+
+
+    func test_enter() {
+        Docker._swiftVersionFile = TestFile(contents: "v1")
+        do {
+            try Docker.execute(with: ["enter"], in: shell)
+            XCTAssertEqual(log, [.ok("docker run --rm -it -v $(PWD):/vapor --entrypoint bash qutheory/swift:v1")])
+        } catch {
+            XCTFail("unexpected error")
+        }
+    }
+
+
+    func test_enter_help() {
+        XCTAssert(Docker.Enter.help.count > 0)
+    }
+    
 }
