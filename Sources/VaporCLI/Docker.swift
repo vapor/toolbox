@@ -10,8 +10,8 @@ struct Docker: Command {
         Docker.Enter.self
     ]
 
-    static func execute(with args: [String], in directory: String) {
-        executeSubCommand(with: args, in: directory)
+    static func execute(with args: [String], in shell: PosixSubsystem) throws {
+        try executeSubCommand(with: args, in: shell)
     }
 }
 
@@ -25,35 +25,37 @@ extension Docker {
 }
 
 extension Docker {
-    static let swiftVersion: String? = {
-        return try? String(contentsOfFile: ".swift-version").trim()
-    }()
+    internal static var _swiftVersionFile: ContentProvider = Path(".swift-version")
 
-    static let imageName: String? = {
-        if let version = swiftVersion {
+    static func swiftVersion() -> String? {
+        return _swiftVersionFile.contents?.trim()
+    }
+
+    static func imageName() -> String? {
+        if let version = swiftVersion() {
             return "qutheory/swift:\(version)"
         } else {
             return nil
         }
-    }()
+    }
 }
 
 extension Docker {
     struct Init: Command {
         static let id = "init"
 
-        static func execute(with args: [String], in directory: String) {
+        static func execute(with args: [String], in shell: PosixSubsystem) throws {
             let quiet = args.contains("--verbose") ? "" : "-s"
 
-            if fileExists("Dockerfile") {
-                fail("A Dockerfile already exists in the current directory.\nPlease move it and try again or run `vapor docker build`.")
+            if shell.fileExists("Dockerfile") {
+                throw Error.failed("A Dockerfile already exists in the current directory.\nPlease move it and try again or run `vapor docker build`.")
             }
 
             do {
                 print("Downloading Dockerfile...")
-                try run("curl -L \(quiet) docker.qutheory.io -o Dockerfile")
+                try shell.run("curl -L \(quiet) docker.qutheory.io -o Dockerfile")
             } catch {
-                fail("Could not download Dockerfile.")
+                throw Error.failed("Could not download Dockerfile.")
             }
 
             print("Dockerfile created.")
@@ -73,19 +75,18 @@ extension Docker {
     struct Build: Command {
         static let id = "build"
 
-        static func execute(with args: [String], in directory: String) {
+        static func execute(with args: [String], in shell: PosixSubsystem) throws {
             guard let
-                swiftVersion = Docker.swiftVersion,
-                imageName = Docker.imageName
+                swiftVersion = Docker.swiftVersion(),
+                imageName = Docker.imageName()
                 else {
-                    fail("Could not determine Swift version (check your .swift-version file)")
+                    throw Error.failed("Could not determine Swift version (check your .swift-version file)")
             }
 
             do {
                 print("Building docker image with Swift version: \(swiftVersion)")
                 print("This may take a few minutes if no layers are cached...")
-                let cmd = "docker build --rm -t \(imageName) --build-arg SWIFT_VERSION=\(swiftVersion) ."
-                try run(cmd)
+                try shell.run("docker build --rm -t \(imageName) --build-arg SWIFT_VERSION=\(swiftVersion) .")
             } catch Error.system(let result) {
                 if result == 32512 {
                     print()
@@ -99,16 +100,16 @@ extension Docker {
                     print("or try running the following snippet:")
                     print("`eval \"$(docker-machine env default)\"`")
                 }
-                fail("Could not initialize Docker")
+                throw Error.failed("Could not initialize Docker")
             } catch {
-                fail("Could not initialize Docker")
+                throw Error.failed("Could not initialize Docker")
             }
         }
 
         static var help: [String] {
             return [
-                       "Build the docker image, using the swift",
-                       "version specified in .swift-version."
+                "Build the docker image, using the swift",
+                "version specified in .swift-version."
             ]
         }
     }
@@ -118,17 +119,17 @@ extension Docker {
     struct Run: Command {
         static let id = "run"
 
-        static func execute(with args: [String], in directory: String) {
+        static func execute(with args: [String], in shell: PosixSubsystem) throws {
             guard let
-                imageName = Docker.imageName
+                imageName = Docker.imageName()
                 else {
-                    fail("Could not determine Swift version (check your .swift-version file)")
+                    throw Error.failed("Could not determine Swift version (check your .swift-version file)")
             }
 
             let cmd = "docker run --rm -it -v $(PWD):/vapor -p 8080:8080 \(imageName)"
             do {
                 print("Launching app with image \(imageName)")
-                try run(cmd)
+                try shell.run(cmd)
             } catch Error.system(let result) {
                 if result == 33280 {
                     // Sven: Attempt to identify if the user has ctrl-c'd out of the container
@@ -138,17 +139,17 @@ extension Docker {
                     // testing showed that other means of terminating the command returns different
                     // values.
                 } else {
-                    fail("docker run command failed, command was\n\(cmd)")
+                    throw Error.failed("docker run command failed, command was\n\(cmd)")
                 }
             } catch {
-                fail("docker run command failed, command was\n\(cmd)")
+                throw Error.failed("docker run command failed, command was\n\(cmd)")
             }
         }
 
         static var help: [String] {
             return [
-                       "Run the app in a docker container with the",
-                       "image created by running 'docker build'"
+                "Run the app in a docker container with the",
+                "image created by running 'docker build'"
             ]
         }
     }
@@ -159,30 +160,29 @@ extension Docker {
     struct Enter: Command {
         static let id = "enter"
 
-        static func execute(with args: [String], in directory: String) {
+        static func execute(with args: [String], in shell: PosixSubsystem) throws {
             guard let
-                imageName = Docker.imageName
+                imageName = Docker.imageName()
                 else {
-                    fail("Could not determine Swift version (check your .swift-version file)")
+                    throw Error.failed("Could not determine Swift version (check your .swift-version file)")
             }
 
             do {
                 print("Starting bash in image \(imageName)")
-                let cmd = "docker run --rm -it -v $(PWD):/vapor --entrypoint bash \(imageName)"
-                try run(cmd)
+                try shell.run("docker run --rm -it -v $(PWD):/vapor --entrypoint bash \(imageName)")
             } catch Error.system(let result) {
                 if result != 33280 {
-                    fail("Could not enter Docker container")
+                    throw Error.failed("Could not enter Docker container")
                 }
             } catch {
-                fail("Could not enter Docker container")
+                throw Error.failed("Could not enter Docker container")
             }
         }
         
         static var help: [String] {
             return [
-                       "Enter the docker container (useful for",
-                       "debugging purposes)"
+                "Enter the docker container (useful for",
+                "debugging purposes)"
             ]
         }
     }

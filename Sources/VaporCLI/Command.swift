@@ -5,7 +5,13 @@ public protocol Command {
 
     static var dependencies: [String] { get }
     static var subCommands: [Command.Type] { get }
-    static func execute(with args: [String], in directory: String)
+    static func execute(with args: [String], in shell: PosixSubsystem) throws
+}
+
+public extension Command {
+    static func execute(with args: [String]) throws {
+        try execute(with: args, in: Shell())
+    }
 }
 
 public extension Command {
@@ -15,9 +21,10 @@ public extension Command {
 
 // sub command related methods
 public extension Command {
+    static var binaryName: String { return "vapor" }
     static var subCommands: [Command.Type] { return [] }
 
-    static func executeSubCommand(with args: [String], in directory: String) {
+    static func executeSubCommand(with args: [String], in shell: PosixSubsystem) throws {
         var iterator = args.makeIterator()
         guard let cmdId = iterator.next() else {
             fail("\(id) requires a sub command:\n" + description)
@@ -26,7 +33,7 @@ public extension Command {
             fail("Unknown \(id) subcommand '\(cmdId)':\n" + description)
         }
         let passthroughArgs = Array(iterator)
-        subcommand.execute(with: passthroughArgs, in: directory)
+        try subcommand.execute(with: passthroughArgs, in: shell)
     }
 }
 

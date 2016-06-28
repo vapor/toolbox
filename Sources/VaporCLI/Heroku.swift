@@ -11,68 +11,80 @@ struct Heroku: Command {
     static var dependencies = ["git", "heroku"]
 
     static var subCommands: [Command.Type] = [
-                                                 Heroku.Init.self,
-                                                 ]
+        Heroku.Init.self,
+        ]
 
-    static func execute(with args: [String], in directory: String) {
-        executeSubCommand(with: args, in: directory)
+    static func execute(with args: [String], in shell: PosixSubsystem) throws {
+        try executeSubCommand(with: args, in: shell)
     }
 }
 
 extension Heroku {
+    // made available in this way so we can inject a path while testing
+    internal static var _packageFile: ContentProvider = Path("./Package.swift")
+
     struct Init: Command {
         static let id = "init"
 
         static var help: [String] {
             return [
-                       "Configures a new heroku project"
+                "Configures a new heroku project"
             ]
         }
 
-        static func execute(with args: [String], in directory: String) {
-            guard args.isEmpty else { fail("heroku init takes no args") }
-
-            if !gitHistoryIsClean() {
-                print("Found Uncommitted Changes")
-                print("Setting up heroku requires adding a commit to the repository")
-                print("Please commit your current changes before setting up heroku")
-                fail("")
+        static func execute(with args: [String], in shell: PosixSubsystem) throws {
+            guard args.isEmpty else {
+                throw Error.failed("heroku init takes no args")
             }
 
-            let packageName = getPackageName()
+            if !shell.passes("git status --porcelain") {
+                throw Error.failed("Current directory does not appear to be a git repository.")
+            }
+
+            if !shell.passes("test -z \"$(git status --porcelain)\" || exit 1") {
+                let msg = ["Found Uncommitted Changes",
+                           "Setting up heroku requires adding a commit to the repository",
+                           "Please commit your current changes before setting up heroku",]
+                throw Error.failed(msg.joined(separator: "\n"))
+            }
+
+            let packageName = extractPackageName(from: Heroku._packageFile)
             print("Setting up Heroku for \(packageName) ...")
             print()
 
-            let herokuIsAlreadyInitialized = passes("git remote show heroku")
+            let herokuIsAlreadyInitialized = shell.passes("git remote show heroku")
             if herokuIsAlreadyInitialized {
                 print("Found existing heroku app")
                 print()
             } else {
                 print("Custom Heroku App Name? (return to let Heroku create)")
-                let herokuAppName = getInput()
-                do {
-                    try run("heroku create \(herokuAppName)")
-                } catch {
-                    fail("unable to create heroku app")
+                if let herokuAppName = shell.getInput() {
+                    do {
+                        try shell.run("heroku create \(herokuAppName)")
+                    } catch {
+                        throw Error.failed("unable to create heroku app")
+                    }
+                } else {
+                    throw Error.cancelled("Please try again and provide a valid app name")
                 }
             }
 
             print("Custom Buildpack? (return to use default)")
             var buildpack = ""
-            if let input = readLine(strippingNewline: true) where !buildpack.isEmpty {
+            if let input = shell.getInput() where !buildpack.isEmpty {
                 buildpack = input
             } else {
                 buildpack = "https://github.com/kylef/heroku-buildpack-swift"
             }
 
             do {
-                try run("heroku buildpacks:set \(buildpack)")
+                try shell.run("heroku buildpacks:set \(buildpack)")
                 print("Using buildpack: \(buildpack)")
                 print()
             } catch Error.system(let code) where code == 256 {
                 print()
             } catch {
-                fail("unable to set buildpack: \(buildpack)")
+                throw Error.failed("unable to set buildpack: \(buildpack)")
             }
 
             print("Creating Procfile ...")
@@ -85,36 +97,40 @@ extension Heroku {
             let procContents = "web: App --port=\\$PORT"
             do {
                 // Overwrites existing Procfile
-                try run("echo \"\(procContents)\" > ./Procfile")
+                try shell.run("echo \"\(procContents)\" > ./Procfile")
             } catch {
-                fail("Unable to make Procfile")
+                throw Error.failed("Unable to make Procfile")
             }
 
             print()
             print("Would you like to push to heroku now? (y/n)")
-            let input = getInput().lowercased()
+            let input = (shell.getInput() ?? "").lowercased()
             if input.hasPrefix("n") {
                 print("\n\n")
                 print("Make sure to push your changes to heroku using:")
                 print("\t'git push heroku master'")
                 print("You may need to scale up dynos")
                 print("\t'heroku ps:scale web=1'")
-                exit(0)
+                return
             }
 
             print()
             print("Pushing to heroku ... this could take a while")
             print()
 
-            system("git add .")
-            system("git commit -m \"setting up heroku\"")
-            system("git push heroku master")
-            
+            do {
+                try shell.run("git add .")
+                try shell.run("git commit -m \"setting up heroku\"")
+                try shell.run("git push heroku master")
+            } catch {
+                throw Error.failed("Unable to push to heroku")
+            }
+
             print("spinning up dynos ...")
             do {
-                try run("heroku ps:scale web=1")
+                try shell.run("heroku ps:scale web=1")
             } catch {
-                fail("unable to spin up dynos")
+                throw Error.failed("unable to spin up dynos")
             }
         }
     }

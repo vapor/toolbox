@@ -7,10 +7,10 @@
 struct New: Command {
     static let id = "new"
 
-    static func execute(with args: [String], in directory: String) {
+    static func execute(with args: [String], in shell: PosixSubsystem) throws {
         guard let name = args.first else {
-            print("Usage: \(directory) \(id) <project-name>")
-            fail("Invalid number of arguments.")
+            print("Usage: \(binaryName) \(id) <project-name>")
+            throw Error.failed("Invalid number of arguments.")
         }
 
         let verbose = args.contains("--verbose")
@@ -19,24 +19,24 @@ struct New: Command {
 
         do {
             let escapedName = "\"\(name)\"" // FIX: Doesn’t support names with quotes
-            try run("mkdir \(escapedName)")
+            try shell.run("mkdir \(escapedName)")
 
             print("Cloning example...")
 
-            try run("curl -L \(curlArgs) https://github.com/qutheory/vapor-example/archive/master.tar.gz -o \(escapedName)/vapor-example.tar.gz")
+            try shell.run("curl -L \(curlArgs) https://github.com/qutheory/vapor-example/archive/master.tar.gz -o \(escapedName)/vapor-example.tar.gz")
 
             print("Unpacking...")
 
-            try run("tar -\(tarArgs)xzf \(escapedName)/vapor-example.tar.gz --strip-components=1 --directory \(escapedName)")
-            try run("rm \(escapedName)/vapor-example.tar.gz")
+            try shell.run("tar -\(tarArgs)xzf \(escapedName)/vapor-example.tar.gz --strip-components=1 --directory \(escapedName)")
+            try shell.run("rm \(escapedName)/vapor-example.tar.gz")
             #if os(OSX)
-                try run("cd \(escapedName) && vapor xcode")
+                try shell.run("cd \(escapedName) && vapor xcode")
             #endif
 
-            if commandExists("git") {
+            if shell.commandExists("git") {
                 print("Initializing git repository if necessary...")
-                system("git init \(escapedName)")
-                system("cd \(escapedName) && git add . && git commit -m \"initial vapor project setup\"")
+                try shell.run("git init \(escapedName)")
+                try shell.run("cd \(escapedName) && git add . && git commit -m \"initial vapor project setup\"")
                 print()
             }
 
@@ -44,16 +44,16 @@ struct New: Command {
             printFancy(asciiArt)
             print()
             printFancy([
-                           "    Project \"\(name)\" has been created.",
-                           "Type `cd \(name)` to enter project directory",
-                           "                   Enjoy!",
-                           ])
+                "    Project \"\(name)\" has been created.",
+                "Type `cd \(name)` to enter project directory",
+                "                   Enjoy!",
+                ])
             print()
             #if os(OSX)
-                system("open \(escapedName)/*.xcodeproj")
+                try shell.run("open \(escapedName)/*.xcodeproj")
             #endif
         } catch {
-            fail("Could not clone repository")
+            throw Error.failed("Could not clone repository")
         }
     }
 }
@@ -61,10 +61,10 @@ struct New: Command {
 extension New {
     static var help: [String] {
         return [
-                   "new <project-name>",
-                   "Clones the Vapor Example to a given",
-                   "folder name and initializes an empty",
-                   "Git repository inside it."
+            "new <project-name>",
+            "Clones the Vapor Example to a given",
+            "folder name and initializes an empty",
+            "Git repository inside it."
         ]
     }
 }
