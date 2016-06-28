@@ -10,10 +10,6 @@ import XCTest
 @testable import VaporCLI
 
 
-var log = [LogEntry]()
-var shell = TestShell()
-
-
 class DockerTests: XCTestCase {
 
     // required by LinuxMain.swift
@@ -38,9 +34,8 @@ class DockerTests: XCTestCase {
 
 
     override func setUp() {
-        // reset command history and test shell
-        log = [LogEntry]()
-        shell = TestShell(logEvent: { log.append($0) })
+        // reset test shell
+        TestShell.reset()
     }
 
 
@@ -70,26 +65,25 @@ class DockerTests: XCTestCase {
 
 
     func test_init() {
-        let _ = try? Docker.execute(with: ["init"], in: shell)
-        let expected: [LogEntry] = [.ok("curl -L -s docker.qutheory.io -o Dockerfile")]
-        XCTAssertEqual(log, expected)
+        let _ = try? Docker.execute(with: ["init"], in: TestShell.shell)
+        XCTAssertEqual(TestShell.log, [.ok("curl -L -s docker.qutheory.io -o Dockerfile")])
     }
 
 
     func test_init_verbose() {
-        let _ = try? Docker.execute(with: ["init", "--verbose"], in: shell)
-        XCTAssertEqual(log, [.ok("curl -L  docker.qutheory.io -o Dockerfile")])
+        let _ = try? Docker.execute(with: ["init", "--verbose"], in: TestShell.shell)
+        XCTAssertEqual(TestShell.log, [.ok("curl -L  docker.qutheory.io -o Dockerfile")])
     }
 
 
     func test_init_Dockerfile_exists() {
-        shell.fileExists = true
+        TestShell.shell.fileExists = true
         do {
-            try Docker.execute(with: ["init"], in: shell)
+            try Docker.execute(with: ["init"], in: TestShell.shell)
             XCTFail("should not be reached, expected error to be thrown")
         } catch Error.failed(let msg) {
             XCTAssert(msg.hasPrefix("A Dockerfile already exists"))
-            XCTAssertEqual(log, [], "expected no commands to be run")
+            XCTAssertEqual(TestShell.log, [], "expected no commands to be run")
         } catch {
             XCTFail("unexpected error")
         }
@@ -97,7 +91,7 @@ class DockerTests: XCTestCase {
 
 
     func test_init_download_failure() {
-        shell.commandResults = { cmd in
+        TestShell.shell.commandResults = { cmd in
             if cmd.hasPrefix("curl") {
                 // fake a "Failed to connect to host" error
                 return .error(7)
@@ -106,11 +100,11 @@ class DockerTests: XCTestCase {
             }
         }
         do {
-            try Docker.execute(with: ["init"], in: shell)
+            try Docker.execute(with: ["init"], in: TestShell.shell)
             XCTFail("should not be reached, expected error to be thrown")
         } catch Error.failed(let msg) {
             XCTAssertEqual(msg, "Could not download Dockerfile.")
-            XCTAssertEqual(log, [.error(7)])
+            XCTAssertEqual(TestShell.log, [.error(7)])
         } catch {
             XCTFail("unexpected error")
         }
@@ -128,8 +122,8 @@ class DockerTests: XCTestCase {
     func test_build() {
         Docker._swiftVersionFile = TestFile(contents: "v1")
         do {
-            try Docker.execute(with: ["build"], in: shell)
-            XCTAssertEqual(log, [.ok("docker build --rm -t qutheory/swift:v1 --build-arg SWIFT_VERSION=v1 .")])
+            try Docker.execute(with: ["build"], in: TestShell.shell)
+            XCTAssertEqual(TestShell.log, [.ok("docker build --rm -t qutheory/swift:v1 --build-arg SWIFT_VERSION=v1 .")])
         } catch {
             XCTFail("unexpected error")
         }
@@ -147,8 +141,8 @@ class DockerTests: XCTestCase {
     func test_run() {
         Docker._swiftVersionFile = TestFile(contents: "v1")
         do {
-            try Docker.execute(with: ["run"], in: shell)
-            XCTAssertEqual(log, [.ok("docker run --rm -it -v $(PWD):/vapor -p 8080:8080 qutheory/swift:v1")])
+            try Docker.execute(with: ["run"], in: TestShell.shell)
+            XCTAssertEqual(TestShell.log, [.ok("docker run --rm -it -v $(PWD):/vapor -p 8080:8080 qutheory/swift:v1")])
         } catch {
             XCTFail("unexpected error")
         }
@@ -166,8 +160,8 @@ class DockerTests: XCTestCase {
     func test_enter() {
         Docker._swiftVersionFile = TestFile(contents: "v1")
         do {
-            try Docker.execute(with: ["enter"], in: shell)
-            XCTAssertEqual(log, [.ok("docker run --rm -it -v $(PWD):/vapor --entrypoint bash qutheory/swift:v1")])
+            try Docker.execute(with: ["enter"], in: TestShell.shell)
+            XCTAssertEqual(TestShell.log, [.ok("docker run --rm -it -v $(PWD):/vapor --entrypoint bash qutheory/swift:v1")])
         } catch {
             XCTFail("unexpected error")
         }

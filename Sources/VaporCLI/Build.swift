@@ -1,7 +1,7 @@
 
 struct Build: Command {
     static let id = "build"
-    static func execute(with args: [String], in shell: PosixSubsystem) {
+    static func execute(with args: [String], in shell: PosixSubsystem) throws {
         do {
             try "swift package fetch".run(in: shell)
         } catch Error.cancelled {

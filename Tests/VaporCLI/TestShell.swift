@@ -10,6 +10,7 @@ import Foundation
 @testable import VaporCLI
 
 
+
 enum LogEntry: Equatable {
     case ok(String)
     case error(Int32)
@@ -49,6 +50,14 @@ struct TestShell {
 }
 
 extension TestShell: PosixSubsystem {
+
+    static var log = [LogEntry]()
+    static var shell = TestShell(logEvent: { log.append($0) })
+    
+    static func reset() {
+        log.removeAll()
+        shell = TestShell(logEvent: { log.append($0) })
+    }
 
     func system(_ command: String) -> Int32 {
         let log = self.commandResults?(command) ?? .ok(command)
