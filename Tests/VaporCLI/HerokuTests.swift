@@ -27,14 +27,6 @@ class HerokuTests: XCTestCase {
     }
 
 
-    // MARK: Tests - General
-
-
-    func test_getPackageName() {
-        
-    }
-
-
     // MARK: Init subcommmand
 
 

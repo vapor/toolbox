@@ -7,6 +7,7 @@ XCTMain([
     testCase(CleanTests.allTests),
     testCase(DockerTests.allTests),
     testCase(HelpTests.allTests),
+    testCase(HerokuTests.allTests),
     testCase(NewTests.allTests),
     testCase(RunTests.allTests),
     testCase(SequenceExtTests.allTests),
