@@ -42,6 +42,8 @@ class HerokuTests: XCTestCase {
         do {
             try Heroku.execute(with: ["init"], in: TestSystem.shell)
             var expected: [LogEntry] = [
+                .ok("git status --porcelain"),
+                .ok("test -z \"$(git status --porcelain)\" || exit 1"),
                 .ok("git remote show heroku"),
                 .ok("heroku buildpacks:set https://github.com/kylef/heroku-buildpack-swift"),
                 .ok("echo \"web: App --port=\\$PORT\" > ./Procfile"),

@@ -37,23 +37,21 @@ extension Heroku {
                 throw Error.failed("heroku init takes no args")
             }
 
-            // FIXME: unhandled error:
-            //        fatal: Not a git repository (or any of the parent directories): .git
+            if !shell.passes("git status --porcelain") {
+                throw Error.failed("Current directory does not appear to be a git repository.")
+            }
 
-            // FIXME
-            if !gitHistoryIsClean() {
+            if !shell.passes("test -z \"$(git status --porcelain)\" || exit 1") {
                 let msg = ["Found Uncommitted Changes",
                            "Setting up heroku requires adding a commit to the repository",
                            "Please commit your current changes before setting up heroku",]
                 throw Error.failed(msg.joined(separator: "\n"))
             }
 
-            // FIXME
             let packageName = extractPackageName(from: Heroku._packageFile)
             print("Setting up Heroku for \(packageName) ...")
             print()
 
-            // FIXME
             let herokuIsAlreadyInitialized = shell.passes("git remote show heroku")
             if herokuIsAlreadyInitialized {
                 print("Found existing heroku app")

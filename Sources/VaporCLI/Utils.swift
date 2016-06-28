@@ -154,10 +154,6 @@ func commandExists(_ command: String) -> Bool {
     return system("hash \(command) 2>/dev/null") == 0
 }
 
-func gitHistoryIsClean() -> Bool {
-    return system("test -z \"$(git status --porcelain)\" || exit 1") == 0
-}
-
 func extractPackageName(from packageFile: ContentProvider) -> String? {
     return packageFile
         .contents?
