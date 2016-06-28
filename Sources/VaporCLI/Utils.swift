@@ -7,6 +7,7 @@ import libc
 public protocol PosixSubsystem {
     func system(_ command: String) -> Int32
     func fileExists(_ path: String) -> Bool
+    func commandExists(_ command: String) -> Bool
 }
 
 
@@ -18,6 +19,10 @@ public struct Shell: PosixSubsystem {
 
     public func fileExists(_ path: String) -> Bool {
         return libc.system("ls \(path) > /dev/null 2>&1") == 0
+    }
+
+    public func commandExists(_ command: String) -> Bool {
+        return libc.system("hash \(command) 2>/dev/null") == 0
     }
 
 }
@@ -80,7 +85,7 @@ extension Process: ArgumentsProvider {}
 
 // Utility functions
 
-// FIXME: remove once all commands are migrated to Shell.fail
+// FIXME: remove once everything is migrated to PosixSystem
 @noreturn public func fail(_ message: String, cancelled: Bool = false) {
     print()
     print("Error: \(message)")
@@ -129,6 +134,7 @@ func getInput() -> String {
     return readLine(strippingNewline: true) ?? ""
 }
 
+// FIXME: remove once everything is migrated to PosixSystem
 func commandExists(_ command: String) -> Bool {
     return system("hash \(command) 2>/dev/null") == 0
 }

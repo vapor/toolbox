@@ -49,6 +49,7 @@ struct TestSystem {
     let logEvent: (LogEntry) -> ()
     var commandResults: ((ShellCommand) -> LogEntry)?
     var fileExists = false
+    var commandExists = true
 
     init(logEvent: (LogEntry) -> () = {_ in }) {
         self.logEvent = logEvent
@@ -81,6 +82,10 @@ extension TestSystem: PosixSubsystem {
 
     func fileExists(_ path: String) -> Bool {
         return fileExists
+    }
+
+    func commandExists(_ command: String) -> Bool {
+        return commandExists
     }
 
     func fail(_ message: String, cancelled: Bool) {
