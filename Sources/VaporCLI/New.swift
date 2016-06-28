@@ -19,24 +19,24 @@ struct New: Command {
 
         do {
             let escapedName = "\"\(name)\"" // FIX: Doesn’t support names with quotes
-            try "mkdir \(escapedName)".run(in: shell)
+            try shell.run("mkdir \(escapedName)")
 
             print("Cloning example...")
 
-            try "curl -L \(curlArgs) https://github.com/qutheory/vapor-example/archive/master.tar.gz -o \(escapedName)/vapor-example.tar.gz".run(in: shell)
+            try shell.run("curl -L \(curlArgs) https://github.com/qutheory/vapor-example/archive/master.tar.gz -o \(escapedName)/vapor-example.tar.gz")
 
             print("Unpacking...")
 
-            try "tar -\(tarArgs)xzf \(escapedName)/vapor-example.tar.gz --strip-components=1 --directory \(escapedName)".run(in: shell)
-            try "rm \(escapedName)/vapor-example.tar.gz".run(in: shell)
+            try shell.run("tar -\(tarArgs)xzf \(escapedName)/vapor-example.tar.gz --strip-components=1 --directory \(escapedName)")
+            try shell.run("rm \(escapedName)/vapor-example.tar.gz")
             #if os(OSX)
-                try "cd \(escapedName) && vapor xcode".run(in: shell)
+                try shell.run("cd \(escapedName) && vapor xcode")
             #endif
 
             if shell.commandExists("git") {
                 print("Initializing git repository if necessary...")
-                try "git init \(escapedName)".run(in: shell)
-                try "cd \(escapedName) && git add . && git commit -m \"initial vapor project setup\"".run(in: shell)
+                try shell.run("git init \(escapedName)")
+                try shell.run("cd \(escapedName) && git add . && git commit -m \"initial vapor project setup\"")
                 print()
             }
 
@@ -50,7 +50,7 @@ struct New: Command {
                 ])
             print()
             #if os(OSX)
-                try "open \(escapedName)/*.xcodeproj".run(in: shell)
+                try shell.run("open \(escapedName)/*.xcodeproj")
             #endif
         } catch {
             throw Error.failed("Could not clone repository")

@@ -47,7 +47,7 @@ func ==(lhs: LogEntry, rhs: LogEntry) -> Bool {
 
 struct TestSystem {
     let logEvent: (LogEntry) -> ()
-    var commandResults: ((ShellCommand) -> LogEntry)?
+    var commandResults: ((String) -> LogEntry)?
     var fileExists = false
     var commandExists = true
     var input: String?

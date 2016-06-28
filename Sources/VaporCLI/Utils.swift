@@ -1,7 +1,7 @@
 import libc
 
 
-// MARK: PosixSubsystem, Shell, Runnable, ShellCommand
+// MARK: ShellCommand, PosixSubsystem, Shell
 
 
 public protocol PosixSubsystem {
@@ -18,6 +18,7 @@ extension PosixSubsystem {
     }
 }
 
+
 extension PosixSubsystem {
     func run(_ command: String) throws {
         let result = self.system(command)
@@ -29,6 +30,7 @@ extension PosixSubsystem {
         }
     }
 }
+
 
 public struct Shell: PosixSubsystem {
 
@@ -49,29 +51,6 @@ public struct Shell: PosixSubsystem {
     }
 
 }
-
-
-// FIXME: get rid of this block and simply replace "...".run(in: shell) with shell.run("...")
-public protocol Runnable {
-    func run(in: PosixSubsystem) throws
-}
-
-public typealias ShellCommand = String
-
-extension ShellCommand: Runnable {
-
-    public func run(in shell: PosixSubsystem) throws {
-        let result = shell.system(self)
-
-        if result == 2 {
-            throw Error.cancelled(self)
-        } else if result != 0 {
-            throw Error.system(result)
-        }
-    }
-    
-}
-// FIXME: end
 
 
 // MARK: ContentProvider, File

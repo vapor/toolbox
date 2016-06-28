@@ -26,9 +26,9 @@ class UtilsTests: XCTestCase {
         var executed = [LogEntry]()
         let shell = TestSystem(logEvent: { executed.append($0) })
         do {
-            try ShellCommand("ls -l").run(in: shell)
+            try shell.run("ls -l")
             // don't even need to wrap the String as it's typealised to ShellCommand:
-            try "ls -la".run(in: shell)
+            try shell.run("ls -la")
             XCTAssertEqual(executed, [.ok("ls -l"), .ok("ls -la")])
         } catch {
             XCTFail()
@@ -39,7 +39,7 @@ class UtilsTests: XCTestCase {
         var shell = TestSystem()
         shell.commandResults = { _ in .error(2) }
         do {
-            try "foo".run(in: shell)
+            try shell.run("foo")
             XCTFail()
         } catch Error.cancelled {
             // ok
@@ -52,7 +52,7 @@ class UtilsTests: XCTestCase {
         var shell = TestSystem()
         shell.commandResults = { _ in .error(1) }
         do {
-            try "foo".run(in: shell)
+            try shell.run("foo")
             XCTFail()
         } catch Error.system(let res) {
             XCTAssertEqual(res, 1)
