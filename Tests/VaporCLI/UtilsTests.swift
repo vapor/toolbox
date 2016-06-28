@@ -24,7 +24,7 @@ class UtilsTests: XCTestCase {
 
     func test_ShellCommand_run() {
         var executed = [LogEntry]()
-        let shell = TestShell(logEvent: { executed.append($0) })
+        let shell = TestSystem(logEvent: { executed.append($0) })
         do {
             try ShellCommand("ls -l").run(in: shell)
             // don't even need to wrap the String as it's typealised to ShellCommand:
@@ -36,7 +36,7 @@ class UtilsTests: XCTestCase {
     }
 
     func test_ShellCommand_run_cancelled() {
-        var shell = TestShell()
+        var shell = TestSystem()
         shell.commandResults = { _ in .error(2) }
         do {
             try "foo".run(in: shell)
@@ -49,7 +49,7 @@ class UtilsTests: XCTestCase {
     }
 
     func test_ShellCommand_run_error() {
-        var shell = TestShell()
+        var shell = TestSystem()
         shell.commandResults = { _ in .error(1) }
         do {
             try "foo".run(in: shell)

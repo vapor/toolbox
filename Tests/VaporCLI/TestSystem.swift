@@ -1,5 +1,5 @@
 //
-//  TestShell.swift
+//  TestSystem.swift
 //  VaporCLI
 //
 //  Created by Sven A. Schmidt on 27/06/2016.
@@ -39,7 +39,7 @@ func ==(lhs: LogEntry, rhs: LogEntry) -> Bool {
     }
 }
 
-struct TestShell {
+struct TestSystem {
     let logEvent: (LogEntry) -> ()
     var commandResults: ((ShellCommand) -> LogEntry)?
     var fileExists = false
@@ -49,14 +49,14 @@ struct TestShell {
     }
 }
 
-extension TestShell: PosixSubsystem {
+extension TestSystem: PosixSubsystem {
 
     static var log = [LogEntry]()
-    static var shell = TestShell(logEvent: { log.append($0) })
+    static var shell = TestSystem(logEvent: { log.append($0) })
     
     static func reset() {
         log.removeAll()
-        shell = TestShell(logEvent: { log.append($0) })
+        shell = TestSystem(logEvent: { log.append($0) })
     }
 
     func system(_ command: String) -> Int32 {

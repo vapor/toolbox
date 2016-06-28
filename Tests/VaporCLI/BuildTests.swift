@@ -25,7 +25,7 @@ class BuildTests: XCTestCase {
 
     override func setUp() {
         // reset test shell
-        TestShell.reset()
+        TestSystem.reset()
     }
 
 
@@ -33,20 +33,20 @@ class BuildTests: XCTestCase {
 
 
     func test_execute() {
-        let _ = try? Build.execute(with: [], in: TestShell.shell)
-        XCTAssertEqual(TestShell.log, [.ok("swift package fetch"), .ok("swift build ")])
+        let _ = try? Build.execute(with: [], in: TestSystem.shell)
+        XCTAssertEqual(TestSystem.log, [.ok("swift package fetch"), .ok("swift build ")])
     }
 
     
     func test_execute_args() {
-        let _ = try? Build.execute(with: ["-foo", "-bar"], in: TestShell.shell)
-        XCTAssertEqual(TestShell.log, [.ok("swift package fetch"), .ok("swift build -foo -bar")])
+        let _ = try? Build.execute(with: ["-foo", "-bar"], in: TestSystem.shell)
+        XCTAssertEqual(TestSystem.log, [.ok("swift package fetch"), .ok("swift build -foo -bar")])
     }
 
 
     func test_execute_release() {
-        let _ = try? Build.execute(with: ["--release"], in: TestShell.shell)
-        XCTAssertEqual(TestShell.log, [.ok("swift package fetch"), .ok("swift build -c release")])
+        let _ = try? Build.execute(with: ["--release"], in: TestSystem.shell)
+        XCTAssertEqual(TestSystem.log, [.ok("swift package fetch"), .ok("swift build -c release")])
     }
 
 

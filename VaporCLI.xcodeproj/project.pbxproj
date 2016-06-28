@@ -7,8 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5AA1874B1D2129B200AE8430 /* TestShell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AA1874A1D2129B200AE8430 /* TestShell.swift */; };
+		5AA1874B1D2129B200AE8430 /* TestSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AA1874A1D2129B200AE8430 /* TestSystem.swift */; };
 		5AA65A861D22566600177575 /* BuildTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AA65A851D22566600177575 /* BuildTests.swift */; };
+		5AA65A881D225B0800177575 /* CleanTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AA65A871D225B0800177575 /* CleanTests.swift */; };
 		5AC9EAEC1D21795A00D5E118 /* TestFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC9EAEB1D21795A00D5E118 /* TestFile.swift */; };
 		_LinkFileRef_VaporCLI_via_VaporCLITestSuite /* VaporCLI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_VaporCLI" /* VaporCLI.framework */; };
 		_LinkFileRef_VaporCLI_via_vapor /* VaporCLI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_VaporCLI" /* VaporCLI.framework */; };
@@ -58,8 +59,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		5AA1874A1D2129B200AE8430 /* TestShell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestShell.swift; sourceTree = "<group>"; };
-		5AA65A851D22566600177575 /* BuildTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BuildTests.swift; sourceTree = "<group>"; };
+		5AA1874A1D2129B200AE8430 /* TestSystem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = TestSystem.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
+		5AA65A851D22566600177575 /* BuildTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = BuildTests.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
+		5AA65A871D225B0800177575 /* CleanTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = CleanTests.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		5AC9EAEB1D21795A00D5E118 /* TestFile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestFile.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Package.swift /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		"__PBXFileRef_Sources/VaporCLI/Array+ext.swift" /* Array+ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+ext.swift"; sourceTree = "<group>"; };
@@ -210,11 +212,12 @@
 			children = (
 				__PBXFileRef_Tests/VaporCLI/ArrayExtTests.swift /* ArrayExtTests.swift */,
 				5AA65A851D22566600177575 /* BuildTests.swift */,
+				5AA65A871D225B0800177575 /* CleanTests.swift */,
 				__PBXFileRef_Tests/VaporCLI/CmdDockerTests.swift /* DockerTests.swift */,
 				__PBXFileRef_Tests/VaporCLI/SequenceExtTests.swift /* SequenceExtTests.swift */,
 				__PBXFileRef_Tests/VaporCLI/StringExtTests.swift /* StringExtTests.swift */,
 				5AC9EAEB1D21795A00D5E118 /* TestFile.swift */,
-				5AA1874A1D2129B200AE8430 /* TestShell.swift */,
+				5AA1874A1D2129B200AE8430 /* TestSystem.swift */,
 				__PBXFileRef_Tests/VaporCLI/UtilsTests.swift /* UtilsTests.swift */,
 				__PBXFileRef_VaporCLITestSuite_Info.plist /* VaporCLITestSuite_Info.plist */,
 			);
@@ -380,8 +383,9 @@
 				5AC9EAEC1D21795A00D5E118 /* TestFile.swift in Sources */,
 				__src_cc_ref_Tests/VaporCLI/SequenceExtTests.swift /* SequenceExtTests.swift in Sources */,
 				__src_cc_ref_Tests/VaporCLI/StringExtTests.swift /* StringExtTests.swift in Sources */,
-				5AA1874B1D2129B200AE8430 /* TestShell.swift in Sources */,
+				5AA1874B1D2129B200AE8430 /* TestSystem.swift in Sources */,
 				5AA65A861D22566600177575 /* BuildTests.swift in Sources */,
+				5AA65A881D225B0800177575 /* CleanTests.swift in Sources */,
 				__src_cc_ref_Tests/VaporCLI/UtilsTests.swift /* UtilsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
