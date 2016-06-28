@@ -5,11 +5,10 @@ struct Build: Command {
         do {
             try "swift package fetch".run(in: shell)
         } catch Error.cancelled {
-            // FIXME: throw here
-            fail("Fetch cancelled", cancelled: true)
+            // re-throw with updated message
+            throw Error.cancelled("Fetch cancelled")
         } catch {
-            // FIXME: throw here
-            fail("Could not fetch dependencies.")
+            throw Error.failed("Could not fetch dependencies.")
         }
 
         var flags = args
@@ -21,16 +20,15 @@ struct Build: Command {
             let buildFlags = flags.joined(separator: " ")
             try "swift build \(buildFlags)".run(in: shell)
         } catch Error.cancelled {
-            // FIXME: throw here
-            fail("Build cancelled.", cancelled: true)
+            // re-throw with updated message
+            throw Error.cancelled("Build cancelled")
         } catch {
             print()
             print("Need help getting your project to build?")
             print("Join our Slack where hundreds of contributors")
             print("are waiting to help: http://slack.qutheory.io")
 
-            // FIXME: throw here
-            fail("Could not build project.")
+            throw Error.failed("Could not build project.")
         }
     }
 }

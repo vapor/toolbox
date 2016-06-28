@@ -37,7 +37,7 @@ extension ShellCommand: Runnable {
         let result = shell.system(self)
 
         if result == 2 {
-            throw Error.cancelled
+            throw Error.cancelled(self)
         } else if result != 0 {
             throw Error.system(result)
         }
@@ -79,7 +79,7 @@ extension Path: ContentProvider {
 public enum Error: ErrorProtocol { // Errors pertaining to running commands
     case system(Int32)
     case failed(String) // user facing error, thrown by execute
-    case cancelled
+    case cancelled(String)
     case terminalSize
 }
 

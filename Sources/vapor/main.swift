@@ -28,13 +28,16 @@ do {
     let arguments = Array(iterator)
     try command.execute(with: arguments)
     exit(0)
+} catch Error.cancelled(let msg) {
+    print()
+    print("Error: \(msg)")
+    exit(1)
 } catch Error.failed(let msg) {
     print()
     print("Error: \(msg)")
-    // FIXME: suppress this when command has been cancelled (build and run commands)
     print("Note: Make sure you are using Swift 3.0 Snapshot 06-06")
-    exit(1)
+    exit(2)
 } catch {
     print("unexpected error")
-    exit(2)
+    exit(3)
 }

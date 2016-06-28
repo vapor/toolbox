@@ -10,7 +10,6 @@ import Foundation
 @testable import VaporCLI
 
 
-
 enum LogEntry: Equatable {
     case ok(String)
     case error(Int32)
@@ -26,6 +25,7 @@ enum LogEntry: Equatable {
     }
 }
 
+
 func ==(lhs: LogEntry, rhs: LogEntry) -> Bool {
     switch (lhs, rhs) {
     case let (.ok(left), .ok(right)):
@@ -39,6 +39,7 @@ func ==(lhs: LogEntry, rhs: LogEntry) -> Bool {
     }
 }
 
+
 struct TestSystem {
     let logEvent: (LogEntry) -> ()
     var commandResults: ((ShellCommand) -> LogEntry)?
@@ -48,6 +49,7 @@ struct TestSystem {
         self.logEvent = logEvent
     }
 }
+
 
 extension TestSystem: PosixSubsystem {
 

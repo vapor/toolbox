@@ -18,6 +18,10 @@ class BuildTests: XCTestCase {
             ("test_execute", test_execute),
             ("test_execute_args", test_execute_args),
             ("test_execute_release", test_execute_release),
+            ("test_execute_fetch_cancelled", test_execute_fetch_cancelled),
+            ("test_execute_fetch_failed", test_execute_fetch_failed),
+            ("test_execute_build_cancelled", test_execute_build_cancelled),
+            ("test_execute_build_failed", test_execute_build_failed),
             ("test_help", test_help),
         ]
     }
@@ -62,6 +66,88 @@ class BuildTests: XCTestCase {
     }
 
 
+    func test_execute_fetch_cancelled() {
+        TestSystem.shell.commandResults = { cmd in
+            if cmd == "swift package fetch" {
+                return .error(2)
+            } else {
+                return .ok(cmd)
+            }
+        }
+        do {
+            try Build.execute(with: [], in: TestSystem.shell)
+            XCTFail("should not be reached, expected error to be thrown")
+        } catch Error.cancelled(let msg) {
+            XCTAssertEqual(msg, "Fetch cancelled")
+            XCTAssertEqual(TestSystem.log, [.error(2)])
+        } catch {
+            XCTFail("unexpected error")
+        }
+    }
+
+
+    func test_execute_fetch_failed() {
+        TestSystem.shell.commandResults = { cmd in
+            if cmd == "swift package fetch" {
+                // return some error code other than 2 (cancelled)
+                return .error(3)
+            } else {
+                return .ok(cmd)
+            }
+        }
+        do {
+            try Build.execute(with: [], in: TestSystem.shell)
+            XCTFail("should not be reached, expected error to be thrown")
+        } catch Error.failed(let msg) {
+            XCTAssertEqual(msg, "Could not fetch dependencies.")
+            XCTAssertEqual(TestSystem.log, [.error(3)])
+        } catch {
+            XCTFail("unexpected error")
+        }
+    }
+
+    
+    func test_execute_build_cancelled() {
+        TestSystem.shell.commandResults = { cmd in
+            if cmd.hasPrefix("swift build") {
+                return .error(2)
+            } else {
+                return .ok(cmd)
+            }
+        }
+        do {
+            try Build.execute(with: [], in: TestSystem.shell)
+            XCTFail("should not be reached, expected error to be thrown")
+        } catch Error.cancelled(let msg) {
+            XCTAssertEqual(msg, "Build cancelled")
+            XCTAssertEqual(TestSystem.log, [.ok("swift package fetch"), .error(2)])
+        } catch {
+            XCTFail("unexpected error")
+        }
+    }
+
+
+    func test_execute_build_failed() {
+        TestSystem.shell.commandResults = { cmd in
+            if cmd.hasPrefix("swift build") {
+                // return some error code other than 2 (cancelled)
+                return .error(3)
+            } else {
+                return .ok(cmd)
+            }
+        }
+        do {
+            try Build.execute(with: [], in: TestSystem.shell)
+            XCTFail("should not be reached, expected error to be thrown")
+        } catch Error.failed(let msg) {
+            XCTAssertEqual(msg, "Could not build project.")
+            XCTAssertEqual(TestSystem.log, [.ok("swift package fetch"), .error(3)])
+        } catch {
+            XCTFail("unexpected error")
+        }
+    }
+
+    
     func test_help() {
         XCTAssert(Build.help.count > 0)
     }
