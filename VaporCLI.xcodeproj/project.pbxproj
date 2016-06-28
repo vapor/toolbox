@@ -16,6 +16,7 @@
 		5AC9EAEC1D21795A00D5E118 /* TestFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC9EAEB1D21795A00D5E118 /* TestFile.swift */; };
 		5AE77C091D22899700B8A8FF /* NewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AE77C081D22899700B8A8FF /* NewTests.swift */; };
 		5AE77C0B1D229F8300B8A8FF /* HelpTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AE77C0A1D229F8300B8A8FF /* HelpTests.swift */; };
+		5AE77C0D1D22A13C00B8A8FF /* HerokuTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AE77C0C1D22A13C00B8A8FF /* HerokuTests.swift */; };
 		_LinkFileRef_VaporCLI_via_VaporCLITestSuite /* VaporCLI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_VaporCLI" /* VaporCLI.framework */; };
 		_LinkFileRef_VaporCLI_via_vapor /* VaporCLI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_VaporCLI" /* VaporCLI.framework */; };
 		_LinkFileRef_libc_via_VaporCLI /* libc.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_libc" /* libc.framework */; };
@@ -73,6 +74,7 @@
 		5AC9EAEB1D21795A00D5E118 /* TestFile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestFile.swift; sourceTree = "<group>"; };
 		5AE77C081D22899700B8A8FF /* NewTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewTests.swift; sourceTree = "<group>"; };
 		5AE77C0A1D229F8300B8A8FF /* HelpTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HelpTests.swift; sourceTree = "<group>"; };
+		5AE77C0C1D22A13C00B8A8FF /* HerokuTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HerokuTests.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Package.swift /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		"__PBXFileRef_Sources/VaporCLI/Array+ext.swift" /* Array+ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+ext.swift"; sourceTree = "<group>"; };
 		__PBXFileRef_Sources/VaporCLI/Build.swift /* Build.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Build.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
@@ -235,6 +237,7 @@
 				5AA65A891D22659200177575 /* UpdateTests.swift */,
 				__PBXFileRef_Tests/VaporCLI/UtilsTests.swift /* UtilsTests.swift */,
 				__PBXFileRef_VaporCLITestSuite_Info.plist /* VaporCLITestSuite_Info.plist */,
+				5AE77C0C1D22A13C00B8A8FF /* HerokuTests.swift */,
 			);
 			name = VaporCLITestSuite;
 			path = Tests/VaporCLI;
@@ -397,6 +400,7 @@
 				5AE77C091D22899700B8A8FF /* NewTests.swift in Sources */,
 				5AE77C0B1D229F8300B8A8FF /* HelpTests.swift in Sources */,
 				5AA65A8E1D22862500177575 /* RunTests.swift in Sources */,
+				5AE77C0D1D22A13C00B8A8FF /* HerokuTests.swift in Sources */,
 				__src_cc_ref_Tests/VaporCLI/CmdDockerTests.swift /* DockerTests.swift in Sources */,
 				5AC9EAEC1D21795A00D5E118 /* TestFile.swift in Sources */,
 				__src_cc_ref_Tests/VaporCLI/SequenceExtTests.swift /* SequenceExtTests.swift in Sources */,

@@ -8,8 +8,27 @@ public protocol PosixSubsystem {
     func system(_ command: String) -> Int32
     func fileExists(_ path: String) -> Bool
     func commandExists(_ command: String) -> Bool
+    func getInput() -> String?
 }
 
+
+extension PosixSubsystem {
+    func passes(_ command: String) -> Bool {
+        return self.system(command) == 0
+    }
+}
+
+extension PosixSubsystem {
+    func run(_ command: String) throws {
+        let result = self.system(command)
+
+        if result == 2 {
+            throw Error.cancelled(command)
+        } else if result != 0 {
+            throw Error.system(result)
+        }
+    }
+}
 
 public struct Shell: PosixSubsystem {
 
@@ -25,16 +44,19 @@ public struct Shell: PosixSubsystem {
         return libc.system("hash \(command) 2>/dev/null") == 0
     }
 
+    public func getInput() -> String? {
+        return readLine(strippingNewline: true)
+    }
+
 }
 
 
+// FIXME: get rid of this block and simply replace "...".run(in: shell) with shell.run("...")
 public protocol Runnable {
     func run(in: PosixSubsystem) throws
 }
 
-
 public typealias ShellCommand = String
-
 
 extension ShellCommand: Runnable {
 
@@ -49,6 +71,7 @@ extension ShellCommand: Runnable {
     }
     
 }
+// FIXME: end
 
 
 // MARK: ContentProvider, File
@@ -126,14 +149,6 @@ func runWithOutput(_ command: String) throws -> String { // Command needs to use
     }
 }
 
-func passes(_ command: String) -> Bool {
-    return system(command) == 0
-}
-
-func getInput() -> String {
-    return readLine(strippingNewline: true) ?? ""
-}
-
 // FIXME: remove once everything is migrated to PosixSystem
 func commandExists(_ command: String) -> Bool {
     return system("hash \(command) 2>/dev/null") == 0
@@ -143,20 +158,9 @@ func gitHistoryIsClean() -> Bool {
     return system("test -z \"$(git status --porcelain)\" || exit 1") == 0
 }
 
-func readPackageSwiftFile() -> String {
-    let file = "./Package.swift"
-    do {
-        return try String(contentsOfFile: file)
-    } catch {
-        print()
-        print("Unable to find Package.swift")
-        print("Make sure you've run `vapor new` or setup your Swift project manually")
-        fail("")
-    }
-}
-
-func extractPackageName(from packageFile: String) -> String {
-    let packageName = packageFile
+func extractPackageName(from packageFile: ContentProvider) -> String? {
+    return packageFile
+        .contents?
         .components(separatedBy: "\n")
         .lazy
         .map { $0.trim() }
@@ -166,18 +170,6 @@ func extractPackageName(from packageFile: String) -> String {
         .lazy
         .filter { !$0.hasPrefix("name") }
         .first
-
-    guard let name = packageName else {
-        fail("Unable to extract package name")
-    }
-
-    return name
-}
-
-func getPackageName() -> String {
-    let packageFile = readPackageSwiftFile()
-    let packageName = extractPackageName(from: packageFile)
-    return packageName
 }
 
 func terminalSize() throws -> (width: Int, height: Int) {
