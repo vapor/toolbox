@@ -33,20 +33,32 @@ class BuildTests: XCTestCase {
 
 
     func test_execute() {
-        let _ = try? Build.execute(with: [], in: TestSystem.shell)
-        XCTAssertEqual(TestSystem.log, [.ok("swift package fetch"), .ok("swift build ")])
+        do {
+            try Build.execute(with: [], in: TestSystem.shell)
+            XCTAssertEqual(TestSystem.log, [.ok("swift package fetch"), .ok("swift build ")])
+        } catch {
+            XCTFail("unexpected error")
+        }
     }
 
     
     func test_execute_args() {
-        let _ = try? Build.execute(with: ["-foo", "-bar"], in: TestSystem.shell)
-        XCTAssertEqual(TestSystem.log, [.ok("swift package fetch"), .ok("swift build -foo -bar")])
+        do {
+            try Build.execute(with: ["foo", "-bar"], in: TestSystem.shell)
+            XCTAssertEqual(TestSystem.log, [.ok("swift package fetch"), .ok("swift build foo -bar")])
+        } catch {
+            XCTFail("unexpected error")
+        }
     }
 
 
     func test_execute_release() {
-        let _ = try? Build.execute(with: ["--release"], in: TestSystem.shell)
-        XCTAssertEqual(TestSystem.log, [.ok("swift package fetch"), .ok("swift build -c release")])
+        do {
+            try Build.execute(with: ["--release"], in: TestSystem.shell)
+            XCTAssertEqual(TestSystem.log, [.ok("swift package fetch"), .ok("swift build -c release")])
+        } catch {
+            XCTFail("unexpected error")
+        }
     }
 
 

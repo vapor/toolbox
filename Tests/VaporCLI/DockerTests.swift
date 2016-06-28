@@ -65,14 +65,22 @@ class DockerTests: XCTestCase {
 
 
     func test_init() {
-        let _ = try? Docker.execute(with: ["init"], in: TestSystem.shell)
-        XCTAssertEqual(TestSystem.log, [.ok("curl -L -s docker.qutheory.io -o Dockerfile")])
+        do {
+            try Docker.execute(with: ["init"], in: TestSystem.shell)
+            XCTAssertEqual(TestSystem.log, [.ok("curl -L -s docker.qutheory.io -o Dockerfile")])
+        } catch {
+            XCTFail("unexpected error")
+        }
     }
 
 
     func test_init_verbose() {
-        let _ = try? Docker.execute(with: ["init", "--verbose"], in: TestSystem.shell)
-        XCTAssertEqual(TestSystem.log, [.ok("curl -L  docker.qutheory.io -o Dockerfile")])
+        do {
+            try Docker.execute(with: ["init", "--verbose"], in: TestSystem.shell)
+            XCTAssertEqual(TestSystem.log, [.ok("curl -L  docker.qutheory.io -o Dockerfile")])
+        } catch {
+            XCTFail("unexpected error")
+        }
     }
 
 
