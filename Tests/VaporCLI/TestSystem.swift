@@ -10,6 +10,8 @@ import Foundation
 @testable import VaporCLI
 
 
+// MARK: LogEntry
+
 enum LogEntry: Equatable {
     case ok(String)
     case error(Int32)
@@ -38,6 +40,9 @@ func ==(lhs: LogEntry, rhs: LogEntry) -> Bool {
         return false
     }
 }
+
+
+// MARK: TestSystem
 
 
 struct TestSystem {

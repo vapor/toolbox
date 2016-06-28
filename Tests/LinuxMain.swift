@@ -8,5 +8,6 @@ XCTMain([
     testCase(DockerTests.allTests),
     testCase(SequenceExtTests.allTests),
     testCase(StringExtTests.allTests),
+    testCase(UpdateTests.allTests),
     testCase(UtilsTests.allTests),
 ])

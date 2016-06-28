@@ -9,9 +9,9 @@
 struct Update: Command {
     static let id = "update"
 
-    static func execute(with args: [String], in shell: PosixSubsystem) {
+    static func execute(with args: [String], in shell: PosixSubsystem) throws {
         guard let target = pathToSelf else {
-            fail("Could not determine path to vapor binary.")
+            throw Error.failed("Could not determine path to vapor binary.")
         }
 
         let name = "vapor-install.swift"
@@ -21,13 +21,13 @@ struct Update: Command {
             print("Downloading...")
             try "curl -L \(quiet) vapor-cli.qutheory.io -o \(name)".run(in: shell)
         } catch {
-            fail("Could not download Vapor CLI.")
+            throw Error.failed("Could not download Vapor CLI.")
         }
 
         do {
             try "swift \(name) \(target)".run(in: shell)
         } catch {
-            fail("Could not update CLI.")
+            throw Error.failed("Could not update CLI.")
         }
 
         print("Vapor CLI updated.")
@@ -46,8 +46,11 @@ extension Update {
 
 
 extension Update {
+    // this may look a bit convoluted but it's necessary to inject dependency for testing
+    internal static var _argumentsProvider: ArgumentsProvider.Type = Process.self
+
     static var pathToSelf: String? {
-        if let path = Process.arguments.first {
+        if let path = _argumentsProvider.arguments.first {
             if path == "vapor" {
                 return try? runWithOutput("which vapor").trim()
             } else {

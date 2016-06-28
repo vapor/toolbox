@@ -64,6 +64,20 @@ extension Path: ContentProvider {
 }
 
 
+// MARK: ArgumentsProvider
+
+
+protocol ArgumentsProvider {
+    // cannot use `static var arguments: [String] { get }`
+    // because
+//    static func arguments() -> [String]
+    static var arguments: [String] { get }
+}
+
+
+extension Process: ArgumentsProvider {}
+
+
 // Utility functions
 
 // FIXME: remove once all commands are migrated to Shell.fail
