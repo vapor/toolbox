@@ -1,23 +1,30 @@
 
-protocol Command {
+public protocol Command {
     static var id: String { get }
     static var help: [String] { get }
 
     static var dependencies: [String] { get }
     static var subCommands: [Command.Type] { get }
-    static func execute(with args: [String], in directory: String)
+    static func execute(with args: [String], in shell: PosixSubsystem) throws
 }
 
-extension Command {
+public extension Command {
+    static func execute(with args: [String]) throws {
+        try execute(with: args, in: Shell())
+    }
+}
+
+public extension Command {
     static var dependencies: [String] { return [] }
     static var help: [String] { return [] }
 }
 
 // sub command related methods
-extension Command {
+public extension Command {
+    static var binaryName: String { return "vapor" }
     static var subCommands: [Command.Type] { return [] }
 
-    static func executeSubCommand(with args: [String], in directory: String) {
+    static func executeSubCommand(with args: [String], in shell: PosixSubsystem) throws {
         var iterator = args.makeIterator()
         guard let cmdId = iterator.next() else {
             fail("\(id) requires a sub command:\n" + description)
@@ -26,11 +33,11 @@ extension Command {
             fail("Unknown \(id) subcommand '\(cmdId)':\n" + description)
         }
         let passthroughArgs = Array(iterator)
-        subcommand.execute(with: passthroughArgs, in: directory)
+        try subcommand.execute(with: passthroughArgs, in: shell)
     }
 }
 
-extension Command {
+public extension Command {
     static var description: String {
         // Sub Commands
         let subCommandRows: [String] = subCommands.map { subCommand in
@@ -67,7 +74,7 @@ extension Command {
     }
 }
 
-extension Command {
+public extension Command {
     static func assertDependenciesSatisfied() {
         for dependency in dependencies where !commandExists(dependency) {
             fail("\(id) requires \(dependency)")

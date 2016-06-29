@@ -7,38 +7,15 @@
 #endif
 
 import Foundation
-
-let version = "0.6.0"
-
-struct VaporCLI {
-    // this closure assignment is necessary to be able to exclude Xcode on Linux
-    static let commands: [Command.Type] = {
-        var c = [Command.Type]()
-        c.append(Help)
-        c.append(Version)
-        c.append(Clean)
-        c.append(Build)
-        c.append(Run)
-        c.append(New)
-        c.append(Update)
-        #if os(OSX)
-            c.append(Xcode)
-        #endif
-        c.append(Heroku)
-        c.append(Docker)
-        return c
-    }()
-}
+import VaporCLI
 
 var iterator = Process.arguments.makeIterator()
 
-// FIXME: Sven: this is actually the path to the binary, not the directory
-// not sure why this is called directory, perhaps this used to be run through `dirname`?
-guard let directory = iterator.next() else {
-    fail("no directory")
+guard let binary = iterator.next() else {
+    fail("no binary")
 }
 guard let commandId = iterator.next() else {
-    print("Usage: \(directory) [\(VaporCLI.commands.map({ $0.id }).joined(separator: "|"))]")
+    print("Usage: \(binary) [\(VaporCLI.commands.map({ $0.id }).joined(separator: "|"))]")
     fail("no command")
 }
 guard let command = getCommand(id: commandId, commands: VaporCLI.commands) else {
@@ -47,6 +24,20 @@ guard let command = getCommand(id: commandId, commands: VaporCLI.commands) else 
 
 command.assertDependenciesSatisfied()
 
-let arguments = Array(iterator)
-command.execute(with: arguments, in: directory)
-exit(0)
+do {
+    let arguments = Array(iterator)
+    try command.execute(with: arguments)
+    exit(0)
+} catch Error.cancelled(let msg) {
+    print()
+    print("Error: \(msg)")
+    exit(1)
+} catch Error.failed(let msg) {
+    print()
+    print("Error: \(msg)")
+    print("Note: Make sure you are using Swift 3.0 Snapshot 06-06")
+    exit(2)
+} catch {
+    print("unexpected error")
+    exit(3)
+}

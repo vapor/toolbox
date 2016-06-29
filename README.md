@@ -17,3 +17,14 @@ Run it (installs to `/usr/local/bin/vapor` by default, optionally specify differ
 Remove install script:
 
 - `rm install-vapor.swift`
+
+## Extending VaporCLI
+
+If you are using Xcode, everything should be set up in the Xcode project file. It builds and runs the tests.
+
+There is also a script `test` which runs the unit tests on both Darwin (OSX/macOS) and Linux (via docker). It writes the test results to `test.log`, which can be committed to source control.
+
+When added tests, please note that SPM currently requires a few extra steps for them to be picked up by the test runner on Linux:
+
+- in the test case, add a `static var allTests: [(String, (ArrayExtTests) -> () throws -> Void)]` member listing all tests (see existing files for reference)
+- in `LinuxMain.swift` add an entry `testCase(YourFileHere.swift)` to `XCTMain`

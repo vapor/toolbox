@@ -218,3 +218,4 @@ xcuserdata/
 
 # Vapor-cli additions
 .build
+*.xcodeproj

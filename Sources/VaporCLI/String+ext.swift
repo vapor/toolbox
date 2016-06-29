@@ -15,13 +15,13 @@ enum ANSIColor: String {
 }
 
 extension String {
-    func trim(trimCharacters: [Character] = whiteSpace) -> String {
+    func trim(characters: [Character] = whiteSpace) -> String {
         // while characters
         var mutable = self
-        while let next = mutable.characters.first where trimCharacters.contains(next) {
+        while let next = mutable.characters.first where characters.contains(next) {
             mutable.remove(at: mutable.startIndex)
         }
-        while let next = mutable.characters.last where trimCharacters.contains(next) {
+        while let next = mutable.characters.last where characters.contains(next) {
             mutable.remove(at: mutable.index(before: mutable.endIndex))
         }
         return mutable
@@ -58,28 +58,6 @@ extension String {
 
         return lines.joined(separator: "\n")
     }
-
-    #if os(Linux)
-    func hasPrefix(_ str: String) -> Bool {
-    let strGen = str.characters.makeIterator()
-    let selfGen = self.characters.makeIterator()
-    let seq = zip(strGen, selfGen)
-    for (lhs, rhs) in seq where lhs != rhs {
-    return false
-    }
-    return true
-    }
-
-    func hasSuffix(_ str: String) -> Bool {
-    let strGen = str.characters.reversed().makeIterator()
-    let selfGen = self.characters.reversed().makeIterator()
-    let seq = zip(strGen, selfGen)
-    for (lhs, rhs) in seq where lhs != rhs {
-    return false
-    }
-    return true
-    }
-    #endif
 
     func colored(with colors: [Character: ANSIColor], default defaultColor: ANSIColor = .reset) -> String {
         // Check the string is long enough

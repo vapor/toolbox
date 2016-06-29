@@ -4,11 +4,11 @@
     struct Xcode: Command {
         static let id = "xcode"
 
-        static func execute(with args: [String], in directory: String) {
+        static func execute(with args: [String], in shell: PosixSubsystem) {
             print("Generating Xcode Project...")
 
             do {
-                try run("swift package generate-xcodeproj")
+                try shell.run("swift package generate-xcodeproj")
             } catch {
                 fail("Could not generate Xcode Project.")
             }
@@ -16,7 +16,7 @@
             print("Opening Xcode...")
 
             do {
-                try run("open *.xcodeproj")
+                try shell.run("open *.xcodeproj")
             } catch {
                 fail("Could not open Xcode Project.")
             }
