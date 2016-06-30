@@ -75,9 +75,3 @@ let asciiArt: [String] = [
      " "
 ]
 
-public func getCommand(id: String, commands: [Command.Type]) -> Command.Type? {
-    return commands
-        .lazy
-        .filter { $0.id == id }
-        .first
-}

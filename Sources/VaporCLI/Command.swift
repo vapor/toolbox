@@ -9,6 +9,15 @@ public protocol Command {
 }
 
 public extension Command {
+    static func subCommand(for id: String) -> Command.Type? {
+        return subCommands
+            .lazy
+            .filter { $0.id == id }
+            .first
+    }
+}
+
+public extension Command {
     static func execute(with args: [String]) throws {
         try execute(with: args, in: Shell())
     }
@@ -29,9 +38,12 @@ public extension Command {
         guard let cmdId = iterator.next() else {
             throw Error.failed("\(id) requires a sub command:\n" + description)
         }
-        guard let subcommand = getCommand(id: cmdId, commands:subCommands) else {
+        guard let subcommand = subCommand(for: cmdId) else {
             throw Error.failed("Unknown \(id) subcommand '\(cmdId)':\n" + description)
         }
+
+        try subcommand.assertDependenciesSatisfied()
+
         let passthroughArgs = Array(iterator)
         try subcommand.execute(with: passthroughArgs, in: shell)
     }
