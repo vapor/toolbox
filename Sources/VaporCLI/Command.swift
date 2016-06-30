@@ -76,7 +76,7 @@ public extension Command {
 
 public extension Command {
     static func assertDependenciesSatisfied() {
-        for dependency in dependencies where !commandExists(dependency) {
+        for dependency in dependencies where !Shell().commandExists(dependency) {
             fail("\(id) requires \(dependency)")
         }
     }

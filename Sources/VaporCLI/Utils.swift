@@ -128,11 +128,6 @@ func runWithOutput(_ command: String) throws -> String { // Command needs to use
     }
 }
 
-// FIXME: remove once everything is migrated to PosixSystem
-func commandExists(_ command: String) -> Bool {
-    return system("hash \(command) 2>/dev/null") == 0
-}
-
 func extractPackageName(from packageFile: ContentProvider) -> String? {
     return packageFile
         .contents?
