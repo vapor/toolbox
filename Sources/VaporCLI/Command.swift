@@ -30,7 +30,6 @@ public extension Command {
 
 // sub command related methods
 public extension Command {
-    static var binaryName: String { return "vapor" }
     static var subCommands: [Command.Type] { return [] }
 
     static func executeSubCommand(with args: [String], in shell: PosixSubsystem) throws {

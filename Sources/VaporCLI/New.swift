@@ -9,7 +9,7 @@ struct New: Command {
 
     static func execute(with args: [String], in shell: PosixSubsystem) throws {
         guard let name = args.first else {
-            print("Usage: \(binaryName) \(id) <project-name>")
+            print("Usage: \(VaporCLI.id) \(id) <project-name>")
             throw Error.failed("Invalid number of arguments.")
         }
 
