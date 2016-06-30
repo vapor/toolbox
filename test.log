@@ -1,17 +1,17 @@
-Thu 30 Jun 2016 10:26:05 BST
+Thu 30 Jun 2016 13:55:41 BST
 Darwin Rhea.local 15.5.0 Darwin Kernel Version 15.5.0: Tue Apr 19 18:36:36 PDT 2016; root:xnu-3248.50.21~8/RELEASE_X86_64 x86_64
 Compile Swift Module 'VaporCLITestSuite' (15 sources)
 Linking .build/debug/VaporCLITests.xctest/Contents/MacOS/VaporCLITests
-Test Suite 'All tests' started at 2016-06-30 10:26:16.302
-Test Suite 'VaporCLITests.xctest' started at 2016-06-30 10:26:16.303
-Test Suite 'ArrayExtTests' started at 2016-06-30 10:26:16.303
+Test Suite 'All tests' started at 2016-06-30 13:55:52.531
+Test Suite 'VaporCLITests.xctest' started at 2016-06-30 13:55:52.532
+Test Suite 'ArrayExtTests' started at 2016-06-30 13:55:52.532
 Test Case '-[VaporCLITestSuite.ArrayExtTests test_remove]' started.
 Test Case '-[VaporCLITestSuite.ArrayExtTests test_remove]' passed (0.001 seconds).
 Test Case '-[VaporCLITestSuite.ArrayExtTests test_removeMatching]' started.
 Test Case '-[VaporCLITestSuite.ArrayExtTests test_removeMatching]' passed (0.000 seconds).
-Test Suite 'ArrayExtTests' passed at 2016-06-30 10:26:16.304.
+Test Suite 'ArrayExtTests' passed at 2016-06-30 13:55:52.533.
 	 Executed 2 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
-Test Suite 'BuildTests' started at 2016-06-30 10:26:16.304
+Test Suite 'BuildTests' started at 2016-06-30 13:55:52.534
 Test Case '-[VaporCLITestSuite.BuildTests test_execute]' started.
 Test Case '-[VaporCLITestSuite.BuildTests test_execute]' passed (0.000 seconds).
 Test Case '-[VaporCLITestSuite.BuildTests test_execute_args]' started.
@@ -28,16 +28,16 @@ Test Case '-[VaporCLITestSuite.BuildTests test_execute_release]' started.
 Test Case '-[VaporCLITestSuite.BuildTests test_execute_release]' passed (0.000 seconds).
 Test Case '-[VaporCLITestSuite.BuildTests test_help]' started.
 Test Case '-[VaporCLITestSuite.BuildTests test_help]' passed (0.000 seconds).
-Test Suite 'BuildTests' passed at 2016-06-30 10:26:16.305.
-	 Executed 8 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
-Test Suite 'CleanTests' started at 2016-06-30 10:26:16.305
+Test Suite 'BuildTests' passed at 2016-06-30 13:55:52.535.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 0.001 (0.002) seconds
+Test Suite 'CleanTests' started at 2016-06-30 13:55:52.535
 Test Case '-[VaporCLITestSuite.CleanTests test_execute]' started.
 Test Case '-[VaporCLITestSuite.CleanTests test_execute]' passed (0.000 seconds).
 Test Case '-[VaporCLITestSuite.CleanTests test_execute_args]' started.
 Test Case '-[VaporCLITestSuite.CleanTests test_execute_args]' passed (0.000 seconds).
-Test Suite 'CleanTests' passed at 2016-06-30 10:26:16.306.
+Test Suite 'CleanTests' passed at 2016-06-30 13:55:52.536.
 	 Executed 2 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
-Test Suite 'DockerTests' started at 2016-06-30 10:26:16.306
+Test Suite 'DockerTests' started at 2016-06-30 13:55:52.536
 Test Case '-[VaporCLITestSuite.DockerTests test_build]' started.
 Test Case '-[VaporCLITestSuite.DockerTests test_build]' passed (0.000 seconds).
 Test Case '-[VaporCLITestSuite.DockerTests test_build_help]' started.
@@ -66,30 +66,30 @@ Test Case '-[VaporCLITestSuite.DockerTests test_subCommands]' started.
 Test Case '-[VaporCLITestSuite.DockerTests test_subCommands]' passed (0.001 seconds).
 Test Case '-[VaporCLITestSuite.DockerTests test_swiftVersion]' started.
 Test Case '-[VaporCLITestSuite.DockerTests test_swiftVersion]' passed (0.000 seconds).
-Test Suite 'DockerTests' passed at 2016-06-30 10:26:16.308.
-	 Executed 14 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
-Test Suite 'HelpTests' started at 2016-06-30 10:26:16.308
+Test Suite 'DockerTests' passed at 2016-06-30 13:55:52.539.
+	 Executed 14 tests, with 0 failures (0 unexpected) in 0.002 (0.003) seconds
+Test Suite 'HelpTests' started at 2016-06-30 13:55:52.539
 Test Case '-[VaporCLITestSuite.HelpTests test_execute]' started.
 Test Case '-[VaporCLITestSuite.HelpTests test_execute]' passed (0.000 seconds).
-Test Suite 'HelpTests' passed at 2016-06-30 10:26:16.308.
+Test Suite 'HelpTests' passed at 2016-06-30 13:55:52.539.
 	 Executed 1 test, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
-Test Suite 'HerokuTests' started at 2016-06-30 10:26:16.308
+Test Suite 'HerokuTests' started at 2016-06-30 13:55:52.539
 Test Case '-[VaporCLITestSuite.HerokuTests test_init]' started.
 Test Case '-[VaporCLITestSuite.HerokuTests test_init]' passed (0.001 seconds).
 Test Case '-[VaporCLITestSuite.HerokuTests test_init_help]' started.
 Test Case '-[VaporCLITestSuite.HerokuTests test_init_help]' passed (0.000 seconds).
-Test Suite 'HerokuTests' passed at 2016-06-30 10:26:16.309.
+Test Suite 'HerokuTests' passed at 2016-06-30 13:55:52.540.
 	 Executed 2 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
-Test Suite 'NewTests' started at 2016-06-30 10:26:16.309
+Test Suite 'NewTests' started at 2016-06-30 13:55:52.540
 Test Case '-[VaporCLITestSuite.NewTests test_execute]' started.
-Test Case '-[VaporCLITestSuite.NewTests test_execute]' passed (0.267 seconds).
+Test Case '-[VaporCLITestSuite.NewTests test_execute]' passed (0.260 seconds).
 Test Case '-[VaporCLITestSuite.NewTests test_execute_noargs]' started.
 Test Case '-[VaporCLITestSuite.NewTests test_execute_noargs]' passed (0.000 seconds).
 Test Case '-[VaporCLITestSuite.NewTests test_help]' started.
 Test Case '-[VaporCLITestSuite.NewTests test_help]' passed (0.000 seconds).
-Test Suite 'NewTests' passed at 2016-06-30 10:26:16.577.
-	 Executed 3 tests, with 0 failures (0 unexpected) in 0.267 (0.268) seconds
-Test Suite 'RunTests' started at 2016-06-30 10:26:16.577
+Test Suite 'NewTests' passed at 2016-06-30 13:55:52.800.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.260 (0.260) seconds
+Test Suite 'RunTests' started at 2016-06-30 13:55:52.800
 Test Case '-[VaporCLITestSuite.RunTests test_execute]' started.
 Test Case '-[VaporCLITestSuite.RunTests test_execute]' passed (0.000 seconds).
 Test Case '-[VaporCLITestSuite.RunTests test_execute_args]' started.
@@ -100,23 +100,23 @@ Test Case '-[VaporCLITestSuite.RunTests test_execute_release]' started.
 Test Case '-[VaporCLITestSuite.RunTests test_execute_release]' passed (0.000 seconds).
 Test Case '-[VaporCLITestSuite.RunTests test_help]' started.
 Test Case '-[VaporCLITestSuite.RunTests test_help]' passed (0.000 seconds).
-Test Suite 'RunTests' passed at 2016-06-30 10:26:16.577.
+Test Suite 'RunTests' passed at 2016-06-30 13:55:52.801.
 	 Executed 5 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
-Test Suite 'SequenceExtTests' started at 2016-06-30 10:26:16.577
+Test Suite 'SequenceExtTests' started at 2016-06-30 13:55:52.801
 Test Case '-[VaporCLITestSuite.SequenceExtTests test_valueFor]' started.
 Test Case '-[VaporCLITestSuite.SequenceExtTests test_valueFor]' passed (0.000 seconds).
-Test Suite 'SequenceExtTests' passed at 2016-06-30 10:26:16.578.
+Test Suite 'SequenceExtTests' passed at 2016-06-30 13:55:52.801.
 	 Executed 1 test, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
-Test Suite 'StringExtTests' started at 2016-06-30 10:26:16.578
+Test Suite 'StringExtTests' started at 2016-06-30 13:55:52.802
 Test Case '-[VaporCLITestSuite.StringExtTests test_centerTextBlock]' started.
 Test Case '-[VaporCLITestSuite.StringExtTests test_centerTextBlock]' passed (0.000 seconds).
 Test Case '-[VaporCLITestSuite.StringExtTests test_colored]' started.
 Test Case '-[VaporCLITestSuite.StringExtTests test_colored]' passed (0.000 seconds).
 Test Case '-[VaporCLITestSuite.StringExtTests test_trim]' started.
 Test Case '-[VaporCLITestSuite.StringExtTests test_trim]' passed (0.000 seconds).
-Test Suite 'StringExtTests' passed at 2016-06-30 10:26:16.578.
+Test Suite 'StringExtTests' passed at 2016-06-30 13:55:52.803.
 	 Executed 3 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
-Test Suite 'UpdateTests' started at 2016-06-30 10:26:16.579
+Test Suite 'UpdateTests' started at 2016-06-30 13:55:52.803
 Test Case '-[VaporCLITestSuite.UpdateTests test_execute]' started.
 Test Case '-[VaporCLITestSuite.UpdateTests test_execute]' passed (0.000 seconds).
 Test Case '-[VaporCLITestSuite.UpdateTests test_execute_args]' started.
@@ -127,9 +127,9 @@ Test Case '-[VaporCLITestSuite.UpdateTests test_help]' started.
 Test Case '-[VaporCLITestSuite.UpdateTests test_help]' passed (0.000 seconds).
 Test Case '-[VaporCLITestSuite.UpdateTests test_pathToSelf]' started.
 Test Case '-[VaporCLITestSuite.UpdateTests test_pathToSelf]' passed (0.000 seconds).
-Test Suite 'UpdateTests' passed at 2016-06-30 10:26:16.579.
-	 Executed 5 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
-Test Suite 'UtilsTests' started at 2016-06-30 10:26:16.579
+Test Suite 'UpdateTests' passed at 2016-06-30 13:55:52.803.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'UtilsTests' started at 2016-06-30 13:55:52.803
 Test Case '-[VaporCLITestSuite.UtilsTests test_getCommand]' started.
 Test Case '-[VaporCLITestSuite.UtilsTests test_getCommand]' passed (0.000 seconds).
 Test Case '-[VaporCLITestSuite.UtilsTests test_ShellCommand_run]' started.
@@ -138,12 +138,12 @@ Test Case '-[VaporCLITestSuite.UtilsTests test_ShellCommand_run_cancelled]' star
 Test Case '-[VaporCLITestSuite.UtilsTests test_ShellCommand_run_cancelled]' passed (0.000 seconds).
 Test Case '-[VaporCLITestSuite.UtilsTests test_ShellCommand_run_error]' started.
 Test Case '-[VaporCLITestSuite.UtilsTests test_ShellCommand_run_error]' passed (0.000 seconds).
-Test Suite 'UtilsTests' passed at 2016-06-30 10:26:16.580.
+Test Suite 'UtilsTests' passed at 2016-06-30 13:55:52.804.
 	 Executed 4 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
-Test Suite 'VaporCLITests.xctest' passed at 2016-06-30 10:26:16.580.
-	 Executed 50 tests, with 0 failures (0 unexpected) in 0.274 (0.277) seconds
-Test Suite 'All tests' passed at 2016-06-30 10:26:16.580.
-	 Executed 50 tests, with 0 failures (0 unexpected) in 0.274 (0.277) seconds
+Test Suite 'VaporCLITests.xctest' passed at 2016-06-30 13:55:52.804.
+	 Executed 50 tests, with 0 failures (0 unexpected) in 0.269 (0.272) seconds
+Test Suite 'All tests' passed at 2016-06-30 13:55:52.804.
+	 Executed 50 tests, with 0 failures (0 unexpected) in 0.269 (0.273) seconds
 
 Need help getting your project to build?
 Join our Slack where hundreds of contributors
@@ -288,96 +288,96 @@ Downloading...
 Vapor CLI updated.
 Downloading...
 Vapor CLI updated.
-Thu Jun 30 09:26:16 UTC 2016
-Linux e3aca403010a 4.4.14-moby #1 SMP Wed Jun 29 10:00:58 UTC 2016 x86_64 x86_64 x86_64 GNU/Linux
+Thu Jun 30 12:55:53 UTC 2016
+Linux 39b94f08ff5b 4.4.14-moby #1 SMP Wed Jun 29 10:00:58 UTC 2016 x86_64 x86_64 x86_64 GNU/Linux
 Compile Swift Module 'VaporCLITestSuite' (15 sources)
 Linking .build/debug/VaporCLITests.xctest
-Test Suite 'All tests' started at 09:26:26.549
-Test Suite 'debug.xctest' started at 09:26:26.560
-Test Suite 'ArrayExtTests' started at 09:26:26.560
-Test Case 'ArrayExtTests.test_remove' started at 09:26:26.560
+Test Suite 'All tests' started at 12:56:03.707
+Test Suite 'debug.xctest' started at 12:56:03.719
+Test Suite 'ArrayExtTests' started at 12:56:03.719
+Test Case 'ArrayExtTests.test_remove' started at 12:56:03.719
 Test Case 'ArrayExtTests.test_remove' passed (0.0 seconds).
-Test Case 'ArrayExtTests.test_removeMatching' started at 09:26:26.561
+Test Case 'ArrayExtTests.test_removeMatching' started at 12:56:03.719
 Test Case 'ArrayExtTests.test_removeMatching' passed (0.0 seconds).
-Test Suite 'ArrayExtTests' passed at 09:26:26.561
+Test Suite 'ArrayExtTests' passed at 12:56:03.719
 	 Executed 2 tests, with 0 failures (0 unexpected) in 0.0 (0.0) seconds
-Test Suite 'BuildTests' started at 09:26:26.561
-Test Case 'BuildTests.test_execute' started at 09:26:26.561
+Test Suite 'BuildTests' started at 12:56:03.719
+Test Case 'BuildTests.test_execute' started at 12:56:03.719
 Test Case 'BuildTests.test_execute' passed (0.0 seconds).
-Test Case 'BuildTests.test_execute_args' started at 09:26:26.561
+Test Case 'BuildTests.test_execute_args' started at 12:56:03.719
 Test Case 'BuildTests.test_execute_args' passed (0.0 seconds).
-Test Case 'BuildTests.test_execute_release' started at 09:26:26.561
+Test Case 'BuildTests.test_execute_release' started at 12:56:03.720
 Test Case 'BuildTests.test_execute_release' passed (0.0 seconds).
-Test Case 'BuildTests.test_execute_fetch_cancelled' started at 09:26:26.561
+Test Case 'BuildTests.test_execute_fetch_cancelled' started at 12:56:03.720
 Test Case 'BuildTests.test_execute_fetch_cancelled' passed (0.0 seconds).
-Test Case 'BuildTests.test_execute_fetch_failed' started at 09:26:26.561
+Test Case 'BuildTests.test_execute_fetch_failed' started at 12:56:03.720
 Test Case 'BuildTests.test_execute_fetch_failed' passed (0.0 seconds).
-Test Case 'BuildTests.test_execute_build_cancelled' started at 09:26:26.562
+Test Case 'BuildTests.test_execute_build_cancelled' started at 12:56:03.720
 Test Case 'BuildTests.test_execute_build_cancelled' passed (0.0 seconds).
-Test Case 'BuildTests.test_execute_build_failed' started at 09:26:26.562
+Test Case 'BuildTests.test_execute_build_failed' started at 12:56:03.720
 
 Need help getting your project to build?
 Join our Slack where hundreds of contributors
 are waiting to help: http://slack.qutheory.io
 Test Case 'BuildTests.test_execute_build_failed' passed (0.0 seconds).
-Test Case 'BuildTests.test_help' started at 09:26:26.562
+Test Case 'BuildTests.test_help' started at 12:56:03.720
 Test Case 'BuildTests.test_help' passed (0.0 seconds).
-Test Suite 'BuildTests' passed at 09:26:26.562
+Test Suite 'BuildTests' passed at 12:56:03.720
 	 Executed 8 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
-Test Suite 'CleanTests' started at 09:26:26.562
-Test Case 'CleanTests.test_execute' started at 09:26:26.562
+Test Suite 'CleanTests' started at 12:56:03.720
+Test Case 'CleanTests.test_execute' started at 12:56:03.720
 Cleaned.
 Test Case 'CleanTests.test_execute' passed (0.0 seconds).
-Test Case 'CleanTests.test_execute_args' started at 09:26:26.563
+Test Case 'CleanTests.test_execute_args' started at 12:56:03.721
 Test Case 'CleanTests.test_execute_args' passed (0.0 seconds).
-Test Suite 'CleanTests' passed at 09:26:26.563
+Test Suite 'CleanTests' passed at 12:56:03.721
 	 Executed 2 tests, with 0 failures (0 unexpected) in 0.0 (0.0) seconds
-Test Suite 'DockerTests' started at 09:26:26.563
-Test Case 'DockerTests.test_subCommands' started at 09:26:26.563
+Test Suite 'DockerTests' started at 12:56:03.721
+Test Case 'DockerTests.test_subCommands' started at 12:56:03.721
 Test Case 'DockerTests.test_subCommands' passed (0.001 seconds).
-Test Case 'DockerTests.test_swiftVersion' started at 09:26:26.563
+Test Case 'DockerTests.test_swiftVersion' started at 12:56:03.721
 Test Case 'DockerTests.test_swiftVersion' passed (0.0 seconds).
-Test Case 'DockerTests.test_imageName' started at 09:26:26.563
+Test Case 'DockerTests.test_imageName' started at 12:56:03.722
 Test Case 'DockerTests.test_imageName' passed (0.0 seconds).
-Test Case 'DockerTests.test_init' started at 09:26:26.564
+Test Case 'DockerTests.test_init' started at 12:56:03.722
 Downloading Dockerfile...
 Dockerfile created.
 You may now adjust the file or
 run `vapor docker build`.
-Test Case 'DockerTests.test_init' passed (0.0 seconds).
-Test Case 'DockerTests.test_init_verbose' started at 09:26:26.564
+Test Case 'DockerTests.test_init' passed (0.001 seconds).
+Test Case 'DockerTests.test_init_verbose' started at 12:56:03.722
 Downloading Dockerfile...
 Dockerfile created.
 You may now adjust the file or
 run `vapor docker build`.
 Test Case 'DockerTests.test_init_verbose' passed (0.0 seconds).
-Test Case 'DockerTests.test_init_Dockerfile_exists' started at 09:26:26.564
+Test Case 'DockerTests.test_init_Dockerfile_exists' started at 12:56:03.723
 Test Case 'DockerTests.test_init_Dockerfile_exists' passed (0.0 seconds).
-Test Case 'DockerTests.test_init_download_failure' started at 09:26:26.564
+Test Case 'DockerTests.test_init_download_failure' started at 12:56:03.723
 Downloading Dockerfile...
 Test Case 'DockerTests.test_init_download_failure' passed (0.0 seconds).
-Test Case 'DockerTests.test_init_help' started at 09:26:26.564
+Test Case 'DockerTests.test_init_help' started at 12:56:03.723
 Test Case 'DockerTests.test_init_help' passed (0.0 seconds).
-Test Case 'DockerTests.test_build' started at 09:26:26.565
+Test Case 'DockerTests.test_build' started at 12:56:03.723
 Building docker image with Swift version: v1
 This may take a few minutes if no layers are cached...
 Test Case 'DockerTests.test_build' passed (0.0 seconds).
-Test Case 'DockerTests.test_build_help' started at 09:26:26.565
+Test Case 'DockerTests.test_build_help' started at 12:56:03.723
 Test Case 'DockerTests.test_build_help' passed (0.0 seconds).
-Test Case 'DockerTests.test_run' started at 09:26:26.565
+Test Case 'DockerTests.test_run' started at 12:56:03.723
 Launching app with image qutheory/swift:v1
 Test Case 'DockerTests.test_run' passed (0.0 seconds).
-Test Case 'DockerTests.test_run_help' started at 09:26:26.565
+Test Case 'DockerTests.test_run_help' started at 12:56:03.723
 Test Case 'DockerTests.test_run_help' passed (0.0 seconds).
-Test Case 'DockerTests.test_enter' started at 09:26:26.565
+Test Case 'DockerTests.test_enter' started at 12:56:03.723
 Starting bash in image qutheory/swift:v1
 Test Case 'DockerTests.test_enter' passed (0.0 seconds).
-Test Case 'DockerTests.test_enter_help' started at 09:26:26.565
+Test Case 'DockerTests.test_enter_help' started at 12:56:03.723
 Test Case 'DockerTests.test_enter_help' passed (0.0 seconds).
-Test Suite 'DockerTests' passed at 09:26:26.565
+Test Suite 'DockerTests' passed at 12:56:03.723
 	 Executed 14 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
-Test Suite 'HelpTests' started at 09:26:26.565
-Test Case 'HelpTests.test_execute' started at 09:26:26.565
+Test Suite 'HelpTests' started at 12:56:03.724
+Test Case 'HelpTests.test_execute' started at 12:56:03.724
 Usage: vapor [help|version|clean|build|run|new|update|heroku|docker]
 
 Available Commands:
@@ -443,10 +443,10 @@ Community:
     http://slack.qutheory.io
 
 Test Case 'HelpTests.test_execute' passed (0.0 seconds).
-Test Suite 'HelpTests' passed at 09:26:26.566
+Test Suite 'HelpTests' passed at 12:56:03.724
 	 Executed 1 test, with 0 failures (0 unexpected) in 0.0 (0.0) seconds
-Test Suite 'HerokuTests' started at 09:26:26.567
-Test Case 'HerokuTests.test_init' started at 09:26:26.567
+Test Suite 'HerokuTests' started at 12:56:03.724
+Test Case 'HerokuTests.test_init' started at 12:56:03.724
 Setting up Heroku for Optional("foo") ...
 
 Found existing heroku app
@@ -461,13 +461,13 @@ Would you like to push to heroku now? (y/n)
 Pushing to heroku ... this could take a while
 
 spinning up dynos ...
-Test Case 'HerokuTests.test_init' passed (0.001 seconds).
-Test Case 'HerokuTests.test_init_help' started at 09:26:26.568
+Test Case 'HerokuTests.test_init' passed (0.0 seconds).
+Test Case 'HerokuTests.test_init_help' started at 12:56:03.725
 Test Case 'HerokuTests.test_init_help' passed (0.0 seconds).
-Test Suite 'HerokuTests' passed at 09:26:26.568
-	 Executed 2 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
-Test Suite 'NewTests' started at 09:26:26.568
-Test Case 'NewTests.test_execute' started at 09:26:26.568
+Test Suite 'HerokuTests' passed at 12:56:03.725
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.0 (0.0) seconds
+Test Suite 'NewTests' started at 12:56:03.725
+Test Case 'NewTests.test_execute' started at 12:56:03.725
 Cloning example...
 Unpacking...
 Initializing git repository if necessary...
@@ -501,76 +501,76 @@ Initializing git repository if necessary...
                    Type `cd name` to enter project directory
                                       Enjoy![0;0m
 
-Test Case 'NewTests.test_execute' passed (0.01 seconds).
-Test Case 'NewTests.test_execute_noargs' started at 09:26:26.578
+Test Case 'NewTests.test_execute' passed (0.011 seconds).
+Test Case 'NewTests.test_execute_noargs' started at 12:56:03.736
 Usage: vapor new <project-name>
 Test Case 'NewTests.test_execute_noargs' passed (0.0 seconds).
-Test Case 'NewTests.test_help' started at 09:26:26.579
+Test Case 'NewTests.test_help' started at 12:56:03.736
 Test Case 'NewTests.test_help' passed (0.0 seconds).
-Test Suite 'NewTests' passed at 09:26:26.579
-	 Executed 3 tests, with 0 failures (0 unexpected) in 0.01 (0.01) seconds
-Test Suite 'RunTests' started at 09:26:26.579
-Test Case 'RunTests.test_execute' started at 09:26:26.579
+Test Suite 'NewTests' passed at 12:56:03.736
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.011 (0.011) seconds
+Test Suite 'RunTests' started at 12:56:03.736
+Test Case 'RunTests.test_execute' started at 12:56:03.736
 Running...
 Test Case 'RunTests.test_execute' passed (0.0 seconds).
-Test Case 'RunTests.test_execute_args' started at 09:26:26.579
+Test Case 'RunTests.test_execute_args' started at 12:56:03.736
 Running...
 Test Case 'RunTests.test_execute_args' passed (0.0 seconds).
-Test Case 'RunTests.test_execute_name' started at 09:26:26.579
+Test Case 'RunTests.test_execute_name' started at 12:56:03.737
 Running...
-Test Case 'RunTests.test_execute_name' passed (0.001 seconds).
-Test Case 'RunTests.test_execute_release' started at 09:26:26.580
+Test Case 'RunTests.test_execute_name' passed (0.0 seconds).
+Test Case 'RunTests.test_execute_release' started at 12:56:03.737
 Running...
 Test Case 'RunTests.test_execute_release' passed (0.0 seconds).
-Test Case 'RunTests.test_help' started at 09:26:26.580
+Test Case 'RunTests.test_help' started at 12:56:03.737
 Test Case 'RunTests.test_help' passed (0.0 seconds).
-Test Suite 'RunTests' passed at 09:26:26.580
-	 Executed 5 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
-Test Suite 'SequenceExtTests' started at 09:26:26.580
-Test Case 'SequenceExtTests.test_valueFor' started at 09:26:26.580
+Test Suite 'RunTests' passed at 12:56:03.737
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.0 (0.0) seconds
+Test Suite 'SequenceExtTests' started at 12:56:03.737
+Test Case 'SequenceExtTests.test_valueFor' started at 12:56:03.737
 Test Case 'SequenceExtTests.test_valueFor' passed (0.0 seconds).
-Test Suite 'SequenceExtTests' passed at 09:26:26.580
+Test Suite 'SequenceExtTests' passed at 12:56:03.737
 	 Executed 1 test, with 0 failures (0 unexpected) in 0.0 (0.0) seconds
-Test Suite 'StringExtTests' started at 09:26:26.580
-Test Case 'StringExtTests.test_trim' started at 09:26:26.580
+Test Suite 'StringExtTests' started at 12:56:03.737
+Test Case 'StringExtTests.test_trim' started at 12:56:03.737
 Test Case 'StringExtTests.test_trim' passed (0.0 seconds).
-Test Case 'StringExtTests.test_centerTextBlock' started at 09:26:26.581
+Test Case 'StringExtTests.test_centerTextBlock' started at 12:56:03.738
 Test Case 'StringExtTests.test_centerTextBlock' passed (0.0 seconds).
-Test Case 'StringExtTests.test_colored' started at 09:26:26.581
+Test Case 'StringExtTests.test_colored' started at 12:56:03.738
 Test Case 'StringExtTests.test_colored' passed (0.0 seconds).
-Test Suite 'StringExtTests' passed at 09:26:26.581
+Test Suite 'StringExtTests' passed at 12:56:03.738
 	 Executed 3 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
-Test Suite 'UpdateTests' started at 09:26:26.581
-Test Case 'UpdateTests.test_pathToSelf' started at 09:26:26.581
+Test Suite 'UpdateTests' started at 12:56:03.738
+Test Case 'UpdateTests.test_pathToSelf' started at 12:56:03.738
 Test Case 'UpdateTests.test_pathToSelf' passed (0.0 seconds).
-Test Case 'UpdateTests.test_execute' started at 09:26:26.582
+Test Case 'UpdateTests.test_execute' started at 12:56:03.739
 Downloading...
 Vapor CLI updated.
 Test Case 'UpdateTests.test_execute' passed (0.0 seconds).
-Test Case 'UpdateTests.test_execute_verbose' started at 09:26:26.582
+Test Case 'UpdateTests.test_execute_verbose' started at 12:56:03.739
 Downloading...
 Vapor CLI updated.
 Test Case 'UpdateTests.test_execute_verbose' passed (0.0 seconds).
-Test Case 'UpdateTests.test_execute_args' started at 09:26:26.582
+Test Case 'UpdateTests.test_execute_args' started at 12:56:03.739
 Downloading...
 Vapor CLI updated.
 Test Case 'UpdateTests.test_execute_args' passed (0.0 seconds).
-Test Case 'UpdateTests.test_help' started at 09:26:26.582
+Test Case 'UpdateTests.test_help' started at 12:56:03.739
 Test Case 'UpdateTests.test_help' passed (0.0 seconds).
-Test Suite 'UpdateTests' passed at 09:26:26.582
+Test Suite 'UpdateTests' passed at 12:56:03.740
 	 Executed 5 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
-Test Suite 'UtilsTests' started at 09:26:26.583
-Test Case 'UtilsTests.test_getCommand' started at 09:26:26.583
-Test Case 'UtilsTests.test_getCommand' passed (0.001 seconds).
-Test Case 'UtilsTests.test_ShellCommand_run' started at 09:26:26.583
+Test Suite 'UtilsTests' started at 12:56:03.740
+Test Case 'UtilsTests.test_getCommand' started at 12:56:03.740
+Test Case 'UtilsTests.test_getCommand' passed (0.0 seconds).
+Test Case 'UtilsTests.test_ShellCommand_run' started at 12:56:03.740
 Test Case 'UtilsTests.test_ShellCommand_run' passed (0.0 seconds).
-Test Case 'UtilsTests.test_ShellCommand_run_cancelled' started at 09:26:26.584
+Test Case 'UtilsTests.test_ShellCommand_run_cancelled' started at 12:56:03.740
 Test Case 'UtilsTests.test_ShellCommand_run_cancelled' passed (0.0 seconds).
-Test Case 'UtilsTests.test_ShellCommand_run_error' started at 09:26:26.584
+Test Case 'UtilsTests.test_ShellCommand_run_error' started at 12:56:03.740
 Test Case 'UtilsTests.test_ShellCommand_run_error' passed (0.0 seconds).
-Test Suite 'UtilsTests' passed at 09:26:26.584
-	 Executed 4 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
-Test Suite 'debug.xctest' passed at 09:26:26.584
+Test Suite 'UtilsTests' passed at 12:56:03.740
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.0 (0.0) seconds
+Test Suite 'debug.xctest' passed at 12:56:03.740
 	 Executed 50 tests, with 0 failures (0 unexpected) in 0.018 (0.018) seconds
-Test Suite 'All tests' passed at 09:26:26.585
+Test Suite 'All tests' passed at 12:56:03.741
 	 Executed 50 tests, with 0 failures (0 unexpected) in 0.018 (0.018) seconds
