@@ -87,15 +87,6 @@ extension Process: ArgumentsProvider {}
 
 // Utility functions
 
-// FIXME: remove once everything is migrated to PosixSystem
-@noreturn public func fail(_ message: String, cancelled: Bool = false) {
-    print()
-    print("Error: \(message)")
-    if !cancelled {
-        print("Note: Make sure you are using Swift 3.0 Snapshot 06-06")
-    }
-    exit(1)
-}
 
 public enum Error: ErrorProtocol { // Errors pertaining to running commands
     case system(Int32)

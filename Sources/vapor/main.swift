@@ -1,43 +1,49 @@
 #!/usr/bin/env swift
 
-#if os(OSX)
-    import Darwin
-#else
-    import Glibc
-#endif
-
 import Foundation
 import VaporCLI
 
-var iterator = Process.arguments.makeIterator()
 
-guard let binary = iterator.next() else {
-    fail("no binary")
+enum ReturnCodes: Int32 {
+    case ok = 0
+    case cancelled
+    case failed
+    case unexpected
 }
-guard let commandId = iterator.next() else {
+
+
+var args = Process.arguments.makeIterator()
+
+guard let binary = args.next() else {
+    // this cannot really happen as argv[0] is the command itself
+    print("no binary")
+    exit(ReturnCodes.unexpected.rawValue)
+}
+guard let commandId = args.next() else {
     print("Usage: \(binary) [\(VaporCLI.commands.map({ $0.id }).joined(separator: "|"))]")
-    fail("no command")
+    print("Please specify a command")
+    exit(ReturnCodes.failed.rawValue)
 }
 guard let command = getCommand(id: commandId, commands: VaporCLI.commands) else {
-    fail("command \(commandId) doesn't exist")
+    print("command \(commandId) doesn't exist, run '\(binary) help' for help")
+    exit(ReturnCodes.failed.rawValue)
 }
 
-command.assertDependenciesSatisfied()
 
 do {
-    let arguments = Array(iterator)
-    try command.execute(with: arguments)
-    exit(0)
+    try command.assertDependenciesSatisfied()
+    try command.execute(with: Array(args))
+    exit(ReturnCodes.ok.rawValue)
 } catch Error.cancelled(let msg) {
     print()
     print("Error: \(msg)")
-    exit(1)
+    exit(ReturnCodes.cancelled.rawValue)
 } catch Error.failed(let msg) {
     print()
     print("Error: \(msg)")
     print("Note: Make sure you are using Swift 3.0 Snapshot 06-06")
-    exit(2)
+    exit(ReturnCodes.failed.rawValue)
 } catch {
     print("unexpected error")
-    exit(3)
+    exit(ReturnCodes.unexpected.rawValue)
 }

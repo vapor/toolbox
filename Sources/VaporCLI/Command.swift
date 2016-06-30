@@ -27,10 +27,10 @@ public extension Command {
     static func executeSubCommand(with args: [String], in shell: PosixSubsystem) throws {
         var iterator = args.makeIterator()
         guard let cmdId = iterator.next() else {
-            fail("\(id) requires a sub command:\n" + description)
+            throw Error.failed("\(id) requires a sub command:\n" + description)
         }
         guard let subcommand = getCommand(id: cmdId, commands:subCommands) else {
-            fail("Unknown \(id) subcommand '\(cmdId)':\n" + description)
+            throw Error.failed("Unknown \(id) subcommand '\(cmdId)':\n" + description)
         }
         let passthroughArgs = Array(iterator)
         try subcommand.execute(with: passthroughArgs, in: shell)
@@ -75,9 +75,9 @@ public extension Command {
 }
 
 public extension Command {
-    static func assertDependenciesSatisfied() {
+    static func assertDependenciesSatisfied() throws {
         for dependency in dependencies where !Shell().commandExists(dependency) {
-            fail("\(id) requires \(dependency)")
+            throw Error.failed("\(id) requires \(dependency)")
         }
     }
 }
