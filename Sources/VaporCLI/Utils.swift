@@ -1,4 +1,5 @@
 import libc
+import Foundation
 
 
 // MARK: ShellCommand, PosixSubsystem, Shell
@@ -9,6 +10,8 @@ public protocol PosixSubsystem {
     func fileExists(_ path: String) -> Bool
     func commandExists(_ command: String) -> Bool
     func getInput() -> String?
+    func terminalSize() -> (width: Int, height: Int)?
+    func printFancy(_ string: String)
 }
 
 
@@ -20,6 +23,7 @@ extension PosixSubsystem {
 
 
 extension PosixSubsystem {
+    // FIXME: consolidate these two
     func run(_ command: String) throws {
         let result = self.system(command)
 
@@ -28,6 +32,27 @@ extension PosixSubsystem {
         } else if result != 0 {
             throw Error.system(result)
         }
+    }
+
+    func runWithOutput(_ command: String, arguments: [String]) -> (status: Int32, stdout: String?, stderr: String?) {
+        let task = NSTask()
+        task.launchPath = command
+        task.arguments = arguments
+        let pipe = NSPipe()
+        task.standardOutput = pipe
+        task.launch()
+        task.waitUntilExit()
+        let status = task.terminationStatus
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        let stdout = String(data: data, encoding: NSUTF8StringEncoding)
+        return (status, stdout, nil)
+    }
+}
+
+
+extension PosixSubsystem {
+    func printFancy(_ strings: [String]) {
+        printFancy(strings.joined(separator: "\n"))
     }
 }
 
@@ -48,6 +73,43 @@ public struct Shell: PosixSubsystem {
 
     public func getInput() -> String? {
         return readLine(strippingNewline: true)
+    }
+
+    public func terminalSize() -> (width: Int, height: Int)? {
+        // Get the columns and lines from tput
+        let tput = "/usr/bin/tput"
+        if let
+            str_cols = runWithOutput(tput, arguments: ["cols"]).stdout?.trim(),
+            str_lines = runWithOutput(tput, arguments: ["lines"]).stdout?.trim(),
+            cols = Int(str_cols),
+            lines = Int(str_lines) {
+            return (cols, lines)
+        } else {
+            return nil
+        }
+    }
+
+    public func printFancy(_ string: String) {
+        let centered: String
+        if let size = terminalSize() {
+            centered = string.centerTextBlock(width: size.width)
+        } else {
+            centered = string
+        }
+
+        let fancy = centered.colored(with: [
+            "*": .magenta,
+            "~": .blue,
+            "+": .cyan, // Droplet
+            "_": .magenta,
+            "/": .magenta,
+            "\\": .magenta,
+            "|": .magenta,
+            "-": .magenta,
+            ")": .magenta // Title
+            ])
+
+        print(fancy)
     }
 
 }
@@ -75,9 +137,6 @@ extension Path: ContentProvider {
 
 
 protocol ArgumentsProvider {
-    // cannot use `static var arguments: [String] { get }`
-    // because
-//    static func arguments() -> [String]
     static var arguments: [String] { get }
 }
 
@@ -96,29 +155,6 @@ public enum Error: ErrorProtocol { // Errors pertaining to running commands
 }
 
 
-func runWithOutput(_ command: String) throws -> String { // Command needs to use the absolute path for the executable
-    // Run the command
-    let fp = popen(command, "r")
-
-    defer {
-        pclose(fp)
-    }
-
-    if let fp = fp {
-        // Get the output of the command
-        let pathSize: Int32 = 1035
-        let path : UnsafeMutablePointer<Int8> = UnsafeMutablePointer(allocatingCapacity: Int(pathSize))
-        var output = ""
-        while fgets(path, pathSize - 1, fp) != nil {
-            output += String(cString: path)
-        }
-
-        return output
-    } else {
-        throw Error.system(1)
-    }
-}
-
 func extractPackageName(from packageFile: ContentProvider) -> String? {
     return packageFile
         .contents?
@@ -133,46 +169,7 @@ func extractPackageName(from packageFile: ContentProvider) -> String? {
         .first
 }
 
-func terminalSize() throws -> (width: Int, height: Int) {
-    // Get the columns and lines from tput
-    let tput = "/usr/bin/tput"
-    let cols = try runWithOutput("\(tput) cols").trim(characters: ["\n"])
-    let lines = try runWithOutput("\(tput) lines").trim(characters: ["\n"])
 
-    if let cols = Int(cols), lines = Int(lines) {
-        return (cols, lines)
-    } else {
-        throw Error.terminalSize
-    }
-}
-
-func printFancy(_ strings: [String]) {
-    printFancy(strings.joined(separator: "\n"))
-}
-
-func printFancy(_ string: String) {
-    let centered: String
-    do {
-        let size = try terminalSize()
-        centered = string.centerTextBlock(width: size.width)
-    } catch {
-        centered = string
-    }
-
-    let fancy = centered.colored(with: [
-                                           "*": .magenta,
-                                           "~": .blue,
-                                           "+": .cyan, // Droplet
-        "_": .magenta,
-        "/": .magenta,
-        "\\": .magenta,
-        "|": .magenta, 
-        "-": .magenta, 
-        ")": .magenta // Title
-        ])
-    
-    print(fancy)
-}
 
 let asciiArt: [String] = [
      "               **",

@@ -92,6 +92,13 @@ extension TestSystem: PosixSubsystem {
     func getInput() -> String? {
         return input
     }
-    
+
+    func terminalSize() -> (width: Int, height: Int)? {
+        return (80, 25)
+    }
+
+    func printFancy(_ string: String) {
+        Shell().printFancy(string)
+    }
 }
 

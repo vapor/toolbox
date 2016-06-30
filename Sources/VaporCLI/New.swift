@@ -41,9 +41,9 @@ struct New: Command {
             }
 
             print()
-            printFancy(asciiArt)
+            shell.printFancy(asciiArt)
             print()
-            printFancy([
+            shell.printFancy([
                 "    Project \"\(name)\" has been created.",
                 "Type `cd \(name)` to enter project directory",
                 "                   Enjoy!",

@@ -35,7 +35,7 @@ class UpdateTests: XCTestCase {
 
     func test_pathToSelf() {
         TestProcess.arguments = ["/usr/local/bin/vapor"]
-        XCTAssertEqual(Update.pathToSelf, "/usr/local/bin/vapor")
+        XCTAssertEqual(Update.pathToSelf(in: TestSystem.shell), "/usr/local/bin/vapor")
 
         // FIXME: enable after making `runWithOutput` testable in TestSystem
         //        TestProcess.arguments = ["vapor"]
