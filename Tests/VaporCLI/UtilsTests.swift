@@ -15,7 +15,6 @@ class UtilsTests: XCTestCase {
     // required by LinuxMain.swift
     static var allTests: [(String, (UtilsTests) -> () throws -> Void)] {
         return [
-            ("test_getCommand", test_getCommand),
             ("test_ShellCommand_run", test_ShellCommand_run),
             ("test_ShellCommand_run_cancelled", test_ShellCommand_run_cancelled),
             ("test_ShellCommand_run_error", test_ShellCommand_run_error),
@@ -57,16 +56,6 @@ class UtilsTests: XCTestCase {
         } catch Error.system(let res) {
             XCTAssertEqual(res, 1)
         } catch {
-            XCTFail()
-        }
-    }
-
-    func test_getCommand() {
-        let cmds: [Command.Type] = [Docker.Init.self, Docker.Build.self, Docker.Run.self]
-        if let res = getCommand(id: "init", commands: cmds) {
-            // XCTAssertEqual cannot compare Command.Type, need to coerce to string
-            XCTAssertEqual("\(res)", "\(Docker.Init.self)")
-        } else {
             XCTFail()
         }
     }
