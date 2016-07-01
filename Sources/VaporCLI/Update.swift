@@ -1,16 +1,11 @@
 
-#if os(OSX)
-    import Darwin
-#else
-    import Glibc
-#endif
 
 
 struct Update: Command {
     static let id = "update"
 
     static func execute(with args: [String], in shell: PosixSubsystem) throws {
-        guard let target = pathToSelf else {
+        guard let target = pathToSelf(in: shell) else {
             throw Error.failed("Could not determine path to vapor binary.")
         }
 
@@ -47,12 +42,13 @@ extension Update {
 
 extension Update {
     // this may look a bit convoluted but it's necessary to inject dependency for testing
+    // Process.arguments crashes when run from unit tests
     internal static var _argumentsProvider: ArgumentsProvider.Type = Process.self
 
-    static var pathToSelf: String? {
+    static func pathToSelf(in shell: PosixSubsystem) -> String? {
         if let path = _argumentsProvider.arguments.first {
             if path == "vapor" {
-                return try? runWithOutput("which vapor").trim()
+                return (try? shell.runWithOutput("which vapor"))?.stdout?.trim()
             } else {
                 return path
             }
