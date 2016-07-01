@@ -69,18 +69,92 @@ public enum Error: ErrorProtocol {
 
 
 // FIXME: add tests
-public struct Shell: PosixSubsystem {
+public struct Shell {
+    // wrappers for a few low level C calls, based on
+    // https://github.com/apple/swift-package-manager/blob/master/Sources/POSIX/system.swift
+
+    private func _WSTATUS(_ status: CInt) -> CInt {
+        return status & 0x7f
+    }
+
+    private func WIFEXITED(_ status: CInt) -> Bool {
+        return _WSTATUS(status) == 0
+    }
+
+    private func WEXITSTATUS(_ status: CInt) -> CInt {
+        return (status >> 8) & 0xff
+    }
+
+    func waitpid(_ pid: pid_t) throws -> Int32 {
+        while true {
+            var exitStatus: Int32 = 0
+            let rv = libc.waitpid(pid, &exitStatus, 0)
+
+            if rv != -1 {
+                if WIFEXITED(exitStatus) {
+                    return WEXITSTATUS(exitStatus)
+                } else {
+                    throw Error.system(exitStatus)
+                }
+            } else if errno == EINTR {
+                continue  // see: man waitpid
+            } else {
+                throw Error.system(errno)
+            }
+        }
+    }
+
+    func posix_spawnp(args: [String]) throws -> pid_t {
+        var environment = [String: String]()
+        let key = "PATH"
+        if let e = getenv(key) {
+            environment[key] = String(validatingUTF8: e)
+        }
+
+        let env: [UnsafeMutablePointer<CChar>?] = environment.map{ "\($0.0)=\($0.1)".withCString(strdup) }
+        defer { for case let arg? in env { free(arg) } }
+
+        var pid: pid_t = 0
+        let argv = args.map{ $0.withCString(strdup) } + [nil]
+        defer { for case let arg? in argv { free(arg) } }
+
+        let res = libc.posix_spawnp(&pid, argv[0], nil, nil, argv, env + [nil])
+
+        if res == 0 {
+            return pid
+        } else {
+            throw Error.system(res)
+        }
+    }
+    
+}
+
+
+extension Shell: PosixSubsystem {
 
     public func system(_ command: String) -> Int32 {
-        return libc.system(command)
+        // FIXME: remove after Grand Renaming lands on Linux
+        #if os(OSX)
+            let parts = command.components(separatedBy: CharacterSet.whitespaces)
+        #else
+            let parts = command.components(separatedBy: NSCharacterSet.whitespaces())
+        #endif
+        do {
+            let pid = try posix_spawnp(args: parts)
+            return try waitpid(pid)
+        } catch {
+            // FIXME: mark method 'throws' and throw
+            //            throw Error.failed("Failed to spawn subprocess '\(command)'")
+            return -1
+        }
     }
 
     public func fileExists(_ path: String) -> Bool {
-        return libc.system("ls \(path) > /dev/null 2>&1") == 0
+        return system("ls \(path) > /dev/null 2>&1") == 0
     }
 
     public func commandExists(_ command: String) -> Bool {
-        return libc.system("hash \(command) 2>/dev/null") == 0
+        return system("hash \(command) 2>/dev/null") == 0
     }
 
     public func getInput() -> String? {
@@ -133,16 +207,27 @@ public struct Shell: PosixSubsystem {
         let command = parts[0]
         let arguments = Array(parts.dropFirst())
 
-        let task = NSTask()
+        // FIXME: remove after Grand Renaming lands on Linux
+        #if os(OSX)
+            let task = Task()
+            let pipe = Pipe()
+        #else
+            let task = NSTask()
+            let pipe = NSPipe()
+        #endif
         task.launchPath = command
         task.arguments = arguments
-        let pipe = NSPipe()
         task.standardOutput = pipe
         task.launch()
         task.waitUntilExit()
         let status = task.terminationStatus
         let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        let stdout = String(data: data, encoding: NSUTF8StringEncoding)
+        // FIXME: remove after Grand Renaming lands on Linux
+        #if os(OSX)
+            let stdout = String(data: data, encoding: String.Encoding.utf8)
+        #else
+            let stdout = String(data: data, encoding: NSUTF8StringEncoding)
+        #endif
         return (status, stdout, nil)
     }
 
