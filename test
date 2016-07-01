@@ -7,10 +7,24 @@ LOGFILE=test.log
 PLATFORMS=${1:-"macos linux"}
 set -euo pipefail
 
+function clean() {
+    rm -rf .build && swift build --clean
+}
+
+function filter() {
+    # remove date and timing information from the log to avoid unnecessary diff noise
+    # '... started at 12:30:31.129' (note that macOS also shows the date)
+    # 'passed (0.001 seconds).'
+    # 'in 0.271 (0.274) seconds'
+    sed 's/ at \([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] \)*[0-9][0-9]:[0-9][0-9]:[0-9][0-9].[0-9][0-9][0-9]//' \
+    | sed 's/ ([0-9][0-9]*.[0-9][0-9]* seconds)//' \
+    | sed 's/ in [0-9][0-9]*.[0-9][0-9]* ([0-9][0-9]*.[0-9][0-9]*) seconds//'
+}
+
 function build_and_test() {
     date 2>&1 | tee -a $LOGFILE
     uname -a 2>&1 | tee -a $LOGFILE
-    rm -rf .build && swift build --clean && swift build && swift test 2>&1 | tee -a $LOGFILE
+    clean && swift build && swift test 2>&1 | filter | tee -a $LOGFILE
 }
 
 if [ ! -f /.dockerenv ]; then
