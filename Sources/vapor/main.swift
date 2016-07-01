@@ -1,43 +1,28 @@
 #!/usr/bin/env swift
 
-#if os(OSX)
-    import Darwin
-#else
-    import Glibc
-#endif
-
 import Foundation
 import VaporCLI
 
-var iterator = Process.arguments.makeIterator()
 
-guard let binary = iterator.next() else {
-    fail("no binary")
-}
-guard let commandId = iterator.next() else {
-    print("Usage: \(binary) [\(VaporCLI.commands.map({ $0.id }).joined(separator: "|"))]")
-    fail("no command")
-}
-guard let command = getCommand(id: commandId, commands: VaporCLI.commands) else {
-    fail("command \(commandId) doesn't exist")
+enum ReturnCodes: Int32 {
+    case ok = 0
+    case cancelled
+    case failed
+    case unexpected
 }
 
-command.assertDependenciesSatisfied()
 
 do {
-    let arguments = Array(iterator)
-    try command.execute(with: arguments)
-    exit(0)
+    try VaporCLI.execute(with: Process.arguments)
+    exit(ReturnCodes.ok.rawValue)
 } catch Error.cancelled(let msg) {
-    print()
     print("Error: \(msg)")
-    exit(1)
+    exit(ReturnCodes.cancelled.rawValue)
 } catch Error.failed(let msg) {
-    print()
     print("Error: \(msg)")
     print("Note: Make sure you are using Swift 3.0 Snapshot 06-06")
-    exit(2)
+    exit(ReturnCodes.failed.rawValue)
 } catch {
     print("unexpected error")
-    exit(3)
+    exit(ReturnCodes.unexpected.rawValue)
 }

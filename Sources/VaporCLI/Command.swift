@@ -9,6 +9,15 @@ public protocol Command {
 }
 
 public extension Command {
+    static func subCommand(for id: String) -> Command.Type? {
+        return subCommands
+            .lazy
+            .filter { $0.id == id }
+            .first
+    }
+}
+
+public extension Command {
     static func execute(with args: [String]) throws {
         try execute(with: args, in: Shell())
     }
@@ -21,17 +30,19 @@ public extension Command {
 
 // sub command related methods
 public extension Command {
-    static var binaryName: String { return "vapor" }
     static var subCommands: [Command.Type] { return [] }
 
     static func executeSubCommand(with args: [String], in shell: PosixSubsystem) throws {
         var iterator = args.makeIterator()
         guard let cmdId = iterator.next() else {
-            fail("\(id) requires a sub command:\n" + description)
+            throw Error.failed("\(id) requires a sub command:\n" + description)
         }
-        guard let subcommand = getCommand(id: cmdId, commands:subCommands) else {
-            fail("Unknown \(id) subcommand '\(cmdId)':\n" + description)
+        guard let subcommand = subCommand(for: cmdId) else {
+            throw Error.failed("Unknown \(id) subcommand '\(cmdId)':\n" + description)
         }
+
+        try subcommand.assertDependenciesSatisfied()
+
         let passthroughArgs = Array(iterator)
         try subcommand.execute(with: passthroughArgs, in: shell)
     }
@@ -75,9 +86,9 @@ public extension Command {
 }
 
 public extension Command {
-    static func assertDependenciesSatisfied() {
-        for dependency in dependencies where !commandExists(dependency) {
-            fail("\(id) requires \(dependency)")
+    static func assertDependenciesSatisfied() throws {
+        for dependency in dependencies where !Shell().commandExists(dependency) {
+            throw Error.failed("\(id) requires \(dependency)")
         }
     }
 }
