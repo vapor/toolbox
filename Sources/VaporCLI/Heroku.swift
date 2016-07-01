@@ -1,10 +1,4 @@
 
-#if os(OSX)
-    import Darwin
-#else
-    import Glibc
-#endif
-
 struct Heroku: Command {
     static let id = "heroku"
 

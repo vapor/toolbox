@@ -1,8 +1,3 @@
-#if os(OSX)
-    import Darwin
-#else
-    import Glibc
-#endif
 
 struct New: Command {
     static let id = "new"
