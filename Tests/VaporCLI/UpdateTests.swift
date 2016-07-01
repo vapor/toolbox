@@ -14,6 +14,7 @@ class UpdateTests: XCTestCase {
     // required by LinuxMain.swift
     static var allTests: [(String, (UpdateTests) -> () throws -> Void)] {
         return [
+            ("test_pathToSelf_absolute", test_pathToSelf_absolute),
             ("test_pathToSelf", test_pathToSelf),
             ("test_execute", test_execute),
             ("test_execute_verbose", test_execute_verbose),
@@ -33,13 +34,23 @@ class UpdateTests: XCTestCase {
     // MARK: Tests
 
 
-    func test_pathToSelf() {
+    func test_pathToSelf_absolute() {
         TestProcess.arguments = ["/usr/local/bin/vapor"]
         XCTAssertEqual(Update.pathToSelf(in: TestSystem.shell), "/usr/local/bin/vapor")
+    }
 
-        // FIXME: enable after making `runWithOutput` testable in TestSystem
-        //        TestProcess.arguments = ["vapor"]
-        //        XCTAssertEqual(Update.pathToSelf, "/somepath/vapor")
+
+    func test_pathToSelf() {
+        TestProcess.arguments = ["vapor"]
+        TestSystem.shell.commandResults = { cmd in
+            if cmd == "which vapor" {
+                return .ok("/some/path/to/vapor")
+            } else {
+                return .ok(cmd)
+            }
+        }
+
+        XCTAssertEqual(Update.pathToSelf(in: TestSystem.shell), "/some/path/to/vapor")
     }
 
 

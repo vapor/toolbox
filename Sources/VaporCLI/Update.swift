@@ -53,7 +53,7 @@ extension Update {
     static func pathToSelf(in shell: PosixSubsystem) -> String? {
         if let path = _argumentsProvider.arguments.first {
             if path == "vapor" {
-                return shell.runWithOutput("which", arguments: ["vapor"]).stdout?.trim()
+                return (try? shell.runWithOutput("which vapor"))?.stdout?.trim()
             } else {
                 return path
             }

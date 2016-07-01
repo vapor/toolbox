@@ -10,6 +10,9 @@ import Foundation
 import libc
 
 
+public typealias CommandResult = (status: Int32, stdout: String?, stderr: String?)
+
+
 // MARK:- PosixSubsystem
 
 
@@ -20,6 +23,7 @@ public protocol PosixSubsystem {
     func getInput() -> String?
     func terminalSize() -> (width: Int, height: Int)?
     func printFancy(_ string: String)
+    func runWithOutput(_ command: String) throws -> CommandResult
 }
 
 
@@ -31,8 +35,8 @@ extension PosixSubsystem {
 
 
 extension PosixSubsystem {
-    // FIXME: consolidate these two
     func run(_ command: String) throws {
+        // FIXME: replace with `runWithOutput(command).status`
         let result = self.system(command)
 
         if result == 2 {
@@ -40,20 +44,6 @@ extension PosixSubsystem {
         } else if result != 0 {
             throw Error.system(result)
         }
-    }
-
-    func runWithOutput(_ command: String, arguments: [String]) -> (status: Int32, stdout: String?, stderr: String?) {
-        let task = NSTask()
-        task.launchPath = command
-        task.arguments = arguments
-        let pipe = NSPipe()
-        task.standardOutput = pipe
-        task.launch()
-        task.waitUntilExit()
-        let status = task.terminationStatus
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        let stdout = String(data: data, encoding: NSUTF8StringEncoding)
-        return (status, stdout, nil)
     }
 }
 
@@ -78,6 +68,7 @@ public enum Error: ErrorProtocol {
 // MARK:- Shell
 
 
+// FIXME: add tests
 public struct Shell: PosixSubsystem {
 
     public func system(_ command: String) -> Int32 {
@@ -100,8 +91,8 @@ public struct Shell: PosixSubsystem {
         // Get the columns and lines from tput
         let tput = "/usr/bin/tput"
         if let
-            str_cols = runWithOutput(tput, arguments: ["cols"]).stdout?.trim(),
-            str_lines = runWithOutput(tput, arguments: ["lines"]).stdout?.trim(),
+            str_cols = (try? runWithOutput(tput + " cols"))?.stdout?.trim(),
+            str_lines = (try? runWithOutput(tput + " lines"))?.stdout?.trim(),
             cols = Int(str_cols),
             lines = Int(str_lines) {
             return (cols, lines)
@@ -132,7 +123,29 @@ public struct Shell: PosixSubsystem {
         
         print(fancy)
     }
-    
+
+    public func runWithOutput(_ command: String) throws -> CommandResult {
+        let parts = command.components(separatedBy: NSCharacterSet.whitespaces())
+        guard parts.count > 0 else {
+            throw Error.failed("Invalid command")
+        }
+
+        let command = parts[0]
+        let arguments = Array(parts.dropFirst())
+
+        let task = NSTask()
+        task.launchPath = command
+        task.arguments = arguments
+        let pipe = NSPipe()
+        task.standardOutput = pipe
+        task.launch()
+        task.waitUntilExit()
+        let status = task.terminationStatus
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        let stdout = String(data: data, encoding: NSUTF8StringEncoding)
+        return (status, stdout, nil)
+    }
+
 }
 
 

@@ -69,16 +69,7 @@ extension TestSystem: PosixSubsystem {
     }
 
     func system(_ command: String) -> Int32 {
-        let log = self.commandResults?(command) ?? .ok(command)
-        self.logEvent(log)
-        switch log {
-        case .ok:
-            return 0
-        case .error(let code):
-            return code
-        case .failed:
-            return 127
-        }
+        return runWithOutput(command).status
     }
 
     func fileExists(_ path: String) -> Bool {
@@ -100,5 +91,19 @@ extension TestSystem: PosixSubsystem {
     func printFancy(_ string: String) {
         Shell().printFancy(string)
     }
+
+    func runWithOutput(_ command: String) -> CommandResult {
+        let log = self.commandResults?(command) ?? .ok(command)
+        self.logEvent(log)
+        switch log {
+        case .ok(let stdout):
+            return (0, stdout, nil)
+        case .error(let code):
+            return (code, nil, nil)
+        case .failed:
+            return (127, nil, nil)
+        }
+    }
+
 }
 
