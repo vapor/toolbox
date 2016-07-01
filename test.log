@@ -1,4 +1,4 @@
-Fri  1 Jul 2016 14:02:15 BST
+Fri  1 Jul 2016 14:05:10 BST
 Darwin Rhea.local 15.5.0 Darwin Kernel Version 15.5.0: Tue Apr 19 18:36:36 PDT 2016; root:xnu-3248.50.21~8/RELEASE_X86_64 x86_64
 Compile Swift Module 'VaporCLITestSuite' (16 sources)
 Linking .build/debug/VaporCLITests.xctest/Contents/MacOS/VaporCLITests
@@ -304,8 +304,8 @@ Vapor CLI updated.
 Downloading...
 Vapor CLI updated.
 Cleaned.
-Fri Jul  1 13:02:27 UTC 2016
-Linux 75a94865c7fc 4.4.14-moby #1 SMP Wed Jun 29 10:00:58 UTC 2016 x86_64 x86_64 x86_64 GNU/Linux
+Fri Jul  1 13:05:22 UTC 2016
+Linux dadbc828a02d 4.4.14-moby #1 SMP Wed Jun 29 10:00:58 UTC 2016 x86_64 x86_64 x86_64 GNU/Linux
 Compile Swift Module 'VaporCLITestSuite' (16 sources)
 Linking .build/debug/VaporCLITests.xctest
 Test Suite 'All tests' started
