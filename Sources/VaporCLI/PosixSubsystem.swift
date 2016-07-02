@@ -133,12 +133,17 @@ public struct Shell {
 extension Shell: PosixSubsystem {
 
     public func system(_ command: String) -> Int32 {
-        // FIXME: remove after Grand Renaming lands on Linux
-        #if os(OSX)
-            let parts = command.components(separatedBy: CharacterSet.whitespaces)
-        #else
-            let parts = command.components(separatedBy: NSCharacterSet.whitespaces())
-        #endif
+        let parts: [String]
+        if !command.hasPrefix("/") {
+            parts = ["/bin/sh", "-c", command]
+        } else {
+            // FIXME: remove after Grand Renaming lands on Linux
+            #if os(OSX)
+                parts = command.components(separatedBy: CharacterSet.whitespaces)
+            #else
+                parts = command.components(separatedBy: NSCharacterSet.whitespaces())
+            #endif
+        }
         do {
             let pid = try posix_spawnp(args: parts)
             return try waitpid(pid)
