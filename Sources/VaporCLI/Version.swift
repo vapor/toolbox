@@ -1,12 +1,11 @@
-
-struct Version: Command {
-    static let id = "version"
-    static func execute(with args: [String], in shell: PosixSubsystem) {
-        print("Vapor CLI version: \(version)")
+public final class Version: Command {
+    public override func run() throws {
+        try super.run()
+        
+        print("Vapor CLI version: \(VaporConsole.version)")
     }
-    static var help: [String] {
-        return [
-                   "display Vapor CLI version"
-        ]
+
+    public override func help() {
+        print("Displays Vapor CLI version")
     }
 }

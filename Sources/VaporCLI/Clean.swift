@@ -1,17 +1,19 @@
+public final class Clean: Command {
+    public static let id = "build"
 
-struct Clean: Command {
-    static let id = "clean"
-    static func execute(with args: [String], in shell: PosixSubsystem) throws {
-        guard args.isEmpty else {
-            throw Error.failed("\(id) does not take any additional parameters")
+    public override func run() throws {
+
+        try shell.run("rm -rf Packages .build")
+
+        if flag("xcode") {
+            try shell.run("rm -rf *.xcodeproj")
         }
 
-        do {
-            try shell.run("rm -rf Packages .build")
-            print("Cleaned.")
-        } catch {
-            fail("Could not clean.")
-        }
+        success("Cleaned.")
+    }
+
+    public override func help() {
+        print("cleans temporary build files")
+        print("optionally removes generated Xcode Project")
     }
 }
-

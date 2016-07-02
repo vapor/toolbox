@@ -1,45 +1,63 @@
+public final class Build: Command {
+    public static let id = "build"
 
-struct Build: Command {
-    static let id = "build"
-    static func execute(with args: [String], in shell: PosixSubsystem) throws {
+    public override func run() throws {
+
+        let loadingBar = self.loadingBar(title: "Build")
+        loadingBar.start()
+
+        let tmpFile = "/var/tmp/vaporBuildOutput.log"
+
         do {
-            try shell.run("swift package fetch")
-        } catch Error.cancelled {
-            // re-throw with updated message
-            throw Error.cancelled("Fetch cancelled")
-        } catch {
-            throw Error.failed("Could not fetch dependencies.")
+            try shell.run("swift package fetch > \(tmpFile) 2>&1")
+        } catch Error.shell(_) {
+            loadingBar.fail()
+            try shell.run("tail \(tmpFile)")
+            throw Error.general("Could not fetch dependencies.")
         }
 
-        var flags = args
-        if args.contains("--release") {
-            flags = flags.filter { $0 != "--release" }
-            flags.append("-c release")
+        var buildFlags: [String] = [
+            "-Xswiftc",
+            "-I/usr/local/include/mysql",
+            "-Xlinker",
+            "-L/usr/local/lib"
+        ]
+
+        for (name, value) in options {
+            if name == "release" && value.bool == true {
+                buildFlags += "--configuration release"
+            } else {
+                buildFlags += "--\(name)=\(value.string ?? "")"
+            }
         }
+
+        let command = "swift build " + buildFlags.joined(separator: " ")
         do {
-            let buildFlags = flags.joined(separator: " ")
-            try shell.run("swift build \(buildFlags)")
-        } catch Error.cancelled {
-            // re-throw with updated message
-            throw Error.cancelled("Build cancelled")
-        } catch {
+            try shell.run("\(command) > \(tmpFile) 2>&1")
+            loadingBar.finish()
+        } catch Error.shell(_) {
+            loadingBar.fail()
             print()
-            print("Need help getting your project to build?")
+            info("Command:")
+            print(command)
+            print()
+            info("Output:")
+            try shell.run("tail \(tmpFile)")
+            print()
+            info("Toolchain:")
+            try shell.run("which swift")
+            print()
+            info("Need help getting your project to build?")
             print("Join our Slack where hundreds of contributors")
             print("are waiting to help: http://slack.qutheory.io")
 
-            throw Error.failed("Could not build project.")
+            throw Error.general("There may be something wrong in the source code or structure of your project.")
         }
     }
-}
 
-extension Build {
-    static var help: [String] {
-        return [
-                   "build <module-name>",
-                   "Builds source files and links Vapor libs.",
-                   "Defaults to App/ folder structure."
-        ]
+    public override func help() {
+        print("build <module-name>")
+        print("Builds source files and links Vapor libs.")
+        print("Defaults to App/ folder structure.")
     }
 }
-

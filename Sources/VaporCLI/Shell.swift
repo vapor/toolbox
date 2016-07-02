@@ -4,55 +4,37 @@ import libc
 // MARK: ShellCommand, PosixSubsystem, Shell
 
 
-public protocol PosixSubsystem {
-    func system(_ command: String) -> Int32
-    func fileExists(_ path: String) -> Bool
-    func commandExists(_ command: String) -> Bool
-    func getInput() -> String?
+public protocol Shell {
+    func run(_ command: String) throws
 }
 
-
-extension PosixSubsystem {
-    func passes(_ command: String) -> Bool {
-        return self.system(command) == 0
-    }
+extension Shell {
+//    public func fileExists(_ path: String) -> Bool {
+//        return run("ls \(path) > /dev/null 2>&1") == 0
+//    }
+//
+//    public func commandExists(_ command: String) -> Bool {
+//        return execute("hash \(command) 2>/dev/null") == 0
+//    }
+//
+//    func passes(_ command: String) -> Bool {
+//        return self.system(command) == 0
+//    }
 }
 
-
-extension PosixSubsystem {
-    func run(_ command: String) throws {
-        let result = self.system(command)
+public final class CShell: Shell {
+    public func run(_ command: String) throws {
+        let result = libc.system(command)
 
         if result == 2 {
-            throw Error.cancelled(command)
+            throw Error.cancelled
         } else if result != 0 {
-            throw Error.system(result)
+            throw Error.shell(Int(result))
         }
     }
 }
 
-
-public struct Shell: PosixSubsystem {
-
-    public func system(_ command: String) -> Int32 {
-        return libc.system(command)
-    }
-
-    public func fileExists(_ path: String) -> Bool {
-        return libc.system("ls \(path) > /dev/null 2>&1") == 0
-    }
-
-    public func commandExists(_ command: String) -> Bool {
-        return libc.system("hash \(command) 2>/dev/null") == 0
-    }
-
-    public func getInput() -> String? {
-        return readLine(strippingNewline: true)
-    }
-
-}
-
-
+/*
 // MARK: ContentProvider, File
 
 
@@ -64,11 +46,11 @@ protocol ContentProvider {
 public typealias Path = String
 
 
-extension Path: ContentProvider {
-    public var contents: String? {
-        return try? String(contentsOfFile: self)
-    }
-}
+//extension Path: ContentProvider {
+//    public var contents: String? {
+//        return try? String(contentsOfFile: self)
+//    }
+//}
 
 
 // MARK: ArgumentsProvider
@@ -220,3 +202,5 @@ public func getCommand(id: String, commands: [Command.Type]) -> Command.Type? {
         .filter { $0.id == id }
         .first
 }
+ 
+ */
