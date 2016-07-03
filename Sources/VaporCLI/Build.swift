@@ -1,18 +1,26 @@
+import Console
+
 public final class Build: Command {
     public static let id = "build"
 
-    public override func run() throws {
+    public let console: Console
 
-        let loadingBar = self.loadingBar(title: "Build")
+    public init(console: Console) {
+        self.console = console
+    }
+
+    public func run(arguments: [String]) throws {
+
+        let loadingBar = console.loadingBar(title: "Build")
         loadingBar.start()
 
         let tmpFile = "/var/tmp/vaporBuildOutput.log"
 
         do {
-            try shell.run("swift package fetch > \(tmpFile) 2>&1")
-        } catch Error.shell(_) {
+            try console.execute("swift package fetch > \(tmpFile) 2>&1")
+        } catch ConsoleError.execute(_) {
             loadingBar.fail()
-            try shell.run("tail \(tmpFile)")
+            try console.execute("tail \(tmpFile)")
             throw Error.general("Could not fetch dependencies.")
         }
 
@@ -23,7 +31,7 @@ public final class Build: Command {
             "-L/usr/local/lib"
         ]
 
-        for (name, value) in options {
+        for (name, value) in arguments.options {
             if name == "release" && value.bool == true {
                 buildFlags += "--configuration release"
             } else {
@@ -33,31 +41,29 @@ public final class Build: Command {
 
         let command = "swift build " + buildFlags.joined(separator: " ")
         do {
-            try shell.run("\(command) > \(tmpFile) 2>&1")
+            try console.execute("\(command) > \(tmpFile) 2>&1")
             loadingBar.finish()
-        } catch Error.shell(_) {
+        } catch ConsoleError.execute(_) {
             loadingBar.fail()
-            print()
-            info("Command:")
-            print(command)
-            print()
-            info("Output:")
-            try shell.run("tail \(tmpFile)")
-            print()
-            info("Toolchain:")
-            try shell.run("which swift")
-            print()
-            info("Need help getting your project to build?")
-            print("Join our Slack where hundreds of contributors")
-            print("are waiting to help: http://slack.qutheory.io")
+            console.print()
+            console.info("Command:")
+            console.print(command)
+            console.print()
+            console.info("Output:")
+            try console.execute("tail \(tmpFile)")
+            console.print()
+            console.info("Toolchain:")
+            try console.execute("which swift")
+            console.print()
+            console.info("Need help getting your project to build?")
+            console.print("Join our Slack where hundreds of contributors")
+            console.print("are waiting to help: http://slack.qutheory.io")
 
-            throw Error.general("There may be something wrong in the source code or structure of your project.")
+            throw Error.general("Build failed.")
         }
     }
 
-    public override func help() {
-        print("build <module-name>")
-        print("Builds source files and links Vapor libs.")
-        print("Defaults to App/ folder structure.")
-    }
+    public let help: [String] = [
+        "Compiles the application."
+    ]
 }

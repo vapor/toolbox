@@ -1,19 +1,27 @@
+import Console
+
 public final class Clean: Command {
-    public static let id = "build"
+    public static let id = "clean"
+    
+    public let console: Console
 
-    public override func run() throws {
+    public init(console: Console) {
+        self.console = console
+    }
 
-        try shell.run("rm -rf Packages .build")
+    public func run(arguments: [String]) throws {
 
-        if flag("xcode") {
-            try shell.run("rm -rf *.xcodeproj")
+        try console.execute("rm -rf Packages .build")
+
+        if arguments.flag("xcode") {
+            try console.execute("rm -rf *.xcodeproj")
         }
 
-        success("Cleaned.")
+        console.success("Cleaned.")
     }
 
-    public override func help() {
-        print("cleans temporary build files")
-        print("optionally removes generated Xcode Project")
-    }
+    public let help: [String] = [
+        "cleans temporary build files",
+        "optionally removes generated Xcode Project"
+    ]
 }
