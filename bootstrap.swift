@@ -7,17 +7,17 @@
 #endif
 import Foundation
 
-@noreturn func fail(_ message: String) {
+func printFailure(_ message: String) {
     print()
     print("Error: \(message)")
     print("Note: Make sure you are using Swift 3.0 Preview 1")
-    exit(1)
 }
 
 enum Error: ErrorProtocol { // Errors pertaining to running commands
     case system(Int32)
     case cancelled
     case commandNotFound
+    case failed(String)
 }
 
 // FIXME: Sven: This code is duplicated almost 1:1 from PosixSubsystem.swift and
@@ -187,7 +187,7 @@ func rm(directory: String) throws {
         directory != "/" ||
         directory != "~"
     else {
-        fail("Will not remove directory '\(directory)'")
+        throw Error.failed("Will not remove directory '\(directory)'")
     }
     try run(["rm", "-rf", directory])
 }
@@ -222,61 +222,61 @@ func trimTrailingSlash(path: String) -> String {
     return p
 }
 
-func bootstrap(repository: String, branch: String, path: String) {
+func bootstrap(repository: String, branch: String, path: String) throws {
     let url = downloadURL(repository: repository, branch: branch)
     let archive = "./tmp.tgz"
     // this directory name is dermined by how github creates the tar.gz
     let unpackedDir = "./\(repository)-\(branch)"
 
+    // download package
     do {
         if !exists(path: archive) {
             print("Downloading \(url) ...")
             try download(url: url, output: archive, verbose: false)
         }
     } catch {
-        fail("Could not download SPM package")
+        throw Error.failed("Could not download SPM package")
     }
-    // FIXME: add defer for cleanup so we don't leave it behind in case of failure
+    defer {
+        if exists(path: archive) {
+            do {
+                try rm(file: archive)
+            } catch { /* ignored */ }
+        }
+    }
 
+    // unpack archive
     do {
         try unpack(archive: archive, verbose: false)
     } catch {
-        fail("Could not unpack archive")
+        throw Error.failed("Could not unpack archive")
     }
-    // FIXME: add defer for cleanup so we don't leave it behind in case of failure
+    defer {
+        if exists(path: unpackedDir) {
+            do {
+                try rm(directory: unpackedDir)
+            } catch { /* ignored */ }
+        }
+    }
 
+    // build package
     do {
         print("Building package ...")
         try build(directory: unpackedDir)
     } catch {
-        fail("Could not build package")
+        throw Error.failed("Could not build package")
     }
 
+    // install binary
     let target = isDir(path: path)
-    ? (trimTrailingSlash(path: path) + "/vapor")
-    : path
+        ? (trimTrailingSlash(path: path) + "/vapor")
+        : path
 
     do {
         let binary = "\(unpackedDir)/.build/release/vapor"
         try install(from: binary, to: target)
     } catch {
-        fail("Could not install binary as \(path)")
-    }
-
-    do { // remove build directory
-        if exists(path: unpackedDir) {
-            try rm(directory: unpackedDir)
-        }
-    } catch {
-        fail("Could not remove directory '\(unpackedDir)'")
-    }
-    
-    do { // remove tar.gz archive
-        if exists(path: archive) {
-            try rm(file: archive)
-        }
-    } catch {
-        fail("Could not remove archive '\(archive)'")
+        throw Error.failed("Could not install binary as \(path)")
     }
 
     print("Vapor CLI successfully installed in \(target)")
@@ -284,12 +284,17 @@ func bootstrap(repository: String, branch: String, path: String) {
 
 // main
 
-let path: String = {
-    if Process.arguments.count > 1 {
-        return Process.arguments[1]
-    } else {
-        return "/usr/local/bin/vapor"
-    }
-}()
+let installPath = Process.arguments.count > 1
+    ? Process.arguments[1]
+    : "/usr/local/bin/vapor"
+let branch = Process.arguments.count > 2
+    ? Process.arguments[2]
+    : "master"
 
-bootstrap(repository: "vapor-cli", branch: "master", path: path)
+do {
+    try bootstrap(repository: "vapor-cli", branch: branch, path: installPath)
+} catch Error.failed(let msg) {
+    printFailure(msg)
+} catch {
+    print("unexpected eror")
+}

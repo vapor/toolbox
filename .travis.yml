@@ -13,7 +13,8 @@ script:
 
   # the first two steps are equivalent to the user installation instructions
   # here: https://vapor.readme.io/docs/install-cli
-  - swift bootstrap.swift /usr/local/bin/vapor
+  # FIXME: remove explicit branch after merge to master
+  - swift bootstrap.swift /usr/local/bin/vapor swift-06-20
   # fixing error on Linux:
   #   mv: try to overwrite ‘/usr/local/bin/vapor’, overriding mode 0755 (rwxr-xr-x)?
   - sudo chmod ugo+w /usr/local/bin/vapor
