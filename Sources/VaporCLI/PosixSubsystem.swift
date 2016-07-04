@@ -106,9 +106,10 @@ public struct Shell {
 
     func posix_spawnp(args: [String]) throws -> pid_t {
         var environment = [String: String]()
-        let key = "PATH"
-        if let e = getenv(key) {
-            environment[key] = String(validatingUTF8: e)
+        for key in ["PATH", "HOME"] {
+            if let e = getenv(key) {
+                environment[key] = String(validatingUTF8: e)
+            }
         }
 
         let env: [UnsafeMutablePointer<CChar>?] = environment.map{ "\($0.0)=\($0.1)".withCString(strdup) }
