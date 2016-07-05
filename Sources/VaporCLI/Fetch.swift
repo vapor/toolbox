@@ -26,14 +26,13 @@ public final class Fetch: Command {
         let depBar = console.loadingBar(title: "Fetch Dependencies")
         depBar.start()
 
-        let tmpFile = "/var/tmp/vaporFetchOutput.log"
-
+        var output = ""
         do {
-            try console.execute("swift package fetch > \(tmpFile) 2>&1")
+            output = try console.subexecute("swift package fetch")
             depBar.finish()
         } catch ConsoleError.execute(_) {
             depBar.fail()
-            try console.execute("tail \(tmpFile)")
+            console.print(output)
             throw Error.general("Could not fetch dependencies.")
         }
     }

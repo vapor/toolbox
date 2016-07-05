@@ -27,8 +27,6 @@ public final class Build: Command {
         let fetch = Fetch(console: console)
         try fetch.run(arguments: [])
 
-        let tmpFile = "/var/tmp/vaporBuildOutput.log"
-
         var buildFlags: [String] = [
             "-Xswiftc",
             "-I/usr/local/include/mysql",
@@ -53,23 +51,25 @@ public final class Build: Command {
 
         let command = "swift build " + buildFlags.joined(separator: " ")
         do {
-            try console.execute("\(command) > \(tmpFile) 2>&1")
+            _ = try console.subexecute(command)
             buildBar.finish()
-        } catch ConsoleError.execute(_) {
+        } catch ConsoleError.subexecute(let code, let error) {
             buildBar.fail()
             console.print()
             console.info("Command:")
             console.print(command)
             console.print()
-            console.info("Output:")
-            try console.execute("tail \(tmpFile)")
+            console.info("Error (\(code)):")
+            console.print(error)
             console.print()
             console.info("Toolchain:")
-            try console.execute("which swift")
+            let toolchain = try console.subexecute("which swift")
+            console.print(toolchain)
             console.print()
             console.info("Help:")
             console.print("Join our Slack where hundreds of contributors")
             console.print("are waiting to help: http://slack.qutheory.io")
+            console.print()
 
             throw Error.general("Build failed.")
         }

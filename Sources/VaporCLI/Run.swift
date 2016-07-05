@@ -25,7 +25,7 @@ public final class Run: Command {
 
         do {
             _ = try console.subexecute("ls .build/\(folder)")
-        } catch ConsoleError.execute(_) {
+        } catch ConsoleError.subexecute(_) {
             if arguments.flag("release") {
                 console.warning("Project must be built for release before running.")
             } else {
