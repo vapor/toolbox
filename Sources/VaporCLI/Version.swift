@@ -1,8 +1,12 @@
 import Console
 
 public final class Version: Command {
-    public static let id = "version"
-    
+    public let id = "version"
+
+    public let help: [String] = [
+        "Displays Vapor CLI version"
+    ]
+
     public let console: Console
     public let version: String
 
@@ -12,10 +16,10 @@ public final class Version: Command {
     }
 
     public func run(arguments: [String]) throws {
-        console.print("Vapor CLI version: \(version)")
+        console.print("Vapor Toolbox v\(version)")
+
+        let run = Run(console: console)
+        try run.run(arguments: ["version"])
     }
 
-    public var help: [String] = [
-        "Displays Vapor CLI version"
-    ]
 }

@@ -2,7 +2,11 @@ import Console
 import Foundation
 
 public final class Run: Command {
-    public static let id = "run"
+    public let id = "run"
+
+    public let help: [String] = [
+        "Runs the compiled application."
+    ]
 
     public let console: Console
 
@@ -23,9 +27,9 @@ public final class Run: Command {
             _ = try console.subexecute("ls .build/\(folder)")
         } catch ConsoleError.execute(_) {
             if arguments.flag("release") {
-                console.info("Project must be built for release before running.")
+                console.warning("Project must be built for release before running.")
             } else {
-                console.info("Project must be built before running.")
+                console.warning("Project must be built before running.")
             }
             throw Error.general("No .build/\(folder) folder found.")
         }
@@ -45,6 +49,8 @@ public final class Run: Command {
                 throw Error.general("Unable to determine package name.")
             }
 
+            console.info("Running \(name)...")
+
             var passThrough = arguments.values
             for (name, value) in arguments.options {
                 passThrough += "--\(name)=\(value)"
@@ -55,10 +61,6 @@ public final class Run: Command {
             throw Error.general("Run failed.")
         }
     }
-
-    public let help: [String] = [
-        "Runs the compiled application."
-    ]
 
     private func extractName() throws -> String? {
         let dump = try console.subexecute("swift package dump-package")
