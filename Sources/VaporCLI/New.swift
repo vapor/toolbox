@@ -1,15 +1,10 @@
-#if os(OSX)
-    import Darwin
-#else
-    import Glibc
-#endif
 
 struct New: Command {
     static let id = "new"
 
     static func execute(with args: [String], in shell: PosixSubsystem) throws {
         guard let name = args.first else {
-            print("Usage: \(binaryName) \(id) <project-name>")
+            print("Usage: \(VaporCLI.id) \(id) <project-name>")
             throw Error.failed("Invalid number of arguments.")
         }
 
@@ -41,9 +36,9 @@ struct New: Command {
             }
 
             print()
-            printFancy(asciiArt)
+            shell.printFancy(asciiArt)
             print()
-            printFancy([
+            shell.printFancy([
                 "    Project \"\(name)\" has been created.",
                 "Type `cd \(name)` to enter project directory",
                 "                   Enjoy!",

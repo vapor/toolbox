@@ -2,10 +2,10 @@
 struct Help: Command {
     static let id = "help"
     static func execute(with args: [String], in shell: PosixSubsystem) {
-        print("Usage: \(binaryName) [\(VaporCLI.commands.map({ $0.id }).joined(separator: "|"))]")
+        print(VaporCLI.usage)
 
         var help = "\nAvailable Commands:\n\n"
-        help += VaporCLI.commands
+        help += VaporCLI.subCommands
             .map { cmd in cmd.description }//"  \(cmd.id):\n\(cmd.description)\n"}
             .joined(separator: "\n")
         help += "\n"

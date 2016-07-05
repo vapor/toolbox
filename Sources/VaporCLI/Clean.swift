@@ -10,7 +10,8 @@ struct Clean: Command {
             try shell.run("rm -rf Packages .build")
             print("Cleaned.")
         } catch {
-            fail("Could not clean.")
+            // re-throw with new error message
+            throw Error.failed("Could not clean.")
         }
     }
 }

@@ -4,16 +4,19 @@ os:
 language: generic
 sudo: required
 dist: trusty
-osx_image: xcode7.3
+osx_image: xcode8
 install:
   - eval "$(curl -sL https://gist.githubusercontent.com/kylef/5c0475ff02b7c7671d2a/raw/02090c7ede5a637b76e6df1710e83cd0bbe7dcdf/swiftenv-install.sh)"
+  # FIXME: temorary to make `vapor new` test work (which d/l vapor master, which is on 06-06)
+  - swiftenv install DEVELOPMENT-SNAPSHOT-2016-06-06-a
 script:
   # run unit tests
   - swift build && swift test
 
   # the first two steps are equivalent to the user installation instructions
   # here: https://vapor.readme.io/docs/install-cli
-  - swift bootstrap.swift /usr/local/bin/vapor
+  # FIXME: remove explicit branch after merge to master
+  - swift bootstrap.swift /usr/local/bin/vapor swift-06-20
   # fixing error on Linux:
   #   mv: try to overwrite ‘/usr/local/bin/vapor’, overriding mode 0755 (rwxr-xr-x)?
   - sudo chmod ugo+w /usr/local/bin/vapor

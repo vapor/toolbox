@@ -5,36 +5,109 @@
 #else
     import Glibc
 #endif
+import Foundation
 
-@noreturn func fail(_ message: String) {
+func printFailure(_ message: String) {
     print()
     print("Error: \(message)")
     print("Note: Make sure you are using Swift 3.0 Preview 1")
-    exit(1)
 }
 
 enum Error: ErrorProtocol { // Errors pertaining to running commands
     case system(Int32)
     case cancelled
     case commandNotFound
+    case failed(String)
 }
 
-func run(_ command: String) throws {
-    let result = system(command)
+// FIXME: Sven: This code is duplicated almost 1:1 from PosixSubsystem.swift and
+// does not have any tests against it at the moment. We can't break this script
+// up, because it needs to be downloaded and executed to install the package.
+// Is there a way to make this testable while still keeping it as a standalone
+// script?
+// At the very least we should make sure the essential parts of this script
+// are idential to a tested version in PosixSubsystem.
+// Could a workaround be to make bootstrap.swift a concatenation of a tested
+// file in the package plus a very small `main` body, like the CLI? I.e.:
+//   cat PosixSubsystem.swift bootstrap_main.swift > bootstrap.swift
+
+// wrappers for a few low level C calls, based on
+// https://github.com/apple/swift-package-manager/blob/master/Sources/POSIX/system.swift
+
+private func _WSTATUS(_ status: CInt) -> CInt {
+    return status & 0x7f
+}
+
+private func WIFEXITED(_ status: CInt) -> Bool {
+    return _WSTATUS(status) == 0
+}
+
+private func WEXITSTATUS(_ status: CInt) -> CInt {
+    return (status >> 8) & 0xff
+}
+
+func waitpid(_ pid: pid_t) throws -> Int32 {
+    while true {
+        var exitStatus: Int32 = 0
+        let rv = waitpid(pid, &exitStatus, 0)
+
+        if rv != -1 {
+            if WIFEXITED(exitStatus) {
+                return WEXITSTATUS(exitStatus)
+            } else {
+                throw Error.system(exitStatus)
+            }
+        } else if errno == EINTR {
+            continue  // see: man waitpid
+        } else {
+            throw Error.system(errno)
+        }
+    }
+}
+
+func posix_spawnp(args: [String]) throws -> pid_t {
+    var environment = [String: String]()
+    for key in ["PATH", "HOME"] {
+        if let e = getenv(key) {
+            environment[key] = String(validatingUTF8: e)
+        }
+    }
+
+    let env: [UnsafeMutablePointer<CChar>?] = environment.map{ "\($0.0)=\($0.1)".withCString(strdup) }
+    defer { for case let arg? in env { free(arg) } }
+
+    var pid: pid_t = 0
+    let argv = args.map{ $0.withCString(strdup) } + [nil]
+    defer { for case let arg? in argv { free(arg) } }
+
+    let res = posix_spawnp(&pid, argv[0], nil, nil, argv, env + [nil])
+
+    if res == 0 {
+        return pid
+    } else {
+        throw Error.system(res)
+    }
+}
+
+func system(_ command: String) throws -> Int32 {
+    let command = ["/bin/sh", "-c", command]
+    let pid = try posix_spawnp(args: command)
+    return try waitpid(pid)
+}
+
+func run(_ arguments: [String], silent: Bool = false) throws {
+    var command = arguments.joined(separator: " ")
+    if silent {
+        command.append("> /dev/null 2>&1")
+    }
+
+    let result = try system(command)
 
     if result == 2 {
         throw Error.cancelled
     } else if result != 0 {
         throw Error.system(result)
     }
-}
-
-func run(_ parts: [String], silent: Bool = false) throws {
-    var cmd = parts.joined(separator: " ")
-    if silent {
-        cmd.append("> /dev/null 2>&1")
-    }
-    try run(cmd)
 }
 
 func exists(path: String) -> Bool {
@@ -53,7 +126,11 @@ func isDir(path: String) -> Bool {
 }
 
 func hasCommand(_ name: String) -> Bool {
-    return system("which \(name) > /dev/null 2>&1") == 0
+    do {
+        return try system("which \(name) > /dev/null 2>&1") == 0
+    } catch {
+        return false
+    }
 }
 
 func curl(url: String, output: String, verbose: Bool = false, followRedirect: Bool = true) throws {
@@ -110,19 +187,18 @@ func rm(directory: String) throws {
         directory != "/" ||
         directory != "~"
     else {
-        fail("Will not remove directory '\(directory)'")
+        throw Error.failed("Will not remove directory '\(directory)'")
     }
-    try run("rm -rf \(directory)")
+    try run(["rm", "-rf", directory])
 }
 
 func rm(file: String) throws {
-    try run("rm \(file)")
+    try run(["rm", file])
 }
 
 func build(directory: String) throws {
-    let cwd = "cd \(directory) &&"
-    let cmd = [cwd, "swift", "build", "-c", "release"]
-    try run(cmd, silent: true)
+    let cmd = ["swift", "build", "-C", directory, "-c", "release"]
+    try run(cmd)
 }
 
 func downloadURL(repository: String, branch: String = "master") -> String {
@@ -146,59 +222,61 @@ func trimTrailingSlash(path: String) -> String {
     return p
 }
 
-func bootstrap(repository: String, branch: String, path: String) {
+func bootstrap(repository: String, branch: String, path: String) throws {
     let url = downloadURL(repository: repository, branch: branch)
     let archive = "./tmp.tgz"
     // this directory name is dermined by how github creates the tar.gz
     let unpackedDir = "./\(repository)-\(branch)"
 
+    // download package
     do {
         if !exists(path: archive) {
             print("Downloading \(url) ...")
             try download(url: url, output: archive, verbose: false)
         }
     } catch {
-        fail("Could not download SPM package")
+        throw Error.failed("Could not download SPM package")
+    }
+    defer {
+        if exists(path: archive) {
+            do {
+                try rm(file: archive)
+            } catch { /* ignored */ }
+        }
     }
 
+    // unpack archive
     do {
         try unpack(archive: archive, verbose: false)
     } catch {
-        fail("Could not unpack archive")
+        throw Error.failed("Could not unpack archive")
+    }
+    defer {
+        if exists(path: unpackedDir) {
+            do {
+                try rm(directory: unpackedDir)
+            } catch { /* ignored */ }
+        }
     }
 
+    // build package
     do {
         print("Building package ...")
         try build(directory: unpackedDir)
     } catch {
-        fail("Could not build package")
+        throw Error.failed("Could not build package")
     }
 
+    // install binary
     let target = isDir(path: path)
-    ? (trimTrailingSlash(path: path) + "/vapor")
-    : path
+        ? (trimTrailingSlash(path: path) + "/vapor")
+        : path
 
     do {
         let binary = "\(unpackedDir)/.build/release/vapor"
         try install(from: binary, to: target)
     } catch {
-        fail("Could not install binary as \(path)")
-    }
-
-    do { // remove build directory
-        if exists(path: unpackedDir) {
-            try rm(directory: unpackedDir)
-        }
-    } catch {
-        fail("Could not remove directory '\(unpackedDir)'")
-    }
-    
-    do { // remove tar.gz archive
-        if exists(path: archive) {
-            try rm(file: archive)
-        }
-    } catch {
-        fail("Could not remove archive '\(archive)'")
+        throw Error.failed("Could not install binary as \(path)")
     }
 
     print("Vapor CLI successfully installed in \(target)")
@@ -206,12 +284,17 @@ func bootstrap(repository: String, branch: String, path: String) {
 
 // main
 
-let path: String = {
-    if Process.arguments.count > 1 {
-        return Process.arguments[1]
-    } else {
-        return "/usr/local/bin/vapor"
-    }
-}()
+let installPath = Process.arguments.count > 1
+    ? Process.arguments[1]
+    : "/usr/local/bin/vapor"
+let branch = Process.arguments.count > 2
+    ? Process.arguments[2]
+    : "master"
 
-bootstrap(repository: "vapor-cli", branch: "master", path: path)
+do {
+    try bootstrap(repository: "vapor-cli", branch: branch, path: installPath)
+} catch Error.failed(let msg) {
+    printFailure(msg)
+} catch {
+    print("unexpected eror")
+}
