@@ -3,9 +3,13 @@ import Console
 public final class Clean: Command {
     public let id = "clean"
 
+    public let signature: [Argument] = [
+        Option(name: "xcode", help: ["Removes any Xcode projects while cleaning."])
+    ]
+
     public let help: [String] = [
-        "cleans temporary build files",
-        "optionally removes generated Xcode Project"
+        "Cleans temporary files--usually fixes",
+        "a plethora of bizarre build errors."
     ]
 
     public let console: Console
@@ -18,10 +22,10 @@ public final class Clean: Command {
         let cleanBar = console.loadingBar(title: "Cleaning")
         cleanBar.start()
 
-        try console.execute("rm -rf Packages .build")
+        try console.executeInForeground("rm -rf Packages .build")
 
         if arguments.flag("xcode") {
-            try console.execute("rm -rf *.xcodeproj")
+            try console.executeInForeground("rm -rf *.xcodeproj")
         }
 
         cleanBar.finish()

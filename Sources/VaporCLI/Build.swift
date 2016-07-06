@@ -34,7 +34,7 @@ public final class Build: Command {
             "-L/usr/local/lib"
         ]
 
-        let buildBar = console.loadingBar(title: "Build Project")
+        let buildBar = console.loadingBar(title: "Building Project")
         buildBar.start()
 
         for (name, value) in arguments.options {
@@ -51,9 +51,9 @@ public final class Build: Command {
 
         let command = "swift build " + buildFlags.joined(separator: " ")
         do {
-            _ = try console.subexecute(command)
+            _ = try console.executeInBackground(command)
             buildBar.finish()
-        } catch ConsoleError.subexecute(let code, let error) {
+        } catch ConsoleError.backgroundExecute(let code, let error) {
             buildBar.fail()
             console.print()
             console.info("Command:")
@@ -63,7 +63,7 @@ public final class Build: Command {
             console.print(error)
             console.print()
             console.info("Toolchain:")
-            let toolchain = try console.subexecute("which swift")
+            let toolchain = try console.executeInBackground("which swift").trim()
             console.print(toolchain)
             console.print()
             console.info("Help:")

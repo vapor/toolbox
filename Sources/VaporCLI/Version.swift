@@ -18,8 +18,12 @@ public final class Version: Command {
     public func run(arguments: [String]) throws {
         console.print("Vapor Toolbox v\(version)")
 
-        let run = Run(console: console)
-        try run.run(arguments: ["version"])
+        do {
+            let run = Run(console: console)
+            try run.run(arguments: ["version"])
+        } catch Error.general(_) {
+            console.warning("Cannot print Vapor Framework version, no project found.")
+        }
     }
 
 }

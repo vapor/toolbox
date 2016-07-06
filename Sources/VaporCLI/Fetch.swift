@@ -23,17 +23,26 @@ public final class Fetch: Command {
             try clean.run(arguments: arguments)
         }
 
-        let depBar = console.loadingBar(title: "Fetch Dependencies")
+        do {
+            _ = try console.executeInBackground("ls Packages")
+        } catch ConsoleError.backgroundExecute(_) {
+            console.info("No Packages folder, fetch may take a while...")
+        }
+
+        let depBar = console.loadingBar(title: "Fetching Dependencies")
         depBar.start()
 
-        var output = ""
         do {
-            output = try console.subexecute("swift package fetch")
+            _ = try console.executeInBackground("swift package fetch")
             depBar.finish()
-        } catch ConsoleError.execute(_) {
+        } catch ConsoleError.backgroundExecute(_, let message) {
             depBar.fail()
-            console.print(output)
-            throw Error.general("Could not fetch dependencies.")
+            if message.contains("dependency graph could not be satisfied because an update") {
+                console.info("Try cleaning your project first.")
+            } else if message.contains("The dependency graph could not be satisfied") {
+                console.info("Check your dependencies' Package.swift files to see where the conflict is.")
+            }
+            throw Error.general(message.trim())
         }
     }
     

@@ -31,17 +31,56 @@ public final class New: Command {
         let template = arguments.options["template"]?.string ?? defaultTemplate
         let name = try value("name", from: arguments).string ?? ""
 
-        try console.execute("cp -R /Users/tanner/Developer/qutheory/vapor/example \(name)")
+        let cloneBar = console.loadingBar(title: "Cloning Template")
+        cloneBar.start()
 
-        let file = "\(name)/Package.swift"
+        do {
+            _ = try console.executeInBackground("git clone \(template) \(name)")
+            cloneBar.finish()
+        } catch ConsoleError.backgroundExecute(_, let error) {
+            cloneBar.fail()
+            throw Error.general(error.trim())
+        }
 
-        var manifest = try console.subexecute("cat \(file)")
-        manifest = manifest.components(separatedBy: "VaporExample").joined(separator: name)
-        manifest = manifest.components(separatedBy: "\"").joined(separator: "\\\"")
+        do {
+            let file = "\(name)/Package.swift"
 
-        try console.execute("echo \"\(manifest)\" > \(file)")
+            var manifest = try console.executeInBackground("cat \(file)")
+            manifest = manifest.components(separatedBy: "VaporExample").joined(separator: name)
+            manifest = manifest.components(separatedBy: "\"").joined(separator: "\\\"")
+            _ = try console.executeInBackground("echo \"\(manifest)\" > \(file)")
+        } catch {
+            console.error("Could not update Package.swift file.")
+        }
 
-        console.success("Welcome to Vapor")
+        console.print()
+
+        for line in console.center(asciiArt) {
+            for character in line.characters {
+                let style: ConsoleStyle
+
+                if let color = colors[character] {
+                    style = .custom(color)
+                } else {
+                    style = .plain
+                }
+
+                console.output("\(character)", style: style, newLine: false)
+            }
+            console.print()
+        }
+
+        console.print()
+
+        for line in [
+            "Project \"\(name)\" has been created.",
+            "Type `cd \(name)` to enter the project directory.",
+            "Enjoy!"
+        ] {
+            console.output(console.center(line))
+        }
+
+        console.print()
     }
 
     public let asciiArt: [String] = [
@@ -67,7 +106,17 @@ public final class New: Command {
          "\\ \\  /  / /\\  | |_) / / \\ | |_)",
          " \\_\\/  /_/--\\ |_|   \\_\\_/ |_| \\",
          "   a web framework for Swift",
-         " "
     ]
 
+    public let colors: [Character: ConsoleColor] = [
+        "*": .magenta,
+        "~": .blue,
+        "+": .cyan, // Droplet
+        "_": .magenta,
+        "/": .magenta,
+        "\\": .magenta,
+        "|": .magenta,
+        "-": .magenta,
+        ")": .magenta // Title
+    ]
 }
