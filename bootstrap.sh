@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 TAG="master"
-SWIFT_VERSION="swift-DEVELOPMENT-SNAPSHOT-2016-06-21-a"
+SWIFT_VERSION="swift-DEVELOPMENT-SNAPSHOT-2016-06-20-a"
 
 SWIFT=`which swift`
 
