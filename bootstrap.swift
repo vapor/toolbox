@@ -10,12 +10,7 @@ import Foundation
 func printFailure(_ message: String) {
     print()
     print("Error: \(message)")
-    print("Note: Make sure you are using Swift version:")
-    do {
-        _ = try system("cat .swift-version")
-    } catch {
-        print("Unable to resolve Swift version.")        
-    }
+    print("Note: Make sure you are using Swift version DEVELOPMENT-SNAPSHOT-2016-06-20-a")
 }
 
 enum Error: ErrorProtocol { // Errors pertaining to running commands
@@ -202,6 +197,7 @@ func rm(file: String) throws {
 }
 
 func build(directory: String) throws {
+    print(directory)
     let cmd = ["swift", "build", "-C", directory, "-c", "release"]
     try run(cmd)
 }
@@ -272,19 +268,11 @@ func bootstrap(repository: String, branch: String, path: String) throws {
         throw Error.failed("Could not build package")
     }
 
-    // install binary
-    let target = isDir(path: path)
-        ? (trimTrailingSlash(path: path) + "/vapor")
-        : path
-
     do {
-        let binary = "\(unpackedDir)/.build/release/vapor"
-        try install(from: binary, to: target)
+        _ = try system("./\(unpackedDir)/.build/release/VaporToolbox self install --path=\(installPath)")
     } catch {
-        throw Error.failed("Could not install binary as \(path)")
+        throw Error.failed("Could not install toolbox.")
     }
-
-    print("Vapor CLI successfully installed in \(target)")
 }
 
 // main
@@ -297,9 +285,9 @@ let branch = Process.arguments.count > 2
     : "master"
 
 do {
-    try bootstrap(repository: "vapor-cli", branch: branch, path: installPath)
+    try bootstrap(repository: "vapor-toolbox", branch: branch, path: installPath)
 } catch Error.failed(let msg) {
     printFailure(msg)
 } catch {
-    print("unexpected eror")
+    print("Unexpected Error")
 }
