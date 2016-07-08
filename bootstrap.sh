@@ -32,18 +32,18 @@ else
 	fi
 fi
 
-TMP="vapor-toolbox-temp.zip";
-DIR="vapor-toolbox-$TAG";
+DIR=".vapor-toolbox-$TAG";
 
-rm -rf $TMP $DIR;
-
-curl -L "https://github.com/qutheory/vapor-toolbox/archive/$TAG.zip" -o $TMP;
-tar xf $TMP;
-rm -rf $TMP;
+rm -rf $DIR;
 
 cd $DIR;
+
+git clone https://github.com/qutheory/vapor-toolbox
+cd vapor-toolbox
+git checkout $TAG
+
 swift build -c release;
 .build/release/Executable self install;
 
-cd ..;
+cd ../../;
 rm -rf $DIR;
