@@ -73,7 +73,7 @@ class BuildTests: XCTestCase {
                 "swift build -Xswiftc -I/usr/local/include/mysql -Xlinker -L/usr/local/lib",
                 "ls .build/debug",
                 "swift package dump-package",
-                ".build/debug/\(name)"
+                ".build/debug/App"
             ])
         } catch {
             XCTFail("Build run failed: \(error)")
