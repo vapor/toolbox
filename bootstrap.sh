@@ -5,15 +5,15 @@ SWIFT_VERSION="swift-DEVELOPMENT-SNAPSHOT-2016-06-20-a";
 
 SWIFT=`which swift`;
 
-if [ $SWIFT == *"swiftenv"* ];
+if [[ $SWIFT == *"swiftenv"* ]];
 then
 	echo "Swiftenv installed, continuing...";
 	swiftenv install $SWIFT_VERSION;
 else
-	if [ $SWIFT == *"swift-latest.xctoolchain"* ];
+	if [[ $SWIFT == *"swift-latest.xctoolchain"* ]];
 	then
 		PATH=`ls -lah /Library/Developer/Toolchains/swift-latest.xctoolchain`;
-		if [ $PATH == *$SWIFT_VERSION* ];
+		if [[ $PATH == *$SWIFT_VERSION* ]];
 		then
 			echo "$SWIFT_VERSION installed, continuing...";
 		else
@@ -21,7 +21,7 @@ else
 			exit 1;
 		fi
 	else
-		if [ $SWIFT == *$SWIFT_VERSION* ];
+		if [[ $SWIFT == *$SWIFT_VERSION* ]];
 		then
 			echo "$SWIFT_VERSION installed, continuing...";
 		else
