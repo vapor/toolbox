@@ -8,7 +8,7 @@ SWIFT=`which swift`;
 if [ $SWIFT == *"swiftenv"* ];
 then
 	echo "Swiftenv installed, continuing...";
-	swiftenv install;
+	swiftenv install $SWIFT_VERSION;
 else
 	if [ $SWIFT == *"swift-latest.xctoolchain"* ];
 	then
