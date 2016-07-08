@@ -43,3 +43,6 @@ rm -rf $TMP
 cd $DIR
 swift build -c release
 .build/release/Executable self install
+
+cd ..
+rm -rf $DIR
