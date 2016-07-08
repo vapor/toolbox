@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 TAG="0.6.0"
 SWIFT_VERSION="swift-DEVELOPMENT-SNAPSHOT-2016-06-20-a"
