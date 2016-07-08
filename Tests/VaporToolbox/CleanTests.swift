@@ -1,54 +1,45 @@
-//
-//  CleanTests.swift
-//  VaporCLI
-//
-//  Created by Sven A. Schmidt on 28/06/2016.
-//
-//
-
 import XCTest
-@testable import VaporCLI
+@testable import VaporToolbox
 
 
 class CleanTests: XCTestCase {
+    static let allTests = [
+        ("testClean", testClean),
+        ("testCleanWithXcode", testCleanWithXcode)
+    ]
 
-    // required by LinuxMain.swift
-    static var allTests: [(String, (CleanTests) -> () throws -> Void)] {
-        return [
-            ("test_execute", test_execute),
-            ("test_execute_args", test_execute_args),
-        ]
-    }
+    func testClean() {
+        let console = TestConsole()
+        let clean = Clean(console: console)
 
-
-    override func setUp() {
-        TestSystem.reset()
-    }
-
-
-    // MARK: Tests
-
-
-    func test_execute() {
         do {
-            try Clean.execute(with: [], in: TestSystem.shell)
-            XCTAssertEqual(TestSystem.log, [.ok("rm -rf Packages .build")])
+            try clean.run(arguments: [])
+            XCTAssertEqual(console.outputBuffer, [
+                "Cleaning [Done]"
+            ])
+            XCTAssertEqual(console.executeBuffer, [
+                "rm -rf Packages .build",
+            ])
         } catch {
-            XCTFail("unexpected error")
+            XCTFail("Clean failed: \(error)")
         }
     }
 
+    func testCleanWithXcode() {
+        let console = TestConsole()
+        let clean = Clean(console: console)
 
-    func test_execute_args() {
         do {
-            try Clean.execute(with: ["foo", "-bar"], in: TestSystem.shell)
-            XCTFail("should not be reached, expected error to be thrown")
-        } catch Error.failed(let msg) {
-            XCTAssertEqual(msg, "clean does not take any additional parameters")
-            XCTAssertEqual(TestSystem.log, [], "expected no commands to be run")
+            try clean.run(arguments: ["--xcode"])
+            XCTAssertEqual(console.outputBuffer, [
+                "Cleaning [Done]"
+            ])
+            XCTAssertEqual(console.executeBuffer, [
+                "rm -rf Packages .build",
+                "rm -rf *.xcodeproj"
+            ])
         } catch {
-            XCTFail("unexpected error")
+            XCTFail("Clean failed: \(error)")
         }
     }
-
 }

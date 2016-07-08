@@ -41,27 +41,27 @@ public final class Xcode: Command {
         let command = "swift package generate-xcodeproj " + buildFlags.joined(separator: " ")
 
         do {
-            _ = try console.executeInBackground("\(command) > \(tmpFile) 2>&1")
+            _ = try console.subexecute("\(command) > \(tmpFile) 2>&1")
             xcodeBar.finish()
-        } catch ConsoleError.backgroundExecute(_, let message) {
+        } catch ConsoleError.subexecute(_, let message) {
             xcodeBar.fail()
-            try console.executeInForeground("tail \(tmpFile)")
+            print(message)
             throw Error.general("Could not generate Xcode project: \(message)")
         }
 
         console.info("Select the `App` scheme to run.")
         do {
-            let version = try console.executeInBackground("cat .swift-version").trim()
+            let version = try console.subexecute("cat .swift-version").trim()
             console.warning("Make sure Xcode > Toolchains > \(version) is selected.")
-        } catch ConsoleError.backgroundExecute(_, let message) {
+        } catch ConsoleError.subexecute(_, let message) {
             console.error("Could not determine Swift version: \(message)")
         }
 
         if console.confirm("Open Xcode project?") {
             do {
                 console.print("Opening Xcode project...")
-                try console.executeInForeground("open *.xcodeproj")
-            } catch ConsoleError.execute(_) {
+                _ = try console.subexecute("open *.xcodeproj")
+            } catch ConsoleError.subexecute(_) {
                 throw Error.general("Could not open Xcode project.")
             }
         }

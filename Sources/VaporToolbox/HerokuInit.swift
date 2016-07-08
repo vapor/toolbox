@@ -29,11 +29,11 @@ public final class HerokuInit: Command {
         let tmpFile = "/var/tmp/vaporFetchOutput.log"
 
         do {
-            try console.executeInForeground("swift package fetch > \(tmpFile) 2>&1")
+            _ = try console.subexecute("swift package fetch > \(tmpFile) 2>&1")
             depBar.finish()
-        } catch ConsoleError.execute(_) {
+        } catch ConsoleError.subexecute(_) {
             depBar.fail()
-            try console.executeInForeground("tail \(tmpFile)")
+            _ = try console.subexecute("tail \(tmpFile)")
             throw Error.general("Could not fetch dependencies.")
         }
     }

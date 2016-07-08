@@ -51,9 +51,9 @@ public final class Build: Command {
 
         let command = "swift build " + buildFlags.joined(separator: " ")
         do {
-            _ = try console.executeInBackground(command)
+            _ = try console.subexecute(command)
             buildBar.finish()
-        } catch ConsoleError.backgroundExecute(let code, let error) {
+        } catch ConsoleError.subexecute(let code, let error) {
             buildBar.fail()
             console.print()
             console.info("Command:")
@@ -63,7 +63,7 @@ public final class Build: Command {
             console.print(error)
             console.print()
             console.info("Toolchain:")
-            let toolchain = try console.executeInBackground("which swift").trim()
+            let toolchain = try console.subexecute("which swift").trim()
             console.print(toolchain)
             console.print()
             console.info("Help:")
@@ -75,8 +75,9 @@ public final class Build: Command {
         }
 
         if arguments.options["run"]?.bool == true {
+            let args = arguments.filter { !["--clean", "--run"].contains($0) }
             let run = Run(console: console)
-            try run.run(arguments: arguments)
+            try run.run(arguments: args)
         }
     }
 

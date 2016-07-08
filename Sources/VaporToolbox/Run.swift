@@ -24,8 +24,8 @@ public final class Run: Command {
         }
 
         do {
-            _ = try console.executeInBackground("ls .build/\(folder)")
-        } catch ConsoleError.backgroundExecute(_) {
+            _ = try console.subexecute("ls .build/\(folder)")
+        } catch ConsoleError.subexecute(_) {
             throw Error.general("No .build/\(folder) folder found.")
         }
 
@@ -51,14 +51,16 @@ public final class Run: Command {
                 passThrough += "--\(name)=\(value)"
             }
 
-            try console.executeInForeground(".build/\(folder)/\(name) \(passThrough.joined(separator: " "))")
+            passThrough.insert(".build/\(folder)/App", at: 0)
+
+            try console.execute(passThrough.joined(separator: " "))
         } catch ConsoleError.execute(_) {
             throw Error.general("Run failed.")
         }
     }
 
     private func extractName() throws -> String? {
-        let dump = try console.executeInBackground("swift package dump-package")
+        let dump = try console.subexecute("swift package dump-package")
 
         let dumpSplit = dump.components(separatedBy: "\"name\": \"")
 

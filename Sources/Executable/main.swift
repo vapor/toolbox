@@ -3,6 +3,8 @@ import Console
 import Foundation
 import VaporToolbox
 
+let version = "0.6.0"
+
 let terminal: Console = Terminal(arguments: Process.arguments)
 
 var iterator = Process.arguments.makeIterator()
@@ -20,9 +22,9 @@ do {
         Fetch(console: terminal),
         Clean(console: terminal),
         Xcode(console: terminal),
-        Version(console: terminal, version: "0.6.1"),
+        Version(console: terminal, version: version),
         Group(id: "self", commands: [
-            SelfInstall(console: terminal, executable: executable),
+            SelfInstall(console: terminal, executable: executable, version: version),
             SelfUpdate(console: terminal, executable: executable),
 
         ], help: [

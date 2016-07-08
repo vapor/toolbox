@@ -42,4 +42,4 @@ rm -rf $TMP
 
 cd $DIR
 swift build -c release
-.build/release/VaporToolbox self install
+.build/release/Executable self install

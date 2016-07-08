@@ -18,29 +18,25 @@ public final class SelfUpdate: Command {
     public func run(arguments: [String]) throws {
         let file: String
         do {
-            file = try console.executeInBackground("ls \(executable)")
+            file = try console.subexecute("ls \(executable)")
         } catch ConsoleError.execute(_) {
             do {
-                file = try console.executeInBackground("which \(executable)")
+                file = try console.subexecute("which \(executable)")
             } catch ConsoleError.execute(_) {
                 throw Error.general("Could not locate executable.")
             }
         }
 
         let current = String(file.characters.dropLast())
-
-
-        console.info(current)
-        return
         
         let command = "mv \(current) /usr/local/bin/vapor"
         do {
-            try console.executeInForeground(command)
-        } catch ConsoleError.execute(_) {
+            _ = try console.subexecute(command)
+        } catch ConsoleError.subexecute(_) {
             console.warning("Install failed, trying sudo")
             do {
-                try console.executeInForeground("sudo \(command)")
-            } catch ConsoleError.execute(_) {
+                _ = try console.subexecute("sudo \(command)")
+            } catch ConsoleError.subexecute(_) {
                 throw Error.general("Installation failed.")
             }
         }

@@ -14,19 +14,21 @@ public final class SelfInstall: Command {
 
     public let console: Console
     public let executable: String
+    let version: String
 
-    public init(console: Console, executable: String) {
+    public init(console: Console, executable: String, version: String) {
         self.console = console
         self.executable = executable
+        self.version = version
     }
 
     public func run(arguments: [String]) throws {
         let file: String
         do {
-            file = try console.executeInBackground("ls \(executable)")
+            file = try console.subexecute("ls \(executable)")
         } catch ConsoleError.execute(_) {
             do {
-                file = try console.executeInBackground("which \(executable)")
+                file = try console.subexecute("which \(executable)")
             } catch ConsoleError.execute(_) {
                 throw Error.general("Could not locate executable.")
             }
@@ -36,14 +38,16 @@ public final class SelfInstall: Command {
 
         let command = "mv \(current) /usr/local/bin/vapor"
         do {
-            try console.executeInForeground(command)
-        } catch ConsoleError.execute(_) {
+            _ = try console.subexecute(command)
+        } catch ConsoleError.subexecute(_) {
             console.warning("Install failed, trying sudo")
             do {
-                try console.executeInForeground("sudo \(command)")
-            } catch ConsoleError.execute(_) {
+                _ = try console.subexecute("sudo \(command)")
+            } catch ConsoleError.subexecute(_) {
                 throw Error.general("Installation failed.")
             }
         }
+
+        console.success("Vapor Toolbox v\(version) Installed")
     }
 }
