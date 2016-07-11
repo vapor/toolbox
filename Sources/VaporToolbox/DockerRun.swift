@@ -46,8 +46,4 @@ public final class DockerRun: Command {
         console.info("Copy and run the following line:")
         console.print("docker run --rm -it -v $(PWD):/vapor -p 8080:8080 \(imageName)")
     }
-
-    static func imageName(version: String) -> String {
-        return "qutheory/swift:\(version)"
-    }
 }

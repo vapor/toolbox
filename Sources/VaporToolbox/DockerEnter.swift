@@ -40,15 +40,9 @@ public final class DockerEnter: Command {
             throw Error.general("Could not determine Swift version from .swift-version file.")
         }
 
-        do {
-            let imageName = DockerBuild.imageName(version: swiftVersion)
-            _ = try console.subexecute("docker run --rm -it -v $(PWD):/vapor --entrypoint bash \(imageName)")
-        } catch ConsoleError.subexecute(_, let message) {
-            throw Error.general("Docker enter failed: \(message)")
-        }
-    }
+        let imageName = DockerBuild.imageName(version: swiftVersion)
 
-    static func imageName(version: String) -> String {
-        return "qutheory/swift:\(version)"
+        console.info("Copy and run the following line:")
+        console.print("docker run --rm -it -v $(PWD):/vapor --entrypoint bash \(imageName)")
     }
 }
