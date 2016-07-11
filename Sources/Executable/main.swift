@@ -3,7 +3,7 @@ import Console
 import Foundation
 import VaporToolbox
 
-let version = "0.6.0"
+let version = "0.6.1"
 
 let terminal = Terminal(arguments: Process.arguments)
 
@@ -14,8 +14,7 @@ guard let executable = iterator.next() else {
 }
 
 signal(SIGINT) { sig in
-    terminal.killChildren()
-    print("Killing children")
+    terminal.killTasks()
     exit(2)
 }
 
