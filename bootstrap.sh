@@ -3,21 +3,27 @@
 TAG="0.6.0";
 SWIFT_VERSION="swift-DEVELOPMENT-SNAPSHOT-2016-06-20-a";
 
-XCODE=`xcrun --version`
+OS=`uname`
 
-if [[ $XCODE != *"xcrun version 30."* ]];
+if [[ $OS == "Darwin" ]];
 then
-	echo "Xcode 8 must be installed and selected.";
-	echo "Install Xcode 8: https://developer.apple.com/download/"
-	echo "Select Xcode 8: sudo xcode-select -s /Applications/Xcode-beta.app/";
-	exit 1;
+	XCODE=`xcrun --version`
+
+	if [[ $XCODE != *"xcrun version 30."* ]];
+	then
+		echo "Xcode 8 must be installed and selected.";
+		echo "Install Xcode 8: https://developer.apple.com/download/"
+		echo "Select Xcode 8: sudo xcode-select -s /Applications/Xcode-beta.app/";
+		exit 1;
+	fi
 fi
 
 SWIFT=`which swift`;
 
 if [[ $SWIFT == *"swiftenv"* ]];
 then
-	echo "Swiftenv installed, continuing...";
+	echo "Swiftenv is installed.";
+	echo "Installing $SWIFT_VERSION"
 	swiftenv install $SWIFT_VERSION;
 else
 	if [[ $SWIFT == *"swift-latest.xctoolchain"* ]];
@@ -28,6 +34,7 @@ else
 			echo "$SWIFT_VERSION installed, continuing...";
 		else
 			echo "Incorrect Swift version installed, please install $SWIFT_VERSION";
+			echo "You can download Swift from http://swift.org."
 			exit 1;
 		fi
 	else
@@ -36,7 +43,7 @@ else
 			echo "$SWIFT_VERSION installed, continuing...";
 		else
 			echo "Neither Swift nor Swiftenv is installed";
-			echo "Please review the documentation for installing the Toolbox at http://docs.qutheory.io";
+			echo "Please review the documentation for installing the Toolbox at http://docs.qutheory.io/";
 			exit 1;
 		fi
 	fi
@@ -49,11 +56,15 @@ rm -rf $DIR;
 mkdir -p $DIR
 cd $DIR;
 
-git clone https://github.com/qutheory/vapor-toolbox
-cd vapor-toolbox
-git checkout $TAG
+echo "Downloading...";
+git clone https://github.com/qutheory/vapor-toolbox > /dev/null 2>&1;
+cd vapor-toolbox;
+git checkout $TAG > /dev/null 2>&1;
 
-swift build -c release;
+echo "Compiling...";
+swift build -c release > /dev/null;
+
+echo "Installing...";
 .build/release/Executable self install;
 
 cd ../../;

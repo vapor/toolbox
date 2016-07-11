@@ -22,7 +22,6 @@ script:
   - vapor docker init -n
 
   # basic
-  - vapor help                      # help
   - vapor new test-project          # new
   - cd test-project
   - vapor fetch                     # fetch
