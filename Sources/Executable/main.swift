@@ -13,6 +13,10 @@ guard let executable = iterator.next() else {
     throw ConsoleError.noExecutable
 }
 
+signal(SIGINT) { signal in
+    print("Got signal")
+    print(signal)
+}
 
 do {
     try terminal.run(executable: executable, commands: [
