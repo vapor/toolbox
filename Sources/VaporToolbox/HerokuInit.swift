@@ -24,16 +24,6 @@ public final class HerokuInit: Command {
         }
 
         do {
-            let status = try console.subexecute("git status --porcelain")
-            if status.trim() != "" {
-                console.info("All current changes must be committed before pushing to Heroku.")
-                throw Error.general("Found uncommitted changes.")
-            }
-        } catch ConsoleError.subexecute(_, _) {
-            throw Error.general("No .git repository found.")
-        }
-
-        do {
             _ = try console.subexecute("git remote show heroku")
             throw Error.general("Git already has a heroku remote.")
         } catch ConsoleError.subexecute(_, _) {
@@ -47,10 +37,9 @@ public final class HerokuInit: Command {
             name = ""
         }
 
-        console.info("Creating \(name ?? "Heroku app")...")
-
         do {
-            _ = try console.subexecute("heroku create \(name)")
+            let message = try console.subexecute("heroku create \(name)")
+            console.info(message)
         } catch ConsoleError.subexecute(_, let message) {
             throw Error.general("Unable to create Heroku app: \(message.trim())")
         }
@@ -82,15 +71,9 @@ public final class HerokuInit: Command {
 
         if console.confirm("Would you like to push to Heroku now?") {
             console.warning("This may take a while...")
-            let herokuBar = console.loadingBar(title: "Pushing to Heroku")
-            herokuBar.start()
-            do {
-                _ = try console.subexecute("git add . && git commit -m 'vapor toolbox initializing heroku' && git push heroku master")
-                herokuBar.finish()
-            } catch ConsoleError.subexecute(_, let message) {
-                herokuBar.fail()
-                throw Error.general("Unable to push to Heroku: \(message)")
-            }
+
+            let push = HerokuPush(console: console)
+            try push.run(arguments: [])
 
             let dynoBar = console.loadingBar(title: "Spinning up dynos")
             dynoBar.start()

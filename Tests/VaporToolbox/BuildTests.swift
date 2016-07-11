@@ -16,11 +16,12 @@ class BuildTests: XCTestCase {
         do {
             try build.run(arguments: [])
             XCTAssertEqual(console.outputBuffer, [
+                "No Packages folder, fetch may take a while...",
                 "Fetching Dependencies [Done]",
                 "Building Project [Done]"
             ])
             XCTAssertEqual(console.executeBuffer, [
-                "ls Packages",
+                "ls .",
                 "swift package fetch",
                 "swift build",
             ])
@@ -37,12 +38,13 @@ class BuildTests: XCTestCase {
             try build.run(arguments: ["--clean"])
             XCTAssertEqual(console.outputBuffer, [
                 "Cleaning [Done]",
+                "No Packages folder, fetch may take a while...",
                 "Fetching Dependencies [Done]",
                 "Building Project [Done]"
             ])
             XCTAssertEqual(console.executeBuffer, [
                 "rm -rf Packages .build",
-                "ls Packages",
+                "ls .",
                 "swift package fetch",
                 "swift build",
             ])
@@ -63,12 +65,13 @@ class BuildTests: XCTestCase {
         do {
             try build.run(arguments: ["--run"])
             XCTAssertEqual(console.outputBuffer, [
+                "No Packages folder, fetch may take a while...",
                 "Fetching Dependencies [Done]",
                 "Building Project [Done]",
                 "Running \(name)..."
             ])
             XCTAssertEqual(console.executeBuffer, [
-                "ls Packages",
+                "ls .",
                 "swift package fetch",
                 "swift build",
                 "ls .build/debug",
@@ -87,11 +90,12 @@ class BuildTests: XCTestCase {
         do {
             try build.run(arguments: ["--mysql"])
             XCTAssertEqual(console.outputBuffer, [
+                "No Packages folder, fetch may take a while...",
                 "Fetching Dependencies [Done]",
                 "Building Project [Done]"
             ])
             XCTAssertEqual(console.executeBuffer, [
-                "ls Packages",
+                "ls .",
                 "swift package fetch",
                 "swift build -Xswiftc -I/usr/local/include/mysql -Xlinker -L/usr/local/lib",
             ])

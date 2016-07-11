@@ -30,7 +30,8 @@ do {
             "Commands that affect the toolbox itself."
         ]),
         Group(id: "heroku", commands: [
-            HerokuInit(console: terminal)
+            HerokuInit(console: terminal),
+            HerokuPush(console: terminal),
         ], help: [
             "Commands to help deploy to Heroku."
         ])
