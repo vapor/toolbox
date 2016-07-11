@@ -24,9 +24,12 @@ public final class Fetch: Command {
         }
 
         do {
-            _ = try console.subexecute("ls Packages")
+            let ls = try console.subexecute("ls .")
+            if !ls.contains("Packages") {
+                console.warning("No Packages folder, fetch may take a while...")
+            }
         } catch ConsoleError.subexecute(_) {
-            console.info("No Packages folder, fetch may take a while...")
+            // do nothing
         }
 
         let depBar = console.loadingBar(title: "Fetching Dependencies")

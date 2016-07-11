@@ -46,7 +46,7 @@ public final class New: Command {
             let file = "\(name)/Package.swift"
 
             var manifest = try console.subexecute("cat \(file)")
-            manifest = manifest.components(separatedBy: "VaporExample").joined(separator: name)
+            manifest = manifest.components(separatedBy: "VaporApp").joined(separator: name)
             manifest = manifest.components(separatedBy: "\"").joined(separator: "\\\"")
             _ = try console.subexecute("echo \"\(manifest)\" > \(file)")
         } catch {
