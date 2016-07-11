@@ -34,7 +34,7 @@ public final class SelfInstall: Command {
             }
         }
 
-        let current = String(file.characters.dropLast())
+        let current = file.trim()
 
         let command = "mv \(current) /usr/local/bin/vapor"
         do {

@@ -36,6 +36,7 @@ DIR=".vapor-toolbox-$TAG";
 
 rm -rf $DIR;
 
+mkdir -p $DIR
 cd $DIR;
 
 git clone https://github.com/qutheory/vapor-toolbox
@@ -47,3 +48,5 @@ swift build -c release;
 
 cd ../../;
 rm -rf $DIR;
+
+echo 'Use vapor --help and vapor <command> --help to learn more.';

@@ -20,6 +20,7 @@ do {
         Run(console: terminal),
         Fetch(console: terminal),
         Clean(console: terminal),
+        Test(console: terminal),
         Xcode(console: terminal),
         Version(console: terminal, version: version),
         Group(id: "self", commands: [
@@ -34,6 +35,14 @@ do {
             HerokuPush(console: terminal),
         ], help: [
             "Commands to help deploy to Heroku."
+        ]),
+        Group(id: "docker", commands: [
+            DockerInit(console: terminal),
+            DockerBuild(console: terminal),
+            DockerRun(console: terminal),
+            DockerEnter(console: terminal)
+        ], help: [
+            "Commands to help manage a Docker image."
         ])
     ], arguments: Array(iterator), help: [
         "Join our Slack if you have questions, need help,",

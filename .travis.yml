@@ -14,23 +14,21 @@ script:
   - swift test
 
   - .build/release/Executable self install
+  - vapor --help
   - vapor version                   # version
 
   # docker
-  # - rm Dockerfile                   # docker init won't run if file exists
-  # - vapor docker init
-
-  # heroku
-  # - vapor heroku init
+  - rm Dockerfile                   # docker init won't run if file exists
+  - vapor docker init
 
   # basic
   - vapor help                      # help
   - vapor new test-project          # new
   - cd test-project
+  - vapor fetch                     # fetch
   - vapor clean                     # clean
   - vapor build                     # build
   - vapor run &                     # run
 
-  # test update
-  # FIXME: enable later - this can only work after cli.qutheory.io starts serving bootstrap.swift
-  #- vapor update                    # will update to older version
+  - vapor self update
+
