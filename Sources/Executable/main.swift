@@ -5,12 +5,18 @@ import VaporToolbox
 
 let version = "0.6.0"
 
-let terminal: Console = Terminal(arguments: Process.arguments)
+let terminal = Terminal(arguments: Process.arguments)
 
 var iterator = Process.arguments.makeIterator()
 
 guard let executable = iterator.next() else {
     throw ConsoleError.noExecutable
+}
+
+signal(SIGINT) { sig in
+    terminal.killChildren()
+    print("Killing children")
+    exit(2)
 }
 
 do {
@@ -56,8 +62,9 @@ do {
     terminal.error("Error: ", newLine: false)
     terminal.print("Insufficient arguments.")
 } catch ConsoleError.help {
-    exit(0)
+    exit(1)
 } catch ConsoleError.cancelled {
+    print("Cancelled")
     exit(2)
 } catch ConsoleError.noCommand {
     terminal.error("Error: ", newLine: false)
