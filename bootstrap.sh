@@ -12,7 +12,7 @@ then
 else
 	if [[ $SWIFT == *"swift-latest.xctoolchain"* ]];
 	then
-		PATH=`ls -lah /Library/Developer/Toolchains/swift-latest.xctoolchain`;
+		PATH=`ls -lah /Library/Developer/Toolchains/swift-latest.xctoolchain`:"$PATH";
 		if [[ $PATH == *$SWIFT_VERSION* ]];
 		then
 			echo "$SWIFT_VERSION installed, continuing...";
