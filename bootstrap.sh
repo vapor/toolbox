@@ -3,6 +3,16 @@
 TAG="0.6.0";
 SWIFT_VERSION="swift-DEVELOPMENT-SNAPSHOT-2016-06-20-a";
 
+XCODE=`xcrun --version`
+
+if [[ $XCODE != *"xcrun version 30."* ]];
+then
+	echo "Xcode 8 must be installed and selected.";
+	echo "Install Xcode 8: https://developer.apple.com/download/"
+	echo "Select Xcode 8: sudo xcode-select -s /Applications/Xcode-beta.app/";
+	exit 1;
+fi
+
 SWIFT=`which swift`;
 
 if [[ $SWIFT == *"swiftenv"* ]];
