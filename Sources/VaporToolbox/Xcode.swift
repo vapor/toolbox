@@ -8,6 +8,10 @@ public final class Xcode: Command {
         "Additionally links commonly used libraries."
     ]
 
+    public let signature: [Argument] = [
+        Option(name: "mysql", help: ["Links MySQL libraries."])
+    ]
+
     public let console: Console
 
     public init(console: Console) {
@@ -23,14 +27,23 @@ public final class Xcode: Command {
         let xcodeBar = console.loadingBar(title: "Generating Xcode Project")
         xcodeBar.start()
 
-        var buildFlags: [String] = [
-            "-Xswiftc",
-            "-I/usr/local/include/mysql",
-            "-Xlinker",
-            "-L/usr/local/lib"
-        ]
+        var buildFlags: [String] = []
+        
+        if arguments.flag("mysql") {
+            buildFlags += [
+                "-Xswiftc",
+                "-I/usr/local/include/mysql",
+                "-Xlinker",
+                "-L/usr/local/lib"
+            ]
+        }
+
 
         for (name, value) in arguments.options {
+            if ["mysql"].contains(name) {
+                continue
+            }
+
             if name == "release" && value.bool == true {
                 buildFlags += "--configuration release"
             } else {
@@ -38,7 +51,10 @@ public final class Xcode: Command {
             }
         }
 
-        let command = "swift package generate-xcodeproj " + buildFlags.joined(separator: " ")
+        var commandArray = ["swift", "package", "generate-xcodeproj"]
+        commandArray += buildFlags
+        
+        let command = commandArray.joined(separator: " ")
 
         do {
             _ = try console.subexecute("\(command) > \(tmpFile) 2>&1")

@@ -4,25 +4,21 @@ os:
 language: generic
 sudo: required
 dist: trusty
-osx_image: xcode7.3
+osx_image: xcode8
 install:
   - eval "$(curl -sL https://gist.githubusercontent.com/kylef/5c0475ff02b7c7671d2a/raw/02090c7ede5a637b76e6df1710e83cd0bbe7dcdf/swiftenv-install.sh)"
 script:
   # run unit tests
-  - swift build && swift test
+  - swift build
+  - swift build --configuration release
+  - swift test
 
-  # the first two steps are equivalent to the user installation instructions
-  # here: https://vapor.readme.io/docs/install-cli
-  - swift bootstrap.swift /usr/local/bin/vapor
-  # fixing error on Linux:
-  #   mv: try to overwrite ‘/usr/local/bin/vapor’, overriding mode 0755 (rwxr-xr-x)?
-  - sudo chmod ugo+w /usr/local/bin/vapor
-
+  - .build/release/Executable self install
   - vapor version                   # version
 
   # docker
-  - rm Dockerfile                   # docker init won't run if file exists
-  - vapor docker init
+  # - rm Dockerfile                   # docker init won't run if file exists
+  # - vapor docker init
 
   # heroku
   # - vapor heroku init

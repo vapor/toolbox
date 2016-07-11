@@ -5,7 +5,8 @@ public final class Build: Command {
 
     public let signature: [Argument] = [
         Option(name: "run", help: ["Runs the project after building."]),
-        Option(name: "clean", help: ["Cleans the project before building."])
+        Option(name: "clean", help: ["Cleans the project before building."]),
+        Option(name: "mysql", help: ["Links MySQL libraries."])
     ]
 
     public let help: [String] = [
@@ -27,18 +28,22 @@ public final class Build: Command {
         let fetch = Fetch(console: console)
         try fetch.run(arguments: [])
 
-        var buildFlags: [String] = [
-            "-Xswiftc",
-            "-I/usr/local/include/mysql",
-            "-Xlinker",
-            "-L/usr/local/lib"
-        ]
+        var buildFlags: [String] = []
+
+        if arguments.flag("mysql") {
+            buildFlags += [
+                "-Xswiftc",
+                "-I/usr/local/include/mysql",
+                "-Xlinker",
+                "-L/usr/local/lib"
+            ]
+        }
 
         let buildBar = console.loadingBar(title: "Building Project")
         buildBar.start()
 
         for (name, value) in arguments.options {
-            if ["clean", "run"].contains(name) {
+            if ["clean", "run", "mysql"].contains(name) {
                 continue
             }
 
@@ -49,7 +54,10 @@ public final class Build: Command {
             }
         }
 
-        let command = "swift build " + buildFlags.joined(separator: " ")
+        var commandArray = ["swift", "build"]
+        commandArray += buildFlags
+
+        let command = commandArray.joined(separator: " ")
         do {
             _ = try console.subexecute(command)
             buildBar.finish()

@@ -22,7 +22,7 @@ class BuildTests: XCTestCase {
             XCTAssertEqual(console.executeBuffer, [
                 "ls Packages",
                 "swift package fetch",
-                "swift build -Xswiftc -I/usr/local/include/mysql -Xlinker -L/usr/local/lib",
+                "swift build",
             ])
         } catch {
             XCTFail("Build run failed: \(error)")
@@ -44,7 +44,7 @@ class BuildTests: XCTestCase {
                 "rm -rf Packages .build",
                 "ls Packages",
                 "swift package fetch",
-                "swift build -Xswiftc -I/usr/local/include/mysql -Xlinker -L/usr/local/lib",
+                "swift build",
             ])
         } catch {
             XCTFail("Build run failed: \(error)")
@@ -70,10 +70,30 @@ class BuildTests: XCTestCase {
             XCTAssertEqual(console.executeBuffer, [
                 "ls Packages",
                 "swift package fetch",
-                "swift build -Xswiftc -I/usr/local/include/mysql -Xlinker -L/usr/local/lib",
+                "swift build",
                 "ls .build/debug",
                 "swift package dump-package",
                 ".build/debug/App"
+            ])
+        } catch {
+            XCTFail("Build run failed: \(error)")
+        }
+    }
+
+    func testBuildWithMySQL() {
+        let console = TestConsole()
+        let build = Build(console: console)
+
+        do {
+            try build.run(arguments: ["--mysql"])
+            XCTAssertEqual(console.outputBuffer, [
+                "Fetching Dependencies [Done]",
+                "Building Project [Done]"
+            ])
+            XCTAssertEqual(console.executeBuffer, [
+                "ls Packages",
+                "swift package fetch",
+                "swift build -Xswiftc -I/usr/local/include/mysql -Xlinker -L/usr/local/lib",
             ])
         } catch {
             XCTFail("Build run failed: \(error)")
