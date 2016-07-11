@@ -8,5 +8,5 @@ Learn more about Vapor Toolbox in the <a href="https://vapor.readme.io/docs/inst
 
 ```sh
 # install Vapor Toolbox
-curl -sL toolbox.qutheory.io | sh
+curl -sL toolbox.qutheory.io | bash
 ```
