@@ -19,7 +19,7 @@ script:
 
   # docker
   - rm Dockerfile                   # docker init won't run if file exists
-  - vapor docker init
+  - vapor docker init -n
 
   # basic
   - vapor help                      # help
