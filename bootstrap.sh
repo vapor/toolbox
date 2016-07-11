@@ -7,13 +7,14 @@ OS=`uname`
 
 if [[ $OS == "Darwin" ]];
 then
-	XCODE=`xcrun --version`
+	XCODE=`xcodebuild -version`
 
-	if [[ $XCODE != *"xcrun version 30."* ]];
+	if [[ $XCODE != *"Xcode 8"* ]];
 	then
 		echo "Xcode 8 must be installed and selected.";
 		echo "Install Xcode 8: https://developer.apple.com/download/"
 		echo "Select Xcode 8: sudo xcode-select -s /Applications/Xcode-beta.app/";
+		echo "Run to verify Xcode 8 is selected: xcodebuild -version"
 		exit 1;
 	fi
 fi
