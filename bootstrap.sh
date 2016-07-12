@@ -1,6 +1,6 @@
 #!/bin/sh
 
-TAG="0.6.1";
+TAG="0.6.2";
 SWIFT_VERSION="swift-DEVELOPMENT-SNAPSHOT-2016-06-20-a";
 
 OS=`uname`
