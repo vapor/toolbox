@@ -23,7 +23,7 @@ class BuildTests: XCTestCase {
             XCTAssertEqual(console.executeBuffer, [
                 "ls .",
                 "swift package fetch",
-                "swift build",
+                "swift build 1>&2",
             ])
         } catch {
             XCTFail("Build run failed: \(error)")
@@ -46,7 +46,7 @@ class BuildTests: XCTestCase {
                 "rm -rf Packages .build",
                 "ls .",
                 "swift package fetch",
-                "swift build",
+                "swift build 1>&2",
             ])
         } catch {
             XCTFail("Build run failed: \(error)")
@@ -73,7 +73,7 @@ class BuildTests: XCTestCase {
             XCTAssertEqual(console.executeBuffer, [
                 "ls .",
                 "swift package fetch",
-                "swift build",
+                "swift build 1>&2",
                 "ls .build/debug",
                 "swift package dump-package",
                 ".build/debug/App"
@@ -97,7 +97,7 @@ class BuildTests: XCTestCase {
             XCTAssertEqual(console.executeBuffer, [
                 "ls .",
                 "swift package fetch",
-                "swift build -Xswiftc -I/usr/local/include/mysql -Xlinker -L/usr/local/lib",
+                "swift build -Xswiftc -I/usr/local/include/mysql -Xlinker -L/usr/local/lib 1>&2",
             ])
         } catch {
             XCTFail("Build run failed: \(error)")
