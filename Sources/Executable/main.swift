@@ -61,7 +61,7 @@ do {
     terminal.error("Error: ", newLine: false)
     terminal.print("Insufficient arguments.")
 } catch ConsoleError.help {
-    exit(1)
+    exit(0)
 } catch ConsoleError.cancelled {
     print("Cancelled")
     exit(2)
