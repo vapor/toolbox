@@ -3,14 +3,19 @@ import Console
 import Foundation
 import VaporToolbox
 
-let version = "0.6.0"
+let version = "0.6.1"
 
-let terminal: Console = Terminal(arguments: Process.arguments)
+let terminal = Terminal(arguments: Process.arguments)
 
 var iterator = Process.arguments.makeIterator()
 
 guard let executable = iterator.next() else {
     throw ConsoleError.noExecutable
+}
+
+signal(SIGINT) { sig in
+    terminal.killTasks()
+    exit(2)
 }
 
 do {
@@ -58,6 +63,7 @@ do {
 } catch ConsoleError.help {
     exit(0)
 } catch ConsoleError.cancelled {
+    print("Cancelled")
     exit(2)
 } catch ConsoleError.noCommand {
     terminal.error("Error: ", newLine: false)
