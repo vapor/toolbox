@@ -57,7 +57,7 @@ public final class Build: Command {
         var commandArray = ["swift", "build"]
         commandArray += buildFlags
 
-        commandArray += "1>&2"a
+        commandArray += "1>&2"
 
         let command = commandArray.joined(separator: " ")
         do {
@@ -71,7 +71,7 @@ public final class Build: Command {
             console.print()
             console.info("Error (\(code)):")
             console.print(error)
-            
+
             console.info("Toolchain:")
             let toolchain = try console.subexecute("which swift").trim()
             console.print(toolchain)
