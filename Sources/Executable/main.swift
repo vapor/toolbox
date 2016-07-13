@@ -3,7 +3,7 @@ import Console
 import Foundation
 import VaporToolbox
 
-let version = "0.6.2"
+let version = "0.7.0"
 
 let terminal = Terminal(arguments: Process.arguments)
 
