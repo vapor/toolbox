@@ -62,7 +62,7 @@ public final class HerokuInit: Command {
 
         console.info("Creating procfile...")
 
-        let procContents = "web: App --port=\\$PORT --env=production"
+        let procContents = "web: App --env=production"
         do {
             _ = try console.subexecute("echo \"\(procContents)\" > ./Procfile")
         } catch ConsoleError.subexecute(_, let message) {
