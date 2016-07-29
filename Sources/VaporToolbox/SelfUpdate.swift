@@ -7,10 +7,10 @@ public final class SelfUpdate: Command {
         "Downloads and installs the latest toolbox.",
     ]
 
-    public let console: Console
+    public let console: ConsoleProtocol
     public let executable: String
 
-    public init(console: Console, executable: String) {
+    public init(console: ConsoleProtocol, executable: String) {
         self.console = console
         self.executable = executable
     }
@@ -23,7 +23,7 @@ public final class SelfUpdate: Command {
             updateBar.finish()
         } catch ConsoleError.subexecute(_, let message) {
             updateBar.fail()
-            throw Error.general("Could not update toolbox: \(message)")
+            throw ToolboxError.general("Could not update toolbox: \(message)")
         }
     }
 }

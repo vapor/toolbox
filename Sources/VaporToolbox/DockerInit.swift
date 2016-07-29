@@ -9,9 +9,9 @@ public final class DockerInit: Command {
         "Prepares the application for Docker."
     ]
 
-    public let console: Console
+    public let console: ConsoleProtocol
 
-    public init(console: Console) {
+    public init(console: ConsoleProtocol) {
         self.console = console
     }
 
@@ -19,10 +19,10 @@ public final class DockerInit: Command {
         do {
             let contents = try console.subexecute("ls .")
             if contents.contains("Dockerfile") {
-                throw Error.general("Directory already contains a Dockerfile")
+                throw ToolboxError.general("Directory already contains a Dockerfile")
             }
         } catch ConsoleError.subexecute(_) {
-            throw Error.general("Could not check for Dockerfile")
+            throw ToolboxError.general("Could not check for Dockerfile")
         }
 
         let initBar = console.loadingBar(title: "Cloning Dockerfile")
@@ -33,7 +33,7 @@ public final class DockerInit: Command {
             initBar.finish()
         } catch ConsoleError.subexecute(_, let message) {
             initBar.fail()
-            throw Error.general("Could not download Dockerfile: \(message)")
+            throw ToolboxError.general("Could not download Dockerfile: \(message)")
         }
 
         if console.confirm("Would you like to build the Docker image now?") {

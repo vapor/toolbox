@@ -10,9 +10,9 @@ public final class DockerEnter: Command {
         "Useful for debugging."
     ]
 
-    public let console: Console
+    public let console: ConsoleProtocol
 
-    public init(console: Console) {
+    public init(console: ConsoleProtocol) {
         self.console = console
     }
 
@@ -21,23 +21,23 @@ public final class DockerEnter: Command {
             _ = try console.subexecute("which docker")
         } catch ConsoleError.subexecute(_, _) {
             console.info("Visit https://www.docker.com/products/docker-toolbox")
-            throw Error.general("Docker not installed.")
+            throw ToolboxError.general("Docker not installed.")
         }
 
         do {
             let contents = try console.subexecute("ls .")
             if !contents.contains("Dockerfile") {
-                throw Error.general("No Dockerfile found")
+                throw ToolboxError.general("No Dockerfile found")
             }
         } catch ConsoleError.subexecute(_) {
-            throw Error.general("Could not check for Dockerfile")
+            throw ToolboxError.general("Could not check for Dockerfile")
         }
 
         let swiftVersion: String
         do {
             swiftVersion = try console.subexecute("cat .swift-version").trim()
         } catch {
-            throw Error.general("Could not determine Swift version from .swift-version file.")
+            throw ToolboxError.general("Could not determine Swift version from .swift-version file.")
         }
 
         let imageName = DockerBuild.imageName(version: swiftVersion)

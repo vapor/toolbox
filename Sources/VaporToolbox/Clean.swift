@@ -12,9 +12,9 @@ public final class Clean: Command {
         "a plethora of bizarre build errors."
     ]
 
-    public let console: Console
+    public let console: ConsoleProtocol
     
-    public init(console: Console) {
+    public init(console: ConsoleProtocol) {
         self.console = console
     }
 

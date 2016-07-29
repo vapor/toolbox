@@ -7,10 +7,10 @@ public final class Version: Command {
         "Displays Vapor CLI version"
     ]
 
-    public let console: Console
+    public let console: ConsoleProtocol
     public let version: String
 
-    public init(console: Console, version: String) {
+    public init(console: ConsoleProtocol, version: String) {
         self.console = console
         self.version = version
     }
@@ -21,7 +21,7 @@ public final class Version: Command {
         do {
             let run = Run(console: console)
             try run.run(arguments: ["version"])
-        } catch Error.general(_) {
+        } catch ToolboxError.general(_) {
             console.warning("Cannot print Vapor Framework version, no project found.")
         }
     }
