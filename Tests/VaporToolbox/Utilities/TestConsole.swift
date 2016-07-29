@@ -3,7 +3,7 @@ import Console
 import libc
 @testable import VaporToolbox
 
-final class TestConsole: Console {
+final class TestConsole: ConsoleProtocol {
     var inputBuffer: [String]
     var outputBuffer: [String]
     var executeBuffer: [String]
