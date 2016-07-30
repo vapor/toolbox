@@ -1,3 +1,3 @@
-public enum Error: ErrorProtocol {
+public enum ToolboxError: Error {
     case general(String)
 }

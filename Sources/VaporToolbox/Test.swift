@@ -9,9 +9,9 @@ public final class Test: Command {
         "Runs the application's tests."
     ]
 
-    public let console: Console
+    public let console: ConsoleProtocol
 
-    public init(console: Console) {
+    public init(console: ConsoleProtocol) {
         self.console = console
     }
 
@@ -38,7 +38,7 @@ public final class Test: Command {
             console.print("are waiting to help: http://slack.qutheory.io")
             console.print()
 
-            throw Error.general("Tests failed.")
+            throw ToolboxError.general("Tests failed.")
         }
     }
     

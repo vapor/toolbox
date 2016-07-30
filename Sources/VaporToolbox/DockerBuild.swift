@@ -9,9 +9,9 @@ public final class DockerBuild: Command {
         "Builds the Docker application."
     ]
 
-    public let console: Console
+    public let console: ConsoleProtocol
 
-    public init(console: Console) {
+    public init(console: ConsoleProtocol) {
         self.console = console
     }
 
@@ -20,16 +20,16 @@ public final class DockerBuild: Command {
             _ = try console.subexecute("which docker")
         } catch ConsoleError.subexecute(_, _) {
             console.info("Visit https://www.docker.com/products/docker-toolbox")
-            throw Error.general("Docker not installed.")
+            throw ToolboxError.general("Docker not installed.")
         }
 
         do {
             let contents = try console.subexecute("ls .")
             if !contents.contains("Dockerfile") {
-                throw Error.general("No Dockerfile found")
+                throw ToolboxError.general("No Dockerfile found")
             }
         } catch ConsoleError.subexecute(_) {
-            throw Error.general("Could not check for Dockerfile")
+            throw ToolboxError.general("Could not check for Dockerfile")
         }
 
         let swiftVersion: String
@@ -37,7 +37,7 @@ public final class DockerBuild: Command {
         do {
             swiftVersion = try console.subexecute("cat .swift-version").trim()
         } catch {
-            throw Error.general("Could not determine Swift version from .swift-version file.")
+            throw ToolboxError.general("Could not determine Swift version from .swift-version file.")
         }
 
         let buildBar = console.loadingBar(title: "Building Docker image")
@@ -49,7 +49,7 @@ public final class DockerBuild: Command {
             buildBar.finish()
         } catch ConsoleError.subexecute(_, let message) {
             buildBar.fail()
-            throw Error.general("Docker build failed: \(message.trim())")
+            throw ToolboxError.general("Docker build failed: \(message.trim())")
         }
 
         if console.confirm("Would you like to run the Docker image now?") {

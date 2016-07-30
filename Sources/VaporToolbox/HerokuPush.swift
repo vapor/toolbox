@@ -9,9 +9,9 @@ public final class HerokuPush: Command {
         "Pushes the application to Heroku."
     ]
 
-    public let console: Console
+    public let console: ConsoleProtocol
 
-    public init(console: Console) {
+    public init(console: ConsoleProtocol) {
         self.console = console
     }
 
@@ -20,17 +20,17 @@ public final class HerokuPush: Command {
             _ = try console.subexecute("which heroku")
         } catch ConsoleError.subexecute(_, _) {
             console.info("Visit https://toolbelt.heroku.com")
-            throw Error.general("Heroku Toolbelt must be installed.")
+            throw ToolboxError.general("Heroku Toolbelt must be installed.")
         }
 
         do {
             let status = try console.subexecute("git status --porcelain")
             if status.trim() != "" {
                 console.info("All current changes must be committed before pushing to Heroku.")
-                throw Error.general("Found uncommitted changes.")
+                throw ToolboxError.general("Found uncommitted changes.")
             }
         } catch ConsoleError.subexecute(_, _) {
-            throw Error.general("No .git repository found.")
+            throw ToolboxError.general("No .git repository found.")
         }
 
         //let herokuBar = console.loadingBar(title: "Pushing to Heroku")
@@ -40,7 +40,7 @@ public final class HerokuPush: Command {
             //herokuBar.finish()
         } catch ConsoleError.execute(_) {
             //herokuBar.fail()
-            throw Error.general("Unable to push to Heroku.")
+            throw ToolboxError.general("Unable to push to Heroku.")
         }
     }
 

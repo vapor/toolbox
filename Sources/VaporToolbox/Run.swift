@@ -8,9 +8,9 @@ public final class Run: Command {
         "Runs the compiled application."
     ]
 
-    public let console: Console
+    public let console: ConsoleProtocol
 
-    public init(console: Console) {
+    public init(console: ConsoleProtocol) {
         self.console = console
     }
 
@@ -26,7 +26,7 @@ public final class Run: Command {
         do {
             _ = try console.subexecute("ls .build/\(folder)")
         } catch ConsoleError.subexecute(_) {
-            throw Error.general("No .build/\(folder) folder found.")
+            throw ToolboxError.general("No .build/\(folder) folder found.")
         }
 
         do {
@@ -41,7 +41,7 @@ public final class Run: Command {
                     console.info("Use --name to manually supply the package name.")
                 }
 
-                throw Error.general("Unable to determine package name.")
+                throw ToolboxError.general("Unable to determine package name.")
             }
 
             console.info("Running \(name)...")
@@ -55,7 +55,7 @@ public final class Run: Command {
 
             try console.execute(passThrough.joined(separator: " "))
         } catch ConsoleError.execute(_) {
-            throw Error.general("Run failed.")
+            throw ToolboxError.general("Run failed.")
         }
     }
 

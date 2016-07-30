@@ -9,9 +9,9 @@ public final class HerokuInit: Command {
         "Prepares the application for Heroku integration."
     ]
 
-    public let console: Console
+    public let console: ConsoleProtocol
 
-    public init(console: Console) {
+    public init(console: ConsoleProtocol) {
         self.console = console
     }
 
@@ -20,12 +20,12 @@ public final class HerokuInit: Command {
             _ = try console.subexecute("which heroku")
         } catch ConsoleError.subexecute(_, _) {
             console.info("Visit https://toolbelt.heroku.com")
-            throw Error.general("Heroku Toolbelt must be installed.")
+            throw ToolboxError.general("Heroku Toolbelt must be installed.")
         }
 
         do {
             _ = try console.subexecute("git remote show heroku")
-            throw Error.general("Git already has a heroku remote.")
+            throw ToolboxError.general("Git already has a heroku remote.")
         } catch ConsoleError.subexecute(_, _) {
             //continue
         }
@@ -41,7 +41,7 @@ public final class HerokuInit: Command {
             let message = try console.subexecute("heroku create \(name)")
             console.info(message)
         } catch ConsoleError.subexecute(_, let message) {
-            throw Error.general("Unable to create Heroku app: \(message.trim())")
+            throw ToolboxError.general("Unable to create Heroku app: \(message.trim())")
         }
 
         let buildpack: String
@@ -57,7 +57,7 @@ public final class HerokuInit: Command {
         do {
             _ = try console.subexecute("heroku buildpacks:set \(buildpack)")
         } catch ConsoleError.subexecute(_, let message) {
-            throw Error.general("Unable to set buildpack \(buildpack): \(message)")
+            throw ToolboxError.general("Unable to set buildpack \(buildpack): \(message)")
         }
 
         console.info("Creating procfile...")
@@ -66,7 +66,7 @@ public final class HerokuInit: Command {
         do {
             _ = try console.subexecute("echo \"\(procContents)\" > ./Procfile")
         } catch ConsoleError.subexecute(_, let message) {
-            throw Error.general("Unable to make Procfile: \(message)")
+            throw ToolboxError.general("Unable to make Procfile: \(message)")
         }
 
         if console.confirm("Would you like to push to Heroku now?") {
@@ -83,7 +83,7 @@ public final class HerokuInit: Command {
                 dynoBar.finish()
             } catch ConsoleError.subexecute(_, let message) {
                 dynoBar.fail()
-                throw Error.general("Unable to spin up dynos: \(message)")
+                throw ToolboxError.general("Unable to spin up dynos: \(message)")
             }
 
             console.print("Visit https://dashboard.heroku.com/apps/")

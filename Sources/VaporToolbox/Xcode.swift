@@ -12,9 +12,9 @@ public final class Xcode: Command {
         Option(name: "mysql", help: ["Links MySQL libraries."])
     ]
 
-    public let console: Console
+    public let console: ConsoleProtocol
 
-    public init(console: Console) {
+    public init(console: ConsoleProtocol) {
         self.console = console
     }
 
@@ -62,7 +62,7 @@ public final class Xcode: Command {
         } catch ConsoleError.subexecute(_, let message) {
             xcodeBar.fail()
             print(message)
-            throw Error.general("Could not generate Xcode project: \(message)")
+            throw ToolboxError.general("Could not generate Xcode project: \(message)")
         }
 
         console.info("Select the `App` scheme to run.")
@@ -78,7 +78,7 @@ public final class Xcode: Command {
                 console.print("Opening Xcode project...")
                 _ = try console.subexecute("open *.xcodeproj")
             } catch ConsoleError.subexecute(_) {
-                throw Error.general("Could not open Xcode project.")
+                throw ToolboxError.general("Could not open Xcode project.")
             }
         }
     }

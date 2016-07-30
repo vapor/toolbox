@@ -12,11 +12,11 @@ public final class SelfInstall: Command {
         "Installations default to /usr/local/bin/vapor."
     ]
 
-    public let console: Console
+    public let console: ConsoleProtocol
     public let executable: String
     let version: String
 
-    public init(console: Console, executable: String, version: String) {
+    public init(console: ConsoleProtocol, executable: String, version: String) {
         self.console = console
         self.executable = executable
         self.version = version
@@ -30,7 +30,7 @@ public final class SelfInstall: Command {
             do {
                 file = try console.subexecute("which \(executable)")
             } catch ConsoleError.execute(_) {
-                throw Error.general("Could not locate executable.")
+                throw ToolboxError.general("Could not locate executable.")
             }
         }
 
@@ -44,7 +44,7 @@ public final class SelfInstall: Command {
             do {
                 _ = try console.subexecute("sudo \(command)")
             } catch ConsoleError.subexecute(_) {
-                throw Error.general("Installation failed.")
+                throw ToolboxError.general("Installation failed.")
             }
         }
 

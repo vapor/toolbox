@@ -11,9 +11,9 @@ public final class New: Command {
         "Creates a new Vapor application from a template."
     ]
 
-    public let console: Console
+    public let console: ConsoleProtocol
 
-    public init(console: Console) {
+    public init(console: ConsoleProtocol) {
         self.console = console
 
         signature = [
@@ -39,7 +39,7 @@ public final class New: Command {
             cloneBar.finish()
         } catch ConsoleError.subexecute(_, let error) {
             cloneBar.fail()
-            throw Error.general(error.trim())
+            throw ToolboxError.general(error.trim())
         }
 
         do {

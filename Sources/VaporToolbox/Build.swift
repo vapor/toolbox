@@ -13,9 +13,9 @@ public final class Build: Command {
         "Compiles the application."
     ]
 
-    public let console: Console
+    public let console: ConsoleProtocol
 
-    public init(console: Console) {
+    public init(console: ConsoleProtocol) {
         self.console = console
     }
 
@@ -81,7 +81,7 @@ public final class Build: Command {
             console.print("are waiting to help: http://slack.qutheory.io")
             console.print()
 
-            throw Error.general("Build failed.")
+            throw ToolboxError.general("Build failed.")
         }
 
         if arguments.options["run"]?.bool == true {

@@ -53,7 +53,7 @@ do {
         "Join our Slack if you have questions, need help,",
         "or want to contribute: http://slack.qutheory.io"
     ])
-} catch Error.general(let message) {
+} catch ToolboxError.general(let message) {
     terminal.error("Error: ", newLine: false)
     terminal.print(message)
     exit(1)

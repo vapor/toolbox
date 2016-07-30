@@ -11,9 +11,9 @@ public final class Fetch: Command {
         "Fetches the application's dependencies."
     ]
 
-    public let console: Console
+    public let console: ConsoleProtocol
 
-    public init(console: Console) {
+    public init(console: ConsoleProtocol) {
         self.console = console
     }
 
@@ -45,7 +45,7 @@ public final class Fetch: Command {
             } else if message.contains("The dependency graph could not be satisfied") {
                 console.info("Check your dependencies' Package.swift files to see where the conflict is.")
             }
-            throw Error.general(message.trim())
+            throw ToolboxError.general(message.trim())
         }
     }
     
