@@ -36,6 +36,7 @@ public final class New: Command {
 
         do {
             _ = try console.subexecute("git clone \(template) \(name)")
+            _ = try console.subexecute("rm -rf \(name)/.git")
             cloneBar.finish()
         } catch ConsoleError.subexecute(_, let error) {
             cloneBar.fail()

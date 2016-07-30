@@ -3,7 +3,7 @@ import Console
 import Foundation
 import VaporToolbox
 
-let version = "0.7.0"
+let version = "0.8.0"
 
 let terminal = Terminal(arguments: Process.arguments)
 
@@ -13,9 +13,21 @@ guard let executable = iterator.next() else {
     throw ConsoleError.noExecutable
 }
 
-signal(SIGINT) { sig in
+func kill() {
     terminal.killTasks()
     exit(2)
+}
+signal(SIGINT) { sig in
+    kill()
+}
+signal(SIGQUIT) { sig in
+    kill()
+}
+signal(SIGTERM) { sig in
+    kill()
+}
+signal(SIGHUP) { sig in
+    kill()
 }
 
 do {
