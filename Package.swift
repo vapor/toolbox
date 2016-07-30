@@ -9,6 +9,5 @@ let package = Package(
     dependencies: [
         // Console protocols, terminal, and commands
         .Package(url: "https://github.com/qutheory/console.git", majorVersion: 0, minor: 4),
-    ],
-    exclude: ["bootstrap.swift"]
+    ]
 )

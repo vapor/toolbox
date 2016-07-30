@@ -1,7 +1,7 @@
 #!/bin/bash
 
-TAG="0.7.0";
-SWIFT_VERSION="3.0-PREVIEW-2";
+TAG="0.8.0";
+SWIFT_VERSION="DEVELOPMENT-SNAPSHOT-2016-07-25-a";
 
 curl -sL "check.qutheory.io" | bash || exit 1;
 
