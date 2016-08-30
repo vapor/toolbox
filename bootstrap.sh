@@ -1,7 +1,7 @@
 #!/bin/bash
 
-TAG="0.8.0";
-SWIFT_VERSION="DEVELOPMENT-SNAPSHOT-2016-07-25-a";
+TAG="0.9.0";
+SWIFT_VERSION="DEVELOPMENT-SNAPSHOT-2016-08-18-a";
 
 curl -sL "check.qutheory.io" | bash || exit 1;
 
@@ -13,7 +13,7 @@ mkdir -p $DIR
 cd $DIR;
 
 echo "Downloading...";
-git clone https://github.com/qutheory/vapor-toolbox > /dev/null 2>&1;
+git clone https://github.com/vapor/toolbox > /dev/null 2>&1;
 cd vapor-toolbox;
 git checkout $TAG > /dev/null 2>&1;
 
