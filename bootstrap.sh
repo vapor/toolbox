@@ -13,7 +13,7 @@ mkdir -p $DIR
 cd $DIR;
 
 echo "Downloading...";
-git clone https://github.com/vapor/toolbox > /dev/null 2>&1;
+git clone https://github.com/vapor/toolbox vapor-toolbox > /dev/null 2>&1;
 cd vapor-toolbox;
 git checkout $TAG > /dev/null 2>&1;
 
