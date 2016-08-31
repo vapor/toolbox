@@ -58,7 +58,7 @@ class BuildTests: XCTestCase {
         let build = Build(console: console)
 
         let name = "TestName"
-        console.subExecuteOutputBuffer = [
+        console.backgroundExecuteOutputBuffer = [
             "swift package dump-package": "{\"name\": \"\(name)\"}"
         ]
 
