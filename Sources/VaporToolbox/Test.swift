@@ -19,13 +19,8 @@ public final class Test: Command {
         let testBar = console.loadingBar(title: "Testing")
         testBar.start()
 
-        let testFlags: [String] = []
-
-        var commandArray = ["swift", "test"]
-        commandArray += testFlags
-        let command = commandArray.joined(separator: " ")
         do {
-            _ = try console.backgroundExecute(program: command, arguments: [])
+            _ = try console.backgroundExecute(program: "swift", arguments: ["test"])
             testBar.finish()
         } catch ConsoleError.backgroundExecute(_, let error) {
             testBar.fail()

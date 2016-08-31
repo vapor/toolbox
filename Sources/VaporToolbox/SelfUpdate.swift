@@ -19,7 +19,7 @@ public final class SelfUpdate: Command {
         let updateBar = console.loadingBar(title: "Updating")
         updateBar.start()
         do {
-            _ = try console.backgroundExecute(program: "curl -sL toolbox.qutheory.io | bash 1>&2", arguments: [])
+            _ = try console.backgroundExecute(program: "curl", arguments: ["-sL", "toolbox.qutheory.io", "|", "bash", "1>&2"])
             updateBar.finish()
         } catch ConsoleError.backgroundExecute(_, let message) {
             updateBar.fail()

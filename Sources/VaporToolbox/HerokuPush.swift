@@ -17,14 +17,14 @@ public final class HerokuPush: Command {
 
     public func run(arguments: [String]) throws {
         do {
-            _ = try console.backgroundExecute(program: "which heroku", arguments: [])
+            _ = try console.backgroundExecute(program: "which", arguments: ["heroku"])
         } catch ConsoleError.backgroundExecute(_, _) {
             console.info("Visit https://toolbelt.heroku.com")
             throw ToolboxError.general("Heroku Toolbelt must be installed.")
         }
 
         do {
-            let status = try console.backgroundExecute(program: "git status --porcelain", arguments: [])
+            let status = try console.backgroundExecute(program: "git", arguments: ["status", "--porcelain"])
             if status.trim() != "" {
                 console.info("All current changes must be committed before pushing to Heroku.")
                 throw ToolboxError.general("Found uncommitted changes.")

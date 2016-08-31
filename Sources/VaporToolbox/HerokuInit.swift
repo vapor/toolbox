@@ -17,14 +17,14 @@ public final class HerokuInit: Command {
 
     public func run(arguments: [String]) throws {
         do {
-            _ = try console.backgroundExecute(program: "which heroku", arguments: [])
+            _ = try console.backgroundExecute(program: "which", arguments: ["heroku"])
         } catch ConsoleError.backgroundExecute(_, _) {
             console.info("Visit https://toolbelt.heroku.com")
             throw ToolboxError.general("Heroku Toolbelt must be installed.")
         }
 
         do {
-            _ = try console.backgroundExecute(program: "git remote show heroku", arguments: [])
+            _ = try console.backgroundExecute(program: "git", arguments: ["remote", "show", "heroku"])
             throw ToolboxError.general("Git already has a heroku remote.")
         } catch ConsoleError.backgroundExecute(_, _) {
             //continue
@@ -38,7 +38,7 @@ public final class HerokuInit: Command {
         }
 
         do {
-            let message = try console.backgroundExecute(program: "heroku create \(name)", arguments: [])
+            let message = try console.backgroundExecute(program: "heroku", arguments: ["create", "\(name)"])
             console.info(message)
         } catch ConsoleError.backgroundExecute(_, let message) {
             throw ToolboxError.general("Unable to create Heroku app: \(message.trim())")
@@ -55,7 +55,7 @@ public final class HerokuInit: Command {
         console.info("Setting buildpack...")
 
         do {
-            _ = try console.backgroundExecute(program: "heroku buildpacks:set \(buildpack)", arguments: [])
+            _ = try console.backgroundExecute(program: "heroku", arguments: ["buildpacks:set", "\(buildpack)"])
         } catch ConsoleError.backgroundExecute(_, let message) {
             throw ToolboxError.general("Unable to set buildpack \(buildpack): \(message)")
         }
@@ -64,7 +64,7 @@ public final class HerokuInit: Command {
 
         let procContents = "web: App --env=production --workdir=\"./\""
         do {
-            _ = try console.backgroundExecute(program: "echo \"\(procContents)\" > ./Procfile", arguments: [])
+            _ = try console.backgroundExecute(program: "echo", arguments: ["\"\(procContents)\"", ">", "./Procfile"])
         } catch ConsoleError.backgroundExecute(_, let message) {
             throw ToolboxError.general("Unable to make Procfile: \(message)")
         }
@@ -79,7 +79,7 @@ public final class HerokuInit: Command {
             dynoBar.start()
 
             do {
-                _ = try console.backgroundExecute(program: "heroku ps:scale web=1", arguments: [])
+                _ = try console.backgroundExecute(program: "heroku", arguments: ["ps:scale", "web=1"])
                 dynoBar.finish()
             } catch ConsoleError.backgroundExecute(_, let message) {
                 dynoBar.fail()

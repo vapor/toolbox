@@ -22,10 +22,10 @@ public final class Clean: Command {
         let cleanBar = console.loadingBar(title: "Cleaning")
         cleanBar.start()
 
-        _ = try console.backgroundExecute(program: "rm -rf Packages .build", arguments: [])
+        _ = try console.backgroundExecute(program: "rm", arguments: ["-rf", "Packages", ".build"])
 
         if arguments.flag("xcode") {
-            _ = try console.backgroundExecute(program: "rm -rf *.xcodeproj", arguments: [])
+            _ = try console.backgroundExecute(program: "rm", arguments: ["-rf", "*.xcodeproj"])
         }
 
         cleanBar.finish()

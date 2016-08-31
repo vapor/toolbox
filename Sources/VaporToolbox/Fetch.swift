@@ -24,7 +24,7 @@ public final class Fetch: Command {
         }
 
         do {
-            let ls = try console.backgroundExecute(program: "ls .", arguments: [])
+            let ls = try console.backgroundExecute(program: "ls", arguments: ["."])
             if !ls.contains("Packages") {
                 console.warning("No Packages folder, fetch may take a while...")
             }
@@ -36,7 +36,7 @@ public final class Fetch: Command {
         depBar.start()
 
         do {
-            _ = try console.backgroundExecute(program: "swift package fetch", arguments: [])
+            _ = try console.backgroundExecute(program: "swift", arguments: ["package", "fetch"])
             depBar.finish()
         } catch ConsoleError.backgroundExecute(_, let message) {
             depBar.fail()

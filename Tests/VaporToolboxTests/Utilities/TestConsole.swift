@@ -56,15 +56,15 @@ final class TestConsole: ConsoleProtocol {
     }
 
     func execute(program: String, arguments: [String], input: Int32?, output: Int32?, error: Int32?) throws {
-        exec(program)
+        exec(program, args: arguments)
     }
 
     func backgroundExecute(program: String, arguments: [String]) throws -> String {
-        exec(program)
-        return backgroundExecuteOutputBuffer[program] ?? ""
+        exec(program, args: arguments)
+        return backgroundExecuteOutputBuffer[program + " " + arguments.joined(separator: " ")] ?? ""
     }
 
-    private func exec(_ command: String) {
-        executeBuffer.append(command)
+    private func exec(_ command: String, args: [String]) {
+        executeBuffer.append(command + (!args.isEmpty ? " " + args.joined(separator: " ") : ""))
     }
 }

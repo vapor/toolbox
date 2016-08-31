@@ -69,7 +69,7 @@ public final class Build: Command {
 
         let command = commandArray.joined(separator: " ")
         do {
-            _ = try console.backgroundExecute(program: command, arguments: [])
+            _ = try console.backgroundExecute(program: commandArray[0], arguments: commandArray.dropFirst(1).array)
             buildBar.finish()
         } catch ConsoleError.backgroundExecute(let code, let error) {
             buildBar.fail()
@@ -81,7 +81,7 @@ public final class Build: Command {
             console.print(error)
 
             console.info("Toolchain:")
-            let toolchain = try console.backgroundExecute(program: "which swift", arguments: []).trim()
+            let toolchain = try console.backgroundExecute(program: "which", arguments: ["swift"]).trim()
             console.print(toolchain)
             console.print()
             console.info("Help:")

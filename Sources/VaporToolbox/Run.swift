@@ -24,7 +24,7 @@ public final class Run: Command {
         }
 
         do {
-            _ = try console.backgroundExecute(program: "ls .build/\(folder)", arguments: [])
+            _ = try console.backgroundExecute(program: "ls", arguments: [".build/\(folder)"])
         } catch ConsoleError.backgroundExecute(_) {
             throw ToolboxError.general("No .build/\(folder) folder found.")
         }
@@ -60,7 +60,7 @@ public final class Run: Command {
     }
 
     private func extractName() throws -> String? {
-        let dump = try console.backgroundExecute(program: "swift package dump-package", arguments: [])
+        let dump = try console.backgroundExecute(program: "swift", arguments: ["package", "dump-package"])
 
         let dumpSplit = dump.components(separatedBy: "\"name\": \"")
 
