@@ -5,29 +5,12 @@ import VaporToolbox
 
 let version = "0.8.0"
 
-let terminal = Terminal(arguments: Process.arguments)
+let terminal = Terminal(arguments: CommandLine.arguments)
 
-var iterator = Process.arguments.makeIterator()
+var iterator = CommandLine.arguments.makeIterator()
 
 guard let executable = iterator.next() else {
     throw ConsoleError.noExecutable
-}
-
-func kill() {
-    terminal.killTasks()
-    exit(2)
-}
-signal(SIGINT) { sig in
-    kill()
-}
-signal(SIGQUIT) { sig in
-    kill()
-}
-signal(SIGTERM) { sig in
-    kill()
-}
-signal(SIGHUP) { sig in
-    kill()
 }
 
 do {

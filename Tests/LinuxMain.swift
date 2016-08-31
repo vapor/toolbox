@@ -1,5 +1,5 @@
 import XCTest
-@testable import VaporToolboxTestSuite
+@testable import VaporToolboxTests
 
 XCTMain([
     testCase(BuildTests.allTests),

@@ -17,26 +17,26 @@ public final class HerokuPush: Command {
 
     public func run(arguments: [String]) throws {
         do {
-            _ = try console.subexecute("which heroku")
-        } catch ConsoleError.subexecute(_, _) {
+            _ = try console.backgroundExecute(program: "which heroku", arguments: [])
+        } catch ConsoleError.backgroundExecute(_, _) {
             console.info("Visit https://toolbelt.heroku.com")
             throw ToolboxError.general("Heroku Toolbelt must be installed.")
         }
 
         do {
-            let status = try console.subexecute("git status --porcelain")
+            let status = try console.backgroundExecute(program: "git status --porcelain", arguments: [])
             if status.trim() != "" {
                 console.info("All current changes must be committed before pushing to Heroku.")
                 throw ToolboxError.general("Found uncommitted changes.")
             }
-        } catch ConsoleError.subexecute(_, _) {
+        } catch ConsoleError.backgroundExecute(_, _) {
             throw ToolboxError.general("No .git repository found.")
         }
 
         //let herokuBar = console.loadingBar(title: "Pushing to Heroku")
         //herokuBar.start()
         do {
-            try console.execute("git push heroku master")
+            try console.execute(program: "git push heroku master", arguments: [], input: nil, output: nil, error: nil)
             //herokuBar.finish()
         } catch ConsoleError.execute(_) {
             //herokuBar.fail()
