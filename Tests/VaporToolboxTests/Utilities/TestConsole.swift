@@ -55,13 +55,13 @@ final class TestConsole: ConsoleProtocol {
         }
     }
 
-    func execute(_ command: String) throws {
-        exec(command)
+    func execute(program: String, arguments: [String], input: Int32?, output: Int32?, error: Int32?) throws {
+        exec(program)
     }
 
-    func backgroundExecute(_ command: String, input: String) throws -> String {
-        exec(command)
-        return backgroundExecuteOutputBuffer[command] ?? ""
+    func backgroundExecute(program: String, arguments: [String]) throws -> String {
+        exec(program)
+        return backgroundExecuteOutputBuffer[program] ?? ""
     }
 
     private func exec(_ command: String) {
