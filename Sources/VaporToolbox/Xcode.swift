@@ -51,7 +51,7 @@ public final class Xcode: Command {
             }
         }
 
-        let argsArray = ["package", "generate-xcodeproj"] + buildFlags + [">", "\(tmpFile)", "2>&1"]
+        let argsArray = ["package", "generate-xcodeproj"] + buildFlags + [">", "\(tmpFile)"]
 
         do {
             _ = try console.backgroundExecute(program: "swift", arguments: argsArray)

@@ -65,7 +65,8 @@ public final class Build: Command {
         var commandArray = ["swift", "build"]
         commandArray += buildFlags
 
-        commandArray += "1>&2"
+        // TODO: Figure out what to do about this
+        //commandArray += "1>&2"
 
         let command = commandArray.joined(separator: " ")
         do {
