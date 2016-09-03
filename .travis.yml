@@ -14,6 +14,8 @@ script:
   - swift test
 
   - .build/release/Executable self install
+  - sudo mv /usr/local/bin/vapor /usr/bin/vapor
+  
   - vapor --help
   - vapor version                   # version
 

@@ -7,14 +7,14 @@ final class TestConsole: ConsoleProtocol {
     var inputBuffer: [String]
     var outputBuffer: [String]
     var executeBuffer: [String]
-    var subExecuteOutputBuffer: [String: String]
+    var backgroundExecuteOutputBuffer: [String: String]
     var newLine: Bool
 
     init() {
         inputBuffer = []
         outputBuffer = []
         executeBuffer = []
-        subExecuteOutputBuffer = [:]
+        backgroundExecuteOutputBuffer = [:]
 
         confirmOverride = nil
         size = (0, 0)
@@ -55,16 +55,16 @@ final class TestConsole: ConsoleProtocol {
         }
     }
 
-    func execute(_ command: String) throws {
-        exec(command)
+    func execute(program: String, arguments: [String], input: Int32?, output: Int32?, error: Int32?) throws {
+        exec(program, args: arguments)
     }
 
-    func subexecute(_ command: String, input: String) throws -> String {
-        exec(command)
-        return subExecuteOutputBuffer[command] ?? ""
+    func backgroundExecute(program: String, arguments: [String]) throws -> String {
+        exec(program, args: arguments)
+        return backgroundExecuteOutputBuffer[program + " " + arguments.joined(separator: " ")] ?? ""
     }
 
-    private func exec(_ command: String) {
-        executeBuffer.append(command)
+    private func exec(_ command: String, args: [String]) {
+        executeBuffer.append(command + (!args.isEmpty ? " " + args.joined(separator: " ") : ""))
     }
 }

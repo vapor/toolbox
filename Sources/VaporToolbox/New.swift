@@ -35,10 +35,10 @@ public final class New: Command {
         cloneBar.start()
 
         do {
-            _ = try console.subexecute("git clone \(template) \(name)")
-            _ = try console.subexecute("rm -rf \(name)/.git")
+            _ = try console.backgroundExecute(program: "git", arguments: ["clone", "\(template)", "\(name)"])
+            _ = try console.backgroundExecute(program: "rm", arguments: ["-rf", "\(name)/.git"])
             cloneBar.finish()
-        } catch ConsoleError.subexecute(_, let error) {
+        } catch ConsoleError.backgroundExecute(_, let error) {
             cloneBar.fail()
             throw ToolboxError.general(error.trim())
         }
@@ -46,10 +46,10 @@ public final class New: Command {
         do {
             let file = "\(name)/Package.swift"
 
-            var manifest = try console.subexecute("cat \(file)")
+            var manifest = try console.backgroundExecute(program: "cat", arguments: ["\(file)"])
             manifest = manifest.components(separatedBy: "VaporApp").joined(separator: name)
             manifest = manifest.components(separatedBy: "\"").joined(separator: "\\\"")
-            _ = try console.subexecute("echo \"\(manifest)\" > \(file)")
+            _ = try console.backgroundExecute(program: "echo", arguments: ["\"\(manifest)\"", ">", "\(file)"])
         } catch {
             console.error("Could not update Package.swift file.")
         }

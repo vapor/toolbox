@@ -17,25 +17,25 @@ public final class DockerBuild: Command {
 
     public func run(arguments: [String]) throws {
         do {
-            _ = try console.subexecute("which docker")
-        } catch ConsoleError.subexecute(_, _) {
+            _ = try console.backgroundExecute(program: "which", arguments: ["docker"])
+        } catch ConsoleError.backgroundExecute(_, _) {
             console.info("Visit https://www.docker.com/products/docker-toolbox")
             throw ToolboxError.general("Docker not installed.")
         }
 
         do {
-            let contents = try console.subexecute("ls .")
+            let contents = try console.backgroundExecute(program: "ls", arguments: ["."])
             if !contents.contains("Dockerfile") {
                 throw ToolboxError.general("No Dockerfile found")
             }
-        } catch ConsoleError.subexecute(_) {
+        } catch ConsoleError.backgroundExecute(_) {
             throw ToolboxError.general("Could not check for Dockerfile")
         }
 
         let swiftVersion: String
 
         do {
-            swiftVersion = try console.subexecute("cat .swift-version").trim()
+            swiftVersion = try console.backgroundExecute(program: "cat", arguments: [".swift-version"]).trim()
         } catch {
             throw ToolboxError.general("Could not determine Swift version from .swift-version file.")
         }
@@ -45,9 +45,9 @@ public final class DockerBuild: Command {
 
         do {
             let imageName = DockerBuild.imageName(version: swiftVersion)
-            _ = try console.subexecute("docker build --rm -t \(imageName) --build-arg SWIFT_VERSION=\(swiftVersion) .")
+            _ = try console.backgroundExecute(program: "docker", arguments: ["build", "--rm", "-t", "\(imageName)", "--build-arg", "SWIFT_VERSION=\(swiftVersion)", "."])
             buildBar.finish()
-        } catch ConsoleError.subexecute(_, let message) {
+        } catch ConsoleError.backgroundExecute(_, let message) {
             buildBar.fail()
             throw ToolboxError.general("Docker build failed: \(message.trim())")
         }

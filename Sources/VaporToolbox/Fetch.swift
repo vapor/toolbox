@@ -24,11 +24,11 @@ public final class Fetch: Command {
         }
 
         do {
-            let ls = try console.subexecute("ls .")
+            let ls = try console.backgroundExecute(program: "ls", arguments: ["."])
             if !ls.contains("Packages") {
                 console.warning("No Packages folder, fetch may take a while...")
             }
-        } catch ConsoleError.subexecute(_) {
+        } catch ConsoleError.backgroundExecute(_) {
             // do nothing
         }
 
@@ -36,9 +36,9 @@ public final class Fetch: Command {
         depBar.start()
 
         do {
-            _ = try console.subexecute("swift package fetch")
+            _ = try console.backgroundExecute(program: "swift", arguments: ["package", "fetch"])
             depBar.finish()
-        } catch ConsoleError.subexecute(_, let message) {
+        } catch ConsoleError.backgroundExecute(_, let message) {
             depBar.fail()
             if message.contains("dependency graph could not be satisfied because an update") {
                 console.info("Try cleaning your project first.")

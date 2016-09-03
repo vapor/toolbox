@@ -51,15 +51,12 @@ public final class Xcode: Command {
             }
         }
 
-        var commandArray = ["swift", "package", "generate-xcodeproj"]
-        commandArray += buildFlags
-        
-        let command = commandArray.joined(separator: " ")
+        let argsArray = ["package", "generate-xcodeproj"] + buildFlags + [">", "\(tmpFile)"]
 
         do {
-            _ = try console.subexecute("\(command) > \(tmpFile) 2>&1")
+            _ = try console.backgroundExecute(program: "swift", arguments: argsArray)
             xcodeBar.finish()
-        } catch ConsoleError.subexecute(_, let message) {
+        } catch ConsoleError.backgroundExecute(_, let message) {
             xcodeBar.fail()
             print(message)
             throw ToolboxError.general("Could not generate Xcode project: \(message)")
@@ -67,17 +64,17 @@ public final class Xcode: Command {
 
         console.info("Select the `App` scheme to run.")
         do {
-            let version = try console.subexecute("cat .swift-version").trim()
+            let version = try console.backgroundExecute(program: "cat", arguments: [".swift-version"]).trim()
             console.warning("Make sure Xcode > Toolchains > \(version) is selected.")
-        } catch ConsoleError.subexecute(_, let message) {
+        } catch ConsoleError.backgroundExecute(_, let message) {
             console.error("Could not determine Swift version: \(message)")
         }
 
         if console.confirm("Open Xcode project?") {
             do {
                 console.print("Opening Xcode project...")
-                _ = try console.subexecute("open *.xcodeproj")
-            } catch ConsoleError.subexecute(_) {
+                _ = try console.backgroundExecute(program: "open", arguments: ["*.xcodeproj"])
+            } catch ConsoleError.backgroundExecute(_) {
                 throw ToolboxError.general("Could not open Xcode project.")
             }
         }

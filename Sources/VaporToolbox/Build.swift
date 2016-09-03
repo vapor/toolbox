@@ -65,13 +65,11 @@ public final class Build: Command {
         var commandArray = ["swift", "build"]
         commandArray += buildFlags
 
-        commandArray += "1>&2"
-
         let command = commandArray.joined(separator: " ")
         do {
-            _ = try console.subexecute(command)
+            _ = try console.backgroundExecute(program: commandArray[0], arguments: commandArray.dropFirst(1).array)
             buildBar.finish()
-        } catch ConsoleError.subexecute(let code, let error) {
+        } catch ConsoleError.backgroundExecute(let code, let error) {
             buildBar.fail()
             console.print()
             console.info("Command:")
@@ -81,7 +79,7 @@ public final class Build: Command {
             console.print(error)
 
             console.info("Toolchain:")
-            let toolchain = try console.subexecute("which swift").trim()
+            let toolchain = try console.backgroundExecute(program: "which", arguments: ["swift"]).trim()
             console.print(toolchain)
             console.print()
             console.info("Help:")

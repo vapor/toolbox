@@ -17,11 +17,11 @@ public final class DockerInit: Command {
 
     public func run(arguments: [String]) throws {
         do {
-            let contents = try console.subexecute("ls .")
+            let contents = try console.backgroundExecute(program: "ls", arguments: ["."])
             if contents.contains("Dockerfile") {
                 throw ToolboxError.general("Directory already contains a Dockerfile")
             }
-        } catch ConsoleError.subexecute(_) {
+        } catch ConsoleError.backgroundExecute(_) {
             throw ToolboxError.general("Could not check for Dockerfile")
         }
 
@@ -29,9 +29,9 @@ public final class DockerInit: Command {
         initBar.start()
 
         do {
-            _ = try console.subexecute("curl -L docker.qutheory.io -o Dockerfile")
+            _ = try console.backgroundExecute(program: "curl", arguments: ["-L", "docker.qutheory.io", "-o", "Dockerfile"])
             initBar.finish()
-        } catch ConsoleError.subexecute(_, let message) {
+        } catch ConsoleError.backgroundExecute(_, let message) {
             initBar.fail()
             throw ToolboxError.general("Could not download Dockerfile: \(message)")
         }
