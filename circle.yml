@@ -1,0 +1,26 @@
+test:
+  override:
+    - eval "$(curl -sL https://gist.githubusercontent.com/kylef/5c0475ff02b7c7671d2a/raw/02090c7ede5a637b76e6df1710e83cd0bbe7dcdf/swiftenv-install.sh)"
+    # run unit tests
+    - swift build -Xswiftc -DNO_ANIMATION
+    - swift build --configuration release -Xswiftc -DNO_ANIMATION
+    - swift test
+
+    - .build/release/Executable self install
+    - vapor --help
+    - vapor version                   # version
+
+    # docker
+    - rm Dockerfile                   # docker init won't run if file exists
+    - vapor docker init -n
+
+    # basic
+    - vapor new test-project          # new
+    - cd test-project
+    - vapor fetch                     # fetch
+    - vapor clean                     # clean
+    - vapor build                     # build
+    - vapor run &                     # run
+
+    - vapor self update
+
