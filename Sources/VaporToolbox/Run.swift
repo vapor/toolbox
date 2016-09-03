@@ -51,9 +51,7 @@ public final class Run: Command {
                 passThrough += "--\(name)=\(value)"
             }
 
-            passThrough.insert(".build/\(folder)/App", at: 0)
-
-            try console.execute(program: passThrough.joined(separator: " "), arguments: [], input: nil, output: nil, error: nil)
+            try console.foregroundExecute(program: ".build/\(folder)/App", arguments: passThrough)
         } catch ConsoleError.execute(_) {
             throw ToolboxError.general("Run failed.")
         }

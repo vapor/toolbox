@@ -36,13 +36,14 @@ public final class SelfInstall: Command {
 
         let current = file.trim()
 
-        let commandArray = ["mv", "\(current)", "/usr/local/bin/vapor"]
+        let command =  ["\(current)", "/usr/local/bin/vapor"]
+
         do {
-            _ = try console.backgroundExecute(program: commandArray[0], arguments: commandArray.dropFirst(1).array)
+            _ = try console.backgroundExecute(program: "mv", arguments: command)
         } catch ConsoleError.backgroundExecute(_) {
             console.warning("Install failed, trying sudo")
             do {
-                _ = try console.backgroundExecute(program: "sudo", arguments: commandArray)
+                _ = try console.backgroundExecute(program: "sudo", arguments: ["mv"] + command)
             } catch ConsoleError.backgroundExecute(_) {
                 throw ToolboxError.general("Installation failed.")
             }
