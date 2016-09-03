@@ -36,7 +36,7 @@ public final class SelfInstall: Command {
 
         let current = file.trim()
 
-        let command =  ["\(current)", "/usr/local/bin/vapor"]
+        let command =  [current, "/usr/local/bin/vapor"]
 
         do {
             _ = try console.backgroundExecute(program: "mv", arguments: command)
