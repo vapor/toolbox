@@ -1,9 +1,9 @@
 #!/bin/bash
 
-TAG="0.9.0";
+TAG="0.10.0";
 SWIFT_VERSION="DEVELOPMENT-SNAPSHOT-2016-08-18-a";
 
-curl -sL "check.qutheory.io" | bash || exit 1;
+curl -sL "check.vapor.sh" | bash || exit 1;
 
 DIR=".vapor-toolbox-$TAG";
 
