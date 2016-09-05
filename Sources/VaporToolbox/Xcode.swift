@@ -73,7 +73,7 @@ public final class Xcode: Command {
         if console.confirm("Open Xcode project?") {
             do {
                 console.print("Opening Xcode project...")
-                _ = try console.backgroundExecute(program: "open", arguments: ["*.xcodeproj"])
+                _ = try console.backgroundExecute(program: "/bin/sh", arguments: ["-c", "open *.xcodeproj"])
             } catch ConsoleError.backgroundExecute(_) {
                 throw ToolboxError.general("Could not open Xcode project.")
             }
