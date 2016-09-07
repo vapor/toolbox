@@ -29,7 +29,7 @@ public final class DockerInit: Command {
         initBar.start()
 
         do {
-            _ = try console.backgroundExecute(program: "curl", arguments: ["-L", "docker.qutheory.io", "-o", "Dockerfile"])
+            _ = try console.backgroundExecute(program: "curl", arguments: ["-L", "docker.vapor.sh", "-o", "Dockerfile"])
             initBar.finish()
         } catch ConsoleError.backgroundExecute(_, let message) {
             initBar.fail()

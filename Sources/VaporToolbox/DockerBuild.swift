@@ -59,6 +59,6 @@ public final class DockerBuild: Command {
     }
 
     static func imageName(version: String) -> String {
-        return "qutheory/swift:\(version)"
+        return "vapor/swift:\(version)"
     }
 }
