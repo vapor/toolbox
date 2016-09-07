@@ -62,18 +62,16 @@ public final class Build: Command {
             }
         }
 
-        var commandArray = ["swift", "build"]
-        commandArray += buildFlags
+        let command =  ["build"] + buildFlags
 
-        let command = commandArray.joined(separator: " ")
         do {
-            _ = try console.backgroundExecute(program: commandArray[0], arguments: commandArray.dropFirst(1).array)
+            _ = try console.backgroundExecute(program: "swift", arguments: command)
             buildBar.finish()
         } catch ConsoleError.backgroundExecute(let code, let error) {
             buildBar.fail()
             console.print()
             console.info("Command:")
-            console.print(command)
+            console.print(command.joined(separator: " "))
             console.print()
             console.info("Error (\(code)):")
             console.print(error)
@@ -84,7 +82,7 @@ public final class Build: Command {
             console.print()
             console.info("Help:")
             console.print("Join our Slack where hundreds of contributors")
-            console.print("are waiting to help: http://slack.qutheory.io")
+            console.print("are waiting to help: http://vapor.team")
             console.print()
 
             throw ToolboxError.general("Build failed.")

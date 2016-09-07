@@ -30,7 +30,7 @@ public final class Test: Command {
             console.print()
             console.info("Help:")
             console.print("Join our Slack where hundreds of contributors")
-            console.print("are waiting to help: http://slack.qutheory.io")
+            console.print("are waiting to help: http://vapor.team")
             console.print()
 
             throw ToolboxError.general("Tests failed.")

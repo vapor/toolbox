@@ -3,7 +3,7 @@ import Console
 public final class New: Command {
     public let id = "new"
 
-    public let defaultTemplate = "https://github.com/qutheory/vapor-example"
+    public let defaultTemplate = "https://github.com/vapor/vapor-example"
 
     public let signature: [Argument]
 
