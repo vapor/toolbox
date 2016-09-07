@@ -56,7 +56,7 @@ public final class Build: Command {
             }
 
             if name == "release" && value.bool == true {
-                buildFlags += "--configuration release"
+                buildFlags += ["--configuration", "release"]
             } else {
                 buildFlags += "--\(name)=\(value.string ?? "")"
             }
