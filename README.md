@@ -4,7 +4,7 @@
 
 # Vapor Toolbox
 
-Learn more about Vapor Toolbox in the <a href="https://vapor.readme.io/docs/install-toolbox">documentation</a>.
+Learn more about Vapor Toolbox in the <a href="https://vapor.github.io/documentation/getting-started/install-toolbox.html">documentation</a>.
 
 ```sh
 # install Vapor Toolbox
