@@ -22,8 +22,6 @@ public final class Xcode: Command {
         let fetch = Fetch(console: console)
         try fetch.run(arguments: [])
 
-        let tmpFile = "/var/tmp/vaporXcodeOutput.log"
-
         let xcodeBar = console.loadingBar(title: "Generating Xcode Project")
         xcodeBar.start()
 
@@ -51,7 +49,7 @@ public final class Xcode: Command {
             }
         }
 
-        let argsArray = ["package", "generate-xcodeproj"] + buildFlags + [">", "\(tmpFile)"]
+        let argsArray = ["package", "generate-xcodeproj"] + buildFlags
 
         do {
             _ = try console.backgroundExecute(program: "swift", arguments: argsArray)
