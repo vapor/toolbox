@@ -16,6 +16,21 @@ public final class HerokuInit: Command {
     }
 
     public func run(arguments: [String]) throws {
+
+        func gitIsClean() throws {
+          do {
+              let status = try console.backgroundExecute(program: "git", arguments: ["status", "--porcelain"])
+              if status.trim() != "" {
+                  console.info("All current changes must be committed before running a Heroku init.")
+                  throw ToolboxError.general("Found uncommitted changes.")
+              }
+          } catch ConsoleError.backgroundExecute(_, _) {
+              throw ToolboxError.general("No .git repository found.")
+          }
+        }
+
+        try gitIsClean()
+
         do {
             _ = try console.backgroundExecute(program: "which", arguments: ["heroku"])
         } catch ConsoleError.backgroundExecute(_, _) {
@@ -60,24 +75,46 @@ public final class HerokuInit: Command {
             throw ToolboxError.general("Unable to set buildpack \(buildpack): \(message)")
         }
 
-        console.info("Creating procfile...")
 
-        let procContents = "web: App --env=production --workdir=\"./\""
+        let appName: String
+        if console.confirm("Are you using a custom Executable name?") {
+            appName = console.ask("App Name:").string ?? ""
+        } else {
+            appName = "App"
+        }
+
+        console.info("Setting procfile...")
+        let procContents = "web: \(appName) --env=production --workdir=\"./\" --config:servers.default.port=$PORT"
         do {
-            _ = try console.backgroundExecute(program: "echo", arguments: ["\"\(procContents)\"", ">", "./Procfile"])
+            _ = try console.backgroundExecute(program: "/bin/sh", arguments: ["-c", "echo \"\(procContents)\" >> ./Procfile"])
         } catch ConsoleError.backgroundExecute(_, let message) {
             throw ToolboxError.general("Unable to make Procfile: \(message)")
+        }
+
+        console.info("Committing procfile...")
+        do {
+            try gitIsClean() // should throw
+        } catch {
+          // if not clean, commit.
+          _ = try console.backgroundExecute(program: "git", arguments: ["add", "."])
+          _ = try console.backgroundExecute(program: "git", arguments: ["commit", "-m",  "'adding procfile'"])
         }
 
         if console.confirm("Would you like to push to Heroku now?") {
             console.warning("This may take a while...")
 
-            let push = HerokuPush(console: console)
-            try push.run(arguments: [])
+            let buildBar = console.loadingBar(title: "Building on Heroku ... ~5-10 minutes")
+            buildBar.start()
+            do {
+              _ = try console.backgroundExecute(program: "git", arguments: ["push", "heroku", "master"])
+              buildBar.finish()
+            } catch ConsoleError.backgroundExecute(_, let message) {
+              buildBar.fail()
+              throw ToolboxError.general("Heroku push failed \(message)")
+            }
 
             let dynoBar = console.loadingBar(title: "Spinning up dynos")
             dynoBar.start()
-
             do {
                 _ = try console.backgroundExecute(program: "heroku", arguments: ["ps:scale", "web=1"])
                 dynoBar.finish()
