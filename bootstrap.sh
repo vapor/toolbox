@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TAG="0.10.1";
+TAG="0.10.2";
 SWIFT_VERSION="DEVELOPMENT-SNAPSHOT-2016-08-18-a";
 
 curl -sL "check.vapor.sh" | bash || exit 1;

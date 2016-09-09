@@ -3,7 +3,7 @@ import Console
 import Foundation
 import VaporToolbox
 
-let version = "0.10.1"
+let version = "0.10.2"
 
 let terminal = Terminal(arguments: CommandLine.arguments)
 
@@ -71,5 +71,3 @@ do {
     terminal.print("\(error)")
     exit(1)
 }
-
-
