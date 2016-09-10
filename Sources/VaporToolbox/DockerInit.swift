@@ -31,7 +31,7 @@ public final class DockerInit: Command {
         do {
             _ = try console.backgroundExecute(program: "curl", arguments: ["-L", "docker.vapor.sh", "-o", "Dockerfile"])
             initBar.finish()
-        } catch ConsoleError.backgroundExecute(_, _, let message) {
+        } catch ConsoleError.backgroundExecute(_, let message, _) {
             initBar.fail()
             throw ToolboxError.general("Could not download Dockerfile: \(message.string)")
         }

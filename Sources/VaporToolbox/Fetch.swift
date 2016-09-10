@@ -38,7 +38,7 @@ public final class Fetch: Command {
         do {
             _ = try console.backgroundExecute(program: "swift", arguments: ["package", "fetch"])
             depBar.finish()
-        } catch ConsoleError.backgroundExecute(_, _, let message) {
+        } catch ConsoleError.backgroundExecute(_, let message, _) {
             let message = message.string
             depBar.fail()
             if message.contains("dependency graph could not be satisfied because an update") {

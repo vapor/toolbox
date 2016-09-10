@@ -40,7 +40,7 @@ public final class HerokuInit: Command {
                     "Please checkout master branch before initializing heroku. 'git checkout master'"
                 )
             }
-        } catch ConsoleError.backgroundExecute(_, _, let message) {
+        } catch ConsoleError.backgroundExecute(_, let message, _) {
             throw ToolboxError.general("Unable to locate current git branch: \(message.string)")
         }
 
@@ -69,7 +69,7 @@ public final class HerokuInit: Command {
         do {
             url = try console.backgroundExecute(program: "heroku", arguments: ["create", "\(name)"])
             console.info(url)
-        } catch ConsoleError.backgroundExecute(_, _, let message) {
+        } catch ConsoleError.backgroundExecute(_, let message, _) {
             throw ToolboxError.general("Unable to create Heroku app: \(message.string.trim())")
         }
 
@@ -85,7 +85,7 @@ public final class HerokuInit: Command {
 
         do {
             _ = try console.backgroundExecute(program: "heroku", arguments: ["buildpacks:set", "\(buildpack)"])
-        } catch ConsoleError.backgroundExecute(_, _, let message) {
+        } catch ConsoleError.backgroundExecute(_, let message, _) {
             throw ToolboxError.general("Unable to set buildpack \(buildpack): \(message.string)")
         }
 
@@ -101,7 +101,7 @@ public final class HerokuInit: Command {
         let procContents = "web: \(appName) --env=production --workdir=\"./\" --config:servers.default.port=\\$PORT"
         do {
             _ = try console.backgroundExecute(program: "/bin/sh", arguments: ["-c", "echo \"\(procContents)\" >> ./Procfile"])
-        } catch ConsoleError.backgroundExecute(_, _, let message) {
+        } catch ConsoleError.backgroundExecute(_, let message, _) {
             throw ToolboxError.general("Unable to make Procfile: \(message.string)")
         }
 
@@ -122,7 +122,7 @@ public final class HerokuInit: Command {
             do {
               _ = try console.backgroundExecute(program: "git", arguments: ["push", "heroku", "master"])
               buildBar.finish()
-            } catch ConsoleError.backgroundExecute(_, _, let message) {
+            } catch ConsoleError.backgroundExecute(_, let message, _) {
               buildBar.fail()
               throw ToolboxError.general("Heroku push failed \(message.string)")
             }
@@ -132,7 +132,7 @@ public final class HerokuInit: Command {
             do {
                 _ = try console.backgroundExecute(program: "heroku", arguments: ["ps:scale", "web=1"])
                 dynoBar.finish()
-            } catch ConsoleError.backgroundExecute(_, _, let message) {
+            } catch ConsoleError.backgroundExecute(_, let message, _) {
                 dynoBar.fail()
                 throw ToolboxError.general("Unable to spin up dynos: \(message.string)")
             }

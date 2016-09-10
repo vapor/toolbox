@@ -47,9 +47,9 @@ public final class DockerBuild: Command {
             let imageName = DockerBuild.imageName(version: swiftVersion)
             _ = try console.backgroundExecute(program: "docker", arguments: ["build", "--rm", "-t", "\(imageName)", "--build-arg", "SWIFT_VERSION=\(swiftVersion)", "."])
             buildBar.finish()
-        } catch ConsoleError.backgroundExecute(_, _, let message) {
+        } catch ConsoleError.backgroundExecute(_, let error, _) {
             buildBar.fail()
-            throw ToolboxError.general("Docker build failed: \(message.string.trim())")
+            throw ToolboxError.general("Docker build failed: \(error.string.trim())")
         }
 
         if console.confirm("Would you like to run the Docker image now?") {

@@ -54,7 +54,7 @@ public final class Xcode: Command {
         do {
             _ = try console.backgroundExecute(program: "swift", arguments: argsArray)
             xcodeBar.finish()
-        } catch ConsoleError.backgroundExecute(_, _, let message) {
+        } catch ConsoleError.backgroundExecute(_, let message, _) {
             xcodeBar.fail()
             console.print(message.string)
             throw ToolboxError.general("Could not generate Xcode project: \(message.string)")
@@ -64,7 +64,7 @@ public final class Xcode: Command {
         do {
             let version = try console.backgroundExecute(program: "cat", arguments: [".swift-version"]).trim()
             console.warning("Make sure Xcode > Toolchains > \(version) is selected.")
-        } catch ConsoleError.backgroundExecute(_, _, let message) {
+        } catch ConsoleError.backgroundExecute(_, let message, _) {
             console.error("Could not determine Swift version: \(message.string)")
         }
 
