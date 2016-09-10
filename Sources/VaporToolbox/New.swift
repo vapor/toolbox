@@ -38,9 +38,9 @@ public final class New: Command {
             _ = try console.backgroundExecute(program: "git", arguments: ["clone", "\(template)", "\(name)"])
             _ = try console.backgroundExecute(program: "rm", arguments: ["-rf", "\(name)/.git"])
             cloneBar.finish()
-        } catch ConsoleError.backgroundExecute(_, let error) {
+        } catch ConsoleError.backgroundExecute(_, let error, _) {
             cloneBar.fail()
-            throw ToolboxError.general(error.trim())
+            throw ToolboxError.general(error.string.trim())
         }
 
         do {

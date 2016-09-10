@@ -67,19 +67,26 @@ public final class Build: Command {
         do {
             _ = try console.backgroundExecute(program: "swift", arguments: command)
             buildBar.finish()
-        } catch ConsoleError.backgroundExecute(let code, let error) {
+        } catch ConsoleError.backgroundExecute(let code, let error, let output) {
             buildBar.fail()
             console.print()
             console.info("Command:")
             console.print(command.joined(separator: " "))
             console.print()
+
             console.info("Error (\(code)):")
-            console.print(error)
+            console.print(error.string)
+            console.print()
+
+            console.info("Output:")
+            console.print(output.string)
+            console.print()
 
             console.info("Toolchain:")
             let toolchain = try console.backgroundExecute(program: "which", arguments: ["swift"]).trim()
             console.print(toolchain)
             console.print()
+
             console.info("Help:")
             console.print("Join our Slack where hundreds of contributors")
             console.print("are waiting to help: http://vapor.team")
