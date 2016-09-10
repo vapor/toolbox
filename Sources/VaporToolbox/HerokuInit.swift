@@ -17,19 +17,32 @@ public final class HerokuInit: Command {
 
     public func run(arguments: [String]) throws {
 
-        func gitIsClean() throws {
-          do {
-              let status = try console.backgroundExecute(program: "git", arguments: ["status", "--porcelain"])
-              if status.trim() != "" {
-                  console.info("All current changes must be committed before running a Heroku init.")
-                  throw ToolboxError.general("Found uncommitted changes.")
-              }
-          } catch ConsoleError.backgroundExecute(_, _) {
-              throw ToolboxError.general("No .git repository found.")
-          }
+        func gitIsClean(log: Bool = true) throws {
+            do {
+                let status = try console.backgroundExecute(program: "git", arguments: ["status", "--porcelain"])
+                if status.trim() != "" {
+                    if log {
+                        console.info("All current changes must be committed before running a Heroku init.")
+                    }
+                    throw ToolboxError.general("Found uncommitted changes.")
+                }
+            } catch ConsoleError.backgroundExecute(_, _) {
+                throw ToolboxError.general("No .git repository found.")
+            }
         }
 
         try gitIsClean()
+
+        do {
+            let branches = try console.backgroundExecute(program: "git", arguments: ["branch"])
+            guard branches.contains("* master") else {
+                throw ToolboxError.general(
+                    "Please checkout master branch before initializing heroku. 'git checkout master'"
+                )
+            }
+        } catch ConsoleError.backgroundExecute(_, let message) {
+            throw ToolboxError.general("Unable to locate current git branch: \(message)")
+        }
 
         do {
             _ = try console.backgroundExecute(program: "which", arguments: ["heroku"])
@@ -52,9 +65,10 @@ public final class HerokuInit: Command {
             name = ""
         }
 
+        let url: String
         do {
-            let message = try console.backgroundExecute(program: "heroku", arguments: ["create", "\(name)"])
-            console.info(message)
+            url = try console.backgroundExecute(program: "heroku", arguments: ["create", "\(name)"])
+            console.info(url)
         } catch ConsoleError.backgroundExecute(_, let message) {
             throw ToolboxError.general("Unable to create Heroku app: \(message.trim())")
         }
@@ -78,13 +92,13 @@ public final class HerokuInit: Command {
 
         let appName: String
         if console.confirm("Are you using a custom Executable name?") {
-            appName = console.ask("App Name:").string ?? ""
+            appName = console.ask("Executable Name:").string ?? ""
         } else {
             appName = "App"
         }
 
         console.info("Setting procfile...")
-        let procContents = "web: \(appName) --env=production --workdir=\"./\" --config:servers.default.port=$PORT"
+        let procContents = "web: \(appName) --env=production --workdir=\"./\" --config:servers.default.port=\\$PORT"
         do {
             _ = try console.backgroundExecute(program: "/bin/sh", arguments: ["-c", "echo \"\(procContents)\" >> ./Procfile"])
         } catch ConsoleError.backgroundExecute(_, let message) {
@@ -93,7 +107,7 @@ public final class HerokuInit: Command {
 
         console.info("Committing procfile...")
         do {
-            try gitIsClean() // should throw
+            try gitIsClean(log: false) // should throw
         } catch {
           // if not clean, commit.
           _ = try console.backgroundExecute(program: "git", arguments: ["add", "."])
@@ -124,7 +138,7 @@ public final class HerokuInit: Command {
             }
 
             console.print("Visit https://dashboard.heroku.com/apps/")
-            console.success("App is live on Heroku.")
+            console.success("App is live on Heroku, visit \n\(url)")
         } else {
             console.info("You may push to Heroku later using:")
             console.print("git push heroku master")
