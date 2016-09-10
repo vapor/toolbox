@@ -26,11 +26,11 @@ public final class SelfInstall: Command {
         let file: String
         do {
             file = try console.backgroundExecute(program: "/bin/sh", arguments: ["-c", "ls \(executable)"])
-        } catch ConsoleError.backgroundExecute(_, _) {
+        } catch ConsoleError.backgroundExecute {
             do {
                 file = try console.backgroundExecute(program: "/usr/bin/which", arguments: [executable])
-            } catch ConsoleError.backgroundExecute(let code, let error) {
-                throw ToolboxError.general("Could not locate executable: \(code) \(error)")
+            } catch ConsoleError.backgroundExecute(let code, let error, _) {
+                throw ToolboxError.general("Could not locate executable: \(code) \(error.string)")
             }
         }
 
@@ -40,11 +40,11 @@ public final class SelfInstall: Command {
 
         do {
             _ = try console.backgroundExecute(program: "mv", arguments: command)
-        } catch ConsoleError.backgroundExecute(_) {
+        } catch ConsoleError.backgroundExecute {
             console.warning("Install failed, trying sudo")
             do {
                 _ = try console.backgroundExecute(program: "sudo", arguments: ["mv"] + command)
-            } catch ConsoleError.backgroundExecute(_) {
+            } catch ConsoleError.backgroundExecute {
                 throw ToolboxError.general("Installation failed.")
             }
         }

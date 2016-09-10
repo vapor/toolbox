@@ -21,9 +21,9 @@ public final class SelfUpdate: Command {
         do {
             _ = try console.backgroundExecute(program: "/bin/sh", arguments: ["-c", "curl -sL toolbox.vapor.sh | bash"])
             updateBar.finish()
-        } catch ConsoleError.backgroundExecute(_, let message) {
+        } catch ConsoleError.backgroundExecute(_, _, let message) {
             updateBar.fail()
-            throw ToolboxError.general("Could not update toolbox: \(message)")
+            throw ToolboxError.general("Could not update toolbox: \(message.string)")
         }
     }
 }

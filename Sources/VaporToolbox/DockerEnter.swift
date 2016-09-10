@@ -19,7 +19,7 @@ public final class DockerEnter: Command {
     public func run(arguments: [String]) throws {
         do {
             _ = try console.backgroundExecute(program: "which", arguments: ["docker"])
-        } catch ConsoleError.backgroundExecute(_, _) {
+        } catch ConsoleError.backgroundExecute {
             console.info("Visit https://www.docker.com/products/docker-toolbox")
             throw ToolboxError.general("Docker not installed.")
         }
@@ -29,7 +29,7 @@ public final class DockerEnter: Command {
             if !contents.contains("Dockerfile") {
                 throw ToolboxError.general("No Dockerfile found")
             }
-        } catch ConsoleError.backgroundExecute(_) {
+        } catch ConsoleError.backgroundExecute {
             throw ToolboxError.general("Could not check for Dockerfile")
         }
 

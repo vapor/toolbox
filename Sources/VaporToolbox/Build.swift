@@ -67,14 +67,14 @@ public final class Build: Command {
         do {
             _ = try console.backgroundExecute(program: "swift", arguments: command)
             buildBar.finish()
-        } catch ConsoleError.backgroundExecute(let code, let error) {
+        } catch ConsoleError.backgroundExecute(let code, let error, _) {
             buildBar.fail()
             console.print()
             console.info("Command:")
             console.print(command.joined(separator: " "))
             console.print()
             console.info("Error (\(code)):")
-            console.print(error)
+            console.print(error.string)
 
             console.info("Toolchain:")
             let toolchain = try console.backgroundExecute(program: "which", arguments: ["swift"]).trim()

@@ -19,7 +19,7 @@ public final class DockerRun: Command {
     public func run(arguments: [String]) throws {
         do {
             _ = try console.backgroundExecute(program: "which", arguments: ["docker"])
-        } catch ConsoleError.backgroundExecute(_, _) {
+        } catch ConsoleError.backgroundExecute {
             console.info("Visit https://www.docker.com/products/docker-toolbox")
             throw ToolboxError.general("Docker not installed.")
         }

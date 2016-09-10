@@ -22,11 +22,11 @@ public final class Test: Command {
         do {
             _ = try console.backgroundExecute(program: "swift", arguments: ["test"])
             testBar.finish()
-        } catch ConsoleError.backgroundExecute(_, let error) {
+        } catch ConsoleError.backgroundExecute(_, let error, _) {
             testBar.fail()
             console.print()
             console.info("Log:")
-            console.print(error)
+            console.print(error.string)
             console.print()
             console.info("Help:")
             console.print("Join our Slack where hundreds of contributors")
