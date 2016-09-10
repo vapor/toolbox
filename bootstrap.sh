@@ -1,7 +1,7 @@
 #!/bin/bash
 curl -sL "check.vapor.sh" | bash || exit 1;
 
-DIR=".vapor-toolbox-$TAG";
+DIR=".vapor-toolbox-temporary";
 
 rm -rf $DIR;
 
