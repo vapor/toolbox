@@ -1,4 +1,5 @@
 import Console
+import Foundation
 
 public final class Build: Command {
     public let id = "build"
@@ -46,7 +47,9 @@ public final class Build: Command {
                 "-g"
             ]
         }
-        
+
+        buildFlags += try Config.buildFlags()
+
         let buildBar = console.loadingBar(title: "Building Project")
         buildBar.start()
 

@@ -5,4 +5,5 @@ XCTMain([
     testCase(BuildTests.allTests),
     testCase(CleanTests.allTests),
     testCase(StringExtTests.allTests),
+    testCase(VaporConfigFlagsTests.allTests),
 ])

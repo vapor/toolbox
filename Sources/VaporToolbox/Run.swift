@@ -44,14 +44,27 @@ public final class Run: Command {
                 throw ToolboxError.general("Unable to determine package name.")
             }
 
-            console.info("Running \(name)...")
-
             var passThrough = arguments.values
             for (name, value) in arguments.options {
                 passThrough += "--\(name)=\(value)"
             }
 
-            try console.foregroundExecute(program: ".build/\(folder)/App", arguments: passThrough)
+            passThrough += try Config.runFlags()
+
+            console.info("Running \(name)...")
+
+            let path = ".build/\(folder)/\(name)"
+            if FileManager.default.fileExists(atPath: "./\(path)") {
+                try console.foregroundExecute(
+                    program: path,
+                    arguments: passThrough
+                )
+            } else {
+                try console.foregroundExecute(
+                    program: ".build/\(folder)/App",
+                    arguments: passThrough
+                )
+            }
         } catch ConsoleError.execute(_) {
             throw ToolboxError.general("Run failed.")
         }

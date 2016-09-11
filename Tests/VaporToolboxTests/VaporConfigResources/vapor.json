@@ -1,33 +1,17 @@
 {
-    "name": "MySQL Provider",
+    "name": "VaporConfigResources",
     "flags": {
         "run": {
             "linux": [
-                "--config:keys.custom=value"
-            ]
-        },
-        "build": {
-            "macos": [
-                "-Xswiftc",
-                "-I/usr/local/include/mysql",
-                "-Xlinker",
-                "-L/usr/local/lib"
+                "--config:keys.one=1"
             ],
-            "linux": [
-                "-Xswiftc",
-                "-DNOJSON"
+            "macos": [
+                "mac-flag"
             ]
         },
         "test": {
             "macos": [
-                "-Xswiftc",
-                "-I/usr/local/include/mysql",
-                "-Xlinker",
-                "-L/usr/local/lib"
-            ],
-            "linux": [
-                "-Xswiftc",
-                "-DNOJSON"
+              "macos-test-flag"
             ]
         }
     }

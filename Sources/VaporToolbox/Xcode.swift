@@ -1,4 +1,5 @@
 import Console
+import Foundation
 
 public final class Xcode: Command {
     public let id = "xcode"
@@ -36,6 +37,7 @@ public final class Xcode: Command {
             ]
         }
 
+        buildFlags += try Config.buildFlags()
 
         for (name, value) in arguments.options {
             if ["mysql"].contains(name) {

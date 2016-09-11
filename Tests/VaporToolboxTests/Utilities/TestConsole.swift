@@ -4,7 +4,12 @@ import libc
 @testable import VaporToolbox
 
 final class TestConsole: ConsoleProtocol {
-    var inputBuffer: [String]
+    var inputBuffer: [String] {
+        didSet {
+            Swift.print("\(inputBuffer)")
+            Swift.print()
+        }
+    }
     var outputBuffer: [String]
     var executeBuffer: [String]
     var backgroundExecuteOutputBuffer: [String: String]
