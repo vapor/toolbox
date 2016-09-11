@@ -81,7 +81,7 @@ extension FileManager {
         return try contentsOfDirectory(atPath: root).filter { isDirectory(path: root + $0) }
     }
 
-    fileprivate func isDirectory(path: String) -> Bool {
+    private func isDirectory(path: String) -> Bool {
         var isDirectory: ObjCBool = false
         _ = fileExists(atPath: path, isDirectory: &isDirectory)
         #if os(Linux)
@@ -97,7 +97,7 @@ extension Node {
     /**
      Load the file at a path as raw bytes, or as parsed JSON representation
      */
-    static func loadContents(path: String) throws -> Node {
+    fileprivate static func loadContents(path: String) throws -> Node {
         let data = try DataFile().load(path: path)
         guard path.hasSuffix(".json") else { return .bytes(data) }
         return try JSON(bytes: data).converted()
