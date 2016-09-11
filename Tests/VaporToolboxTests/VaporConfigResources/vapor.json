@@ -1,0 +1,34 @@
+{
+    "name": "MySQL Provider",
+    "flags": {
+        "run": {
+            "linux": [
+                "--config:keys.custom=value"
+            ]
+        },
+        "build": {
+            "macos": [
+                "-Xswiftc",
+                "-I/usr/local/include/mysql",
+                "-Xlinker",
+                "-L/usr/local/lib"
+            ],
+            "linux": [
+                "-Xswiftc",
+                "-DNOJSON"
+            ]
+        },
+        "test": {
+            "macos": [
+                "-Xswiftc",
+                "-I/usr/local/include/mysql",
+                "-Xlinker",
+                "-L/usr/local/lib"
+            ],
+            "linux": [
+                "-Xswiftc",
+                "-DNOJSON"
+            ]
+        }
+    }
+}
