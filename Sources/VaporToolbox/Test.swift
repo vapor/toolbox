@@ -20,7 +20,8 @@ public final class Test: Command {
         testBar.start()
 
         do {
-            _ = try console.backgroundExecute(program: "swift", arguments: ["test"])
+            let flags = try Config.testFlags()
+            _ = try console.backgroundExecute(program: "swift", arguments: ["test"] + flags)
             testBar.finish()
         } catch ConsoleError.backgroundExecute(_, let error, _) {
             testBar.fail()
