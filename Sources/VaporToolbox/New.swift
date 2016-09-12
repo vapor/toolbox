@@ -93,6 +93,8 @@ public final class New: Command {
          http(s)://whatever.com/foo/bar => http(s)://whatever.com/foo/bar
          foo/some-template => https://github.com/foo/some-template
          some-template => https://github.com/vapor/some-template
+         some => https://github.com/vapor/some
+         if fails, attempts `-template` suffix
          some => https://github.com/vapor/some-template
     */
     private func expand(template: String) throws -> String {
