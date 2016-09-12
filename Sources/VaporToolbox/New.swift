@@ -28,7 +28,7 @@ public final class New: Command {
     }
 
     public func run(arguments: [String]) throws {
-        let template = arguments.options["template"]?.string ?? defaultTemplate
+        let template = try loadTemplate(arguments: arguments)
         let name = try value("name", from: arguments).string ?? ""
 
         let cloneBar = console.loadingBar(title: "Cloning Template")
@@ -82,6 +82,46 @@ public final class New: Command {
         }
 
         console.print()
+    }
+
+    private func loadTemplate(arguments: [String]) throws -> String {
+        guard let template = arguments.options["template"]?.string else { return defaultTemplate }
+        return try expand(template: template)
+    }
+
+    /**
+         http(s)://whatever.com/foo/bar => http(s)://whatever.com/foo/bar
+         foo/some-template => https://github.com/foo/some-template
+         some-template => https://github.com/vapor/some-template
+         some => https://github.com/vapor/some-template
+    */
+    private func expand(template: String) throws -> String {
+        // if valid URL, use it
+        guard try !isValid(url: template) else { return template }
+        // `/` indicates `owner/repo`
+        guard !template.contains("/") else { return "https://github.com/" + template }
+        // no '/' indicates vapor default
+        let direct = "https://github.com/vapor/" + template
+        guard try !isValid(url: direct) else { return direct }
+        // invalid url attempts `-template` suffix
+        return direct + "-template"
+    }
+
+    private func isValid(url: String) throws -> Bool {
+        // http://stackoverflow.com/a/6136861/2611971
+        let result = try console.backgroundExecute(
+            program: "curl",
+            arguments: [
+                "-o",
+                "/dev/null",
+                "--silent",
+                "--head",
+                "--write-out",
+                "'%{http_code}\n'",
+                url
+            ]
+        )
+        return result.contains("200")
     }
 
     public let asciiArt: [String] = [
