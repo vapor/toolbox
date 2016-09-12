@@ -77,7 +77,7 @@ public final class HerokuInit: Command {
         if console.confirm("Would you like to provide a custom Heroku buildpack?") {
             buildpack = console.ask("Custom buildpack:").string ?? ""
         } else {
-            buildpack = "https://github.com/kylef/heroku-buildpack-swift"
+            buildpack = "https://github.com/vapor/heroku-buildpack"
         }
 
 
