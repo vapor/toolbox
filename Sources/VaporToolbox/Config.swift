@@ -62,7 +62,6 @@ extension FileManager {
         let rootConfig = loadVaporConfig(directory: rootDirectory)
 
         let packagesDirectory = rootDirectory + "Packages/"
-        print(try subDirectories(root: packagesDirectory))
         let packagesConfigs = try subDirectories(root: packagesDirectory)
             .map { packagesDirectory + $0 }
             .flatMap(loadVaporConfig)
