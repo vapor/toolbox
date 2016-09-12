@@ -12,7 +12,12 @@ class VaporConfigFlagsTests: XCTestCase {
         ("testTestFlagsLinux", testTestFlagsLinux),
     ]
 
+    #if Xcode
     let directory = #file.components(separatedBy: "/").dropLast().joined(separator: "/") + "/VaporConfigResources"
+    #else
+    let directory = "./Tests/ToolboxTests/VaporToolboxTests/VaporConfigResources"
+    #endif
+
     func testBuildFlagsMac() throws {
         let flags = try Config.buildFlags(rootDirectory: directory, os: "macos")
         let expectation = [
