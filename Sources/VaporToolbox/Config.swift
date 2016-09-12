@@ -47,7 +47,7 @@ extension Config {
         #if os(Linux)
         return "linux"
         #else
-        return "macOS"
+        return "macos"
         #endif
     }
 }
