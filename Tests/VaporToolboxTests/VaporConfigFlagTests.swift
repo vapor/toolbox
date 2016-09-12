@@ -15,7 +15,7 @@ class VaporConfigFlagsTests: XCTestCase {
     #if Xcode
     let directory = #file.components(separatedBy: "/").dropLast().joined(separator: "/") + "/VaporConfigResources"
     #else
-    let directory = "./Tests/ToolboxTests/VaporToolboxTests/VaporConfigResources"
+    let directory = "./Tests/VaporToolboxTests/VaporConfigResources"
     #endif
 
     func testBuildFlagsMac() throws {
