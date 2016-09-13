@@ -1,0 +1,18 @@
+{
+    "name": "VaporConfigResources",
+    "flags": {
+        "run": {
+            "linux": [
+                "--config:keys.one=1"
+            ],
+            "macos": [
+                "mac-flag"
+            ]
+        },
+        "test": {
+            "macos": [
+              "macos-test-flag"
+            ]
+        }
+    }
+}

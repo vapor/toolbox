@@ -25,26 +25,26 @@ public final class SelfInstall: Command {
     public func run(arguments: [String]) throws {
         let file: String
         do {
-            file = try console.backgroundExecute(program: "ls", arguments: ["\(executable)"])
-        } catch ConsoleError.execute(_) {
+            file = try console.backgroundExecute(program: "/bin/sh", arguments: ["-c", "ls \(executable)"])
+        } catch ConsoleError.backgroundExecute {
             do {
-                file = try console.backgroundExecute(program: "which", arguments: ["\(executable)"])
-            } catch ConsoleError.execute(_) {
-                throw ToolboxError.general("Could not locate executable.")
+                file = try console.backgroundExecute(program: "/usr/bin/which", arguments: [executable])
+            } catch ConsoleError.backgroundExecute(let code, let error, _) {
+                throw ToolboxError.general("Could not locate executable: \(code) \(error.string)")
             }
         }
 
         let current = file.trim()
 
-        let command =  [current, "/usr/local/bin/vapor"]
+        let command = [current, "/usr/local/bin/vapor"]
 
         do {
             _ = try console.backgroundExecute(program: "mv", arguments: command)
-        } catch ConsoleError.backgroundExecute(_) {
+        } catch ConsoleError.backgroundExecute {
             console.warning("Install failed, trying sudo")
             do {
                 _ = try console.backgroundExecute(program: "sudo", arguments: ["mv"] + command)
-            } catch ConsoleError.backgroundExecute(_) {
+            } catch ConsoleError.backgroundExecute {
                 throw ToolboxError.general("Installation failed.")
             }
         }

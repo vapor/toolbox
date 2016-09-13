@@ -16,9 +16,37 @@ public final class HerokuInit: Command {
     }
 
     public func run(arguments: [String]) throws {
+
+        func gitIsClean(log: Bool = true) throws {
+            do {
+                let status = try console.backgroundExecute(program: "git", arguments: ["status", "--porcelain"])
+                if status.trim() != "" {
+                    if log {
+                        console.info("All current changes must be committed before running a Heroku init.")
+                    }
+                    throw ToolboxError.general("Found uncommitted changes.")
+                }
+            } catch ConsoleError.backgroundExecute {
+                throw ToolboxError.general("No .git repository found.")
+            }
+        }
+
+        try gitIsClean()
+
+        do {
+            let branches = try console.backgroundExecute(program: "git", arguments: ["branch"])
+            guard branches.contains("* master") else {
+                throw ToolboxError.general(
+                    "Please checkout master branch before initializing heroku. 'git checkout master'"
+                )
+            }
+        } catch ConsoleError.backgroundExecute(_, let message, _) {
+            throw ToolboxError.general("Unable to locate current git branch: \(message.string)")
+        }
+
         do {
             _ = try console.backgroundExecute(program: "which", arguments: ["heroku"])
-        } catch ConsoleError.backgroundExecute(_, _) {
+        } catch ConsoleError.backgroundExecute {
             console.info("Visit https://toolbelt.heroku.com")
             throw ToolboxError.general("Heroku Toolbelt must be installed.")
         }
@@ -26,7 +54,7 @@ public final class HerokuInit: Command {
         do {
             _ = try console.backgroundExecute(program: "git", arguments: ["remote", "show", "heroku"])
             throw ToolboxError.general("Git already has a heroku remote.")
-        } catch ConsoleError.backgroundExecute(_, _) {
+        } catch ConsoleError.backgroundExecute {
             //continue
         }
 
@@ -37,18 +65,19 @@ public final class HerokuInit: Command {
             name = ""
         }
 
+        let url: String
         do {
-            let message = try console.backgroundExecute(program: "heroku", arguments: ["create", "\(name)"])
-            console.info(message)
-        } catch ConsoleError.backgroundExecute(_, let message) {
-            throw ToolboxError.general("Unable to create Heroku app: \(message.trim())")
+            url = try console.backgroundExecute(program: "heroku", arguments: ["create", "\(name)"])
+            console.info(url)
+        } catch ConsoleError.backgroundExecute(_, let message, _) {
+            throw ToolboxError.general("Unable to create Heroku app: \(message.string.trim())")
         }
 
         let buildpack: String
         if console.confirm("Would you like to provide a custom Heroku buildpack?") {
             buildpack = console.ask("Custom buildpack:").string ?? ""
         } else {
-            buildpack = "https://github.com/kylef/heroku-buildpack-swift"
+            buildpack = "https://github.com/vapor/heroku-buildpack"
         }
 
 
@@ -56,38 +85,60 @@ public final class HerokuInit: Command {
 
         do {
             _ = try console.backgroundExecute(program: "heroku", arguments: ["buildpacks:set", "\(buildpack)"])
-        } catch ConsoleError.backgroundExecute(_, let message) {
-            throw ToolboxError.general("Unable to set buildpack \(buildpack): \(message)")
+        } catch ConsoleError.backgroundExecute(_, let message, _) {
+            throw ToolboxError.general("Unable to set buildpack \(buildpack): \(message.string)")
         }
 
-        console.info("Creating procfile...")
 
-        let procContents = "web: App --env=production --workdir=\"./\""
+        let appName: String
+        if console.confirm("Are you using a custom Executable name?") {
+            appName = console.ask("Executable Name:").string ?? ""
+        } else {
+            appName = "App"
+        }
+
+        console.info("Setting procfile...")
+        let procContents = "web: \(appName) --env=production --workdir=\"./\" --config:servers.default.port=\\$PORT"
         do {
-            _ = try console.backgroundExecute(program: "echo", arguments: ["\"\(procContents)\"", ">", "./Procfile"])
-        } catch ConsoleError.backgroundExecute(_, let message) {
-            throw ToolboxError.general("Unable to make Procfile: \(message)")
+            _ = try console.backgroundExecute(program: "/bin/sh", arguments: ["-c", "echo \"\(procContents)\" >> ./Procfile"])
+        } catch ConsoleError.backgroundExecute(_, let message, _) {
+            throw ToolboxError.general("Unable to make Procfile: \(message.string)")
+        }
+
+        console.info("Committing procfile...")
+        do {
+            try gitIsClean(log: false) // should throw
+        } catch {
+          // if not clean, commit.
+          _ = try console.backgroundExecute(program: "git", arguments: ["add", "."])
+          _ = try console.backgroundExecute(program: "git", arguments: ["commit", "-m",  "'adding procfile'"])
         }
 
         if console.confirm("Would you like to push to Heroku now?") {
             console.warning("This may take a while...")
 
-            let push = HerokuPush(console: console)
-            try push.run(arguments: [])
+            let buildBar = console.loadingBar(title: "Building on Heroku ... ~5-10 minutes")
+            buildBar.start()
+            do {
+              _ = try console.backgroundExecute(program: "git", arguments: ["push", "heroku", "master"])
+              buildBar.finish()
+            } catch ConsoleError.backgroundExecute(_, let message, _) {
+              buildBar.fail()
+              throw ToolboxError.general("Heroku push failed \(message.string)")
+            }
 
             let dynoBar = console.loadingBar(title: "Spinning up dynos")
             dynoBar.start()
-
             do {
                 _ = try console.backgroundExecute(program: "heroku", arguments: ["ps:scale", "web=1"])
                 dynoBar.finish()
-            } catch ConsoleError.backgroundExecute(_, let message) {
+            } catch ConsoleError.backgroundExecute(_, let message, _) {
                 dynoBar.fail()
-                throw ToolboxError.general("Unable to spin up dynos: \(message)")
+                throw ToolboxError.general("Unable to spin up dynos: \(message.string)")
             }
 
             console.print("Visit https://dashboard.heroku.com/apps/")
-            console.success("App is live on Heroku.")
+            console.success("App is live on Heroku, visit \n\(url)")
         } else {
             console.info("You may push to Heroku later using:")
             console.print("git push heroku master")

@@ -18,7 +18,7 @@ public final class DockerBuild: Command {
     public func run(arguments: [String]) throws {
         do {
             _ = try console.backgroundExecute(program: "which", arguments: ["docker"])
-        } catch ConsoleError.backgroundExecute(_, _) {
+        } catch ConsoleError.backgroundExecute {
             console.info("Visit https://www.docker.com/products/docker-toolbox")
             throw ToolboxError.general("Docker not installed.")
         }
@@ -28,7 +28,7 @@ public final class DockerBuild: Command {
             if !contents.contains("Dockerfile") {
                 throw ToolboxError.general("No Dockerfile found")
             }
-        } catch ConsoleError.backgroundExecute(_) {
+        } catch ConsoleError.backgroundExecute {
             throw ToolboxError.general("Could not check for Dockerfile")
         }
 
@@ -47,9 +47,9 @@ public final class DockerBuild: Command {
             let imageName = DockerBuild.imageName(version: swiftVersion)
             _ = try console.backgroundExecute(program: "docker", arguments: ["build", "--rm", "-t", "\(imageName)", "--build-arg", "SWIFT_VERSION=\(swiftVersion)", "."])
             buildBar.finish()
-        } catch ConsoleError.backgroundExecute(_, let message) {
+        } catch ConsoleError.backgroundExecute(_, let error, _) {
             buildBar.fail()
-            throw ToolboxError.general("Docker build failed: \(message.trim())")
+            throw ToolboxError.general("Docker build failed: \(error.string.trim())")
         }
 
         if console.confirm("Would you like to run the Docker image now?") {
@@ -59,6 +59,6 @@ public final class DockerBuild: Command {
     }
 
     static func imageName(version: String) -> String {
-        return "qutheory/swift:\(version)"
+        return "vapor/swift:\(version)"
     }
 }

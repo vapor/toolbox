@@ -20,17 +20,18 @@ public final class Test: Command {
         testBar.start()
 
         do {
-            _ = try console.backgroundExecute(program: "swift", arguments: ["test"])
+            let flags = try Config.testFlags()
+            _ = try console.backgroundExecute(program: "swift", arguments: ["test"] + flags)
             testBar.finish()
-        } catch ConsoleError.backgroundExecute(_, let error) {
+        } catch ConsoleError.backgroundExecute(_, let error, _) {
             testBar.fail()
             console.print()
             console.info("Log:")
-            console.print(error)
+            console.print(error.string)
             console.print()
             console.info("Help:")
             console.print("Join our Slack where hundreds of contributors")
-            console.print("are waiting to help: http://slack.qutheory.io")
+            console.print("are waiting to help: http://vapor.team")
             console.print()
 
             throw ToolboxError.general("Tests failed.")

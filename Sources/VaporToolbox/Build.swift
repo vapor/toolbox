@@ -32,7 +32,7 @@ public final class Build: Command {
         // Fetch all the dependencies before building
         let fetch = Fetch(console: console)
         try fetch.run(arguments: [])
-        
+
         // Add dynamic libraries to packages
         if arguments.flag("dylib") {
             try updatePackagesWithDyLib(arguments: arguments)
@@ -58,7 +58,9 @@ public final class Build: Command {
                 "-g"
             ]
         }
-        
+
+        buildFlags += try Config.buildFlags()
+
         // Show building status
         let buildBar = console.loadingBar(title: "Building Project")
         buildBar.start()
@@ -70,42 +72,45 @@ public final class Build: Command {
             }
 
             if name == "release" && value.bool == true {
-                buildFlags += "--configuration release"
+                buildFlags += ["--configuration", "release"]
             } else {
                 buildFlags += "--\(name)=\(value.string ?? "")"
             }
         }
 
-        // Create command array
-        var commandArray = ["swift", "build"]
-        commandArray += buildFlags
+        let command =  ["build"] + buildFlags
 
-        // Execute command
-        let command = commandArray.joined(separator: " ")
         do {
-            _ = try console.backgroundExecute(program: commandArray[0], arguments: commandArray.dropFirst(1).array)
+            _ = try console.backgroundExecute(program: "swift", arguments: command)
             buildBar.finish()
-        } catch ConsoleError.backgroundExecute(let code, let error) {
+        } catch ConsoleError.backgroundExecute(let code, let error, let output) {
             buildBar.fail()
             console.print()
             console.info("Command:")
-            console.print(command)
+            console.print(command.joined(separator: " "))
             console.print()
+
             console.info("Error (\(code)):")
-            console.print(error)
+            console.print(error.string)
+            console.print()
+
+            console.info("Output:")
+            console.print(output.string)
+            console.print()
 
             console.info("Toolchain:")
             let toolchain = try console.backgroundExecute(program: "which", arguments: ["swift"]).trim()
             console.print(toolchain)
             console.print()
+
             console.info("Help:")
             console.print("Join our Slack where hundreds of contributors")
-            console.print("are waiting to help: http://slack.qutheory.io")
+            console.print("are waiting to help: http://vapor.team")
             console.print()
 
             throw ToolboxError.general("Build failed.")
         }
-        
+
         // Create DyLib aliases
         if arguments.flag("dylib") {
             try writeDyLibAliases(arguments: arguments)
@@ -125,19 +130,20 @@ public final class Build: Command {
         guard let path = String(validatingUTF8: cwd) else { return nil }
         return path
     }
-    
+
     private func packageDump(path: URL) throws -> [String: AnyObject] {
-        let jsonData = try console.backgroundExecuteData(program: "swift", arguments: ["package", "dump-package", "--input", path.path])
-        let json = try JSONSerialization.jsonObject(with: jsonData, options: []) as! [String: AnyObject]
-        return json
+        let json = try console.backgroundExecute(program: "swift", arguments: ["package", "dump-package", "--input", path.path])
+        let data = Data(bytes: json.bytes)
+        let serialized = try JSONSerialization.jsonObject(with: data, options: .allowFragments)
+        return serialized as! [String: AnyObject]
     }
-    
+
     private func appendProduct(named productName: String, toPackage package: String) -> String {
         // Create text that will be appended
         let appendText =
             "let lib\(productName) = Product(name: \"\(productName)\", type: .Library(.Dynamic), modules: \"\(productName)\")\n" +
             "products.append(lib\(productName))\n"
-        
+
         // Return new text, if doesn't exist already
         if !package.contains(appendText) {
             return package.appending(appendText)
@@ -145,19 +151,19 @@ public final class Build: Command {
             return package
         }
     }
-    
+
     private func updatePackagesWithDyLib(arguments: [String]) throws {
         // Create loading bar
         let processBar = console.loadingBar(title: "Processing Packages")
         processBar.start()
-        
+
         do {
             // Get the project URL
             guard let projectPath = currentWorkingDirectory() else {
                 throw ToolboxError.general("Could not get current working directory.")
             }
             let projectUrl = URL(fileURLWithPath: projectPath)
-            
+
             // Find all the packages in the `Packages` folder
             // The folder is assumed to exist since Fetch is executed before this
             let packages = try FileManager.default.contentsOfDirectory(
@@ -165,17 +171,17 @@ public final class Build: Command {
                 includingPropertiesForKeys: nil,
                 options: .skipsHiddenFiles
             )
-            
+
             // Process all the packages
             for packageUrl in packages {
                 // Get the package dump
                 let package = try packageDump(path: packageUrl)
-                
+
                 // Get the package contents
                 let packageFileUrl = packageUrl.appendingPathComponent("Package.swift")
                 var packageContents = try String(contentsOf: packageFileUrl, encoding: String.Encoding.utf8)
                 packageContents += "\n" // Add new line to pad products
-                
+
                 if let targets = package["package.targets"] as? [[String: AnyObject]], targets.count > 0 { // Add product for every target
                     // Has targets
                     for target in targets {
@@ -184,7 +190,7 @@ public final class Build: Command {
                             print("Could not get name for package target.")
                             continue
                         }
-                        
+
                         // Append the product
                         packageContents = appendProduct(named: name, toPackage: packageContents)
                     }
@@ -194,15 +200,15 @@ public final class Build: Command {
                         print("Could not get name for package.")
                         continue
                     }
-                    
+
                     // Append the product
                     packageContents = appendProduct(named: name, toPackage: packageContents)
                 }
-                
+
                 // Write thew new package file
                 try packageContents.write(to: packageFileUrl, atomically: true, encoding: String.Encoding.utf8)
             }
-            
+
             // Finish the process
             processBar.finish()
         } catch {
@@ -211,23 +217,23 @@ public final class Build: Command {
             console.info("Error:")
             console.print(error.localizedDescription)
             console.print()
-            
+
             throw ToolboxError.general("Processing packages failed.")
         }
     }
-    
+
     private func writeDyLibAliases(arguments: [String]) throws {
         // Create loading bar
         let processBar = console.loadingBar(title: "Creating DyLib Aliases")
         processBar.start()
-        
+
         do {
             // Get the project URL
             guard let projectPath = currentWorkingDirectory() else {
                 throw ToolboxError.general("Could not get current working directory.")
             }
             let projectUrl = URL(fileURLWithPath: projectPath)
-            
+
             // Deal with DyLibs folder
             let dyLibsFolderURL = projectUrl.appendingPathComponent("DyLibs")
             var isDirectory: ObjCBool = ObjCBool(false)
@@ -235,7 +241,7 @@ public final class Build: Command {
                 try FileManager.default.removeItem(at: dyLibsFolderURL)
             }
             try FileManager.default.createDirectory(at: dyLibsFolderURL, withIntermediateDirectories: false, attributes: nil) // Create/recreate the DyLibs folder
-            
+
             // Get the build folder with the DyLibs
             let buildFolderPath: String
             if arguments.flag("release") {
@@ -243,7 +249,7 @@ public final class Build: Command {
             } else {
                 buildFolderPath = ".build/debug"
             }
-            
+
             // Find all DyLibs in the build folder
             let buildFolder = projectUrl.appendingPathComponent(buildFolderPath)
             let dylibFiles = try FileManager.default.contentsOfDirectory(
@@ -251,14 +257,14 @@ public final class Build: Command {
                 includingPropertiesForKeys: nil,
                 options: []
             ).filter { $0.pathExtension == "dylib" }
-            
+
             // Create aliases for all the DyLibs in the DyLibs/ folder
             for dylibFile in dylibFiles {
                 let alias = try dylibFile.bookmarkData(options: URL.BookmarkCreationOptions.suitableForBookmarkFile)
                 let aliasTargetURL = dyLibsFolderURL.appendingPathComponent(dylibFile.lastPathComponent)
                 try URL.writeBookmarkData(alias, to: aliasTargetURL)
             }
-            
+
             // Finish the process
             processBar.finish()
         } catch {
@@ -267,7 +273,7 @@ public final class Build: Command {
             console.info("Error:")
             console.print(error.localizedDescription)
             console.print()
-            
+
             throw ToolboxError.general("Creating dynamic library aliases failed.")
         }
     }

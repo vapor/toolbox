@@ -1,4 +1,5 @@
 import Console
+import Foundation
 
 public final class Xcode: Command {
     public let id = "xcode"
@@ -22,8 +23,6 @@ public final class Xcode: Command {
         let fetch = Fetch(console: console)
         try fetch.run(arguments: [])
 
-        let tmpFile = "/var/tmp/vaporXcodeOutput.log"
-
         let xcodeBar = console.loadingBar(title: "Generating Xcode Project")
         xcodeBar.start()
 
@@ -38,6 +37,7 @@ public final class Xcode: Command {
             ]
         }
 
+        buildFlags += try Config.buildFlags()
 
         for (name, value) in arguments.options {
             if ["mysql"].contains(name) {
@@ -51,29 +51,29 @@ public final class Xcode: Command {
             }
         }
 
-        let argsArray = ["package", "generate-xcodeproj"] + buildFlags + [">", "\(tmpFile)"]
+        let argsArray = ["package", "generate-xcodeproj"] + buildFlags
 
         do {
             _ = try console.backgroundExecute(program: "swift", arguments: argsArray)
             xcodeBar.finish()
-        } catch ConsoleError.backgroundExecute(_, let message) {
+        } catch ConsoleError.backgroundExecute(_, let message, _) {
             xcodeBar.fail()
-            print(message)
-            throw ToolboxError.general("Could not generate Xcode project: \(message)")
+            console.print(message.string)
+            throw ToolboxError.general("Could not generate Xcode project: \(message.string)")
         }
 
         console.info("Select the `App` scheme to run.")
         do {
             let version = try console.backgroundExecute(program: "cat", arguments: [".swift-version"]).trim()
             console.warning("Make sure Xcode > Toolchains > \(version) is selected.")
-        } catch ConsoleError.backgroundExecute(_, let message) {
-            console.error("Could not determine Swift version: \(message)")
+        } catch ConsoleError.backgroundExecute(_, let message, _) {
+            console.error("Could not determine Swift version: \(message.string)")
         }
 
         if console.confirm("Open Xcode project?") {
             do {
                 console.print("Opening Xcode project...")
-                _ = try console.backgroundExecute(program: "open", arguments: ["*.xcodeproj"])
+                _ = try console.backgroundExecute(program: "/bin/sh", arguments: ["-c", "open *.xcodeproj"])
             } catch ConsoleError.backgroundExecute(_) {
                 throw ToolboxError.general("Could not open Xcode project.")
             }

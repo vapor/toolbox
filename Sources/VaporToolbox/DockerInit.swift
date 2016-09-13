@@ -29,11 +29,11 @@ public final class DockerInit: Command {
         initBar.start()
 
         do {
-            _ = try console.backgroundExecute(program: "curl", arguments: ["-L", "docker.qutheory.io", "-o", "Dockerfile"])
+            _ = try console.backgroundExecute(program: "curl", arguments: ["-L", "docker.vapor.sh", "-o", "Dockerfile"])
             initBar.finish()
-        } catch ConsoleError.backgroundExecute(_, let message) {
+        } catch ConsoleError.backgroundExecute(_, let message, _) {
             initBar.fail()
-            throw ToolboxError.general("Could not download Dockerfile: \(message)")
+            throw ToolboxError.general("Could not download Dockerfile: \(message.string)")
         }
 
         if console.confirm("Would you like to build the Docker image now?") {

@@ -3,7 +3,7 @@ import Console
 import Foundation
 import VaporToolbox
 
-let version = "0.10.0"
+let version = "0.10.5"
 
 let terminal = Terminal(arguments: CommandLine.arguments)
 
@@ -46,7 +46,7 @@ do {
         ])
     ], arguments: Array(iterator), help: [
         "Join our Slack if you have questions, need help,",
-        "or want to contribute: http://slack.qutheory.io"
+        "or want to contribute: http://vapor.team"
     ])
 } catch ToolboxError.general(let message) {
     terminal.error("Error: ", newLine: false)
@@ -71,5 +71,3 @@ do {
     terminal.print("\(error)")
     exit(1)
 }
-
-

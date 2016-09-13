@@ -4,8 +4,16 @@
 
 # Vapor Toolbox
 
-Learn more about Vapor Toolbox in the <a href="https://vapor.readme.io/docs/install-toolbox">documentation</a>.
+Learn more about Vapor Toolbox in the <a href="https://vapor.github.io/documentation/getting-started/install-toolbox.html">documentation</a>.
 
+## Homebrew
+
+```sh
+# install Vapor Toolbox
+brew install vapor/tap/toolbox
+```
+
+## Linux / Manual
 ```sh
 # install Vapor Toolbox
 curl -sL toolbox.qutheory.io | bash
