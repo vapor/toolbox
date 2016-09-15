@@ -76,7 +76,7 @@ class BuildTests: XCTestCase {
                 "swift build",
                 "ls .build/debug",
                 "swift package dump-package",
-                ".build/debug/App"
+                ".build/debug/\(name)"
             ])
         } catch {
             XCTFail("Build run failed: \(error)")

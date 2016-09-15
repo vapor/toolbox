@@ -6,6 +6,8 @@ sudo: required
 dist: trusty
 osx_image: xcode8
 script:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; curl -sL swift.vapor.sh/ubuntu | bash; fi
+
   # run unit tests
   - swift build -Xswiftc -DNO_ANIMATION
   - swift build --configuration release -Xswiftc -DNO_ANIMATION
