@@ -63,12 +63,6 @@ public final class Xcode: Command {
         }
 
         console.info("Select the `App` scheme to run.")
-        do {
-            let version = try console.backgroundExecute(program: "cat", arguments: [".swift-version"]).trim()
-            console.warning("Make sure Xcode > Toolchains > \(version) is selected.")
-        } catch ConsoleError.backgroundExecute(_, let message, _) {
-            console.error("Could not determine Swift version: \(message.string)")
-        }
 
         if console.confirm("Open Xcode project?") {
             do {

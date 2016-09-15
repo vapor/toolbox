@@ -61,7 +61,7 @@ public final class Run: Command {
                 )
             } else {
                 try console.foregroundExecute(
-                    program: ".build/\(folder)/App",
+                    program: ".build/\(folder)/\(name)",
                     arguments: passThrough
                 )
             }

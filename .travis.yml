@@ -5,9 +5,9 @@ language: generic
 sudo: required
 dist: trusty
 osx_image: xcode8
-install:
-  - eval "$(curl -sL https://gist.githubusercontent.com/kylef/5c0475ff02b7c7671d2a/raw/02090c7ede5a637b76e6df1710e83cd0bbe7dcdf/swiftenv-install.sh)"
 script:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then curl -sL swift.vapor.sh/ubuntu | bash; fi
+
   # run unit tests
   - swift build -Xswiftc -DNO_ANIMATION
   - swift build --configuration release -Xswiftc -DNO_ANIMATION
