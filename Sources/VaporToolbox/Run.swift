@@ -8,6 +8,11 @@ public final class Run: Command {
         "Runs the compiled application."
     ]
 
+    public let signature: [Argument] = [
+        Option(name: "name", help: ["The package name."]),
+        Option(name: "exec", help: ["The executable name."])
+    ]
+
     public let console: ConsoleProtocol
 
     public init(console: ConsoleProtocol) {
@@ -44,6 +49,8 @@ public final class Run: Command {
                 throw ToolboxError.general("Unable to determine package name.")
             }
 
+            let exec = arguments.options["exec"]?.string ?? "App"
+
             var passThrough = arguments.values
             for (name, value) in arguments.options {
                 passThrough += "--\(name)=\(value)"
@@ -53,18 +60,24 @@ public final class Run: Command {
 
             console.info("Running \(name)...")
 
-            let path = ".build/\(folder)/\(name)"
-            if FileManager.default.fileExists(atPath: "./\(path)") {
-                try console.foregroundExecute(
-                    program: path,
-                    arguments: passThrough
-                )
-            } else {
-                try console.foregroundExecute(
-                    program: ".build/\(folder)/\(name)",
-                    arguments: passThrough
-                )
+            var path = ".build/\(folder)/\(name)"
+            do {
+                if FileManager.default.fileExists(atPath: "./\(path)") {
+                    try console.foregroundExecute(
+                        program: path,
+                        arguments: passThrough
+                    )
+                } else {
+                    path = ".build/\(folder)/\(exec)"
+                    try console.foregroundExecute(
+                        program: path,
+                        arguments: passThrough
+                    )
+                }
+            } catch ConsoleError.spawnProcess {
+                throw ToolboxError.general("Could not find \(path).")
             }
+
         } catch ConsoleError.execute(_) {
             throw ToolboxError.general("Run failed.")
         }
