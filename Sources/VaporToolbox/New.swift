@@ -45,11 +45,10 @@ public final class New: Command {
 
         do {
             let file = "\(name)/Package.swift"
-
-            var manifest = try console.backgroundExecute(program: "cat", arguments: ["\(file)"])
+            var manifest = try console.backgroundExecute(program: "/bin/sh", arguments: ["-c", "cat \(file)"])
             manifest = manifest.components(separatedBy: "VaporApp").joined(separator: name)
             manifest = manifest.components(separatedBy: "\"").joined(separator: "\\\"")
-            _ = try console.backgroundExecute(program: "echo", arguments: ["\"\(manifest)\"", ">", "\(file)"])
+            _ = try console.backgroundExecute(program: "/bin/sh", arguments: ["-c", "echo \"\(manifest)\" > \(file)"])
         } catch {
             console.error("Could not update Package.swift file.")
         }
