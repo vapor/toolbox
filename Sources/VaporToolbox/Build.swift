@@ -7,8 +7,11 @@ public final class Build: Command {
     public let signature: [Argument] = [
         Option(name: "run", help: ["Runs the project after building."]),
         Option(name: "clean", help: ["Cleans the project before building."]),
+        Option(name: "fetch", help: ["Fetches the project before building, default true."]),
         Option(name: "mysql", help: ["Links MySQL libraries."]),
-        Option(name: "debug", help: ["Builds with debug symbols."])
+        Option(name: "debug", help: ["Builds with debug symbols."]),
+        Option(name: "verbose", help: ["Print build logs instead of loading bar."]),
+        Option(name: "modulemap", help: ["Add CLibreSSL module map for faster builds, default true."]),
     ]
 
     public let help: [String] = [
@@ -27,8 +30,24 @@ public final class Build: Command {
             try clean.run(arguments: arguments)
         }
 
-        let fetch = Fetch(console: console)
-        try fetch.run(arguments: [])
+        if arguments.options["fetch"]?.bool != false {
+            let fetch = Fetch(console: console)
+            try fetch.run(arguments: [])
+        }
+
+        if arguments.options["modulemap"]?.bool != false {
+            do {
+                let mod = try console.backgroundExecute(program: "/bin/sh", arguments: ["-c", "ls Packages | grep CLibreSSL"]).trim()
+                _ = try console.backgroundExecute(program: "ls", arguments: ["Packages/\(mod)/Sources/CLibreSSL/include/module.modulemap"])
+            } catch {
+                // not found
+                do {
+                    _ = try console.backgroundExecute(program: "/bin/sh", arguments: ["-c", "printf \"module CLibreSSL {\\n    header \\\"CLibreSSL.h\\\"\\n    link \\\"CLibreSSL\\\"\\n}\" > Packages/CLibreSSL-1.0.0/Sources/CLibreSSL/include/module.modulemap"])
+                } catch {
+                    console.warning("Could not add CLibreSSL Module Map: \(error)")
+                }
+            }
+        }
 
         var buildFlags: [String] = []
 
@@ -50,11 +69,16 @@ public final class Build: Command {
 
         buildFlags += try Config.buildFlags()
 
-        let buildBar = console.loadingBar(title: "Building Project")
-        buildBar.start()
+        let buildBar: LoadingBar?
+        if arguments.options["verbose"]?.bool != true {
+            buildBar = console.loadingBar(title: "Building Project")
+            buildBar?.start()
+        } else {
+            buildBar = nil
+        }
 
         for (name, value) in arguments.options {
-            if ["clean", "run", "mysql", "debug"].contains(name) {
+            if ["clean", "run", "mysql", "debug", "verbose", "fetch", "modulemap"].contains(name) {
                 continue
             }
 
@@ -68,10 +92,15 @@ public final class Build: Command {
         let command =  ["build"] + buildFlags
 
         do {
-            _ = try console.backgroundExecute(program: "swift", arguments: command)
-            buildBar.finish()
+            if arguments.options["verbose"]?.bool == true {
+                console.print("Building Project...")
+                try console.foregroundExecute(program: "swift", arguments: command)
+            } else {
+                _ = try console.backgroundExecute(program: "swift", arguments: command)
+                buildBar?.finish()
+            }
         } catch ConsoleError.backgroundExecute(let code, let error, let output) {
-            buildBar.fail()
+            buildBar?.fail()
             console.print()
             console.info("Command:")
             console.print(command.joined(separator: " "))

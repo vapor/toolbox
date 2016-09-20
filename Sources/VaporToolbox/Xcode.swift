@@ -51,6 +51,12 @@ public final class Xcode: Command {
             }
         }
 
+        do {
+            _ = try console.backgroundExecute(program: "/bin/sh", arguments: ["-c", "rm -rf Packages/CLibreSSL-1.*/Sources/CLibreSSL/include/module.modulemap"])
+        } catch {
+            console.warning("Could not remove module map.")
+        }
+
         let argsArray = ["package", "generate-xcodeproj"] + buildFlags
 
         do {
