@@ -14,7 +14,7 @@ class BuildTests: XCTestCase {
         let build = Build(console: console)
 
         do {
-            try build.run(arguments: [])
+            try build.run(arguments: ["--modulemap=false"])
             XCTAssertEqual(console.outputBuffer, [
                 "No Packages folder, fetch may take a while...",
                 "Fetching Dependencies [Done]",
@@ -35,7 +35,7 @@ class BuildTests: XCTestCase {
         let build = Build(console: console)
 
         do {
-            try build.run(arguments: ["--clean"])
+            try build.run(arguments: ["--clean", "--modulemap=false"])
             XCTAssertEqual(console.outputBuffer, [
                 "Cleaning [Done]",
                 "No Packages folder, fetch may take a while...",
@@ -63,7 +63,7 @@ class BuildTests: XCTestCase {
         ]
 
         do {
-            try build.run(arguments: ["--run"])
+            try build.run(arguments: ["--run", "--modulemap=false"])
             XCTAssertEqual(console.outputBuffer, [
                 "No Packages folder, fetch may take a while...",
                 "Fetching Dependencies [Done]",
@@ -88,7 +88,7 @@ class BuildTests: XCTestCase {
         let build = Build(console: console)
 
         do {
-            try build.run(arguments: ["--mysql"])
+            try build.run(arguments: ["--mysql", "--modulemap=false"])
             XCTAssertEqual(console.outputBuffer, [
                 "No Packages folder, fetch may take a while...",
                 "Fetching Dependencies [Done]",

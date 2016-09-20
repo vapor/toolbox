@@ -128,7 +128,7 @@ public final class Build: Command {
         }
 
         if arguments.options["run"]?.bool == true {
-            let args = arguments.filter { !["--clean", "--run"].contains($0) }
+            let args = arguments.filter { !["--clean", "--run", "--modulemap=false"].contains($0) }
             let run = Run(console: console)
             try run.run(arguments: args)
         }
