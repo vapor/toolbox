@@ -37,6 +37,17 @@ public final class SelfInstall: Command {
         let current = file.trim()
 
         let command = [current, "/usr/local/bin/vapor"]
+        
+        do {
+            _ = try console.backgroundExecute(program: "mkdir", arguments: ["-p", "/usr/local/bin"])
+        } catch ConsoleError.backgroundExecute {
+            console.warning("Failed to create /usr/local/bin, trying sudo")
+            do {
+                _ = try console.backgroundExecute(program: "sudo", arguments: ["mkdir", "-p", "/usr/local/bin"])
+            } catch ConsoleError.backgroundExecute {
+                throw ToolboxError.general("Installation Failed. Could not create /usr/local/bin")
+            }
+        }
 
         do {
             _ = try console.backgroundExecute(program: "mv", arguments: command)
