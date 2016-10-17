@@ -97,8 +97,15 @@ public final class HerokuInit: Command {
             appName = "App"
         }
 
+        let region: String
+        if console.confirm("Would you like to deploy to other than US region server?") {
+            region = console.ask("Region code (us/eu):").string ?? ""
+        } else {
+            region = "us"
+        }
+
         console.info("Setting procfile...")
-        let procContents = "web: \(appName) --env=production --workdir=\"./\" --config:servers.default.port=\\$PORT"
+        let procContents = "web: \(appName) --env=production --workdir=\"./\" --config:servers.default.port=\\$PORT --region=\(region)"
         do {
             _ = try console.backgroundExecute(program: "/bin/sh", arguments: ["-c", "echo \"\(procContents)\" >> ./Procfile"])
         } catch ConsoleError.backgroundExecute(_, let message, _) {
