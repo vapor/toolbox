@@ -64,12 +64,10 @@ public final class PrepareAdd: Command {
             "import Fluent\n\n",
             "struct \(preparationName): Preparation {\n\n",
             "    static func prepare(_ database: Database) throws {\n",
-            "        let sql = \"select 1\"\n",
-            "        _ = try database.driver.raw(sql, [])\n",
+            "        // modify the data or squema\n",
             "    }\n\n",
             "    static func revert(_ database: Database) throws {\n",
-            "        let sql = \"select 1\"\n",
-            "        _ = try database.driver.raw(sql, [])\n",
+            "        // revert changes from prepare if possible\n",
             "    }\n\n",
             "}\n"
         ]
