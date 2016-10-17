@@ -17,6 +17,10 @@ public final class PrepareAdd: Command {
     }
 
     public func run(arguments: [String]) throws {
+        if arguments.count < 2 {
+            throw ToolboxError.general("Missing preparation name. Usage: vapor prepare add MyFirstPreparation")
+        }
+        
         let preparationsFolder = "./Sources/App/Preparations"
 
         do {
@@ -35,10 +39,6 @@ public final class PrepareAdd: Command {
             _ = try console.backgroundExecute(program: "mkdir", arguments: ["-p", preparationsFolder])
         } catch ConsoleError.backgroundExecute(_) {
             throw ToolboxError.general("Failed to create preparations folder (\(preparationsFolder)).")
-        }
-
-        if arguments.count < 2 {
-            throw ToolboxError.general("Missing preparation name. Usage: vapor prepare add MyFirstPreparation")
         }
 
         let formatter = DateFormatter()
