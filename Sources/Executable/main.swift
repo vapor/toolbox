@@ -45,9 +45,7 @@ do {
             "Commands to help manage a Docker image."
         ]),
         Group(id: "prepare", commands: [
-            PrepareAdd(console: terminal),
-//            PrepareRun(console: terminal),        // vapor run prepare
-//            PrepareRevert(console: terminal)      // vapor run prepare --revert
+            PrepareAdd(console: terminal)
         ], help: [
             "Commands related to database migrations."
         ])
