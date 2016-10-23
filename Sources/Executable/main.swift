@@ -45,7 +45,8 @@ do {
             "Commands to help manage a Docker image."
         ]),
         Group(id: "prepare", commands: [
-            PrepareAdd(console: terminal)
+            PrepareAdd(console: terminal),
+            PrepareList(console: terminal)
         ], help: [
             "Commands related to database migrations."
         ])
