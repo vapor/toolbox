@@ -33,13 +33,9 @@ public final class HerokuPush: Command {
             throw ToolboxError.general("No .git repository found.")
         }
 
-        //let herokuBar = console.loadingBar(title: "Pushing to Heroku")
-        //herokuBar.start()
         do {
-            try console.execute(program: "git push heroku master", arguments: [], input: nil, output: nil, error: nil)
-            //herokuBar.finish()
+            try console.foregroundExecute(program: "git", arguments: ["push", "heroku", "master"])
         } catch ConsoleError.execute(_) {
-            //herokuBar.fail()
             throw ToolboxError.general("Unable to push to Heroku.")
         }
     }
