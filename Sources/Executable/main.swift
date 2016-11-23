@@ -3,7 +3,7 @@ import Console
 import Foundation
 import VaporToolbox
 
-let version = "1.0.3"
+let version = "1.0.4"
 
 let terminal = Terminal(arguments: CommandLine.arguments)
 
@@ -22,11 +22,11 @@ do {
         Clean(console: terminal),
         Test(console: terminal),
         Xcode(console: terminal),
+        Generate(console: terminal),
         Version(console: terminal, version: version),
         Group(id: "self", commands: [
             SelfInstall(console: terminal, executable: executable, version: version),
             SelfUpdate(console: terminal, executable: executable),
-
         ], help: [
             "Commands that affect the toolbox itself."
         ]),
