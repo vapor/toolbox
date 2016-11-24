@@ -5,6 +5,7 @@ public final class ControllerGenerator: Generator {
 
     private let controllersDirectory = "Sources/App/Controllers/"
     private let templatesDirectory = ".build/Templates/"
+    private let stylesDirectory = "Public/styles/"
 
     public static let supportedTypes = ["controller"]
     public let console: ConsoleProtocol
@@ -19,7 +20,7 @@ public final class ControllerGenerator: Generator {
         }
         let actions = Array(arguments.values[1 ..< arguments.values.count]).filter { return !$0.contains(":") }
         console.print("Controller actions => \(actions)")
-        try generateController(forResourceNamed: name, actions: actions)
+        try generateController(forResourceNamed: name.lowercased(), actions: actions)
     }
 
     public func generateController(forResourceNamed resourceName: String, actions: [String]) throws {
@@ -30,7 +31,7 @@ public final class ControllerGenerator: Generator {
         if actions.count > 0 {
             let viewGenerator = ViewGenerator(console: console)
             try viewGenerator.generateViews(forResourceNamed: resourceName, actions: actions)
-            // TODO: generate css file
+            try File(path: stylesDirectory + "\(resourceName.css)", contents: "").save()
         }
     }
 
