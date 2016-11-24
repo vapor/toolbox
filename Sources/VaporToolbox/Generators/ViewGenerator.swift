@@ -32,7 +32,7 @@ public final class ViewGenerator: Generator {
     }
 
     private func generateView(atPath path: String) throws {
-        try copyTemplate(atPath: ".build/Templates/ViewTemplate.leaf",
+        try copyTemplate(atPath: defaultTemplatesDirectory + "ViewTemplate.leaf",
                          fallbackURL: URL(string: defaultTemplatesURLString)!,
                          toPath: path)
     }

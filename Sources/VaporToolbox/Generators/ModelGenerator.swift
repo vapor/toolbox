@@ -15,7 +15,7 @@ public final class ModelGenerator: Generator {
             throw ConsoleError.argumentNotFound
         }
         let filePath = "Sources/App/Models/\(name.capitalized).swift"
-        let templatePath = ".build/Templates/ModelTemplate.swift"
+        let templatePath = defaultTemplatesDirectory + "ModelTemplate.swift"
         let fallbackURL = URL(string: defaultTemplatesURLString)!
         let ivars = arguments.values.filter { return $0.contains(":") }
         console.print("Model ivars => \(ivars)")

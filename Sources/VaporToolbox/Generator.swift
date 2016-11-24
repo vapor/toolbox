@@ -1,6 +1,7 @@
 import Foundation
 import Console
 
+internal let defaultTemplatesDirectory = ".build/Templates/"
 internal let defaultTemplatesURLString = "https://gist.github.com/1b9b58c0ca4dbe3538b2707df5959d80.git"
 
 public struct File {
@@ -52,14 +53,18 @@ public extension Generator {
         }
     }
 
-    func copyTemplate(atPath: String, fallbackURL: URL, toPath: String, _ editsBlock: ((String) -> String)? = nil) throws {
+    public func loadTemplate(atPath: String, fallbackURL: URL) throws -> File {
         if !fileExists(atPath: atPath) {
-            var templatesDirectoryPathComponents = atPath.components(separatedBy: "/")
-            templatesDirectoryPathComponents.removeLast()
-            let destination = templatesDirectoryPathComponents.joined(separator: "/")
+            var defaultTemplatesDirectoryPathComponents = atPath.components(separatedBy: "/")
+            defaultTemplatesDirectoryPathComponents.removeLast()
+            let destination = defaultTemplatesDirectoryPathComponents.joined(separator: "/")
             try cloneTemplate(atURL: fallbackURL, toPath: destination)
         }
-        var templateFile = try File(path: atPath)
+        return try File(path: atPath)
+    }
+
+    public func copyTemplate(atPath: String, fallbackURL: URL, toPath: String, _ editsBlock: ((String) -> String)? = nil) throws {
+        var templateFile = try loadTemplate(atPath: atPath, fallbackURL: fallbackURL)
         if let editedContents = editsBlock?(templateFile.contents) {
             templateFile.contents = editedContents
         }
