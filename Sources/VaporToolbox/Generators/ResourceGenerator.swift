@@ -8,21 +8,18 @@ public final class ResourceGenerator: Generator {
         self.console = console
     }
 
-    public func generate(arguments: [String : String]) throws {
-        guard let name = arguments["name"] else {
+    public func generate(arguments: [String]) throws {
+        guard let name = arguments.first else {
             throw ConsoleError.argumentNotFound
         }
 
-        let viewGenerator = ViewGenerator(console: console)
-        try viewGenerator.generate(arguments: arguments)
+        try addRouteResourceForResource(named: name)
 
         let modelGenerator = ModelGenerator(console: console)
         try modelGenerator.generate(arguments: arguments)
 
         let controllerGenerator = ControllerGenerator(console: console)
         try controllerGenerator.generate(arguments: arguments)
-
-        try addRouteResourceForResource(named: name)
     }
 
     private func addRouteResourceForResource(named resourceName: String) throws {

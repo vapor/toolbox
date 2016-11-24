@@ -1,27 +1,9 @@
 import Foundation
 import Console
 
-public protocol FileProtocol {
-    var path: String { get }
-    var name: String { get }
-    var directory: String { get }
-}
+internal let defaultTemplatesURLString = "https://gist.github.com/1b9b58c0ca4dbe3538b2707df5959d80.git"
 
-extension FileProtocol {
-
-    public var name: String {
-        return path.components(separatedBy: "/").last!
-    }
-
-    public var directory: String {
-        var components = path.components(separatedBy: "/")
-        components.removeLast()
-        return components.joined(separator: "/")
-    }
-
-}
-
-public struct File: FileProtocol {
+public struct File {
     public let path: String
     public var contents: String
 
@@ -44,24 +26,12 @@ public struct File: FileProtocol {
     }
 }
 
-public struct FileTemplate: FileProtocol {
-    private static let defaultURLString = "https://gist.github.com/1b9b58c0ca4dbe3538b2707df5959d80.git"
-
-    public let path: String
-    public let source: URL
-
-    public init(path: String, source: URL? = nil) {
-        self.path = path
-        self.source = source ?? URL(string: FileTemplate.defaultURLString)!
-    }
-}
-
 public protocol Generator {
     static var supportedTypes: [String] { get }
     var console: ConsoleProtocol { get }
 
     init(console: ConsoleProtocol)
-    func generate(arguments: [String : String]) throws
+    func generate(arguments: [String]) throws
 }
 
 public extension Generator {
@@ -82,24 +52,28 @@ public extension Generator {
         }
     }
 
-    public func generateFile(named fileName: String, inside directoryPath: String, template: FileTemplate) throws -> File {
-        try checkThatFileExists(atPath: directoryPath)
-        let filePath = "\(directoryPath)/\(fileName)"
-        try checkThatFileDoesNotExist(atPath: filePath)
-        console.info("Generating \(filePath)")
-        if !fileExists(atPath: template.path) {
-            try cloneTemplate(template)
+    func copyTemplate(atPath: String, fallbackURL: URL, toPath: String, _ editsBlock: ((String) -> String)? = nil) throws {
+        if !fileExists(atPath: atPath) {
+            var templatesDirectoryPathComponents = atPath.components(separatedBy: "/")
+            templatesDirectoryPathComponents.removeLast()
+            let destination = templatesDirectoryPathComponents.joined(separator: "/")
+            try cloneTemplate(atURL: fallbackURL, toPath: destination)
         }
-        return try File(path: template.path)
+        var templateFile = try File(path: atPath)
+        if let editedContents = editsBlock?(templateFile.contents) {
+            templateFile.contents = editedContents
+        }
+        try checkThatFileDoesNotExist(atPath: toPath)
+        console.info("Generating \(toPath)")
+        try templateFile.saveCopy(atPath: toPath)
     }
 
-    private func cloneTemplate(_ template: FileTemplate) throws {
-        let destination = template.directory
+    private func cloneTemplate(atURL templateURL: URL, toPath: String) throws {
         let cloneBar = console.loadingBar(title: "Cloning Template")
         cloneBar.start()
         do {
-            _ = try console.backgroundExecute(program: "git", arguments: ["clone", "\(template.source)", "\(destination)"])
-            _ = try console.backgroundExecute(program: "rm", arguments: ["-rf", "\(destination)/.git"])
+            _ = try console.backgroundExecute(program: "git", arguments: ["clone", "\(templateURL)", "\(toPath)"])
+            _ = try console.backgroundExecute(program: "rm", arguments: ["-rf", "\(toPath)/.git"])
             cloneBar.finish()
         } catch ConsoleError.backgroundExecute(_, let error, _) {
             cloneBar.fail()
