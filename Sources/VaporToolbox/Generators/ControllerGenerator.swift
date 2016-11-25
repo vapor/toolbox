@@ -43,7 +43,7 @@ public final class ControllerGenerator: Generator {
 
     private func generateSimpleController(named name: String, actions: [String]) throws {
         try generateController(named: name, templateName: "ControllerTemplateSimple.swift")
-        try generateRoutes(forActions: actions, controllerName: ControllerGenerator.controllerNameForResource(name))
+        try generateRoutes(forActions: actions, resourceName: name)
     }
 
     @discardableResult
@@ -119,10 +119,11 @@ public final class ControllerGenerator: Generator {
         try File(path: file.path, contents: string).save()
     }
 
-    private func generateRoutes(forActions actions: [String], controllerName: String) throws {
+    private func generateRoutes(forActions actions: [String], resourceName: String) throws {
         let routeGenerator = RouteGenerator(console: console)
+        let controllerName = ControllerGenerator.controllerNameForResource(resourceName)
         for action in actions {
-            let path = "\(controllerName)/\(action)"
+            let path = "\(resourceName.pluralized.lowercased())/\(action)"
             let handler = "try \(controllerName)().render(\"\(action)\")"
             try routeGenerator.generateRoute(forPath: path, method: "get", handler: handler)
         }
