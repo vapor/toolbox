@@ -1,19 +1,23 @@
 import Foundation
 import Console
 
-public final class ModelGenerator: Generator {
+public final class ModelGenerator: AbstractGenerator {
 
-    public static let supportedTypes = ["model"]
-    public let console: ConsoleProtocol
-
-    public init(console: ConsoleProtocol) {
-        self.console = console
+    override public var id: String {
+        return "model"
     }
 
-    public func generate(arguments: [String]) throws {
+    override public var signature: [Argument] {
+        return super.signature + [
+            Value(name: "properties", help: ["An optional list of properties in the format variable:type (e.g. firstName:string lastname:string)"]),
+        ]
+    }
+
+    override public func generate(arguments: [String]) throws {
         guard let name = arguments.first else {
             throw ConsoleError.argumentNotFound
         }
+
         let filePath = "Sources/App/Models/\(name.capitalized).swift"
         let templatePath = defaultTemplatesDirectory + "ModelTemplate.swift"
         let fallbackURL = URL(string: defaultTemplatesURLString)!

@@ -22,13 +22,21 @@ do {
         Clean(console: terminal),
         Test(console: terminal),
         Xcode(console: terminal),
-        Generate(console: terminal),
         Version(console: terminal, version: version),
         Group(id: "self", commands: [
             SelfInstall(console: terminal, executable: executable, version: version),
             SelfUpdate(console: terminal, executable: executable),
         ], help: [
             "Commands that affect the toolbox itself."
+        ]),
+        Group(id: "generate", commands: [
+            RouteGenerator(console: terminal),
+            ModelGenerator(console: terminal),
+            ViewGenerator(console: terminal),
+            ControllerGenerator(console: terminal),
+            ResourceGenerator(console: terminal),
+        ], help: [
+            "Commands to help generate classes and resources for your project."
         ]),
         Group(id: "heroku", commands: [
             HerokuInit(console: terminal),

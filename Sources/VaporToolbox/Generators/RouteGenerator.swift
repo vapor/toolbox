@@ -1,25 +1,32 @@
 import Foundation
 import Console
 
-public class RouteGenerator: Generator {
-
-    public static var supportedTypes: [String] = ["route"]
-    public let console: ConsoleProtocol
+public class RouteGenerator: AbstractGenerator {
 
     private static let routesFilePath = "Sources/App/main.swift"
 
-    public init(console: ConsoleProtocol) {
-        self.console = console
+    override public var id: String {
+        return "route"
     }
 
-    public func generate(arguments: [String]) throws {
-        guard arguments.count > 2 else {
+    override public var signature: [Argument] {
+        return super.signature + [
+            Value(name: "method", help: ["The route's HTTP method"]),
+            Value(name: "handler", help: ["A string representing code to get a ResponseRepresentable value to handle the route response"]),
+            Option(name: "resource", help: ["Builds routes for a resource instead of the path as specified. If true, method is ignored."]),
+        ]
+    }
+
+    override public func generate(arguments: [String]) throws {
+        let forResource = arguments.flag("resource")
+        let requiredArgumentsCount = forResource ? 1 : 3
+        guard arguments.count >= requiredArgumentsCount else {
             throw ConsoleError.insufficientArguments
         }
 
         let path = arguments[0]
         let method = arguments[1]
-        if arguments.flag("resource") {
+        if forResource {
             try generateRoutes(forResource: path)
         }
         else {

@@ -1,20 +1,26 @@
 import Foundation
 import Console
 
-public final class ControllerGenerator: Generator {
+public final class ControllerGenerator: AbstractGenerator {
 
     private let controllersDirectory = "Sources/App/Controllers/"
     private let scriptsDirectory = "Public/scripts/"
     private let stylesDirectory = "Public/styles/"
 
-    public static let supportedTypes = ["controller"]
-    public let console: ConsoleProtocol
-
-    public init(console: ConsoleProtocol) {
-        self.console = console
+    override public var id: String {
+        return "controller"
     }
 
-    public func generate(arguments: [String]) throws {
+    override public var signature: [Argument] {
+        return super.signature + [
+            Value(name: "actions", help: ["An optional list of actions. Routes and Views will be created for each action."]),
+            Option(name: "resource", help: ["Builds controller for a resource"]),
+            Option(name: "no-css", help: ["If true it doen't create a CSS file for the controller, defaults to true if 'actions' is empty."]),
+            Option(name: "no-js", help: ["If true it doen't create a JavsScript file for the controller, defaults to true if 'actions' is empty."]),
+        ]
+    }
+
+    override public func generate(arguments: [String]) throws {
         guard let name = arguments.first?.lowercased() else {
             throw ConsoleError.argumentNotFound
         }
@@ -85,10 +91,10 @@ public final class ControllerGenerator: Generator {
     private func generatePublicResources(arguments: [String], resourceName: String) throws {
         var resourcesToGenerate: [String] = []
         if !arguments.flag("no-css") {
-            resourcesToGenerate.append(stylesDirectory + "\(resourceName).css")
+            resourcesToGenerate.append(stylesDirectory + "\(resourceName.pluralized).css")
         }
         if !arguments.flag("no-js") {
-            resourcesToGenerate.append(scriptsDirectory + "\(resourceName).js")
+            resourcesToGenerate.append(scriptsDirectory + "\(resourceName.pluralized).js")
         }
         for path in resourcesToGenerate {
             console.info("Generating \(path)")

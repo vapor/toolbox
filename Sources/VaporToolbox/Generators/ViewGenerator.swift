@@ -1,24 +1,22 @@
 import Foundation
 import Console
 
-public final class ViewGenerator: Generator {
+public final class ViewGenerator: AbstractGenerator {
 
     private static let viewsFolderPath = "Resources/Views"
-    public static let supportedTypes = ["view"]
-    public let console: ConsoleProtocol
 
-    public init(console: ConsoleProtocol) {
-        self.console = console
+    override public var id: String {
+        return "view"
     }
 
-    public func generate(arguments: [String]) throws {
+    override public func generate(arguments: [String]) throws {
         guard let name = arguments.first else {
             throw ConsoleError.argumentNotFound
         }
         try generateView(atPath: "\(ViewGenerator.viewsFolderPath)/\(name).leaf")
     }
 
-    public func generateViews(forResourceNamed resourceName: String, actions: [String]) throws {
+    internal func generateViews(forResourceNamed resourceName: String, actions: [String]) throws {
         let path = "\(ViewGenerator.viewsFolderPath)/\(resourceName.pluralized)"
         console.info("Generating directory \(path)")
         try FileManager.default.createDirectory(atPath: path, withIntermediateDirectories: true)
