@@ -31,6 +31,9 @@ public final class ControllerGenerator: Generator {
         }
 
         try generateViews(forActions: actions, resourceName: name)
+        if actions.count > 0 {
+            try generatePublicResources(arguments: arguments, resourceName: name)
+        }
         // TODO: generate test class
     }
 
@@ -77,8 +80,20 @@ public final class ControllerGenerator: Generator {
     private func generateViews(forActions actions: [String], resourceName: String) throws {
         let viewGenerator = ViewGenerator(console: console)
         try viewGenerator.generateViews(forResourceNamed: resourceName, actions: actions)
-        try File(path: stylesDirectory + "\(resourceName).css", contents: "").save()
-        try File(path: scriptsDirectory + "\(resourceName).js", contents: "").save()
+    }
+
+    private func generatePublicResources(arguments: [String], resourceName: String) throws {
+        var resourcesToGenerate: [String] = []
+        if !arguments.flag("no-css") {
+            resourcesToGenerate.append(stylesDirectory + "\(resourceName).css")
+        }
+        if !arguments.flag("no-js") {
+            resourcesToGenerate.append(scriptsDirectory + "\(resourceName).js")
+        }
+        for path in resourcesToGenerate {
+            console.info("Generating \(path)")
+            try File(path: path, contents: "").save()
+        }
     }
 
     private func uncommentMethods(forActions actions: [String], inFile file: File) throws {
