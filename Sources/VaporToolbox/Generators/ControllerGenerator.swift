@@ -4,6 +4,7 @@ import Console
 public final class ControllerGenerator: Generator {
 
     private let controllersDirectory = "Sources/App/Controllers/"
+    private let scriptsDirectory = "Public/scripts/"
     private let stylesDirectory = "Public/styles/"
 
     public static let supportedTypes = ["controller"]
@@ -77,6 +78,7 @@ public final class ControllerGenerator: Generator {
         let viewGenerator = ViewGenerator(console: console)
         try viewGenerator.generateViews(forResourceNamed: resourceName, actions: actions)
         try File(path: stylesDirectory + "\(resourceName).css", contents: "").save()
+        try File(path: scriptsDirectory + "\(resourceName).js", contents: "").save()
     }
 
     private func uncommentMethods(forActions actions: [String], inFile file: File) throws {
