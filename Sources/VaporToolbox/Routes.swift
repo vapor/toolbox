@@ -20,7 +20,7 @@ public final class Routes: Command {
 
     public func run(arguments: [String]) throws {
         let fallbackURL = URL(string: Routes.routesHelperRepo)!
-        let helperFilePath = defaultTemplatesDirectory + "VaporRoutes.swift"
+        let helperFilePath = ".build/Templates/RoutesCommand/VaporRoutes.swift"
         let helperFile = try loadTemplate(atPath: helperFilePath, fallbackURL: fallbackURL)
         let mainFilePath = "Sources/App/main.swift"
         guard fileExists(atPath: mainFilePath) else {
