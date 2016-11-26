@@ -4,38 +4,38 @@ import Console
 internal let defaultTemplatesDirectory = ".build/Templates/"
 internal let defaultTemplatesURLString = "https://gist.github.com/1b9b58c0ca4dbe3538b2707df5959d80.git"
 
-protocol Generator {
+public protocol Generator {
     var console: ConsoleProtocol { get }
     init(console: ConsoleProtocol)
     func generate(arguments: [String]) throws
 }
 
-extension Generator {
+public extension Generator {
 
-    func fileExists(atPath path: String) -> Bool {
+    public func fileExists(atPath path: String) -> Bool {
         return FileManager.default.fileExists(atPath: path)
     }
 
-    func checkThatFileExists(atPath path: String) throws {
+    public func checkThatFileExists(atPath path: String) throws {
         guard fileExists(atPath: path) else {
             throw ToolboxError.general("\(path) not found.")
         }
     }
 
-    func checkThatFileDoesNotExist(atPath path: String) throws {
+    public func checkThatFileDoesNotExist(atPath path: String) throws {
         guard !fileExists(atPath: path) else {
             throw ToolboxError.general("\(path) already exists")
         }
     }
 
-    func loadTemplate(atPath: String, fallbackURL: URL) throws -> File {
+    public func loadTemplate(atPath: String, fallbackURL: URL) throws -> File {
         if !fileExists(atPath: atPath) {
             try cloneTemplate(atURL: fallbackURL, toPath: atPath.directory)
         }
         return try File(path: atPath)
     }
 
-    func copyTemplate(atPath: String, fallbackURL: URL, toPath: String, _ editsBlock: ((String) -> String)? = nil) throws {
+    public func copyTemplate(atPath: String, fallbackURL: URL, toPath: String, _ editsBlock: ((String) -> String)? = nil) throws {
         var templateFile = try loadTemplate(atPath: atPath, fallbackURL: fallbackURL)
         if let editedContents = editsBlock?(templateFile.contents) {
             templateFile.contents = editedContents
@@ -60,23 +60,23 @@ extension Generator {
 
 }
 
-extension String {
+public extension String {
 
-    var directory: String {
+    internal var directory: String {
         var pathComponents = components(separatedBy: "/")
         pathComponents.removeLast()
         return pathComponents.joined(separator: "/")
     }
 
-    var pluralized: String {
+    public var pluralized: String {
         return pluralize()
     }
 
-    var length: Int {
+    private var length: Int {
         return  characters.count
     }
 
-    func substring(from index: Int, length: Int) -> String
+    private func substring(from index: Int, length: Int) -> String
     {
         let start = self.index(self.startIndex, offsetBy: index)
         let end = self.index(self.startIndex, offsetBy: index + length)
@@ -91,7 +91,7 @@ extension String {
         return ["b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "q", "r", "s", "t", "v", "w", "x", "z"]
     }
 
-    func pluralize(count: Int = 2) -> String {
+    public func pluralize(count: Int = 2) -> String {
         if count == 1 {
             return self
         }
@@ -119,25 +119,25 @@ extension String {
 
 }
 
-struct File {
-    let path: String
-    var contents: String
+public struct File {
+    public let path: String
+    public var contents: String
 
-    init(path: String) throws {
+    public init(path: String) throws {
         let contents = try String(contentsOfFile: path, encoding: .utf8)
         self.init(path: path, contents: contents)
     }
 
-    init(path: String, contents: String) {
+    public init(path: String, contents: String) {
         self.path = path
         self.contents = contents
     }
 
-    func save() throws {
+    public func save() throws {
         try saveCopy(atPath: path)
     }
 
-    func saveCopy(atPath path: String) throws {
+    public func saveCopy(atPath path: String) throws {
         let directory = path.directory
         let fileManager = FileManager.default
         if !fileManager.fileExists(atPath: directory) {

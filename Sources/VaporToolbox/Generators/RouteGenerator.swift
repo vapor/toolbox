@@ -3,7 +3,9 @@ import Console
 
 public class RouteGenerator: AbstractGenerator {
 
-    private static let routesFilePath = "Sources/App/main.swift"
+    private static let routesDirectoryPath = "Sources/App/"
+    private static let applicationStartFileName = "main.swift"
+    private static let routesFileName = "Routes.swift"
 
     override public var id: String {
         return "route"
@@ -12,14 +14,13 @@ public class RouteGenerator: AbstractGenerator {
     override public var signature: [Argument] {
         return super.signature + [
             Value(name: "method", help: ["The route's HTTP method"]),
-            Value(name: "handler", help: ["A string representing code to get a ResponseRepresentable value to handle the route response"]),
             Option(name: "resource", help: ["Builds routes for a resource instead of the path as specified. If true, method is ignored."]),
         ]
     }
 
     override public func generate(arguments: [String]) throws {
         let forResource = arguments.flag("resource")
-        let requiredArgumentsCount = forResource ? 1 : 3
+        let requiredArgumentsCount = forResource ? 1 : 2
         guard arguments.count >= requiredArgumentsCount else {
             throw ConsoleError.insufficientArguments
         }
@@ -30,7 +31,7 @@ public class RouteGenerator: AbstractGenerator {
             try generateRoutes(forResource: path)
         }
         else {
-            try generateRoute(forPath: path, method: method, handler: arguments[3])
+            try generateRoute(forPath: path, method: method, handler: "JSON([:])")
         }
     }
 
@@ -53,19 +54,42 @@ public class RouteGenerator: AbstractGenerator {
     }
 
     private func addRoute(_ text: String) throws {
-        let originalText = "\ndrop.run()"
-        let replacementString = "\(text)\n\(originalText)"
+        let originalText = "func configureRoutes(droplet: Droplet) {"
+        let replacementString = "\(originalText)\n\(text)"
         try openRoutesFile() { (file) in
             file.contents = file.contents.replacingOccurrences(of: originalText, with: replacementString)
         }
     }
 
     private func openRoutesFile(_ editClosure: ((inout File) -> Void)) throws {
-        let filePath = RouteGenerator.routesFilePath
-        try checkThatFileExists(atPath: filePath)
-        var file = try File(path: filePath)
+        let filePath = try routesFilePath()
+        try openFile(atPath: filePath, editClosure)
+    }
+
+    private func openFile(atPath path: String, _ editClosure: ((inout File) -> Void)) throws {
+        var file = try File(path: path)
         editClosure(&file)
         try file.save()
+    }
+
+    private func routesFilePath() throws -> String {
+        let filePath = RouteGenerator.routesDirectoryPath + RouteGenerator.routesFileName
+        guard !fileExists(atPath: filePath) else { return filePath }
+        console.warning("\(filePath) not found. Creating it...")
+        let template = try loadTemplate(atPath: defaultTemplatesDirectory + RouteGenerator.routesFileName,
+                                        fallbackURL: URL(string: defaultTemplatesURLString)!)
+        try template.saveCopy(atPath: filePath)
+        try configureDropletUsingRoutesFile()
+        return filePath
+    }
+
+    private func configureDropletUsingRoutesFile() throws {
+        let originalText = "drop.run()"
+        let replacementString = "configureRoutes(droplet: drop)\n\(originalText)"
+        let filePath = RouteGenerator.routesDirectoryPath + RouteGenerator.applicationStartFileName
+        try openFile(atPath: filePath) { (file) in
+            file.contents = file.contents.replacingOccurrences(of: originalText, with: replacementString)
+        }
     }
 
     private func routeString(fromTemplate template: File, path: String, handler: String, method: String = "") -> String {
