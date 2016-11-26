@@ -7,6 +7,10 @@ public class RouteGenerator: AbstractGenerator {
     private static let applicationStartFileName = "main.swift"
     private static let routesFileName = "Routes.swift"
 
+    private static let routesOriginalText = "func configureRoutes<T : Routing.RouteBuilder>(router: T) where T.Value == HTTP.Responder {"
+    private static let routesConfigOriginalText = "drop.run()"
+    private static let routesConfigReplacementText = "configureRoutes(router: drop)"
+
     override public var id: String {
         return "route"
     }
@@ -54,8 +58,8 @@ public class RouteGenerator: AbstractGenerator {
     }
 
     private func addRoute(_ text: String) throws {
-        let originalText = "func configureRoutes(droplet: Droplet) {"
-        let replacementString = "\(originalText)\n\(text)"
+        let originalText = RouteGenerator.routesOriginalText
+        let replacementString = originalText + "\n\(text)"
         try openRoutesFile() { (file) in
             file.contents = file.contents.replacingOccurrences(of: originalText, with: replacementString)
         }
@@ -84,8 +88,8 @@ public class RouteGenerator: AbstractGenerator {
     }
 
     private func configureDropletUsingRoutesFile() throws {
-        let originalText = "drop.run()"
-        let replacementString = "configureRoutes(droplet: drop)\n\(originalText)"
+        let originalText = RouteGenerator.routesConfigOriginalText
+        let replacementString = RouteGenerator.routesConfigReplacementText + "\n\(originalText)"
         let filePath = RouteGenerator.routesDirectoryPath + RouteGenerator.applicationStartFileName
         try openFile(atPath: filePath) { (file) in
             file.contents = file.contents.replacingOccurrences(of: originalText, with: replacementString)
