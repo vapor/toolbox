@@ -20,6 +20,12 @@ public extension Command {
         }
     }
 
+    public func openFile(atPath path: String, _ editClosure: ((inout File) -> Void)) throws {
+        var file = try File(path: path)
+        editClosure(&file)
+        try file.save()
+    }
+
     public func loadTemplate(atPath: String, fallbackURL: URL) throws -> File {
         if !fileExists(atPath: atPath) {
             try cloneTemplate(atURL: fallbackURL, toPath: atPath.directory)

@@ -21,6 +21,7 @@ do {
         Fetch(console: terminal),
         Clean(console: terminal),
         Test(console: terminal),
+        Routes(console: terminal),
         Xcode(console: terminal),
         Version(console: terminal, version: version),
         Group(id: "self", commands: [

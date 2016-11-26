@@ -70,12 +70,6 @@ public class RouteGenerator: AbstractGenerator {
         try openFile(atPath: filePath, editClosure)
     }
 
-    private func openFile(atPath path: String, _ editClosure: ((inout File) -> Void)) throws {
-        var file = try File(path: path)
-        editClosure(&file)
-        try file.save()
-    }
-
     private func routesFilePath() throws -> String {
         let filePath = RouteGenerator.routesDirectoryPath + RouteGenerator.routesFileName
         guard !fileExists(atPath: filePath) else { return filePath }
