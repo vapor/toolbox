@@ -24,7 +24,10 @@ public final class Routes: Command {
         let helperFile = try loadTemplate(atPath: helperFilePath, fallbackURL: fallbackURL)
         let mainFilePath = "Sources/App/main.swift"
         guard fileExists(atPath: mainFilePath) else {
-            throw ToolboxError.general("Please run this command from the route folder of your app")
+            throw ToolboxError.general("Please run this command from the route folder of your app.")
+        }
+        guard fileExists(atPath: "Sources/App/Routes.swift") else {
+            throw ToolboxError.general("No Routes.swift file found. Please run 'vapor generate routes' first.")
         }
 
         let originalMain = try File(path: mainFilePath)
