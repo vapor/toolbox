@@ -126,7 +126,7 @@ extension NewTests {
         return [
             "    name: The application\'s executable name.",
             "template: The template repository to clone.",
-            "          https://example.com/repo => https://example.com/repo",
+            "          http(s)://example.com/repo-path => http(s)://example.com/repo-path",
             "          user/repo => https://github.com/user/repo",
             "          repo => https://github.com/vapor/repo",
             "          Default: https://github.com/vapor/basic-template.",
