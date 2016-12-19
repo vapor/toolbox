@@ -22,6 +22,9 @@ public final class New: Command {
             ]),
             Option(name: "template", help: [
                 "The template repository to clone.",
+                "http(s)://example.com/repo-path => http(s)://example.com/repo-path",
+                "user/repo => https://github.com/user/repo",
+                "repo => https://github.com/vapor/repo",
                 "Default: \(defaultTemplate)."
             ])
         ]
