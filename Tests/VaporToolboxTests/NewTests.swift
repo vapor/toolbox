@@ -1,76 +1,136 @@
-/*
 import XCTest
-@testable import VaporCLI
+@testable import VaporToolbox
 
-
-class NewTests: XCTestCase {
-
-    // required by LinuxMain.swift
+extension NewTests {
     static var allTests: [(String, (NewTests) -> () throws -> Void)] {
         return [
-            ("test_execute", test_execute),
-            ("test_execute_noargs", test_execute_noargs),
-            ("test_help", test_help),
+            ("testNew", testNew),
+            ("testNewCustomTemplateWithName", testNewCustomTemplateWithName),
+            ("testInvalidTemplateOption", testInvalidTemplateOption),
+            ("testSignatureHelp", testSignatureHelp),
+            ("testHelp", testHelp),
         ]
     }
-
-
-    override func setUp() {
-        TestSystem.reset()
-    }
-
-
-    // MARK: Tests
-
-
-    func test_execute() {
-        do {
-            try New.execute(with: ["name"], in: TestSystem.shell)
-            var expected: [LogEntry] = [
-                .ok("mkdir \"name\""),
-                .ok("curl -L -s https://github.com/qutheory/vapor-example/archive/master.tar.gz -o \"name\"/vapor-example.tar.gz"),
-                .ok("tar -xzf \"name\"/vapor-example.tar.gz --strip-components=1 --directory \"name\""),
-                .ok("rm \"name\"/vapor-example.tar.gz"),
-                ]
-            #if os(OSX)
-                expected.append(.ok("cd \"name\" && vapor xcode"))
-            #endif
-            expected.append(.ok("git init \"name\""))
-            expected.append(.ok("cd \"name\" && git add . && git commit -m \"initial vapor project setup\""))
-            #if os(OSX)
-               expected.append(.ok("open \"name\"/*.xcodeproj"))
-            #endif
-            // compare sizes and individual items separately to make result more readable in case of failure
-            XCTAssertEqual(TestSystem.log.count, expected.count)
-            for i in 0..<min(TestSystem.log.count, expected.count) {
-                XCTAssertEqual(TestSystem.log[i], expected[i])
-            }
-        } catch {
-            XCTFail("unexpected error")
-        }
-    }
-
-
-    func test_execute_noargs() {
-        do {
-            try New.execute(with: [], in: TestSystem.shell)
-            XCTFail("should not be reached, expected error to be thrown")
-        } catch Error.failed(let msg) {
-            XCTAssertEqual(msg, "Invalid number of arguments.")
-            XCTAssertEqual(TestSystem.log, [])
-        } catch {
-            XCTFail("unexpected error")
-        }
-    }
-
-
-    // FIXME: test exception code paths
-
-
-    func test_help() {
-        XCTAssert(New.help.count > 0)
-    }
-
 }
- 
- */*/
+
+class NewTests: XCTestCase {
+    
+    var console: TestConsole!
+    var new: New!
+    
+    override func setUp() {
+        console = TestConsole()
+        new = New(console: console)
+    }
+    
+    // MARK: Tests
+    
+    func testNew(){
+        do {
+            let name = "vapor-test"
+            try new.run(arguments: ["\(name)"]
+            )
+            XCTAssertEqual(console.outputBuffer, defaultOutputBufferFor(name))
+            XCTAssertEqual(console.executeBuffer, defaultExecuteBufferFor(name))
+        } catch {
+            XCTFail("New run failed: \(error)")
+        }
+    }
+    
+    func testNewCustomTemplateWithName(){
+        do {
+            let name = "light"
+            try new.run(arguments: ["\(name)", "--template=\(name)"]
+            )
+            XCTAssertEqual(console.outputBuffer, defaultOutputBufferFor(name))
+            XCTAssertEqual(console.executeBuffer, customExecuteBufferFor(name))
+        } catch {
+            XCTFail("New run failed: \(error)")
+        }
+    }
+    
+    func testInvalidTemplateOption(){
+        do {
+            let name = "light-template"
+            try new.run(arguments: [
+                "\(name)",
+                "http://github.com/vapor/\(name)",
+                "--template=true"
+                ]
+            )
+            XCTAssertEqual(console.outputBuffer, [
+                "Use --template=http://github.com/vapor/\(name) to define a template.\n"
+                ]
+            )
+            XCTAssertNil(console.executeBuffer)
+        } catch {
+            XCTAssertEqual("\(error)", "general(\"Invalid template option\")")
+        }
+    }
+    
+    func testSignatureHelp(){
+        new.printSignatureHelp()
+        
+        XCTAssertEqual(console.outputBuffer, signatureHelp())
+        XCTAssert(console.executeBuffer == [])
+    }
+    
+    func testHelp() {
+        console.printHelp(executable: "executable", command: new)
+        
+        XCTAssertEqual(console.outputBuffer, [
+            "Usage: executable new <name> [--template]",
+            "Creates a new Vapor application from a template.",
+            ]
+            + signatureHelp()
+        )
+        XCTAssert(console.executeBuffer == [])
+    }
+    
+    // FIXME: test without arguments
+    // FIXME: test exception code paths
+}
+
+extension NewTests {
+    fileprivate func defaultOutputBufferFor(_ name: String) -> [String]{
+        return ["Cloning Template [Done]", ""]
+            + new.asciiArt
+            + [
+                "",
+                "Project \"\(name)\" has been created.",
+                "Type `cd \(name)` to enter the project directory.",
+                "Enjoy!",
+                ""
+        ]
+    }
+    
+    fileprivate func defaultExecuteBufferFor(_ name: String) -> [String]{
+        return [
+            "git clone https://github.com/vapor/basic-template \(name)",
+            "rm -rf \(name)/.git",
+            "/bin/sh -c cat \(name)/Package.swift",
+            "/bin/sh -c echo \"\" > \(name)/Package.swift"
+        ]
+    }
+    
+    fileprivate func customExecuteBufferFor(_ name: String) -> [String]{
+        return [
+            "curl -o /dev/null --silent --head --write-out \'%{http_code}\n\' \(name)",
+            "curl -o /dev/null --silent --head --write-out \'%{http_code}\n\' https://github.com/vapor/\(name)",
+            "git clone https://github.com/vapor/\(name)-template \(name)", "rm -rf \(name)/.git",
+            "/bin/sh -c cat \(name)/Package.swift", "/bin/sh -c echo \"\" > \(name)/Package.swift"
+        ]
+    }
+    
+    fileprivate func signatureHelp() -> [String] {
+        return [
+            "    name: The application\'s executable name.",
+            "template: The template repository to clone.",
+            "          https://example.com/repo => https://example.com/repo",
+            "          user/repo => https://github.com/user/repo",
+            "          repo => https://github.com/vapor/repo",
+            "          Default: https://github.com/vapor/basic-template.",
+        ]
+    }
+    
+}
