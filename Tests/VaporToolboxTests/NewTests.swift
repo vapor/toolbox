@@ -128,7 +128,7 @@ extension NewTests {
             "template: The template repository to clone.",
             "          http(s)://example.com/repo-path => http(s)://example.com/repo-path",
             "          user/repo => https://github.com/user/repo",
-            "          repo => https://github.com/vapor/repo",
+            "          light => https://github.com/vapor/light-template",
             "          Default: https://github.com/vapor/basic-template.",
         ]
     }
