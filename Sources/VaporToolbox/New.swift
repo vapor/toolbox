@@ -1,7 +1,12 @@
 import Console
+import Foundation
 
 public final class New: Command {
     public let id = "new"
+
+    // source: https://www.debuggex.com/r/H4kRw1G0YPyBFjfm
+    public let regexForGitURL = try! NSRegularExpression(pattern: "((git|ssh|http(s)?)|(git@[\\w\\.]+))(:(//)?)([\\w\\.@\\:/\\-~]+)(\\.git)(/)?",
+                                                          options: NSRegularExpression.Options.caseInsensitive)
 
     public let defaultTemplate = "https://github.com/vapor/basic-template"
 
@@ -93,36 +98,20 @@ public final class New: Command {
          foo/some-template => https://github.com/foo/some-template
          some-template => https://github.com/vapor/some-template
          some => https://github.com/vapor/some
-         if fails, attempts `-template` suffix
-         some => https://github.com/vapor/some-template
     */
     private func expand(template: String) throws -> String {
         // if valid URL, use it
-        guard try !isValid(url: template) else { return template }
+        guard try !isGitURL(template) else { return template }
         // `/` indicates `owner/repo`
         guard !template.contains("/") else { return "https://github.com/" + template }
         // no '/' indicates vapor default
-        let direct = "https://github.com/vapor/" + template
-        guard try !isValid(url: direct) else { return direct }
-        // invalid url attempts `-template` suffix
-        return direct + "-template"
+        return "https://github.com/vapor/" + template
     }
 
-    private func isValid(url: String) throws -> Bool {
-        // http://stackoverflow.com/a/6136861/2611971
-        let result = try console.backgroundExecute(
-            program: "curl",
-            arguments: [
-                "-o",
-                "/dev/null",
-                "--silent",
-                "--head",
-                "--write-out",
-                "'%{http_code}\n'",
-                url
-            ]
-        )
-        return result.contains("200")
+    private func isGitURL(_ url: String) throws -> Bool {
+        return regexForGitURL.numberOfMatches(in: url,
+                                              options: [],
+                                              range: NSRange(location: 0, length: url.characters.count)) == 1
     }
 
     public let asciiArt: [String] = [
