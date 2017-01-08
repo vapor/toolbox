@@ -1,12 +1,20 @@
 import Console
 import Foundation
 
+// source: https://www.debuggex.com/r/H4kRw1G0YPyBFjfm
+fileprivate let gitURLPattern = "((git|ssh|http(s)?)|(git@[\\w\\.]+))(:(//)?)([\\w\\.@\\:/\\-~]+)(\\.git)(/)?"
+
 public final class New: Command {
     public let id = "new"
 
-    // source: https://www.debuggex.com/r/H4kRw1G0YPyBFjfm
-    public let regexForGitURL = try! NSRegularExpression(pattern: "((git|ssh|http(s)?)|(git@[\\w\\.]+))(:(//)?)([\\w\\.@\\:/\\-~]+)(\\.git)(/)?",
-                                                          options: NSRegularExpression.Options.caseInsensitive)
+    
+    #if os(Linux)
+    public let gitURLRegex = try! RegularExpression(pattern: gitURLPattern,
+                                                       options: RegularExpression.Options.caseInsensitive)
+    #else
+    public let gitURLRegex = try! NSRegularExpression(pattern: gitURLPattern,
+                                                         options: NSRegularExpression.Options.caseInsensitive)
+    #endif
 
     public let defaultTemplate = "https://github.com/vapor/basic-template"
 
@@ -109,7 +117,7 @@ public final class New: Command {
     }
 
     private func isGitURL(_ url: String) throws -> Bool {
-        return regexForGitURL.numberOfMatches(in: url,
+        return gitURLRegex.numberOfMatches(in: url,
                                               options: [],
                                               range: NSRange(location: 0, length: url.characters.count)) == 1
     }
