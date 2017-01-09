@@ -2,7 +2,7 @@ import Console
 import Foundation
 
 // source: https://www.debuggex.com/r/H4kRw1G0YPyBFjfm
-fileprivate let gitURLPattern = "((git|ssh|http(s)?)|(git@[\\w\\.]+))(:(//)?)([\\w\\.@\\:/\\-~]+)(\\.git)(/)?"
+fileprivate let gitURLPattern = "((git|ssh|http(s)?)|(git@[\\w\\.]+))(:(//)?)([\\w\\.@\\:/\\-~]+)(\\.git)?(/)?"
 
 public final class New: Command {
     public let id = "new"
@@ -117,9 +117,8 @@ public final class New: Command {
     }
 
     private func isGitURL(_ url: String) throws -> Bool {
-        return gitURLRegex.numberOfMatches(in: url,
-                                              options: [],
-                                              range: NSRange(location: 0, length: url.characters.count)) == 1
+        let range = NSRange(location: 0, length: url.characters.count)
+        return gitURLRegex.numberOfMatches(in: url, options: [], range: range) == 1
     }
 
     public let asciiArt: [String] = [
