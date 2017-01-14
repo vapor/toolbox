@@ -9,7 +9,7 @@ install:
   - eval "$(curl -sL https://gist.githubusercontent.com/kylef/5c0475ff02b7c7671d2a/raw/9f442512a46d7a2af7b850d65a7e9bd31edfb09b/swiftenv-install.sh)"
   - swiftenv install 3.0.1 || echo ""
 script:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then curl -sL swift.vapor.sh/ubuntu | bash; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then eval "$(curl -sL swift.vapor.sh/ubuntu)"; fi
 
   # run unit tests
   - swift build -Xswiftc -DNO_ANIMATION
