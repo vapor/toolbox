@@ -18,7 +18,7 @@ class CleanTests: XCTestCase {
                 "Cleaning [Done]"
             ])
             XCTAssertEqual(console.executeBuffer, [
-                "rm -rf Packages .build",
+                "rm -rf Packages .build Package.pins",
             ])
         } catch {
             XCTFail("Clean failed: \(error)")
@@ -35,7 +35,7 @@ class CleanTests: XCTestCase {
                 "Cleaning [Done]"
             ])
             XCTAssertEqual(console.executeBuffer, [
-                "rm -rf Packages .build",
+                "rm -rf Packages .build Package.pins",
                 "rm -rf *.xcodeproj"
             ])
         } catch {
