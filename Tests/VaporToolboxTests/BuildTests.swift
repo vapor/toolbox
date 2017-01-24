@@ -43,7 +43,7 @@ class BuildTests: XCTestCase {
                 "Building Project [Done]"
             ])
             XCTAssertEqual(console.executeBuffer, [
-                "rm -rf Packages .build",
+                "rm -rf Packages .build Package.pins",
                 "ls .",
                 "swift package fetch",
                 "swift build",
