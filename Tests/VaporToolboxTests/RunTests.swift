@@ -10,6 +10,7 @@ class RunTests: XCTestCase {
         return [
             ("testRunFailsWithNoInformation", testRunFailsWithNoInformation),
             ("testRunNameResolution", testRunNameResolution),
+            ("testRunNameResolutionWithTargets", testRunNameResolutionWithTargets),
             ("testRunWithProvidedExec", testRunWithProvidedExec),
             ("testRunWithProvidedName", testRunWithProvidedName),
             ("testRunRelease", testRunRelease),
@@ -49,7 +50,13 @@ class RunTests: XCTestCase {
         XCTAssertEqual("Running Hello...", console.outputBuffer.last ?? "")
     }
 
+    func testRunNameResolutionWithTargets() throws {
+        console.backgroundExecuteOutputBuffer["swift package dump-package"] = "{\"dependencies\":[],\"exclude\":[],\"name\":\"MultiTargetApp\",\"targets\":[{\"dependencies\":[\"MultiTargetDependency\"],\"name\":\"App\"}]}"
+        try command.run(arguments: [])
         
+        // TODO: the safeguard in Run uses FileManager.default that cannot be faked in the test,
+        //       therefore the actual executed command cannot be tested.
+        XCTAssertEqual("Running MultiTargetApp...", console.outputBuffer.last ?? "")
     }
 
     func testRunWithProvidedExec() throws {
