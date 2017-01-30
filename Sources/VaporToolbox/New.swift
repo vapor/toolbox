@@ -35,7 +35,7 @@ public final class New: Command {
         cloneBar.start()
 
         do {
-            _ = try console.backgroundExecute(program: "git", arguments: ["clone", "\(template)", "\(name)"])
+            _ = try console.backgroundExecute(program: "git", arguments: ["clone", "--depth=1", "\(template)", "\(name)"])
             _ = try console.backgroundExecute(program: "rm", arguments: ["-rf", "\(name)/.git"])
             cloneBar.finish()
         } catch ConsoleError.backgroundExecute(_, let error, _) {
