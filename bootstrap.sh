@@ -15,6 +15,10 @@ cd vapor-toolbox;
 TAG=$(git describe --tags);
 git checkout $TAG > /dev/null 2>&1;
 
+cat Sources/Executable/main.swift | \
+    awk -v tag="$TAG" '/let version = "master"/ { printf "let version = \"%s\"", tag; next } 1' > .tmp && \
+    mv .tmp Sources/Executable/main.swift
+
 echo "Compiling...";
 swift build -c release > /dev/null;
 
