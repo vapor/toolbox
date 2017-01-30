@@ -1,5 +1,6 @@
 import Console
 import Foundation
+import JSON
 
 public final class Run: Command {
     public let id = "run"
@@ -86,13 +87,10 @@ public final class Run: Command {
     private func extractName() throws -> String? {
         let dump = try console.backgroundExecute(program: "swift", arguments: ["package", "dump-package"])
 
-        let dumpSplit = dump.components(separatedBy: "\"name\": \"")
-
-        guard dumpSplit.count == 2 else {
+        guard let json = try? JSON.init(serialized: dump.bytes) else {
             return nil
         }
 
-        let nameSplit = dumpSplit[1].components(separatedBy: "\"")
-        return nameSplit.first
+        return json["name"]?.string
     }
 }
