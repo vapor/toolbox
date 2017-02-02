@@ -35,7 +35,7 @@ public final class New: Command {
         cloneBar.start()
 
         do {
-            _ = try console.backgroundExecute(program: "git", arguments: ["clone", "\(template)", "\(name)"])
+            _ = try console.backgroundExecute(program: "git", arguments: ["clone", "--depth=1", "\(template)", "\(name)"])
             _ = try console.backgroundExecute(program: "rm", arguments: ["-rf", "\(name)/.git"])
             cloneBar.finish()
         } catch ConsoleError.backgroundExecute(_, let error, _) {
@@ -98,31 +98,36 @@ public final class New: Command {
     */
     private func expand(template: String) throws -> String {
         // if valid URL, use it
-        guard try !isValid(url: template) else { return template }
+        guard !isValid(url: template) else { return template }
         // `/` indicates `owner/repo`
         guard !template.contains("/") else { return "https://github.com/" + template }
         // no '/' indicates vapor default
         let direct = "https://github.com/vapor/" + template
-        guard try !isValid(url: direct) else { return direct }
+        guard !isValid(url: direct) else { return direct }
         // invalid url attempts `-template` suffix
         return direct + "-template"
     }
 
-    private func isValid(url: String) throws -> Bool {
-        // http://stackoverflow.com/a/6136861/2611971
-        let result = try console.backgroundExecute(
-            program: "curl",
-            arguments: [
-                "-o",
-                "/dev/null",
-                "--silent",
-                "--head",
-                "--write-out",
-                "'%{http_code}\n'",
-                url
-            ]
-        )
-        return result.contains("200")
+    private func isValid(url: String) -> Bool {
+        do {
+            // http://stackoverflow.com/a/6136861/2611971
+            let result = try console.backgroundExecute(
+                program: "curl",
+                arguments: [
+                    "-o",
+                    "/dev/null",
+                    "--silent",
+                    "--head",
+                    "--write-out",
+                    "'%{http_code}\\n'",
+                    url
+                ]
+            )
+            return result.contains("200")
+        } catch {
+            // yucky...
+            return false
+        }
     }
 
     public let asciiArt: [String] = [
