@@ -32,20 +32,12 @@ public final class DockerBuild: Command {
             throw ToolboxError.general("Could not check for Dockerfile")
         }
 
-        let swiftVersion: String
-
-        do {
-            swiftVersion = try console.backgroundExecute(program: "cat", arguments: [".swift-version"]).trim()
-        } catch {
-            throw ToolboxError.general("Could not determine Swift version from .swift-version file.")
-        }
-
         let buildBar = console.loadingBar(title: "Building Docker image")
         buildBar.start()
 
         do {
             let imageName = DockerBuild.imageName(version: swiftVersion)
-            _ = try console.backgroundExecute(program: "docker", arguments: ["build", "--rm", "-t", "\(imageName)", "--build-arg", "SWIFT_VERSION=\(swiftVersion)", "."])
+            _ = try console.backgroundExecute(program: "docker", arguments: ["build", "--rm", "-t", "vapor", "."])
             buildBar.finish()
         } catch ConsoleError.backgroundExecute(_, let error, _) {
             buildBar.fail()
@@ -56,9 +48,5 @@ public final class DockerBuild: Command {
             let build = DockerRun(console: console)
             try build.run(arguments: arguments)
         }
-    }
-
-    static func imageName(version: String) -> String {
-        return "vapor/swift:\(version)"
     }
 }

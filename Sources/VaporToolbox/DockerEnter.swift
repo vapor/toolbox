@@ -33,16 +33,7 @@ public final class DockerEnter: Command {
             throw ToolboxError.general("Could not check for Dockerfile")
         }
 
-        let swiftVersion: String
-        do {
-            swiftVersion = try console.backgroundExecute(program: "cat", arguments: [".swift-version"]).trim()
-        } catch {
-            throw ToolboxError.general("Could not determine Swift version from .swift-version file.")
-        }
-
-        let imageName = DockerBuild.imageName(version: swiftVersion)
-
         console.info("Copy and run the following line:")
-        console.print("docker run --rm -it -v $(PWD):/vapor --entrypoint bash \(imageName)")
+        console.print("docker run --rm -it -v $(PWD):/vapor --entrypoint bash vapor")
     }
 }
