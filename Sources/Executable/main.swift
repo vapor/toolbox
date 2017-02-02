@@ -3,7 +3,7 @@ import Console
 import Foundation
 import VaporToolbox
 
-let version = "1.0.3"
+let version = "1.0.4"
 
 let terminal = Terminal(arguments: CommandLine.arguments)
 
@@ -21,14 +21,23 @@ do {
         Fetch(console: terminal),
         Clean(console: terminal),
         Test(console: terminal),
+        Routes(console: terminal),
         Xcode(console: terminal),
         Version(console: terminal, version: version),
         Group(id: "self", commands: [
             SelfInstall(console: terminal, executable: executable, version: version),
             SelfUpdate(console: terminal, executable: executable),
-
         ], help: [
             "Commands that affect the toolbox itself."
+        ]),
+        Group(id: "generate", commands: [
+            RouteGenerator(console: terminal),
+            ModelGenerator(console: terminal),
+            ViewGenerator(console: terminal),
+            ControllerGenerator(console: terminal),
+            ResourceGenerator(console: terminal),
+        ], help: [
+            "Commands to help generate classes and resources for your project."
         ]),
         Group(id: "heroku", commands: [
             HerokuInit(console: terminal),
