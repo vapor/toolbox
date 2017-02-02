@@ -43,6 +43,12 @@ do {
             DockerEnter(console: terminal)
         ], help: [
             "Commands to help manage a Docker image."
+        ]),
+        Group(id: "prepare", commands: [
+            PrepareAdd(console: terminal),
+            PrepareList(console: terminal)
+        ], help: [
+            "Commands related to database migrations."
         ])
     ], arguments: Array(iterator), help: [
         "Join our Slack if you have questions, need help,",
