@@ -4,8 +4,7 @@
 FROM ubuntu:14.04
 
 ENV SWIFT_BRANCH swift-3.0-release
-ARG SWIFT_VERSION
-ENV SWIFT_VERSION ${SWIFT_VERSION}
+ENV SWIFT_VERSION swift-3.0.2-RELEASE
 ENV SWIFT_PLATFORM ubuntu14.04
 
 # Install related packages and set LLVM 3.6 as the compiler
