@@ -35,7 +35,6 @@ ENV PATH /usr/bin:$PATH
 
 WORKDIR /vapor
 VOLUME /vapor
-ADD . /vapor
 EXPOSE 8080
 
 # mount in local sources via:  -v $(PWD):/vapor
