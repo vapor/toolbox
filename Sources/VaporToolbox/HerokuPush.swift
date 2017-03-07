@@ -36,7 +36,7 @@ public final class HerokuPush: Command {
         //let herokuBar = console.loadingBar(title: "Pushing to Heroku")
         //herokuBar.start()
         do {
-            try console.execute(program: "git push heroku master", arguments: [], input: nil, output: nil, error: nil)
+            try console.execute(program: "git", arguments: ["push", "heroku", "master"], input: nil, output: nil, error: nil)
             //herokuBar.finish()
         } catch ConsoleError.execute(_) {
             //herokuBar.fail()
