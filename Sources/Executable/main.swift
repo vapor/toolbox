@@ -3,8 +3,8 @@ import Console
 import Foundation
 import VaporToolbox
 
-let version = "1.0.3"
-
+// The toolbox bootstrap script replaces "master" during installation. Do not modify!
+let version = "master"
 let terminal = Terminal(arguments: CommandLine.arguments)
 
 var iterator = CommandLine.arguments.makeIterator()
