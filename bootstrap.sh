@@ -1,5 +1,5 @@
 #!/bin/bash
-curl -sL "check.vapor.sh" | bash || exit 1;
+curl -sL "https://check.vapor.sh" | bash || exit 1;
 
 DIR=".vapor-toolbox-temporary";
 

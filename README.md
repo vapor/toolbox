@@ -16,5 +16,5 @@ brew install vapor/tap/toolbox
 ## Linux / Manual
 ```sh
 # install Vapor Toolbox
-curl -sL toolbox.qutheory.io | bash
+curl -sL https://toolbox.vapor.sh | bash
 ```
