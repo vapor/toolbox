@@ -57,7 +57,11 @@ public final class Xcode: Command {
             console.warning("Could not remove module map.")
         }
 
-        let argsArray = ["package", "generate-xcodeproj"] + buildFlags
+        #if swift(>=3.1)
+            let argsArray = ["package"] + buildFlags + ["generate-xcodeproj"]
+        #else
+            let argsArray = ["package", "generate-xcodeproj"] + buildFlags
+        #endif
 
         do {
             _ = try console.backgroundExecute(program: "swift", arguments: argsArray)
