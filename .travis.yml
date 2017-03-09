@@ -18,10 +18,6 @@ script:
   - vapor --help
   - vapor version                   # version
 
-  # docker
-  - rm Dockerfile                   # docker init won't run if file exists
-  - vapor docker init -n
-
   # basic
   - vapor new test-project          # new
   - cd test-project
@@ -31,4 +27,3 @@ script:
   - vapor run &                     # run
 
   - vapor self update
-
