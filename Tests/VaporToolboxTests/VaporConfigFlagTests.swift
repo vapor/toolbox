@@ -13,7 +13,10 @@ class VaporConfigFlagsTests: XCTestCase {
     ]
 
     #if Xcode
-    let directory = #file.components(separatedBy: "/").dropLast().joined(separator: "/") + "/VaporConfigResources"
+    /// If you don't nest this in a closure, the file path doesn't load properly /shrug
+    let directory: String = {
+        #file.components(separatedBy: "/").dropLast().joined(separator: "/") + "/VaporConfigResources"
+    }()
     #else
     let directory = "./Tests/VaporToolboxTests/VaporConfigResources"
     #endif
