@@ -13,7 +13,7 @@ public final class Clean: Command {
     ]
 
     public let console: ConsoleProtocol
-    
+
     public init(console: ConsoleProtocol) {
         self.console = console
     }
@@ -22,10 +22,14 @@ public final class Clean: Command {
         let cleanBar = console.loadingBar(title: "Cleaning")
         cleanBar.start()
 
-        _ = try console.backgroundExecute(program: "rm", arguments: ["-rf", "Packages", ".build", "Package.pins"])
+        _ = try console.backgroundExecute(program: "rm", arguments: ["-rf", "Packages", ".build"])
 
         if arguments.flag("xcode") {
             _ = try console.backgroundExecute(program: "rm", arguments: ["-rf", "*.xcodeproj"])
+        }
+
+        if arguments.flag("pins") {
+            _ = try console.backgroundExecute(program: "rm", arguments: ["-rf", "Package.pins"])
         }
 
         cleanBar.finish()
