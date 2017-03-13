@@ -74,7 +74,7 @@ public final class HerokuInit: Command {
 
         let url: String
         do {
-            url = try console.backgroundExecute(program: "heroku", arguments: ["create", "\(name)", "--region \(region)"])
+            url = try console.backgroundExecute(program: "heroku", arguments: ["create", name, "--region", region])
             console.info(url)
         } catch ConsoleError.backgroundExecute(_, let message, _) {
             throw ToolboxError.general("Unable to create Heroku app: \(message.string.trim())")
