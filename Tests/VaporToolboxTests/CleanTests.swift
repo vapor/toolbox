@@ -5,7 +5,8 @@ import XCTest
 class CleanTests: XCTestCase {
     static let allTests = [
         ("testClean", testClean),
-        ("testCleanWithXcode", testCleanWithXcode)
+        ("testCleanWithXcode", testCleanWithXcode),
+        ("testCleanWithPins", testCleanWithPins)
     ]
 
     func testClean() {
@@ -37,6 +38,24 @@ class CleanTests: XCTestCase {
             XCTAssertEqual(console.executeBuffer, [
                 "rm -rf Packages .build",
                 "rm -rf *.xcodeproj"
+            ])
+        } catch {
+            XCTFail("Clean failed: \(error)")
+        }
+    }
+
+    func testCleanWithPins() {
+        let console = TestConsole()
+        let clean = Clean(console: console)
+
+        do {
+            try clean.run(arguments: ["--pins"])
+            XCTAssertEqual(console.outputBuffer, [
+                "Cleaning [Done]"
+            ])
+            XCTAssertEqual(console.executeBuffer, [
+                "rm -rf Packages .build",
+                "rm -rf Package.pins"
             ])
         } catch {
             XCTFail("Clean failed: \(error)")
