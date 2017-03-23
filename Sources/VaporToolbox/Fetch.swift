@@ -24,10 +24,16 @@ public final class Fetch: Command {
         }
 
         do {
-            let ls = try console.backgroundExecute(program: "ls", arguments: ["."])
-            if !ls.contains("Packages") {
-                console.warning("No Packages folder, fetch may take a while...")
-            }
+            let ls = try console.backgroundExecute(program: "ls -a", arguments: ["."])
+            #if swift(>=3.1)
+                if !ls.contains(".buid") {
+                    console.warning("No build folder, fetch may take a while...")
+                }
+            #else
+                if !ls.contains("Packages") {
+                    console.warning("No Packages folder, fetch may take a while...")
+                }
+            #endif
         } catch ConsoleError.backgroundExecute(_) {
             // do nothing
         }
