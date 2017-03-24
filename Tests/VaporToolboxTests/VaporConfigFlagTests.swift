@@ -22,6 +22,7 @@ class VaporConfigFlagsTests: XCTestCase {
     #endif
 
     func testBuildFlagsMac() throws {
+        print("Directory: \(directory)")
         let flags = try Config.buildFlags(rootDirectory: directory, os: "macos")
         let expectation = [
             "-Xswiftc",

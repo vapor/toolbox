@@ -16,12 +16,12 @@ class BuildTests: XCTestCase {
         do {
             try build.run(arguments: ["--modulemap=false"])
             XCTAssertEqual(console.outputBuffer, [
-                "No Packages folder, fetch may take a while...",
+                "No .build folder, fetch may take a while...",
                 "Fetching Dependencies [Done]",
                 "Building Project [Done]"
             ])
             XCTAssertEqual(console.executeBuffer, [
-                "ls .",
+                "ls -a .",
                 "swift package fetch",
                 "swift build",
             ])
@@ -38,13 +38,13 @@ class BuildTests: XCTestCase {
             try build.run(arguments: ["--clean", "--modulemap=false"])
             XCTAssertEqual(console.outputBuffer, [
                 "Cleaning [Done]",
-                "No Packages folder, fetch may take a while...",
+                "No .build folder, fetch may take a while...",
                 "Fetching Dependencies [Done]",
                 "Building Project [Done]"
             ])
             XCTAssertEqual(console.executeBuffer, [
                 "rm -rf Packages .build",
-                "ls .",
+                "ls -a .",
                 "swift package fetch",
                 "swift build",
             ])
@@ -65,13 +65,13 @@ class BuildTests: XCTestCase {
         do {
             try build.run(arguments: ["--run", "--modulemap=false"])
             XCTAssertEqual(console.outputBuffer, [
-                "No Packages folder, fetch may take a while...",
+                "No .build folder, fetch may take a while...",
                 "Fetching Dependencies [Done]",
                 "Building Project [Done]",
                 "Running \(name)..."
             ])
             XCTAssertEqual(console.executeBuffer, [
-                "ls .",
+                "ls -a .",
                 "swift package fetch",
                 "swift build",
                 "ls .build/debug",
@@ -90,12 +90,12 @@ class BuildTests: XCTestCase {
         do {
             try build.run(arguments: ["--mysql", "--modulemap=false"])
             XCTAssertEqual(console.outputBuffer, [
-                "No Packages folder, fetch may take a while...",
+                "No .build folder, fetch may take a while...",
                 "Fetching Dependencies [Done]",
                 "Building Project [Done]"
             ])
             XCTAssertEqual(console.executeBuffer, [
-                "ls .",
+                "ls -a .",
                 "swift package fetch",
                 "swift build -Xswiftc -I/usr/local/include/mysql -Xlinker -L/usr/local/lib",
             ])

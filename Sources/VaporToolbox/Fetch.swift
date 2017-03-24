@@ -27,7 +27,7 @@ public final class Fetch: Command {
             let ls = try console.backgroundExecute(program: "ls -a", arguments: ["."])
             #if swift(>=3.1)
                 if !ls.contains(".buid") {
-                    console.warning("No build folder, fetch may take a while...")
+                    console.warning("No .build folder, fetch may take a while...")
                 }
             #else
                 if !ls.contains("Packages") {
