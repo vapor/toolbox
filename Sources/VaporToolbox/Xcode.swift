@@ -27,15 +27,6 @@ public final class Xcode: Command {
         xcodeBar.start()
 
         var buildFlags: [String] = []
-        
-        if arguments.flag("mysql") {
-            buildFlags += [
-                "-Xswiftc",
-                "-I/usr/local/include/mysql",
-                "-Xlinker",
-                "-L/usr/local/lib"
-            ]
-        }
 
         buildFlags += try Config.buildFlags()
 
@@ -58,7 +49,7 @@ public final class Xcode: Command {
         }
 
         #if swift(>=3.1)
-            let argsArray = ["package"] + buildFlags + ["generate-xcodeproj"]
+            let argsArray = ["package"] + buildFlags + ["generate-xcodeproj", "--enable-prefetching"]
         #else
             let argsArray = ["package", "generate-xcodeproj"] + buildFlags
         #endif

@@ -23,7 +23,7 @@ class BuildTests: XCTestCase {
             XCTAssertEqual(console.executeBuffer, [
                 "ls -a .",
                 "swift package fetch",
-                "swift build",
+                "swift build --enable-prefetching",
             ])
         } catch {
             XCTFail("Build run failed: \(error)")
@@ -46,7 +46,7 @@ class BuildTests: XCTestCase {
                 "rm -rf Packages .build",
                 "ls -a .",
                 "swift package fetch",
-                "swift build",
+                "swift build --enable-prefetching",
             ])
         } catch {
             XCTFail("Build run failed: \(error)")
@@ -73,31 +73,10 @@ class BuildTests: XCTestCase {
             XCTAssertEqual(console.executeBuffer, [
                 "ls -a .",
                 "swift package fetch",
-                "swift build",
+                "swift build --enable-prefetching",
                 "ls .build/debug",
                 "swift package dump-package",
                 ".build/debug/App"
-            ])
-        } catch {
-            XCTFail("Build run failed: \(error)")
-        }
-    }
-
-    func testBuildWithMySQL() {
-        let console = TestConsole()
-        let build = Build(console: console)
-
-        do {
-            try build.run(arguments: ["--mysql", "--modulemap=false"])
-            XCTAssertEqual(console.outputBuffer, [
-                "No .build folder, fetch may take a while...",
-                "Fetching Dependencies [Done]",
-                "Building Project [Done]"
-            ])
-            XCTAssertEqual(console.executeBuffer, [
-                "ls -a .",
-                "swift package fetch",
-                "swift build -Xswiftc -I/usr/local/include/mysql -Xlinker -L/usr/local/lib",
             ])
         } catch {
             XCTFail("Build run failed: \(error)")

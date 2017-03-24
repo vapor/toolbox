@@ -51,15 +51,6 @@ public final class Build: Command {
 
         var buildFlags: [String] = []
 
-        if arguments.flag("mysql") {
-            buildFlags += [
-                "-Xswiftc",
-                "-I/usr/local/include/mysql",
-                "-Xlinker",
-                "-L/usr/local/lib"
-            ]
-        }
-
         if arguments.flag("debug") {
             buildFlags += [
                 "-Xswiftc",
@@ -89,8 +80,11 @@ public final class Build: Command {
             }
         }
 
-        let command =  ["build"] + buildFlags
-
+        #if swift(>=3.1)
+            let command =  ["build", "--enable-prefetching"] + buildFlags
+        #else
+            let command =  ["build"] + buildFlags
+        #endif
         do {
             if arguments.options["verbose"]?.bool == true {
                 console.print("Building Project...")
