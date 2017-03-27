@@ -1,4 +1,5 @@
 import Console
+import libc
 
 public final class New: Command {
     public let id = "new"
@@ -8,7 +9,9 @@ public final class New: Command {
     public let signature: [Argument]
 
     public let help: [String] = [
-        "Creates a new Vapor application from a template."
+        "Creates a new Vapor application from a template.",
+        "Use --template=repo/template for github templates",
+        "Use --template=full-url-here.git for non github templates",
     ]
 
     public let console: ConsoleProtocol
@@ -23,6 +26,12 @@ public final class New: Command {
             Option(name: "template", help: [
                 "The template repository to clone.",
                 "Default: \(defaultTemplate)."
+            ]),
+            Option(name: "branch", help: [
+                "An optional branch to specify when cloning",
+            ]),
+            Option(name: "tag", help: [
+                "An optional tag to specify when cloning",
             ])
         ]
     }
@@ -30,19 +39,32 @@ public final class New: Command {
     public func run(arguments: [String]) throws {
         let template = try loadTemplate(arguments: arguments)
         let name = try value("name", from: arguments).string ?? ""
+        let gitDir = "--git-dir=./\(name)/.git"
+        let workTree = "--work-tree=./\(name)"
 
         let cloneBar = console.loadingBar(title: "Cloning Template")
         cloneBar.start()
 
         do {
-            _ = try console.backgroundExecute(program: "git", arguments: ["clone", "--depth=1", "\(template)", "\(name)"])
+            _ = try console.backgroundExecute(program: "git", arguments: ["clone", "\(template)", "\(name)"])
+
+            if let checkout = arguments.options["tag"]?.string ?? arguments.options["branch"]?.string {
+                _ = try console.backgroundExecute(
+                    program: "git",
+                    arguments: [gitDir, workTree, "checkout", checkout]
+                )
+            }
+
             _ = try console.backgroundExecute(program: "rm", arguments: ["-rf", "\(name)/.git"])
+
             cloneBar.finish()
         } catch ConsoleError.backgroundExecute(_, let error, _) {
             cloneBar.fail()
             throw ToolboxError.general(error.string.trim())
         }
 
+        let repository = console.loadingBar(title: "Updating Package Name")
+        repository.start()
         do {
             let file = "\(name)/Package.swift"
             var manifest = try console.backgroundExecute(program: "/bin/sh", arguments: ["-c", "cat \(file)"])
@@ -52,6 +74,21 @@ public final class New: Command {
         } catch {
             console.error("Could not update Package.swift file.")
         }
+        repository.finish()
+
+        let gitBar = console.loadingBar(title: "Initializing git repository")
+        gitBar.start()
+        do {
+            _ = try console.backgroundExecute(program: "git", arguments: [gitDir, "init"])
+            _ = try console.backgroundExecute(program: "git", arguments: [gitDir, workTree, "add", "."])
+            _ = try console.backgroundExecute(
+                program: "git",
+                arguments: [gitDir, workTree, "commit", "-m", "\"created \(name) from template \(template)\""]
+            )
+        } catch {
+            console.error("could not initialize git repository")
+        }
+        gitBar.finish()
 
         console.print()
 

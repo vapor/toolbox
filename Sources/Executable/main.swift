@@ -5,9 +5,10 @@ import VaporToolbox
 
 // The toolbox bootstrap script replaces "master" during installation. Do not modify!
 let version = "master"
-let terminal = Terminal(arguments: CommandLine.arguments)
+let arguments = CommandLine.arguments
+let terminal = Terminal(arguments: arguments)
 
-var iterator = CommandLine.arguments.makeIterator()
+var iterator = arguments.makeIterator()
 
 guard let executable = iterator.next() else {
     throw ConsoleError.noExecutable

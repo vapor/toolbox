@@ -24,10 +24,16 @@ public final class Fetch: Command {
         }
 
         do {
-            let ls = try console.backgroundExecute(program: "ls", arguments: ["."])
-            if !ls.contains("Packages") {
-                console.warning("No Packages folder, fetch may take a while...")
-            }
+            let ls = try console.backgroundExecute(program: "ls", arguments: ["-a", "."])
+            #if swift(>=3.1)
+                if !ls.contains(".build") {
+                    console.warning("No .build folder, fetch may take a while...")
+                }
+            #else
+                if !ls.contains("Packages") {
+                    console.warning("No Packages folder, fetch may take a while...")
+                }
+            #endif
         } catch ConsoleError.backgroundExecute(_) {
             // do nothing
         }
@@ -36,7 +42,11 @@ public final class Fetch: Command {
         depBar.start()
 
         do {
-            _ = try console.backgroundExecute(program: "swift", arguments: ["package", "fetch"])
+            #if swift(>=3.1)
+                _ = try console.backgroundExecute(program: "swift", arguments: ["package", "--enable-prefetching", "fetch"])
+            #else
+                _ = try console.backgroundExecute(program: "swift", arguments: ["package", "fetch"])
+            #endif
             depBar.finish()
         } catch ConsoleError.backgroundExecute(_, let message, _) {
             let message = message.string
