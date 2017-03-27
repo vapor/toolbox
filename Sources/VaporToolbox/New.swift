@@ -25,6 +25,9 @@ public final class New: Command {
             ]),
             Option(name: "template", help: [
                 "The template repository to clone.",
+                "http(s)://example.com/repo-path => http(s)://example.com/repo-path",
+                "user/repo => https://github.com/user/repo",
+                "light => https://github.com/vapor/light-template",
                 "Default: \(defaultTemplate)."
             ]),
             Option(name: "branch", help: [
@@ -121,8 +124,15 @@ public final class New: Command {
     }
 
     private func loadTemplate(arguments: [String]) throws -> String {
-        guard let template = arguments.options["template"]?.string else { return defaultTemplate }
-        return try expand(template: template)
+        guard arguments.count < 3 else {
+            console.info("Use --template=\(arguments[1]) to define a template.\n")
+            throw ToolboxError.general("Invalid template option")
+        }
+        if let template = arguments.options["template"]?.string {
+            return try expand(template: template)
+        } else {
+            return defaultTemplate
+        }
     }
 
     /**
