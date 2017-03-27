@@ -49,7 +49,7 @@ public final class Xcode: Command {
         }
 
         #if swift(>=3.1)
-            let argsArray = ["package"] + buildFlags + ["generate-xcodeproj", "--enable-prefetching"]
+            let argsArray = ["package"] + buildFlags + ["--enable-prefetching", "generate-xcodeproj"]
         #else
             let argsArray = ["package", "generate-xcodeproj"] + buildFlags
         #endif

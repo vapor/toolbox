@@ -42,7 +42,11 @@ public final class Fetch: Command {
         depBar.start()
 
         do {
-            _ = try console.backgroundExecute(program: "swift", arguments: ["package", "fetch"])
+            #if swift(>=3.1)
+                _ = try console.backgroundExecute(program: "swift", arguments: ["package", "--enable-prefetching", "fetch"])
+            #else
+                _ = try console.backgroundExecute(program: "swift", arguments: ["package", "fetch"])
+            #endif
             depBar.finish()
         } catch ConsoleError.backgroundExecute(_, let message, _) {
             let message = message.string

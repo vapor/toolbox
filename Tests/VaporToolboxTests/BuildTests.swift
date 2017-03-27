@@ -22,7 +22,7 @@ class BuildTests: XCTestCase {
             ])
             XCTAssertEqual(console.executeBuffer, [
                 "ls -a .",
-                "swift package fetch",
+                "swift package --enable-prefetching fetch",
                 "swift build --enable-prefetching",
             ])
         } catch {
@@ -45,7 +45,7 @@ class BuildTests: XCTestCase {
             XCTAssertEqual(console.executeBuffer, [
                 "rm -rf Packages .build",
                 "ls -a .",
-                "swift package fetch",
+                "swift package --enable-prefetching fetch",
                 "swift build --enable-prefetching",
             ])
         } catch {
@@ -72,7 +72,7 @@ class BuildTests: XCTestCase {
             ])
             XCTAssertEqual(console.executeBuffer, [
                 "ls -a .",
-                "swift package fetch",
+                "swift package --enable-prefetching fetch",
                 "swift build --enable-prefetching",
                 "ls .build/debug",
                 "swift package dump-package",
