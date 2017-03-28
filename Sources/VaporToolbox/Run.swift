@@ -10,7 +10,6 @@ public final class Run: Command {
     ]
 
     public let signature: [Argument] = [
-        Option(name: "name", help: ["The package name."]),
         Option(name: "exec", help: ["The executable name."])
     ]
 
@@ -36,32 +35,15 @@ public final class Run: Command {
         }
 
         do {
-            let name: String
+            let packageName = try extractPackageName()
+            let exec = try arguments.options["exec"] ?? getExecutableToRun()
 
-            if let n = arguments.options["name"]?.string {
-                name = n
-            } else if let n = try extractName() {
-                name = n
-            } else {
-                if arguments.options["name"]?.string == nil {
-                    console.info("Use --name to manually supply the package name.")
-                }
+            let configuredRunFlags = try Config.runFlags()
+            let passThrough = arguments + configuredRunFlags
 
-                throw ToolboxError.general("Unable to determine package name.")
-            }
+            console.info("Running \(packageName) ...")
 
-            let exec = arguments.options["exec"]?.string ?? "App"
-
-            var passThrough = arguments.values
-            for (name, value) in arguments.options {
-                passThrough += "--\(name)=\(value)"
-            }
-
-            passThrough += try Config.runFlags()
-
-            console.info("Running \(name)...")
-
-            var path = ".build/\(folder)/\(name)"
+            var path = ".build/\(folder)/\(packageName)"
             do {
                 if FileManager.default.fileExists(atPath: "./\(path)") {
                     try console.foregroundExecute(
@@ -84,13 +66,62 @@ public final class Run: Command {
         }
     }
 
-    private func extractName() throws -> String? {
-        let dump = try console.backgroundExecute(program: "swift", arguments: ["package", "dump-package"])
-
-        guard let json = try? JSON.init(serialized: dump.bytes) else {
-            return nil
+    private func getExecutableToRun() throws -> String {
+        let executables = try findExecutables()
+        guard !executables.isEmpty else {
+            throw ToolboxError.general("No executables found")
         }
 
-        return json["name"]?.string
+        // If there's only 1 executable, we'll use that
+        if executables.count == 1 {
+            return executables[0]
+        }
+
+        let formatted = executables.enumerated()
+            .map { idx, option in "\(idx + 1): \(option)" }
+            .joined(separator: "\n")
+
+        let answer = console.ask("Which executable would you like to run?\n\(formatted)")
+        // <= because count is offset by 1 in selection process!
+        guard let idx = answer.int, idx > 0, idx <= executables.count else {
+            console.print("Please enter a valid number associated with your executable")
+            console.print("Use --exec=desiredExecutable to skip this step")
+            throw ToolboxError.general("Invalid selection \(answer) expected valid index.")
+        }
+
+        let exec = executables[idx - 1]
+        console.info("Thanks! Skip this question in the future by using '--exec=\(exec)'")
+        return exec
+    }
+
+    private func extractPackageName() throws -> String {
+        let dump = try console.backgroundExecute(program: "swift", arguments: ["package", "dump-package"])
+        let json = try JSON(bytes: dump.bytes)
+        guard let name = json["name"]?.string else {
+            throw ToolboxError.general("Unable to find package name")
+        }
+        return name
+    }
+
+    private func findExecutables() throws -> [String] {
+        let executables = try console.backgroundExecute(
+            program: "find",
+            arguments: ["./Sources", "-type", "f", "-name", "main.swift"]
+        )
+        let names = executables.components(separatedBy: "\n")
+            .flatMap { path in
+                return path.components(separatedBy: "/")
+                    .dropLast() // drop main.swift
+                    .last // get name of source folder
+            }
+
+        // For the use case where there's one package
+        // and user hasn't setup lower level paths
+        return try names.map { name in
+            if name == "Sources" {
+                return try extractPackageName()
+            }
+            return name
+        }
     }
 }
