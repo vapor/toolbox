@@ -9,10 +9,26 @@ class BuildTests: XCTestCase {
         ("testBuildAndRun", testBuildAndRun)
     ]
 
-    func testBuild() {
-        let console = TestConsole()
-        let build = Build(console: console)
+    var console: TestConsole!
+    var build: Build!
 
+    override func setUp() {
+        console = TestConsole()
+        build = Build(console: console)
+
+        // Default find commands
+        console.backgroundExecuteOutputBuffer["find ./Sources -type f -name main.swift"] =
+        "~/Desktop/MyProject/Sources/Hello/main.swift"
+        console.backgroundExecuteOutputBuffer["ls .build/debug/Hello"] = ".build/debug/Hello\n"
+        console.backgroundExecuteOutputBuffer["ls -a ."] = ".build Packages"
+        console.backgroundExecuteOutputBuffer["swift package --enable-prefetching fetch"] = ""
+        console.backgroundExecuteOutputBuffer["swift package fetch"] = ""
+        console.backgroundExecuteOutputBuffer["swift build --enable-prefetching"] = ""
+        console.backgroundExecuteOutputBuffer["swift build"] = ""
+        console.backgroundExecuteOutputBuffer["ls .build/debug"] = ""
+    }
+
+    func testBuild() {
         do {
             try build.run(arguments: ["--modulemap=false"])
             #if swift(>=3.1)
@@ -44,9 +60,6 @@ class BuildTests: XCTestCase {
     }
 
     func testBuildAndClean() {
-        let console = TestConsole()
-        let build = Build(console: console)
-
         do {
             try build.run(arguments: ["--clean", "--modulemap=false"])
 
@@ -83,14 +96,10 @@ class BuildTests: XCTestCase {
         }
     }
 
-    func testBuildAndRun() {
-        let console = TestConsole()
-        let build = Build(console: console)
-
-        let name = "TestName"
-        console.backgroundExecuteOutputBuffer = [
-            "swift package dump-package": "{\"name\": \"\(name)\"}"
-        ]
+    func testBuildAndRun() throws {
+        let name = "WallaWalla"
+        console.backgroundExecuteOutputBuffer["swift package dump-package"] =
+        "{\"name\": \"\(name)\"}"
 
         do {
             try build.run(arguments: ["--run", "--modulemap=false"])
@@ -125,8 +134,11 @@ class BuildTests: XCTestCase {
                     ".build/debug/App"
                     ])
             #endif
-        } catch {
-            XCTFail("Build run failed: \(error)")
+        } catch ToolboxError.general(let error) where error == "No executables found" {}
+        catch {
+            print(" \(console.backgroundExecuteOutputBuffer)")
+            print("Er: \(error)")
+            print("")
         }
     }
 }

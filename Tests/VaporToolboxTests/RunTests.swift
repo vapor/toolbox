@@ -2,9 +2,6 @@ import XCTest
 @testable import VaporToolbox
 
 class RunTests: XCTestCase {
-    var console: TestConsole!
-    var command: Run!
-    
     // required by LinuxMain.swift
     static var allTests: [(String, (RunTests) -> () throws -> Void)] {
         return [
@@ -18,15 +15,24 @@ class RunTests: XCTestCase {
         ]
     }
 
+    var console: TestConsole!
+    var command: Run!
+
     override func setUp() {
         console = TestConsole()
         command = Run(console: console)
+
+        // Default find commands
+        console.backgroundExecuteOutputBuffer["find ./Sources -type f -name main.swift"] =
+        "~/Desktop/MyProject/Sources/Hello/main.swift"
+        console.backgroundExecuteOutputBuffer["ls .build/debug/Hello"] = ".build/debug/Hello\n"
     }
 
     // MARK: Tests
     func testRunFailsWithNoInformation() throws {
         do {
             try command.run(arguments: [])
+            XCTFail("command.run was expected to fail, but did not")
         } catch (let err) {
             guard case ToolboxError.general(let message) = err else {
                 XCTFail("command.run was expected to throw a general ToolboxError")
@@ -35,28 +41,31 @@ class RunTests: XCTestCase {
 
             XCTAssertEqual("Unable to determine package name.", message,
                            "Unexpected error was returned from command.run")
-            return
         }
-        
-        XCTFail("command.run was expected to fail, but did not")
     }
     
     func testRunNameResolution() throws {
         console.backgroundExecuteOutputBuffer["swift package dump-package"] = "{\"dependencies\": [{\"url\": \"https://github.com/vapor/vapor.git\", \"version\": {\"lowerBound\": \"1.3.0\", \"upperBound\": \"1.3.9223372036854775807\"}}], \"exclude\": [\"Config\", \"Database\", \"Localization\", \"Public\", \"Resources\", \"Tests\"], \"name\": \"Hello\", \"targets\": []}"
-        try command.run(arguments: [])
 
+
+        try command.run(arguments: [])
         // TODO: the safeguard in Run uses FileManager.default that cannot be faked in the test,
         //       therefore the actual executed command cannot be tested.
-        XCTAssertEqual("Running Hello...", console.outputBuffer.last ?? "")
+        XCTAssertEqual("Running Hello ...", console.outputBuffer.last ?? "")
     }
 
     func testRunNameResolutionWithTargets() throws {
-        console.backgroundExecuteOutputBuffer["swift package dump-package"] = "{\"dependencies\":[],\"exclude\":[],\"name\":\"MultiTargetApp\",\"targets\":[{\"dependencies\":[\"MultiTargetDependency\"],\"name\":\"App\"}]}"
+        console.backgroundExecuteOutputBuffer["swift package dump-package"] =
+        "{\"dependencies\":[],\"exclude\":[],\"name\":\"MultiTargetApp\",\"targets\":[{\"dependencies\":[\"MultiTargetDependency\"],\"name\":\"App\"}]}"
+
         try command.run(arguments: [])
         
         // TODO: the safeguard in Run uses FileManager.default that cannot be faked in the test,
         //       therefore the actual executed command cannot be tested.
-        XCTAssertEqual("Running MultiTargetApp...", console.outputBuffer.last ?? "")
+        XCTAssertEqual(
+            "Running MultiTargetApp ...",
+            console.outputBuffer.last
+        )
     }
 
     func testRunWithProvidedExec() throws {
