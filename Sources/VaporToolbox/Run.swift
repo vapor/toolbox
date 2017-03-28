@@ -43,24 +43,14 @@ public final class Run: Command {
 
             console.info("Running \(packageName) ...")
 
-            var path = ".build/\(folder)/\(packageName)"
-            do {
-                if FileManager.default.fileExists(atPath: "./\(path)") {
-                    try console.foregroundExecute(
-                        program: path,
-                        arguments: passThrough
-                    )
-                } else {
-                    path = ".build/\(folder)/\(exec)"
-                    try console.foregroundExecute(
-                        program: path,
-                        arguments: passThrough
-                    )
-                }
-            } catch ConsoleError.spawnProcess {
-                throw ToolboxError.general("Could not find \(path).")
+            let path = ".build/\(folder)/\(exec)"
+            guard FileManager.default.fileExists(atPath: "./\(path)") else {
+                throw ToolboxError.general("Could not find executable at \(path)")
             }
-
+            try console.foregroundExecute(
+                program: path,
+                arguments: passThrough
+            )
         } catch ConsoleError.execute(_) {
             throw ToolboxError.general("Run failed.")
         }
