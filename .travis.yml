@@ -14,8 +14,6 @@ script:
   - swift build --configuration release -Xswiftc -DNO_ANIMATION
   - swift test
 
-  - .build/release/Executable self install
-
   - vapor --help
   - vapor version                   # version
 
