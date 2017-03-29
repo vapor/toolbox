@@ -16,18 +16,22 @@ public final class Test: Command {
     }
 
     public func run(arguments: [String]) throws {
-        let testBar = console.loadingBar(title: "Testing")
+        let verbose = arguments.verbose
+        let testBar = console.loadingBar(title: "Testing", animated: !verbose)
         testBar.start()
 
         do {
             let flags = try Config.testFlags()
-            _ = try console.backgroundExecute(program: "swift", arguments: ["test"] + flags)
+            _ = try console.execute(verbose: verbose, program: "swift", arguments: ["test"] + flags)
             testBar.finish()
-        } catch ConsoleError.backgroundExecute(_, let error, _) {
+        } catch ConsoleError.backgroundExecute(_, let error, let message) {
             testBar.fail()
             console.print()
             console.info("Log:")
             console.print(error)
+            console.print()
+            console.info("Output:")
+            console.info(message)
             console.print()
             console.info("Help:")
             console.print("Join our Slack where hundreds of contributors")
