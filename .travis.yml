@@ -14,7 +14,7 @@ script:
   - swift build --configuration release -Xswiftc -DNO_ANIMATION
   - swift test
 
-  - mv .build/release/Executable /usr/local/bin/vapor
+  - sudo mv .build/release/Executable /usr/local/bin/vapor
 
   - vapor --help
   - vapor version                   # version
