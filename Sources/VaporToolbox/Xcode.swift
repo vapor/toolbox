@@ -59,8 +59,8 @@ public final class Xcode: Command {
             xcodeBar.finish()
         } catch ConsoleError.backgroundExecute(_, let message, _) {
             xcodeBar.fail()
-            console.print(message.makeString())
-            throw ToolboxError.general("Could not generate Xcode project: \(message.makeString())")
+            console.print(message)
+            throw ToolboxError.general("Could not generate Xcode project: \(message)")
         }
 
         console.info("Select the `App` scheme to run.")

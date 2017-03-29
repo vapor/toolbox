@@ -42,7 +42,7 @@ class BuildTests: XCTestCase {
     lazy var build: Build = Build(console: self.console)
 
     func testBuild() throws {
-        try build.run(arguments: ["--modulemap=false"])
+        try! build.run(arguments: [])
 
         XCTAssertEqual(console.outputBuffer, [
             "No .build folder, fetch may take a while...",
@@ -57,7 +57,7 @@ class BuildTests: XCTestCase {
     }
 
     func testBuildAndClean() throws {
-        try build.run(arguments: ["--clean", "--modulemap=false"])
+        try! build.run(arguments: ["--clean"])
 
         XCTAssertEqual(console.outputBuffer, [
             "Cleaning [Done]",
@@ -77,7 +77,7 @@ class BuildTests: XCTestCase {
         let name = "WallaWalla"
         console.backgroundExecuteOutputBuffer["swift package dump-package"] = "{\"name\": \"\(name)\"}"
 
-        try build.run(arguments: ["--run", "--modulemap=false"])
+        try! build.run(arguments: ["--run"])
         XCTAssertEqual(console.outputBuffer, [
             "No .build folder, fetch may take a while...",
             "Fetching Dependencies [Done]",

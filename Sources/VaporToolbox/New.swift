@@ -60,7 +60,7 @@ public final class New: Command {
             cloneBar.finish()
         } catch ConsoleError.backgroundExecute(_, let error, _) {
             cloneBar.fail()
-            throw ToolboxError.general(error.makeString().trim())
+            throw ToolboxError.general(error.trim())
         }
 
         let repository = console.loadingBar(title: "Updating Package Name")

@@ -1,5 +1,10 @@
 import Console
 
+/*
+ robo:vapor.git-5492988889259800272 logan$ git describe --exact-match --tags HEAD
+ 2.0.0-beta.1
+ */
+
 public final class Version: Command {
     public let id = "version"
 

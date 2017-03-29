@@ -30,7 +30,7 @@ public final class SelfInstall: Command {
             do {
                 file = try console.backgroundExecute(program: "/usr/bin/which", arguments: [executable])
             } catch ConsoleError.backgroundExecute(let code, let error, _) {
-                throw ToolboxError.general("Could not locate executable: \(code) \(error.makeString())")
+                throw ToolboxError.general("Could not locate executable: \(code) \(error)")
             }
         }
 

@@ -1,4 +1,7 @@
 import Console
+import Foundation
+import libc
+import Core
 
 public final class Fetch: Command {
     public let id = "fetch"
@@ -18,46 +21,63 @@ public final class Fetch: Command {
     }
 
     public func run(arguments: [String]) throws {
-        if arguments.options["clean"]?.bool == true {
-            let clean = Clean(console: console)
-            try clean.run(arguments: arguments)
-        }
+        try clean(arguments)
+        try fetchWarning()
+        try fetch(arguments)
+    }
 
+    private func clean(_ arguments: [String]) throws {
+        guard arguments.flag("clean") else { return }
+        let clean = Clean(console: console)
+        try clean.run(arguments: arguments)
+    }
+
+    private func fetchWarning() throws {
         do {
             let ls = try console.backgroundExecute(program: "ls", arguments: ["-a", "."])
-            #if swift(>=3.1)
-                if !ls.contains(".build") {
-                    console.warning("No .build folder, fetch may take a while...")
-                }
-            #else
-                if !ls.contains("Packages") {
-                    console.warning("No Packages folder, fetch may take a while...")
-                }
-            #endif
+            if !ls.contains(".build") {
+                console.warning("No .build folder, fetch may take a while...")
+            }
         } catch ConsoleError.backgroundExecute(_) {
             // do nothing
         }
+    }
 
-        let depBar = console.loadingBar(title: "Fetching Dependencies")
+    private func fetch(_ arguments: [String]) throws {
+        let verbose = arguments.verbose
+        print("Being verbose: \(verbose)")
+        let depBar = console.loadingBar(title: "Fetching Dependencies", animated: !verbose)
         depBar.start()
+        try console.execute(
+            verbose: verbose,
+            program: "swift",
+            arguments: ["package", "--enable-prefetching", "fetch"]
+        )
+        depBar.finish()
+    }
+}
 
-        do {
-            #if swift(>=3.1)
-                _ = try console.backgroundExecute(program: "swift", arguments: ["package", "--enable-prefetching", "fetch"])
-            #else
-                _ = try console.backgroundExecute(program: "swift", arguments: ["package", "fetch"])
-            #endif
-            depBar.finish()
-        } catch ConsoleError.backgroundExecute(_, let message, _) {
-            let message = message.makeString()
-            depBar.fail()
-            if message.contains("dependency graph could not be satisfied because an update") {
-                console.info("Try cleaning your project first.")
-            } else if message.contains("The dependency graph could not be satisfied") {
-                console.info("Check your dependencies' Package.swift files to see where the conflict is.")
-            }
-            throw ToolboxError.general(message.trim())
+// MARK: Prototypes
+
+extension LoadingBar {
+    func track(_ operation: @escaping () throws -> ()) rethrows {
+        start()
+        defer { finish() }
+        try operation()
+    }
+}
+extension ConsoleProtocol {
+    func ls(_ arguments: [String]) throws -> String {
+        return try backgroundExecute(program: "ls", arguments: arguments)
+    }
+}
+
+extension ConsoleProtocol {
+    public func execute(verbose: Bool, program: String, arguments: [String]) throws  {
+        if verbose {
+            try foregroundExecute(program: program, arguments: arguments)
+        } else {
+            _ = try backgroundExecute(program: program, arguments: arguments)
         }
     }
-    
 }
