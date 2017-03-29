@@ -44,7 +44,8 @@ public final class Run: Command {
             console.info("Running \(packageName) ...")
 
             let path = ".build/\(folder)/\(exec)"
-            guard FileManager.default.fileExists(atPath: "./\(path)") else {
+            let pathExists = try console.backgroundExecute(program: "ls", arguments: [path])
+            guard pathExists.trim() == path else {
                 throw ToolboxError.general("Could not find executable at \(path)")
             }
             try console.foregroundExecute(
@@ -86,9 +87,8 @@ public final class Run: Command {
 
     private func extractPackageName() throws -> String {
         let dump = try console.backgroundExecute(program: "swift", arguments: ["package", "dump-package"])
-        let json = try JSON(bytes: dump.bytes)
-        guard let name = json["name"]?.string else {
-            throw ToolboxError.general("Unable to find package name")
+        guard let json = try? JSON(bytes: dump.bytes),  let name = json["name"]?.string else {
+            throw ToolboxError.general("Unable to determine package name.")
         }
         return name
     }

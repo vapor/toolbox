@@ -1,4 +1,5 @@
 import XCTest
+import JSON
 @testable import VaporToolbox
 
 class RunTests: XCTestCase {
@@ -9,45 +10,33 @@ class RunTests: XCTestCase {
             ("testRunNameResolution", testRunNameResolution),
             ("testRunNameResolutionWithTargets", testRunNameResolutionWithTargets),
             ("testRunWithProvidedExec", testRunWithProvidedExec),
-            ("testRunWithProvidedName", testRunWithProvidedName),
             ("testRunRelease", testRunRelease),
             ("testRunArgumentPassthrough", testRunArgumentPassthrough)
         ]
     }
 
-    var console: TestConsole!
-    var command: Run!
+    var console: TestConsole = .default()
+    lazy var command: Run = Run(console: self.console)
 
     override func setUp() {
-        console = TestConsole()
-        command = Run(console: console)
-
         // Default find commands
-        console.backgroundExecuteOutputBuffer["find ./Sources -type f -name main.swift"] =
-        "~/Desktop/MyProject/Sources/Hello/main.swift"
-        console.backgroundExecuteOutputBuffer["ls .build/debug/Hello"] = ".build/debug/Hello\n"
+//        console.backgroundExecuteOutputBuffer["find ./Sources -type f -name main.swift"] =
+//        "~/Desktop/MyProject/Sources/Hello/main.swift"
+//        console.backgroundExecuteOutputBuffer["ls .build/debug/Hello"] = ".build/debug/Hello\n"
     }
 
     // MARK: Tests
     func testRunFailsWithNoInformation() throws {
+        console.backgroundExecuteOutputBuffer["swift package dump-package"] = "non-json garbage"
         do {
             try command.run(arguments: [])
             XCTFail("command.run was expected to fail, but did not")
-        } catch (let err) {
-            guard case ToolboxError.general(let message) = err else {
-                XCTFail("command.run was expected to throw a general ToolboxError")
-                throw err
-            }
-
-            XCTAssertEqual("Unable to determine package name.", message,
-                           "Unexpected error was returned from command.run")
+        } catch ToolboxError.general(let message) where message == "Unable to determine package name." {
+            // error thrown is expected :+1:
         }
     }
     
     func testRunNameResolution() throws {
-        console.backgroundExecuteOutputBuffer["swift package dump-package"] = "{\"dependencies\": [{\"url\": \"https://github.com/vapor/vapor.git\", \"version\": {\"lowerBound\": \"1.3.0\", \"upperBound\": \"1.3.9223372036854775807\"}}], \"exclude\": [\"Config\", \"Database\", \"Localization\", \"Public\", \"Resources\", \"Tests\"], \"name\": \"Hello\", \"targets\": []}"
-
-
         try command.run(arguments: [])
         // TODO: the safeguard in Run uses FileManager.default that cannot be faked in the test,
         //       therefore the actual executed command cannot be tested.
@@ -69,19 +58,15 @@ class RunTests: XCTestCase {
     }
 
     func testRunWithProvidedExec() throws {
-        try command.run(arguments: ["--exec=Hello", "--name=Hello"])
-        XCTAssertTrue(console.executeBuffer.last?.contains(".build/debug/Hello") ?? false)
-    }
-    
-    func testRunWithProvidedName() throws {
-        try command.run(arguments: ["--name=Hello"])
-        // TODO: the safeguard in Run uses FileManager.default that cannot be faked in the test,
-        //       therefore the actual executed command cannot be tested.
-        XCTAssertEqual("Running Hello...", console.outputBuffer.last ?? "")
+        console.backgroundExecuteOutputBuffer["ls .build/debug/Foo"] = ".build/debug/Foo\n"
+        console.backgroundExecuteOutputBuffer[".build/debug/Foo"] = ""
+
+        try command.run(arguments: ["--exec=Foo"])
+        XCTAssertTrue(console.executeBuffer.last?.contains(".build/debug/Foo") ?? false)
     }
     
     func testRunRelease() throws {
-        try command.run(arguments: ["--name=Hello", "--release"])
+        try command.run(arguments: ["--release"])
         XCTAssertTrue(console.executeBuffer.last?.contains(".build/release/") ?? false)
     }
     
