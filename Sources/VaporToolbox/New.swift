@@ -38,7 +38,7 @@ public final class New: Command {
 
     public func run(arguments: [String]) throws {
         let template = try loadTemplate(arguments: arguments)
-        let name = try value("name", from: arguments).string ?? ""
+        let name = try value("name", from: arguments)
         let gitDir = "--git-dir=./\(name)/.git"
         let workTree = "--work-tree=./\(name)"
 
@@ -60,7 +60,7 @@ public final class New: Command {
             cloneBar.finish()
         } catch ConsoleError.backgroundExecute(_, let error, _) {
             cloneBar.fail()
-            throw ToolboxError.general(error.string.trim())
+            throw ToolboxError.general(error.makeString().trim())
         }
 
         let repository = console.loadingBar(title: "Updating Package Name")

@@ -38,7 +38,7 @@ public final class Xcode: Command {
             if name == "release" && value.bool == true {
                 buildFlags += "--configuration release"
             } else {
-                buildFlags += "--\(name)=\(value.string ?? "")"
+                buildFlags += "--\(name)=\(value)"
             }
         }
 
@@ -59,8 +59,8 @@ public final class Xcode: Command {
             xcodeBar.finish()
         } catch ConsoleError.backgroundExecute(_, let message, _) {
             xcodeBar.fail()
-            console.print(message.string)
-            throw ToolboxError.general("Could not generate Xcode project: \(message.string)")
+            console.print(message.makeString())
+            throw ToolboxError.general("Could not generate Xcode project: \(message.makeString())")
         }
 
         console.info("Select the `App` scheme to run.")

@@ -27,7 +27,7 @@ public final class Test: Command {
             testBar.fail()
             console.print()
             console.info("Log:")
-            console.print(error.string)
+            console.print(error.makeString())
             console.print()
             console.info("Help:")
             console.print("Join our Slack where hundreds of contributors")

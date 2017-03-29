@@ -23,7 +23,7 @@ public final class SelfUpdate: Command {
             updateBar.finish()
         } catch ConsoleError.backgroundExecute(_, let message, _) {
             updateBar.fail()
-            throw ToolboxError.general("Could not update toolbox: \(message.string)")
+            throw ToolboxError.general("Could not update toolbox: \(message.makeString())")
         }
     }
 }

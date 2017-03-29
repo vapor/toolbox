@@ -41,7 +41,7 @@ public final class HerokuInit: Command {
                 )
             }
         } catch ConsoleError.backgroundExecute(_, let message, _) {
-            throw ToolboxError.general("Unable to locate current git branch: \(message.string)")
+            throw ToolboxError.general("Unable to locate current git branch: \(message.makeString())")
         }
 
         do {
@@ -60,14 +60,14 @@ public final class HerokuInit: Command {
 
         let name: String
         if console.confirm("Would you like to provide a custom Heroku app name?") {
-            name = console.ask("Custom app name:").string ?? ""
+            name = console.ask("Custom app name:")
         } else {
             name = ""
         }
         
         let region: String
         if console.confirm("Would you like to deploy to other than US region server?") {
-            region = console.ask("Region code (us/eu):").string ?? ""
+            region = console.ask("Region code (us/eu):")
         } else {
             region = "us"
         }
@@ -77,12 +77,12 @@ public final class HerokuInit: Command {
             url = try console.backgroundExecute(program: "heroku", arguments: ["create", name, "--region", region])
             console.info(url)
         } catch ConsoleError.backgroundExecute(_, let message, _) {
-            throw ToolboxError.general("Unable to create Heroku app: \(message.string.trim())")
+            throw ToolboxError.general("Unable to create Heroku app: \(message.makeString().trim())")
         }
 
         let buildpack: String
         if console.confirm("Would you like to provide a custom Heroku buildpack?") {
-            buildpack = console.ask("Custom buildpack:").string ?? ""
+            buildpack = console.ask("Custom buildpack:")
         } else {
             buildpack = "https://github.com/vapor/heroku-buildpack"
         }
@@ -93,13 +93,13 @@ public final class HerokuInit: Command {
         do {
             _ = try console.backgroundExecute(program: "heroku", arguments: ["buildpacks:set", "\(buildpack)"])
         } catch ConsoleError.backgroundExecute(_, let message, _) {
-            throw ToolboxError.general("Unable to set buildpack \(buildpack): \(message.string)")
+            throw ToolboxError.general("Unable to set buildpack \(buildpack): \(message.makeString())")
         }
 
 
         let appName: String
         if console.confirm("Are you using a custom Executable name?") {
-            appName = console.ask("Executable Name:").string ?? ""
+            appName = console.ask("Executable Name:")
         } else {
             appName = "App"
         }
@@ -109,7 +109,7 @@ public final class HerokuInit: Command {
         do {
             _ = try console.backgroundExecute(program: "/bin/sh", arguments: ["-c", "echo \"\(procContents)\" >> ./Procfile"])
         } catch ConsoleError.backgroundExecute(_, let message, _) {
-            throw ToolboxError.general("Unable to make Procfile: \(message.string)")
+            throw ToolboxError.general("Unable to make Procfile: \(message.makeString())")
         }
 
         console.info("Committing procfile...")
@@ -131,7 +131,7 @@ public final class HerokuInit: Command {
               buildBar.finish()
             } catch ConsoleError.backgroundExecute(_, let message, _) {
               buildBar.fail()
-              throw ToolboxError.general("Heroku push failed \(message.string)")
+              throw ToolboxError.general("Heroku push failed \(message.makeString())")
             }
 
             let dynoBar = console.loadingBar(title: "Spinning up dynos")
@@ -141,7 +141,7 @@ public final class HerokuInit: Command {
                 dynoBar.finish()
             } catch ConsoleError.backgroundExecute(_, let message, _) {
                 dynoBar.fail()
-                throw ToolboxError.general("Unable to spin up dynos: \(message.string)")
+                throw ToolboxError.general("Unable to spin up dynos: \(message.makeString())")
             }
 
             console.print("Visit https://dashboard.heroku.com/apps/")

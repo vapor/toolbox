@@ -76,7 +76,7 @@ public final class Build: Command {
             if name == "release" && value.bool == true {
                 buildFlags += ["--configuration", "release"]
             } else {
-                buildFlags += "--\(name)=\(value.string ?? "")"
+                buildFlags += "--\(name)=\(value)"
             }
         }
 
@@ -101,11 +101,11 @@ public final class Build: Command {
             console.print()
 
             console.info("Error (\(code)):")
-            console.print(error.string)
+            console.print(error.makeString())
             console.print()
 
             console.info("Output:")
-            console.print(output.string)
+            console.print(output.makeString())
             console.print()
 
             console.info("Toolchain:")
