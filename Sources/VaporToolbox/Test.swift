@@ -23,7 +23,7 @@ public final class Test: Command {
         do {
             let flags = try Config.testFlags()
             _ = try console.execute(verbose: verbose, program: "swift", arguments: ["test"] + flags)
-            testBar.finish()
+            testBar.finish("Passed")
         } catch ConsoleError.backgroundExecute(_, let error, let message) {
             testBar.fail()
             console.print()
