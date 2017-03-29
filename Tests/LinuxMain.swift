@@ -8,5 +8,3 @@ XCTMain([
     testCase(StringExtTests.allTests),
     testCase(VaporConfigFlagsTests.allTests),
 ])
-
-let testCases: [XCTTestCase]

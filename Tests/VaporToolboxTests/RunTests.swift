@@ -4,26 +4,17 @@ import JSON
 
 class RunTests: XCTestCase {
     // required by LinuxMain.swift
-    static var allTests: [(String, (RunTests) -> () throws -> Void)] {
-        return [
-            ("testRunFailsWithNoInformation", testRunFailsWithNoInformation),
-            ("testRunNameResolution", testRunNameResolution),
-            ("testRunNameResolutionWithTargets", testRunNameResolutionWithTargets),
-            ("testRunWithProvidedExec", testRunWithProvidedExec),
-            ("testRunRelease", testRunRelease),
-            ("testRunArgumentPassthrough", testRunArgumentPassthrough)
-        ]
-    }
+    static let allTests = [
+        ("testRunFailsWithNoInformation", testRunFailsWithNoInformation),
+        ("testRunNameResolution", testRunNameResolution),
+        ("testRunNameResolutionWithTargets", testRunNameResolutionWithTargets),
+        ("testRunWithProvidedExec", testRunWithProvidedExec),
+        ("testRunRelease", testRunRelease),
+        ("testRunArgumentPassthrough", testRunArgumentPassthrough)
+    ]
 
     var console: TestConsole = .default()
     lazy var command: Run = Run(console: self.console)
-
-    override func setUp() {
-        // Default find commands
-//        console.backgroundExecuteOutputBuffer["find ./Sources -type f -name main.swift"] =
-//        "~/Desktop/MyProject/Sources/Hello/main.swift"
-//        console.backgroundExecuteOutputBuffer["ls .build/debug/Hello"] = ".build/debug/Hello\n"
-    }
 
     // MARK: Tests
     func testRunFailsWithNoInformation() throws {
