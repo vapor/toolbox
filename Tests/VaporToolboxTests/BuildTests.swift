@@ -89,9 +89,9 @@ class BuildTests: XCTestCase {
             "swift package --enable-prefetching fetch",
             "swift build --enable-prefetching",
             "ls .build/debug",
-            "swift package dump-package",
             "find ./Sources -type f -name main.swift",
             "ls .build/debug/Hello",
+            "swift package dump-package",
             ".build/debug/Hello"
             ])
     }
