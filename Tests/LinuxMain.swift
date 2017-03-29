@@ -4,6 +4,7 @@ import XCTest
 XCTMain([
     testCase(BuildTests.allTests),
     testCase(CleanTests.allTests),
+    testCase(RunTests.allTests),
     testCase(StringExtTests.allTests),
     testCase(VaporConfigFlagsTests.allTests),
 ])

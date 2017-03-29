@@ -3,10 +3,12 @@ import JSON
 import Core
 import Foundation
 
-final class Config: NodeBacked {
-    var node: Node
-    required init(_ node: Node) {
-        self.node = node
+final class Config: StructuredDataWrapper {
+    var wrapped: StructuredData
+    var context: Context
+    init(_ wrapped: StructuredData, in context: Context?) {
+        self.wrapped = wrapped
+        self.context = context ?? emptyContext
     }
 }
 
@@ -35,9 +37,9 @@ extension Config {
 
     private static func loadFlags(directory: String, path: [String]) throws -> [String] {
         let config = try Config(rootDirectory: directory)
-        return config.node[path]?
-            .nodeArray?
-            .flatMap { $0.nodeArray } // to array of arrays
+        return config.wrapped[path]?
+            .array?
+            .flatMap { $0.array } // to array of arrays
             .flatMap { $0 } // to contiguous array
             .flatMap { $0.string }
             ?? []

@@ -44,7 +44,8 @@ public final class Run: Command {
             console.info("Running \(packageName) ...")
 
             let path = ".build/\(folder)/\(exec)"
-            guard try console.pathExists(path) else {
+            let pathExists = try console.backgroundExecute(program: "ls", arguments: [path])
+            guard pathExists.trim() == path else {
                 throw ToolboxError.general("Could not find executable at \(path)")
             }
             try console.foregroundExecute(
@@ -112,13 +113,5 @@ public final class Run: Command {
             }
             return name
         }
-    }
-}
-
-extension ConsoleProtocol {
-    func pathExists(_ path: String) throws -> Bool {
-        let result = try backgroundExecute(program: "ls", arguments: [path])
-        return result.trim() == path
-
     }
 }
