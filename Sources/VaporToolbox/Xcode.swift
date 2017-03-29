@@ -9,9 +9,7 @@ public final class Xcode: Command {
         "Additionally links commonly used libraries."
     ]
 
-    public let signature: [Argument] = [
-        Option(name: "mysql", help: ["Links MySQL libraries."])
-    ]
+    public let signature: [Argument] = []
 
     public let console: ConsoleProtocol
 
@@ -23,39 +21,15 @@ public final class Xcode: Command {
         let fetch = Fetch(console: console)
         try fetch.run(arguments: [])
 
-        let xcodeBar = console.loadingBar(title: "Generating Xcode Project")
+        let verbose = arguments.verbose
+        let xcodeBar = console.loadingBar(title: "Generating Xcode Project", animated: !verbose)
         xcodeBar.start()
 
-        var buildFlags: [String] = []
-
-        buildFlags += try Config.buildFlags()
-
-        for (name, value) in arguments.options {
-            if ["mysql"].contains(name) {
-                continue
-            }
-
-            if name == "release" && value.bool == true {
-                buildFlags += "--configuration release"
-            } else {
-                buildFlags += "--\(name)=\(value)"
-            }
-        }
+        let buildFlags = try loadBuildFlags(arguments)
+        let argsArray = ["package"] + buildFlags + ["--enable-prefetching", "generate-xcodeproj"]
 
         do {
-            _ = try console.backgroundExecute(program: "/bin/sh", arguments: ["-c", "rm -rf Packages/CLibreSSL-1.*/Sources/CLibreSSL/include/module.modulemap"])
-        } catch {
-            console.warning("Could not remove module map.")
-        }
-
-        #if swift(>=3.1)
-            let argsArray = ["package"] + buildFlags + ["--enable-prefetching", "generate-xcodeproj"]
-        #else
-            let argsArray = ["package", "generate-xcodeproj"] + buildFlags
-        #endif
-
-        do {
-            _ = try console.backgroundExecute(program: "swift", arguments: argsArray)
+            _ = try console.execute(verbose: verbose, program: "swift", arguments: argsArray)
             xcodeBar.finish()
         } catch ConsoleError.backgroundExecute(_, let message, _) {
             xcodeBar.fail()
@@ -63,16 +37,36 @@ public final class Xcode: Command {
             throw ToolboxError.general("Could not generate Xcode project: \(message)")
         }
 
-        console.info("Select the `App` scheme to run.")
-
-        if console.confirm("Open Xcode project?") {
-            do {
-                console.print("Opening Xcode project...")
-                _ = try console.backgroundExecute(program: "/bin/sh", arguments: ["-c", "open *.xcodeproj"])
-            } catch ConsoleError.backgroundExecute(_) {
-                throw ToolboxError.general("Could not open Xcode project.")
-            }
-        }
+        // TODO: Get Executable here
+        console.info("Select the `Run` scheme to run.")
+        try openXcode()
     }
 
+    private func loadBuildFlags(_ arguments: [String]) throws -> [String] {
+        var buildFlags = try Config.buildFlags()
+
+        if arguments.flag("debug") {
+            // Appending these flags aids in debugging
+            // symbols on linux
+            buildFlags += ["-Xswiftc", "-g"]
+        }
+
+        if arguments.flag("release") {
+            buildFlags += ["--configuration", "release"]
+        }
+
+        // Setup passthrough
+        buildFlags += arguments
+            .removeFlags(["clean", "run", "debug", "verbose", "fetch", "release"])
+            .options
+            .map { name, value in "--\(name)=\(value)" }
+
+        return buildFlags
+    }
+
+    private func openXcode() throws {
+        guard console.confirm("Open Xcode project?") else { return }
+        console.print("Opening Xcode project...")
+        _ = try console.backgroundExecute(program: "/bin/sh", arguments: ["-c", "open *.xcodeproj"])
+    }
 }
