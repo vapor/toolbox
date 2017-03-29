@@ -45,15 +45,28 @@ public final class Fetch: Command {
 
     private func fetch(_ arguments: [String]) throws {
         let verbose = arguments.verbose
-        print("Being verbose: \(verbose)")
         let depBar = console.loadingBar(title: "Fetching Dependencies", animated: !verbose)
         depBar.start()
+
+        let pass = arguments.removeFlags(["clean", "run", "fetch", "release"])
         try console.execute(
             verbose: verbose,
             program: "swift",
-            arguments: ["package", "--enable-prefetching", "fetch"]
+            arguments: ["package", "--enable-prefetching", "fetch"] + pass
         )
         depBar.finish()
+    }
+}
+
+extension Array where Element == String {
+    func removeFlags(_ flags: [String]) -> [String] {
+        let flags = flags.map { "--\($0)" }
+        return filter { argument in
+            for flag in flags where argument.hasPrefix(flag) {
+                return false
+            }
+            return true
+        }
     }
 }
 
