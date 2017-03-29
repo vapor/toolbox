@@ -72,7 +72,7 @@ public final class Build: Command {
 
     private func run(_ arguments: [String]) throws {
         guard arguments.flag("run") else { return }
-        let args = arguments.removeFlags(["clean", "run", "fetch"])
+        let args = arguments.removeFlags(["clean", "run", "fetch", "verbose"])
 
         let run = Run(console: console)
         try run.run(arguments: args)
@@ -93,7 +93,7 @@ public final class Build: Command {
 
         // Setup passthrough
         buildFlags += arguments
-            .removeFlags(["clean", "run", "debug", "verbose", "fetch"])
+            .removeFlags(["clean", "run", "debug", "verbose", "fetch", "release"])
             .options
             .map { name, value in "--\(name)=\(value)" }
 

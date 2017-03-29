@@ -20,40 +20,53 @@ public final class Run: Command {
     }
 
     public func run(arguments: [String]) throws {
-        let folder: String
-
-        if arguments.flag("release") {
-            folder = "release"
-        } else {
-            folder = "debug"
-        }
-
         do {
-            _ = try console.backgroundExecute(program: "ls", arguments: [".build/\(folder)"])
-        } catch ConsoleError.backgroundExecute(_) {
-            throw ToolboxError.general("No .build/\(folder) folder found.")
-        }
-
-        do {
-            let packageName = try extractPackageName()
-            let exec = try arguments.options["exec"] ?? getExecutableToRun()
+            let executable = try executablePath(arguments)
 
             let configuredRunFlags = try Config.runFlags()
             let passThrough = arguments + configuredRunFlags
 
+            let packageName = try extractPackageName()
             console.info("Running \(packageName) ...")
 
-            let path = ".build/\(folder)/\(exec)"
-            let pathExists = try console.backgroundExecute(program: "ls", arguments: [path])
-            guard pathExists.trim() == path else {
-                throw ToolboxError.general("Could not find executable at \(path)")
-            }
             try console.foregroundExecute(
-                program: path,
+                program: executable,
                 arguments: passThrough
             )
         } catch ConsoleError.execute(_) {
             throw ToolboxError.general("Run failed.")
+        }
+    }
+
+    private func buildFolder(_ arguments: [String]) throws -> String {
+        let folder: String
+        if arguments.flag("release") {
+            folder = ".build/release"
+        } else {
+            folder = ".build/debug"
+        }
+
+        do {
+            _ = try console.backgroundExecute(program: "ls", arguments: [folder])
+        } catch ConsoleError.backgroundExecute(_) {
+            throw ToolboxError.general("No \(folder) folder found.")
+        }
+
+        return folder
+    }
+
+    private func executablePath(_ arguments: [String]) throws -> String {
+        let folder = try buildFolder(arguments)
+        let exec = try arguments.options["exec"] ?? getExecutableToRun()
+        let executablePath = "\(folder)/\(exec)"
+        try verify(executablePath: executablePath)
+        return executablePath
+    }
+
+    private func verify(executablePath: String) throws {
+        let pathExists = try console.backgroundExecute(program: "ls", arguments: [executablePath])
+        guard pathExists.trim() == executablePath else {
+            throw ToolboxError.general("Could not find executable at \(executablePath)")
         }
     }
 

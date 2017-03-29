@@ -48,7 +48,7 @@ public final class Fetch: Command {
         let depBar = console.loadingBar(title: "Fetching Dependencies", animated: !verbose)
         depBar.start()
 
-        let pass = arguments.removeFlags(["clean", "run", "fetch", "release"])
+        let pass = arguments.removeFlags(["clean", "run", "fetch", "release", "verbose"])
         try console.execute(
             verbose: verbose,
             program: "swift",

@@ -4,7 +4,8 @@ public final class Clean: Command {
     public let id = "clean"
 
     public let signature: [Argument] = [
-        Option(name: "xcode", help: ["Removes any Xcode projects while cleaning."])
+        Option(name: "xcode", help: ["Removes any Xcode projects while cleaning."]),
+        Option(name: "pins", help: ["Removes the Package.pins file as well."])
     ]
 
     public let help: [String] = [
