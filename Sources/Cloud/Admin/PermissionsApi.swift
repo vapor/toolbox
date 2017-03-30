@@ -35,13 +35,13 @@ public final class PermissionsApi<Model: PermissionModel> {
         return try [Permission](node: response.json)
     }
 
-    public func set(_ permissions: [String], forUser user: String, in model: Model, with token: Token) throws -> [Permission] {
+    public func set(_ permissions: [String], for user: User, in model: Model, with token: Token) throws -> [Permission] {
         let endpoint = base.finished(with: "/") + model.id.uuidString + "/permissions"
         let request = try Request(method: .put, uri: endpoint)
         request.access = token
 
         var json = JSON([:])
-        try json.set("userId", user)
+        try json.set("userId", user.id.uuidString)
         try json.set("permissions", permissions)
         request.json = json
 
