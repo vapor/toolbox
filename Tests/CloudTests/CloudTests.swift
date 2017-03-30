@@ -126,6 +126,54 @@ extension AdminApi {
 
 extension AdminApi {
     final class OrganizationApi {
+        final class PermissionsApi {
+            func get(organization: String, access: String) throws -> [Permission] {
+                let endpoint = organizationsEndpoint.finished(with: "/") + organization + "/permissions"
+                let request = try Request(method: .get, uri: endpoint)
+                request.token = access
+
+                let response = try client.respond(to: request)
+                guard let json = response.json?.array else {
+                    throw "Bad response for project permissions: \(response)"
+                }
+                return try [Permission](node: json)
+            }
+
+            func all(token: String) throws -> [Permission] {
+                let endpoint = organizationsEndpoint.finished(with: "/") + "permissions"
+                let request = try Request(method: .get, uri: endpoint)
+                request.token = token
+
+                let response = try client.respond(to: request)
+                guard let json = response.json?.array else {
+                    throw "Bad response for project permissions: \(response)"
+                }
+                return try [Permission](node: json)
+            }
+
+            func update(_ permissions: [String], forUser user: String, inOrganization organization: String, token: String) throws -> [Permission] {
+                let endpoint = organizationsEndpoint.finished(with: "/") + organization + "/permissions"
+                let request = try Request(method: .put, uri: endpoint)
+                request.token = token
+
+                var json = JSON([:])
+                try json.set("userId", user)
+                // TODO: Why are we using permission keys here instead of id
+                // kind of feels like duplicate ids
+                try json.set("permissions", permissions)
+                request.json = json
+
+                let response = try client.respond(to: request)
+                guard let permissions = response.json?.array else {
+                    throw "Bad response to update permissions: \(response)"
+                }
+
+                return try [Permission](node: permissions)
+            }
+        }
+        
+        let permissions = PermissionsApi()
+
         func create(name: String, accessToken: String) throws -> Organization {
             let request = try Request(method: .post, uri: organizationsEndpoint)
             request.token = accessToken
@@ -135,6 +183,16 @@ extension AdminApi {
             return try Organization(node: json)
         }
 
+        func all(token: String) throws -> [Organization] {
+            let request = try Request(method: .get, uri: organizationsEndpoint)
+            request.token = token
+            let response = try client.respond(to: request)
+            // TODO: Should handle pagination
+            guard let json = response.json?["data"]?.array else { throw "Bad response organization create \(response)" }
+            return try [Organization](node: json)
+        }
+
+        // TODO: Remove
         func get(access: String) throws -> [Organization] {
             let request = try Request(method: .get, uri: organizationsEndpoint)
             request.token = access
@@ -184,8 +242,72 @@ func == (lhs: Project, rhs: Project) -> Bool {
         && lhs.organizationId == rhs.organizationId
 }
 
+struct Permission: NodeInitializable {
+    let id: UUID
+    let key: String
+
+    init(node: Node) throws {
+        id = try node.get("id")
+        key = try node.get("key")
+    }
+}
+
+extension Permission: Equatable {}
+func == (lhs: Permission, rhs: Permission) -> Bool {
+    return lhs.id == rhs.id
+        && lhs.key == rhs.key
+}
+
 extension AdminApi {
     final class ProjectsApi {
+        final class PermissionsApi {
+            func get(project: String, access: String) throws -> [Permission] {
+                let endpoint = projectsEndpoint.finished(with: "/") + project + "/permissions"
+                let request = try Request(method: .get, uri: endpoint)
+                request.token = access
+
+                let response = try client.respond(to: request)
+                guard let json = response.json?.array else {
+                    throw "Bad response for project permissions: \(response)"
+                }
+                return try [Permission](node: json)
+            }
+
+            func all(token: String) throws -> [Permission] {
+                let endpoint = projectsEndpoint.finished(with: "/") + "permissions"
+                let request = try Request(method: .get, uri: endpoint)
+                request.token = token
+
+                let response = try client.respond(to: request)
+                guard let json = response.json?.array else {
+                    throw "Bad response for project permissions: \(response)"
+                }
+                return try [Permission](node: json)
+            }
+
+            func update(_ permissions: [String], forUser user: String, inProject project: String, token: String) throws -> [Permission] {
+                let endpoint = projectsEndpoint.finished(with: "/") + project + "/permissions"
+                let request = try Request(method: .put, uri: endpoint)
+                request.token = token
+
+                var json = JSON([:])
+                try json.set("userId", user)
+                // TODO: Why are we using permission keys here instead of id
+                // kind of feels like duplicate ids
+                try json.set("permissions", permissions)
+                request.json = json
+
+                let response = try client.respond(to: request)
+                guard let permissions = response.json?.array else {
+                    throw "Bad response to update permissions: \(response)"
+                }
+                
+                return try [Permission](node: permissions)
+            }
+        }
+
+        let permissions = PermissionsApi()
+
         func create(name: String, color: String?, organizationId: String, access: String) throws -> Project {
             let projectsUri = organizationsEndpoint.finished(with: "/") + organizationId + "/projects"
             let request = try Request(method: .post, uri: projectsUri)
@@ -295,12 +417,14 @@ let adminApi = AdminApi()
 
 class UserApiTests: XCTestCase {
     func testCloud() throws {
-        let (email, pass, access) = try testUserApi()
-        let org = try testOrganizationApi(email: email, pass: pass, access: access)
-        try testProjects(organization: org, access: access)
+        let (email, pass, access) = try! testUserApi()
+        let org = try! testOrganizationApi(email: email, pass: pass, access: access)
+        try! testProjects(organization: org, access: access)
+        try testOrganizationPermissions(token: access)
     }
 
     func testUserApi() throws -> (email: String, pass: String, access: String) {
+        // TODO: Breakout create/login/get to convenience
         let email = "fake-\(Date().timeIntervalSince1970)@gmail.com"
         let pass = "real-secure"
         try createUser(email: email, pass: pass)
@@ -371,6 +495,50 @@ class UserApiTests: XCTestCase {
         XCTAssertEqual(single.color, updated.color)
         XCTAssertEqual(single.organizationId, updated.organizationId)
         XCTAssertNotEqual(single.name, updated.name)
+
+        let permissions = try adminApi.projects.permissions.get(project: updated.id.uuidString, access: access)
+        XCTAssert(!permissions.isEmpty)
+
+        let allPermissions = try adminApi.projects.permissions.all(token: access)
+        permissions.forEach { permission in
+            XCTAssert(allPermissions.contains(permission))
+        }
+
+        // TODO: Make comprehensive code to create and login
+        let email = "fake-\(Date().timeIntervalSince1970)@gmail.com"
+        let pass = "real-secure"
+        try createUser(email: email, pass: pass)
+        let (newAccess, _) = try adminApi.user.login(email: email, pass: pass)
+        let newUser = try adminApi.user.get(accessToken: newAccess)
+
+        let currentPermissions = try adminApi.projects.permissions.get(project: single.id.uuidString, access: newAccess)
+        XCTAssert(currentPermissions.isEmpty)
+
+        // TODO: why not id?
+        let perms = allPermissions.map { $0.key }
+        let updatedPermissions = try adminApi.projects.permissions.update(
+            perms,
+            forUser: newUser.id.uuidString,
+            inProject: updated.id.uuidString,
+            token: access
+        )
+        XCTAssertEqual(updatedPermissions, allPermissions)
+    }
+
+    func testOrganizationPermissions(token: String) throws {
+        let organizations = try adminApi.organizations.get(access: token)
+        XCTAssert(!organizations.isEmpty)
+        let allPermissions = try adminApi.organizations.permissions.all(token: token)
+
+        let org = organizations[0]
+        let individual = try adminApi.organizations.permissions.get(organization: org.id.uuidString, access: token)
+
+        let email = "fake-\(Date())@gmail.com"
+        let pass = "real-secure"
+        let newUser = try adminApi.user.login(email: email, pass: pass)
+        print("Individual organizations: \(individual)")
+        print("All permissions organization: \(allPermissions)")
+        print("")
     }
 
     func testColors(access: String) throws {
