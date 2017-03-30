@@ -47,9 +47,9 @@ public final class Xcode: Command {
 
     private func logExecutableInfo() throws {
         // If it's not a Vapor project, don't log warnings
-        guard try isVaporProject(with: console) else { return }
+        guard try project.isVaporProject() else { return }
 
-        let executables = try findExecutables(with: console)
+        let executables = try project.availableExecutables()
         if executables.isEmpty {
             console.info("No executable found, make sure to create")
             console.info("a target that includes a 'main.swift' file")

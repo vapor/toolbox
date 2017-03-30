@@ -44,7 +44,7 @@ public final class Build: Command {
     }
 
     private func fetch(_ arguments: [String]) throws {
-        let needsFetch = !buildFolderExists(with: console)
+        let needsFetch = !project.buildFolderExists()
         let shouldFetch = arguments.option("fetch")?.bool ?? needsFetch
         guard shouldFetch else { return }
         

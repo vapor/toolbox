@@ -1,16 +1,22 @@
 {
     "name": "Example",
     "flags": {
+        "all": [
+            "--verbose"
+        ],
         "run": {
+            "all": [
+
+            ],
             "linux": [
                 "--config:keys.two=2"
             ],
-            "macos": [
+            "mac": [
                 "mac-flag-2"
             ]
         },
         "build": {
-            "macos": [
+            "mac": [
                 "-Xswiftc",
                 "-I/usr/local/include/mysql",
                 "-Xlinker",
@@ -22,7 +28,7 @@
             ]
         },
         "test": {
-            "macos": [
+            "mac": [
                 "-Xswiftc",
                 "-I/usr/local/include/mysql",
                 "-Xlinker",

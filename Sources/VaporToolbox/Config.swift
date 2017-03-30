@@ -2,42 +2,44 @@ import Node
 import JSON
 import Core
 import Foundation
+import Console
 
-final class Config: StructuredDataWrapper {
-    var wrapped: StructuredData
-    var context: Context
-    init(_ wrapped: StructuredData, in context: Context?) {
+public final class Config: StructuredDataWrapper {
+    public var wrapped: StructuredData
+    public var context: Context
+    public init(_ wrapped: StructuredData, in context: Context?) {
         self.wrapped = wrapped
         self.context = context ?? emptyContext
     }
 }
 
 extension Config {
-    convenience init(rootDirectory: String = "./") throws  {
+    public convenience init(rootDirectory: String = "./") throws  {
         let configs = try FileManager.default.vaporConfigFiles(rootDirectory: rootDirectory)
         self.init(Node(configs))
     }
 }
 
 extension Config {
-    static func buildFlags(rootDirectory: String = "./", os: String? = nil) throws -> [String] {
+    public static func buildFlags(rootDirectory: String = "./", os: String? = nil) throws -> [String] {
         let os = os ?? dynamicOs()
-        return try loadFlags(directory: rootDirectory, path: ["flags", "build", os])
+        return try loadFlags(directory: rootDirectory, command: "build", os: os)
     }
 
-    static func runFlags(rootDirectory: String = "./", os: String? = nil) throws -> [String] {
+    public static func runFlags(rootDirectory: String = "./", os: String? = nil) throws -> [String] {
         let os = os ?? dynamicOs()
-        return try loadFlags(directory: rootDirectory, path: ["flags", "run", os])
+        return try loadFlags(directory: rootDirectory, command: "run", os: os)
     }
 
-    static func testFlags(rootDirectory: String = "./", os: String? = nil) throws -> [String] {
+    public static func testFlags(rootDirectory: String = "./", os: String? = nil) throws -> [String] {
         let os = os ?? dynamicOs()
-        return try loadFlags(directory: rootDirectory, path: ["flags", "test", os])
+        return try loadFlags(directory: rootDirectory, command: "test", os: os)
     }
 
-    private static func loadFlags(directory: String, path: [String]) throws -> [String] {
+    private static func loadFlags(directory: String, command: String, os: String) throws -> [String] {
         let config = try Config(rootDirectory: directory)
-        return config.wrapped[path]?
+
+        return config.wrapped["flags", command, os]?
             .array?
             .flatMap { $0.array } // to array of arrays
             .flatMap { $0 } // to contiguous array
@@ -49,7 +51,7 @@ extension Config {
         #if os(Linux)
         return "linux"
         #else
-        return "macos"
+        return "mac"
         #endif
     }
 }

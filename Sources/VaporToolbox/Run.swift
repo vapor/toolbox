@@ -26,7 +26,7 @@ public final class Run: Command {
             let configuredRunFlags = try Config.runFlags()
             let passThrough = arguments + configuredRunFlags
 
-            let packageName = try extractPackageName(with: console)
+            let packageName = try project.packageName()
             console.info("Running \(packageName) ...")
 
             try console.foregroundExecute(
@@ -69,7 +69,7 @@ public final class Run: Command {
     }
 
     private func getExecutableToRun() throws -> String {
-        let executables = try findExecutables(with: console)
+        let executables = try project.availableExecutables()
         guard !executables.isEmpty else {
             throw ToolboxError.general("No executables found")
         }
@@ -87,35 +87,5 @@ public final class Run: Command {
         }
         console.info("Thanks! Skip this question in the future by using '--exec=\(executable)'")
         return executable
-    }
-}
-
-internal func extractPackageName(with console: ConsoleProtocol) throws -> String {
-    let dump = try console.backgroundExecute(program: "swift", arguments: ["package", "dump-package"])
-    guard let json = try? JSON(bytes: dump.bytes), let name = json["name"]?.string else {
-        throw ToolboxError.general("Unable to determine package name.")
-    }
-    return name
-}
-
-internal func findExecutables(with console: ConsoleProtocol) throws -> [String] {
-    let executables = try console.backgroundExecute(
-        program: "find",
-        arguments: ["./Sources", "-type", "f", "-name", "main.swift"]
-    )
-    let names = executables.components(separatedBy: "\n")
-        .flatMap { path in
-            return path.components(separatedBy: "/")
-                .dropLast() // drop main.swift
-                .last // get name of source folder
-    }
-
-    // For the use case where there's one package
-    // and user hasn't setup lower level paths
-    return try names.map { name in
-        if name == "Sources" {
-            return try extractPackageName(with: console)
-        }
-        return name
     }
 }
