@@ -2,7 +2,7 @@ import Console
 import Foundation
 
 extension Array where Element == String {
-    var verbose: Bool {
+    var isVerbose: Bool {
         return flag("verbose")
     }
 }
@@ -56,13 +56,13 @@ public final class Build: Command {
     private func build(_ arguments: [String]) throws {
         let buildFlags = try loadBuildFlags(arguments)
 
-        let verbose = arguments.verbose
-        let buildBar = console.loadingBar(title: "Building Project", animated: !verbose)
+        let isVerbose = arguments.isVerbose
+        let buildBar = console.loadingBar(title: "Building Project", animated: !isVerbose)
         buildBar.start()
 
         let command =  ["build", "--enable-prefetching"] + buildFlags
         do {
-            try console.execute(verbose: verbose, program: "swift", arguments: command)
+            try console.execute(verbose: isVerbose, program: "swift", arguments: command)
             buildBar.finish()
         } catch ConsoleError.backgroundExecute(let code, let error, let output) {
             buildBar.fail()

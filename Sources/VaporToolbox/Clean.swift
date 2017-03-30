@@ -20,7 +20,7 @@ public final class Clean: Command {
     }
 
     public func run(arguments: [String]) throws {
-        let cleanBar = console.loadingBar(title: "Cleaning")
+        let cleanBar = console.loadingBar(title: "Cleaning", animated: !arguments.isVerbose)
         cleanBar.start()
 
         _ = try console.backgroundExecute(program: "rm", arguments: ["-rf", ".build"])

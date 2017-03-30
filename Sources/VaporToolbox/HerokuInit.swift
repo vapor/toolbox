@@ -124,20 +124,20 @@ public final class HerokuInit: Command {
         if console.confirm("Would you like to push to Heroku now?") {
             console.warning("This may take a while...")
 
-            let buildBar = console.loadingBar(title: "Building on Heroku ... ~5-10 minutes")
+            let buildBar = console.loadingBar(title: "Building on Heroku ... ~5-10 minutes", animated: !arguments.isVerbose)
             buildBar.start()
             do {
-              _ = try console.backgroundExecute(program: "git", arguments: ["push", "heroku", "master"])
+                _ = try console.execute(verbose: arguments.isVerbose, program: "git", arguments: ["push", "heroku", "master"])
               buildBar.finish()
             } catch ConsoleError.backgroundExecute(_, let message, _) {
               buildBar.fail()
               throw ToolboxError.general("Heroku push failed \(message)")
             }
 
-            let dynoBar = console.loadingBar(title: "Spinning up dynos")
+            let dynoBar = console.loadingBar(title: "Spinning up dynos", animated: !arguments.isVerbose)
             dynoBar.start()
             do {
-                _ = try console.backgroundExecute(program: "heroku", arguments: ["ps:scale", "web=1"])
+                _ = try console.execute(verbose: arguments.isVerbose, program: "heroku", arguments: ["ps:scale", "web=1"])
                 dynoBar.finish()
             } catch ConsoleError.backgroundExecute(_, let message, _) {
                 dynoBar.fail()

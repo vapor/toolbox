@@ -18,18 +18,18 @@ public final class Xcode: Command {
     }
 
     public func run(arguments: [String]) throws {
-        let fetch = Fetch(console: console)
-        try fetch.run(arguments: [])
+        let build = Build(console: console)
+        try build.run(arguments: arguments)
 
-        let verbose = arguments.verbose
-        let xcodeBar = console.loadingBar(title: "Generating Xcode Project", animated: !verbose)
+        let isVerbose = arguments.isVerbose
+        let xcodeBar = console.loadingBar(title: "Generating Xcode Project", animated: !isVerbose)
         xcodeBar.start()
 
         let buildFlags = try loadBuildFlags(arguments)
         let argsArray = ["package"] + buildFlags + ["--enable-prefetching", "generate-xcodeproj"]
 
         do {
-            _ = try console.execute(verbose: verbose, program: "swift", arguments: argsArray)
+            _ = try console.execute(verbose: isVerbose, program: "swift", arguments: argsArray)
             xcodeBar.finish()
         } catch ConsoleError.backgroundExecute(_, let message, _) {
             xcodeBar.fail()
@@ -37,9 +37,22 @@ public final class Xcode: Command {
             throw ToolboxError.general("Could not generate Xcode project: \(message)")
         }
 
-        // TODO: Get Executable here
-        console.info("Select the `Run` scheme to run.")
-        try openXcode()
+        let executables = try findExecutables(with: console)
+        if executables.isEmpty {
+            console.info("No executable found, make sure to create ", newLine: false)
+            console.info("a target that includes a 'main.swift' file, ", newLine: false)
+            console.info("then regenerate your project", newLine: true)
+        } else if executables.count == 1 {
+            let executable = executables[0]
+            console.info("Select the `\(executable)` scheme to run.")
+        } else {
+            console.info("Select one of your executables to run.")
+            executables.forEach { exec in
+                console.print("- \(exec)")
+            }
+        }
+
+        try openXcode(arguments)
     }
 
     private func loadBuildFlags(_ arguments: [String]) throws -> [String] {
@@ -64,9 +77,9 @@ public final class Xcode: Command {
         return buildFlags
     }
 
-    private func openXcode() throws {
+    private func openXcode(_ arguments: [String]) throws {
         guard console.confirm("Open Xcode project?") else { return }
         console.print("Opening Xcode project...")
-        _ = try console.backgroundExecute(program: "/bin/sh", arguments: ["-c", "open *.xcodeproj"])
+        _ = try console.execute(verbose: arguments.isVerbose, program: "/bin/sh", arguments: ["-c", "open *.xcodeproj"])
     }
 }

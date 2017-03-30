@@ -42,14 +42,16 @@ public final class New: Command {
         let gitDir = "--git-dir=./\(name)/.git"
         let workTree = "--work-tree=./\(name)"
 
-        let cloneBar = console.loadingBar(title: "Cloning Template")
+        let isVerbose = arguments.isVerbose
+        let cloneBar = console.loadingBar(title: "Cloning Template", animated: !isVerbose)
         cloneBar.start()
 
         do {
-            _ = try console.backgroundExecute(program: "git", arguments: ["clone", "\(template)", "\(name)"])
+            _ = try console.execute(verbose: isVerbose, program: "git", arguments: ["clone", "\(template)", "\(name)"])
 
             if let checkout = arguments.options["tag"]?.string ?? arguments.options["branch"]?.string {
-                _ = try console.backgroundExecute(
+                _ = try console.execute(
+                    verbose: isVerbose,
                     program: "git",
                     arguments: [gitDir, workTree, "checkout", checkout]
                 )
@@ -63,7 +65,7 @@ public final class New: Command {
             throw ToolboxError.general(error.trim())
         }
 
-        let repository = console.loadingBar(title: "Updating Package Name")
+        let repository = console.loadingBar(title: "Updating Package Name", animated: !isVerbose)
         repository.start()
         do {
             let file = "\(name)/Package.swift"
@@ -76,12 +78,13 @@ public final class New: Command {
         }
         repository.finish()
 
-        let gitBar = console.loadingBar(title: "Initializing git repository")
+        let gitBar = console.loadingBar(title: "Initializing git repository", animated: !isVerbose)
         gitBar.start()
         do {
-            _ = try console.backgroundExecute(program: "git", arguments: [gitDir, "init"])
-            _ = try console.backgroundExecute(program: "git", arguments: [gitDir, workTree, "add", "."])
-            _ = try console.backgroundExecute(
+            _ = try console.execute(verbose: isVerbose, program: "git", arguments: [gitDir, "init"])
+            _ = try console.execute(verbose: isVerbose, program: "git", arguments: [gitDir, workTree, "add", "."])
+            _ = try console.execute(
+                verbose: isVerbose,
                 program: "git",
                 arguments: [gitDir, workTree, "commit", "-m", "\"created \(name) from template \(template)\""]
             )

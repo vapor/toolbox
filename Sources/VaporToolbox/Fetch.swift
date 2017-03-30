@@ -44,13 +44,13 @@ public final class Fetch: Command {
     }
 
     private func fetch(_ arguments: [String]) throws {
-        let verbose = arguments.verbose
-        let depBar = console.loadingBar(title: "Fetching Dependencies", animated: !verbose)
+        let isVerbose = arguments.isVerbose
+        let depBar = console.loadingBar(title: "Fetching Dependencies", animated: !isVerbose)
         depBar.start()
 
         let pass = arguments.removeFlags(["clean", "run", "fetch", "release", "verbose"])
         try console.execute(
-            verbose: verbose,
+            verbose: isVerbose,
             program: "swift",
             arguments: ["package", "--enable-prefetching", "fetch"] + pass
         )

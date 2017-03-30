@@ -26,7 +26,7 @@ public final class Run: Command {
             let configuredRunFlags = try Config.runFlags()
             let passThrough = arguments + configuredRunFlags
 
-            let packageName = try extractPackageName()
+            let packageName = try extractPackageName(with: console)
             console.info("Running \(packageName) ...")
 
             try console.foregroundExecute(
@@ -71,7 +71,7 @@ public final class Run: Command {
     }
 
     private func getExecutableToRun() throws -> String {
-        let executables = try findExecutables()
+        let executables = try findExecutables(with: console)
         guard !executables.isEmpty else {
             throw ToolboxError.general("No executables found")
         }
@@ -81,50 +81,67 @@ public final class Run: Command {
             return executables[0]
         }
 
-        let formatted = executables.enumerated()
-            .map { idx, option in "\(idx + 1): \(option)" }
-            .joined(separator: "\n")
-
-        let answer = console.ask("Which executable would you like to run?\n\(formatted)")
-        // <= because count is offset by 1 in selection process!
-        guard let idx = answer.int, idx > 0, idx <= executables.count else {
+        let title = "Which executable would you like to run?"
+        guard let executable = console.askList(withTitle: title, from: executables) else {
             console.print("Please enter a valid number associated with your executable")
             console.print("Use --exec=desiredExecutable to skip this step")
-            throw ToolboxError.general("Invalid selection \(answer) expected valid index.")
+            throw ToolboxError.general("No executable selected")
         }
+        console.info("Thanks! Skip this question in the future by using '--exec=\(executable)'")
+        return executable
+    }
+}
 
-        let exec = executables[idx - 1]
-        console.info("Thanks! Skip this question in the future by using '--exec=\(exec)'")
-        return exec
+internal func extractPackageName(with console: ConsoleProtocol) throws -> String {
+    let dump = try console.backgroundExecute(program: "swift", arguments: ["package", "dump-package"])
+    guard let json = try? JSON(bytes: dump.bytes), let name = json["name"]?.string else {
+        throw ToolboxError.general("Unable to determine package name.")
+    }
+    return name
+}
+
+internal func findExecutables(with console: ConsoleProtocol) throws -> [String] {
+    let executables = try console.backgroundExecute(
+        program: "find",
+        arguments: ["./Sources", "-type", "f", "-name", "main.swift"]
+    )
+    let names = executables.components(separatedBy: "\n")
+        .flatMap { path in
+            return path.components(separatedBy: "/")
+                .dropLast() // drop main.swift
+                .last // get name of source folder
     }
 
-    private func extractPackageName() throws -> String {
-        let dump = try console.backgroundExecute(program: "swift", arguments: ["package", "dump-package"])
-        guard let json = try? JSON(bytes: dump.bytes), let name = json["name"]?.string else {
-            throw ToolboxError.general("Unable to determine package name.")
+    // For the use case where there's one package
+    // and user hasn't setup lower level paths
+    return try names.map { name in
+        if name == "Sources" {
+            return try extractPackageName(with: console)
         }
         return name
     }
+}
 
-    private func findExecutables() throws -> [String] {
-        let executables = try console.backgroundExecute(
-            program: "find",
-            arguments: ["./Sources", "-type", "f", "-name", "main.swift"]
-        )
-        let names = executables.components(separatedBy: "\n")
-            .flatMap { path in
-                return path.components(separatedBy: "/")
-                    .dropLast() // drop main.swift
-                    .last // get name of source folder
-            }
 
-        // For the use case where there's one package
-        // and user hasn't setup lower level paths
-        return try names.map { name in
-            if name == "Sources" {
-                return try extractPackageName()
-            }
-            return name
+extension ConsoleProtocol {
+    public func askList(withTitle title: String, from list: [String]) -> String? {
+        info(title)
+        list.enumerated().forEach { idx, item in
+            // offset 0 to start at 1
+            let offset = idx + 1
+            info("\(offset): ", newLine: false)
+            print(item)
         }
+        output("> ", style: .plain, newLine: false)
+        let raw = input()
+        guard let idx = Int(raw) else {
+            // .count is implicitly offset, no need to adjust
+            warning("Invalid selection '\(raw)', expected: 1...\(list.count)")
+            return nil
+        }
+        // undo previous offset back to 0 indexing
+        let offset = idx - 1
+        guard offset < list.count else { return nil }
+        return list[offset]
     }
 }
