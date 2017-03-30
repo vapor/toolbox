@@ -23,6 +23,6 @@ script:
   - vapor new test-project          # new
   - cd test-project
   - vapor fetch                     # fetch
-  - vapor clean                     # clean
+  - vapor clean -y                  # clean
   - vapor build                     # build
   - vapor run &                     # run
