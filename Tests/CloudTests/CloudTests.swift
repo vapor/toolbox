@@ -12,6 +12,17 @@ import HTTP
 
 extension String: Error {}
 
+struct Token {
+    let access: String
+    let refresh: String
+}
+
+extension Token: Equatable {}
+func == (lhs: Token, rhs: Token) -> Bool {
+    return lhs.access == rhs.access
+        && lhs.refresh == rhs.refresh
+}
+
 final class User: NodeInitializable {
     let id: UUID
     let firstName: String
@@ -70,7 +81,7 @@ extension AdminApi {
             lastName: String,
             organization: String,
             image: String?
-        ) throws -> (user: User, token: String, refresh: String) {
+        ) throws -> (user: User, token: Token) {
             try create(
                 email: email,
                 pass: pass,
@@ -79,9 +90,9 @@ extension AdminApi {
                 organization: organization,
                 image: image
             )
-            let (token, refresh) = try adminApi.user.login(email: email, pass: pass)
-            let user = try adminApi.user.get(accessToken: token)
-            return (user, token, refresh)
+            let token = try adminApi.user.login(email: email, pass: pass)
+            let user = try adminApi.user.get(with: token)
+            return (user, token)
         }
 
         @discardableResult
@@ -102,7 +113,7 @@ extension AdminApi {
             return try client.respond(to: request)
         }
 
-        func login(email: String, pass: String) throws -> (accessToken: String, refreshToken: String) {
+        func login(email: String, pass: String) throws -> Token {
             var json = JSON([:])
             try json.set("email", email)
             try json.set("password", pass)
@@ -115,12 +126,12 @@ extension AdminApi {
                 let refresh = response.json?["refreshToken"]?.string
                 else { throw "Bad response to login: \(response)" }
 
-            return (access, refresh)
+            return Token(access: access, refresh: refresh)
         }
 
-        func get(accessToken: String) throws -> User {
+        func get(with token: Token) throws -> User {
             let request = try Request(method: .get, uri: meEndpoint)
-            request.token = accessToken
+            request.access = token
 
             let response = try client.respond(to: request)
             guard let json = response.json else {
@@ -134,14 +145,14 @@ extension AdminApi {
 
 extension AdminApi {
     final class AccessApi {
-        func refresh(refreshToken: String) throws -> String {
+        func refresh(with token: Token) throws -> Token {
             let request = try Request(method: .get, uri: refreshEndpoint)
-            request.token = refreshToken
+            request.refresh = token
             let response = try client.respond(to: request)
-            guard let token = response.json?["accessToken"]?.string else {
+            guard let refresh = response.json?["accessToken"]?.string else {
                 throw "Bad response to refresh request: \(response)"
             }
-            return token
+            return Token(access: token.access, refresh: refresh)
         }
     }
 }
@@ -149,10 +160,10 @@ extension AdminApi {
 extension AdminApi {
     final class OrganizationApi {
         final class PermissionsApi {
-            func get(organization: String, access: String) throws -> [Permission] {
+            func get(organization: String, with token: Token) throws -> [Permission] {
                 let endpoint = organizationsEndpoint.finished(with: "/") + organization + "/permissions"
                 let request = try Request(method: .get, uri: endpoint)
-                request.token = access
+                request.access = token
 
                 let response = try client.respond(to: request)
                 guard let json = response.json?.array else {
@@ -161,10 +172,10 @@ extension AdminApi {
                 return try [Permission](node: json)
             }
 
-            func all(token: String) throws -> [Permission] {
+            func all(with token: Token) throws -> [Permission] {
                 let endpoint = organizationsEndpoint.finished(with: "/") + "permissions"
                 let request = try Request(method: .get, uri: endpoint)
-                request.token = token
+                request.access = token
 
                 let response = try client.respond(to: request)
                 guard let json = response.json?.array else {
@@ -173,10 +184,10 @@ extension AdminApi {
                 return try [Permission](node: json)
             }
 
-            func update(_ permissions: [String], forUser user: String, inOrganization organization: String, token: String) throws -> [Permission] {
+            func update(_ permissions: [String], forUser user: String, inOrganization organization: String, with token: Token) throws -> [Permission] {
                 let endpoint = organizationsEndpoint.finished(with: "/") + organization + "/permissions"
                 let request = try Request(method: .put, uri: endpoint)
-                request.token = token
+                request.access = token
 
                 var json = JSON([:])
                 try json.set("userId", user)
@@ -196,18 +207,18 @@ extension AdminApi {
         
         let permissions = PermissionsApi()
 
-        func create(name: String, accessToken: String) throws -> Organization {
+        func create(name: String, with token: Token) throws -> Organization {
             let request = try Request(method: .post, uri: organizationsEndpoint)
-            request.token = accessToken
+            request.access = token
             request.json = try JSON(node: ["name": name])
             let response = try client.respond(to: request)
             guard let json = response.json else { throw "Bad response organization create \(response)" }
             return try Organization(node: json)
         }
 
-        func all(token: String) throws -> [Organization] {
+        func all(with token: Token) throws -> [Organization] {
             let request = try Request(method: .get, uri: organizationsEndpoint)
-            request.token = token
+            request.access = token
             let response = try client.respond(to: request)
             // TODO: Should handle pagination
             guard let json = response.json?["data"]?.array else { throw "Bad response organization create \(response)" }
@@ -215,22 +226,22 @@ extension AdminApi {
         }
 
         // TODO: Remove
-        func get(access: String) throws -> [Organization] {
+        func get(with token: Token) throws -> [Organization] {
             let request = try Request(method: .get, uri: organizationsEndpoint)
-            request.token = access
+            request.access = token
             let response = try client.respond(to: request)
             // TODO: Should handle pagination
             guard let json = response.json?["data"]?.array else { throw "Bad response organization create \(response)" }
             return try [Organization](node: json)
         }
 
-        func get(id: UUID, access: String) throws -> Organization {
-            return try get(id: id.uuidString, access: access)
+        func get(id: UUID, with token: Token) throws -> Organization {
+            return try get(id: id.uuidString, with: token)
         }
 
-        func get(id: String, access: String) throws -> Organization {
+        func get(id: String, with token: Token) throws -> Organization {
             let request = try Request(method: .get, uri: organizationsEndpoint)
-            request.token = access
+            request.access = token
             request.json = try JSON(node: ["id": id])
             let response = try client.respond(to: request)
             // TODO: Discuss w/ Tanner, should this really be returning an array?
@@ -283,10 +294,10 @@ func == (lhs: Permission, rhs: Permission) -> Bool {
 extension AdminApi {
     final class ProjectsApi {
         final class PermissionsApi {
-            func get(project: String, access: String) throws -> [Permission] {
+            func get(project: String, with token: Token) throws -> [Permission] {
                 let endpoint = projectsEndpoint.finished(with: "/") + project + "/permissions"
                 let request = try Request(method: .get, uri: endpoint)
-                request.token = access
+                request.access = token
 
                 let response = try client.respond(to: request)
                 guard let json = response.json?.array else {
@@ -295,10 +306,10 @@ extension AdminApi {
                 return try [Permission](node: json)
             }
 
-            func all(token: String) throws -> [Permission] {
+            func all(with token: Token) throws -> [Permission] {
                 let endpoint = projectsEndpoint.finished(with: "/") + "permissions"
                 let request = try Request(method: .get, uri: endpoint)
-                request.token = token
+                request.access = token
 
                 let response = try client.respond(to: request)
                 guard let json = response.json?.array else {
@@ -307,10 +318,10 @@ extension AdminApi {
                 return try [Permission](node: json)
             }
 
-            func update(_ permissions: [String], forUser user: String, inProject project: String, token: String) throws -> [Permission] {
+            func update(_ permissions: [String], forUser user: String, inProject project: String, with token: Token) throws -> [Permission] {
                 let endpoint = projectsEndpoint.finished(with: "/") + project + "/permissions"
                 let request = try Request(method: .put, uri: endpoint)
-                request.token = token
+                request.access = token
 
                 var json = JSON([:])
                 try json.set("userId", user)
@@ -330,10 +341,10 @@ extension AdminApi {
 
         let permissions = PermissionsApi()
 
-        func create(name: String, color: String?, organizationId: String, access: String) throws -> Project {
+        func create(name: String, color: String?, organizationId: String, with token: Token) throws -> Project {
             let projectsUri = organizationsEndpoint.finished(with: "/") + organizationId + "/projects"
             let request = try Request(method: .post, uri: projectsUri)
-            request.token = access
+            request.access = token
 
             var json = JSON()
             try json.set("name", name)
@@ -350,10 +361,10 @@ extension AdminApi {
             return try Project(node: project)
         }
 
-        func get(query: String, access: String) throws -> [Project] {
+        func get(query: String, with token: Token) throws -> [Project] {
             let endpoint = projectsEndpoint + "?name=\(query)"
             let request = try Request(method: .get, uri: endpoint)
-            request.token = access
+            request.access = token
 
             let response = try client.respond(to: request)
             guard let json = response.json?["data"]?.array else {
@@ -363,14 +374,14 @@ extension AdminApi {
             return try [Project](node: json)
         }
 
-        func get(id: UUID, access: String) throws -> Project {
-            return try get(id: id.uuidString, access: access)
+        func get(id: UUID, with token: Token) throws -> Project {
+            return try get(id: id.uuidString, with: token)
         }
 
-        func get(id: String, access: String) throws -> Project {
+        func get(id: String, with token: Token) throws -> Project {
             let endpoint = projectsEndpoint.finished(with: "/") + id
             let request = try Request(method: .get, uri: endpoint)
-            request.token = access
+            request.access = token
 
             let response = try client.respond(to: request)
             guard let json = response.json else {
@@ -380,10 +391,10 @@ extension AdminApi {
             return try Project(node: json)
         }
 
-        func update(_ project: Project, name: String?, color: String?, access: String) throws -> Project {
+        func update(_ project: Project, name: String?, color: String?, with token: Token) throws -> Project {
             let endpoint = projectsEndpoint.finished(with: "/") + project.id.uuidString
             let request = try Request(method: .patch, uri: endpoint)
-            request.token = access
+            request.access = token
 
             var json = JSON([:])
             try json.set("name", name ?? project.name)
@@ -398,10 +409,10 @@ extension AdminApi {
             return try Project(node: project)
         }
 
-        func colors(access: String) throws -> [Color] {
+        func colors(with token: Token) throws -> [Color] {
             let endpoint = projectsEndpoint.finished(with: "/") + "colors"
             let request = try Request(method: .get, uri: endpoint)
-            request.token = access
+            request.access = token
 
             let response = try client.respond(to: request)
             let colors: [Color]? = response.json?
@@ -420,12 +431,16 @@ extension AdminApi {
 }
 
 extension Request {
-    var token: String {
-        get {
-            fatalError()
-        }
+    var access: Token {
+        get { fatalError() }
         set {
-            headers["Authorization"] = "Bearer \(newValue)"
+            headers["Authorization"] = "Bearer \(newValue.access)"
+        }
+    }
+    var refresh: Token {
+        get { fatalError() }
+        set {
+            headers["Authorization"] = "Bearer \(newValue.refresh)"
         }
     }
 }
@@ -439,23 +454,23 @@ let adminApi = AdminApi()
 
 class UserApiTests: XCTestCase {
     func testCloud() throws {
-        let (email, pass, access) = try! testUserApi()
-        let org = try! testOrganizationApi(email: email, pass: pass, access: access)
-        try! testProjects(organization: org, access: access)
-        try! testOrganizationPermissions(token: access)
+        let (email, pass, token) = try! testUserApi()
+        let org = try! testOrganizationApi(email: email, pass: pass, token: token)
+        try! testProjects(organization: org, token: token)
+        try! testOrganizationPermissions(token: token)
     }
 
-    func testUserApi() throws -> (email: String, pass: String, access: String) {
+    func testUserApi() throws -> (email: String, pass: String, access: Token) {
         // TODO: Breakout create/login/get to convenience
         let email = "fake-\(Date().timeIntervalSince1970)@gmail.com"
         let pass = "real-secure"
         try createUser(email: email, pass: pass)
-        let (access, refresh) = try adminApi.user.login(email: email, pass: pass)
-        let user = try adminApi.user.get(accessToken: access)
+        let token = try adminApi.user.login(email: email, pass: pass)
+        let user = try adminApi.user.get(with: token)
         XCTAssertEqual(user.email, email)
 
-        let newToken = try adminApi.access.refresh(refreshToken: refresh)
-        XCTAssertNotEqual(access, newToken)
+        let newToken = try adminApi.access.refresh(with: token)
+        XCTAssertNotEqual(token, newToken)
 
         return (email, pass, newToken)
     }
@@ -480,48 +495,48 @@ class UserApiTests: XCTestCase {
         XCTAssertEqual(json["name.last"]?.string, lastName)
     }
 
-    func testOrganizationApi(email: String, pass: String, access: String) throws -> Organization {
+    func testOrganizationApi(email: String, pass: String, token: Token) throws -> Organization {
         let org = "Real Business, Inc."
-        let new = try adminApi.organizations.create(name: org, accessToken: access)
+        let new = try adminApi.organizations.create(name: org, with: token)
         XCTAssertEqual(new.name, org)
 
-        let list = try adminApi.organizations.get(access: access)
+        let list = try adminApi.organizations.get(with: token)
         XCTAssert(list.contains(new))
 
-        let one = try adminApi.organizations.get(id: new.id, access: access)
+        let one = try adminApi.organizations.get(id: new.id, with: token)
         XCTAssertEqual(one, new)
 
         return one
     }
 
-    func testProjects(organization: Organization, access: String) throws {
+    func testProjects(organization: Organization, token: Token) throws {
         let name = "Fun Awesome Proj!"
         let project = try adminApi.projects.create(
             name: name,
             color: nil,
             organizationId: organization.id.uuidString,
-            access: access
+            with: token
         )
 
         let testPrefix = name.bytes.prefix(2).makeString()
-        let all = try adminApi.projects.get(query: testPrefix, access: access)
+        let all = try adminApi.projects.get(query: testPrefix, with: token)
         XCTAssert(all.contains(project))
 
-        let single = try adminApi.projects.get(id: project.id, access: access)
+        let single = try adminApi.projects.get(id: project.id, with: token)
         XCTAssertEqual(project, single)
 
-        try testColors(access: access)
+        try testColors(token: token)
 
-        let updated = try adminApi.projects.update(single, name: "I'm different", color: nil, access: access)
+        let updated = try adminApi.projects.update(single, name: "I'm different", color: nil, with: token)
         XCTAssertEqual(single.id, updated.id)
         XCTAssertEqual(single.color, updated.color)
         XCTAssertEqual(single.organizationId, updated.organizationId)
         XCTAssertNotEqual(single.name, updated.name)
 
-        let permissions = try adminApi.projects.permissions.get(project: updated.id.uuidString, access: access)
+        let permissions = try adminApi.projects.permissions.get(project: updated.id.uuidString, with: token)
         XCTAssert(!permissions.isEmpty)
 
-        let allPermissions = try adminApi.projects.permissions.all(token: access)
+        let allPermissions = try adminApi.projects.permissions.all(with: token)
         permissions.forEach { permission in
             XCTAssert(allPermissions.contains(permission))
         }
@@ -530,10 +545,10 @@ class UserApiTests: XCTestCase {
         let email = "fake-\(Date().timeIntervalSince1970)@gmail.com"
         let pass = "real-secure"
         try createUser(email: email, pass: pass)
-        let (newAccess, _) = try adminApi.user.login(email: email, pass: pass)
-        let newUser = try adminApi.user.get(accessToken: newAccess)
+        let newToken = try adminApi.user.login(email: email, pass: pass)
+        let newUser = try adminApi.user.get(with: newToken)
 
-        let currentPermissions = try adminApi.projects.permissions.get(project: single.id.uuidString, access: newAccess)
+        let currentPermissions = try adminApi.projects.permissions.get(project: single.id.uuidString, with: newToken)
         XCTAssert(currentPermissions.isEmpty)
 
         // TODO: why not id?
@@ -542,15 +557,15 @@ class UserApiTests: XCTestCase {
             perms,
             forUser: newUser.id.uuidString,
             inProject: updated.id.uuidString,
-            token: access
+            with: token
         )
         XCTAssertEqual(updatedPermissions, allPermissions)
     }
 
-    func testOrganizationPermissions(token: String) throws {
-        let organizations = try adminApi.organizations.get(access: token)
+    func testOrganizationPermissions(token: Token) throws {
+        let organizations = try adminApi.organizations.get(with: token)
         XCTAssert(!organizations.isEmpty)
-        let allPermissions = try adminApi.organizations.permissions.all(token: token)
+        let allPermissions = try adminApi.organizations.permissions.all(with: token)
 
         let org = organizations[0]
 
@@ -567,7 +582,7 @@ class UserApiTests: XCTestCase {
 
         let prePermissions = try adminApi.organizations.permissions.get(
             organization: org.id.uuidString,
-            access: newUser.token
+            with: newUser.token
         )
         XCTAssert(prePermissions.isEmpty)
         let postPermissions = try adminApi.organizations.permissions.update(
@@ -575,13 +590,13 @@ class UserApiTests: XCTestCase {
             allPermissions.map { $0.key },
             forUser: newUser.user.id.uuidString,
             inOrganization: org.id.uuidString,
-            token: token
+            with: token
         )
         XCTAssertEqual(postPermissions, allPermissions)
     }
 
-    func testColors(access: String) throws {
-        let colors = try adminApi.projects.colors(access: access)
+    func testColors(token: Token) throws {
+        let colors = try adminApi.projects.colors(with: token)
         XCTAssert(!colors.isEmpty)
     }
 }
