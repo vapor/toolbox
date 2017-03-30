@@ -10,21 +10,21 @@ final class TestConsole: ConsoleProtocol {
     var backgroundExecuteOutputBuffer: [String: String]
     var newLine: Bool
 
+    // MARK: Protocol conformance
+    var confirmOverride: Bool?
+    var size: (width: Int, height: Int)
+
     init() {
         inputBuffer = []
         outputBuffer = []
         executeBuffer = []
         backgroundExecuteOutputBuffer = [:]
 
-        confirmOverride = nil
+        confirmOverride = true
         size = (0, 0)
         newLine = false
     }
 
-    // MARK: Protocol conformance 
-
-    var confirmOverride: Bool?
-    var size: (width: Int, height: Int)
 
     func output(_ string: String, style: ConsoleStyle, newLine: Bool) {
         if self.newLine {
@@ -61,7 +61,11 @@ final class TestConsole: ConsoleProtocol {
 
     func backgroundExecute(program: String, arguments: [String]) throws -> String {
         exec(program, args: arguments)
-        return backgroundExecuteOutputBuffer[program + " " + arguments.joined(separator: " ")] ?? ""
+        let command = program + " " + arguments.joined(separator: " ")
+        guard let val = backgroundExecuteOutputBuffer[command] else {
+            throw ToolboxError.general("No command set for '\(command)'")
+        }
+        return val
     }
 
     private func exec(_ command: String, args: [String]) {

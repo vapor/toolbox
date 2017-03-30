@@ -24,13 +24,6 @@ do {
         Test(console: terminal),
         Xcode(console: terminal),
         Version(console: terminal, version: version),
-        Group(id: "self", commands: [
-            SelfInstall(console: terminal, executable: executable, version: version),
-            SelfUpdate(console: terminal, executable: executable),
-
-        ], help: [
-            "Commands that affect the toolbox itself."
-        ]),
         Group(id: "heroku", commands: [
             HerokuInit(console: terminal),
             HerokuPush(console: terminal),

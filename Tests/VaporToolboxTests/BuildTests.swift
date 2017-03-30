@@ -1,7 +1,36 @@
 import XCTest
+import JSON
 @testable import VaporToolbox
 
+extension TestConsole {
+    static func `default`() -> TestConsole {
+        let console = TestConsole()
 
+        // swift commands
+        console.backgroundExecuteOutputBuffer["swift package --enable-prefetching fetch"] = ""
+        console.backgroundExecuteOutputBuffer["swift package fetch"] = ""
+        console.backgroundExecuteOutputBuffer["swift build --enable-prefetching"] = ""
+        console.backgroundExecuteOutputBuffer["swift build"] = ""
+
+        console.backgroundExecuteOutputBuffer["swift package dump-package"] = try! JSON(["name": "Hello"]).serialize().makeString()
+        // find commands
+        console.backgroundExecuteOutputBuffer["find ./Sources -type f -name main.swift"] =
+        "~/Desktop/MyProject/Sources/Hello/main.swift"
+
+        // ls commands
+        console.backgroundExecuteOutputBuffer["ls .build/debug/Hello"] = ".build/debug/Hello\n"
+        console.backgroundExecuteOutputBuffer["ls -a ."] = ""
+        console.backgroundExecuteOutputBuffer["ls .build/debug"] = ""
+        console.backgroundExecuteOutputBuffer["ls .build/release"] = ""
+        console.backgroundExecuteOutputBuffer["ls .build/release/Hello"] = ".build/release/Hello\n"
+        
+        // rm commands
+        console.backgroundExecuteOutputBuffer["rm -rf .build"] = ""
+        console.backgroundExecuteOutputBuffer["rm -rf *.xcodeproj"] = ""
+        console.backgroundExecuteOutputBuffer["rm -rf Package.pins"] = ""
+        return console
+    }
+}
 class BuildTests: XCTestCase {
     static let allTests = [
         ("testBuild", testBuild),
@@ -9,124 +38,64 @@ class BuildTests: XCTestCase {
         ("testBuildAndRun", testBuildAndRun)
     ]
 
-    func testBuild() {
-        let console = TestConsole()
-        let build = Build(console: console)
+    let console: TestConsole = .default()
+    lazy var build: Build = Build(console: self.console)
 
-        do {
-            try build.run(arguments: ["--modulemap=false"])
-            #if swift(>=3.1)
-                XCTAssertEqual(console.outputBuffer, [
-                    "No .build folder, fetch may take a while...",
-                    "Fetching Dependencies [Done]",
-                    "Building Project [Done]"
-                ])
-                XCTAssertEqual(console.executeBuffer, [
-                    "ls -a .",
-                    "swift package --enable-prefetching fetch",
-                    "swift build --enable-prefetching",
-                ])
-            #else
-                XCTAssertEqual(console.outputBuffer, [
-                    "No Packages folder, fetch may take a while...",
-                    "Fetching Dependencies [Done]",
-                    "Building Project [Done]"
-                    ])
-                XCTAssertEqual(console.executeBuffer, [
-                    "ls -a .",
-                    "swift package fetch",
-                    "swift build",
-                    ])
-            #endif
-        } catch {
-            XCTFail("Build run failed: \(error)")
-        }
+    func testBuild() throws {
+        try build.run(arguments: [])
+
+        XCTAssertEqual(console.outputBuffer, [
+            "No .build folder, fetch may take a while...",
+            "Fetching Dependencies [Done]",
+            "Building Project [Done]"
+            ])
+        XCTAssertEqual(console.executeBuffer, [
+            "ls -a .",
+            "ls -a .",
+            "swift package --enable-prefetching fetch",
+            "swift build --enable-prefetching",
+            ])
     }
 
-    func testBuildAndClean() {
-        let console = TestConsole()
-        let build = Build(console: console)
+    func testBuildAndClean() throws {
+        try build.run(arguments: ["--clean"])
 
-        do {
-            try build.run(arguments: ["--clean", "--modulemap=false"])
-
-            #if swift(>=3.1)
-                XCTAssertEqual(console.outputBuffer, [
-                    "Cleaning [Done]",
-                    "No .build folder, fetch may take a while...",
-                    "Fetching Dependencies [Done]",
-                    "Building Project [Done]"
-                ])
-                XCTAssertEqual(console.executeBuffer, [
-                    "rm -rf Packages .build",
-                    "ls -a .",
-                    "swift package --enable-prefetching fetch",
-                    "swift build --enable-prefetching",
-                ])
-            #else
-                XCTAssertEqual(console.outputBuffer, [
-                    "Cleaning [Done]",
-                    "No Packages folder, fetch may take a while...",
-                    "Fetching Dependencies [Done]",
-                    "Building Project [Done]"
-                    ])
-                XCTAssertEqual(console.executeBuffer, [
-                    "rm -rf Packages .build",
-                    "ls -a .",
-                    "swift package fetch",
-                    "swift build",
-                    ])
-
-            #endif
-        } catch {
-            XCTFail("Build run failed: \(error)")
-        }
+        XCTAssertEqual(console.outputBuffer, [
+            "Cleaning [Done]",
+            "No .build folder, fetch may take a while...",
+            "Fetching Dependencies [Done]",
+            "Building Project [Done]"
+            ])
+        XCTAssertEqual(console.executeBuffer, [
+            "rm -rf .build",
+            "ls -a .",
+            "ls -a .",
+            "swift package --enable-prefetching fetch",
+            "swift build --enable-prefetching",
+            ])
     }
 
-    func testBuildAndRun() {
-        let console = TestConsole()
-        let build = Build(console: console)
+    func testBuildAndRun() throws {
+        let name = "WallaWalla"
+        console.backgroundExecuteOutputBuffer["swift package dump-package"] = "{\"name\": \"\(name)\"}"
 
-        let name = "TestName"
-        console.backgroundExecuteOutputBuffer = [
-            "swift package dump-package": "{\"name\": \"\(name)\"}"
-        ]
-
-        do {
-            try build.run(arguments: ["--run", "--modulemap=false"])
-            #if swift(>=3.1)
-                XCTAssertEqual(console.outputBuffer, [
-                    "No .build folder, fetch may take a while...",
-                    "Fetching Dependencies [Done]",
-                    "Building Project [Done]",
-                    "Running \(name)..."
-                ])
-                XCTAssertEqual(console.executeBuffer, [
-                    "ls -a .",
-                    "swift package --enable-prefetching fetch",
-                    "swift build --enable-prefetching",
-                    "ls .build/debug",
-                    "swift package dump-package",
-                    ".build/debug/App"
-                ])
-            #else
-                XCTAssertEqual(console.outputBuffer, [
-                    "No Packages folder, fetch may take a while...",
-                    "Fetching Dependencies [Done]",
-                    "Building Project [Done]",
-                    "Running \(name)..."
-                    ])
-                XCTAssertEqual(console.executeBuffer, [
-                    "ls -a .",
-                    "swift package fetch",
-                    "swift build",
-                    "ls .build/debug",
-                    "swift package dump-package",
-                    ".build/debug/App"
-                    ])
-            #endif
-        } catch {
-            XCTFail("Build run failed: \(error)")
-        }
+        try build.run(arguments: ["--run"])
+        XCTAssertEqual(console.outputBuffer, [
+            "No .build folder, fetch may take a while...",
+            "Fetching Dependencies [Done]",
+            "Building Project [Done]",
+            "Running \(name) ..."
+            ])
+        XCTAssertEqual(console.executeBuffer, [
+            "ls -a .",
+            "ls -a .",
+            "swift package --enable-prefetching fetch",
+            "swift build --enable-prefetching",
+            "ls .build/debug",
+            "find ./Sources -type f -name main.swift",
+            "ls .build/debug/Hello",
+            "swift package dump-package",
+            ".build/debug/Hello"
+            ])
     }
 }

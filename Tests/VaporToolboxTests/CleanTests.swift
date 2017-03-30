@@ -9,34 +9,27 @@ class CleanTests: XCTestCase {
         ("testCleanWithPins", testCleanWithPins)
     ]
 
-    func testClean() {
-        let console = TestConsole()
-        let clean = Clean(console: console)
+    let console: TestConsole = .default()
+    lazy var clean: Clean = Clean(console: self.console)
 
-        do {
-            try clean.run(arguments: [])
-            XCTAssertEqual(console.outputBuffer, [
-                "Cleaning [Done]"
+    func testClean() throws {
+        try clean.run(arguments: [])
+        XCTAssertEqual(console.outputBuffer, [
+            "Cleaning [Done]"
             ])
-            XCTAssertEqual(console.executeBuffer, [
-                "rm -rf Packages .build",
+        XCTAssertEqual(console.executeBuffer, [
+            "rm -rf .build",
             ])
-        } catch {
-            XCTFail("Clean failed: \(error)")
-        }
     }
 
-    func testCleanWithXcode() {
-        let console = TestConsole()
-        let clean = Clean(console: console)
-
+    func testCleanWithXcode() throws {
         do {
             try clean.run(arguments: ["--xcode"])
             XCTAssertEqual(console.outputBuffer, [
                 "Cleaning [Done]"
             ])
             XCTAssertEqual(console.executeBuffer, [
-                "rm -rf Packages .build",
+                "rm -rf .build",
                 "rm -rf *.xcodeproj"
             ])
         } catch {
@@ -45,16 +38,13 @@ class CleanTests: XCTestCase {
     }
 
     func testCleanWithPins() {
-        let console = TestConsole()
-        let clean = Clean(console: console)
-
         do {
             try clean.run(arguments: ["--pins"])
             XCTAssertEqual(console.outputBuffer, [
                 "Cleaning [Done]"
             ])
             XCTAssertEqual(console.executeBuffer, [
-                "rm -rf Packages .build",
+                "rm -rf .build",
                 "rm -rf Package.pins"
             ])
         } catch {

@@ -38,18 +38,20 @@ public final class New: Command {
 
     public func run(arguments: [String]) throws {
         let template = try loadTemplate(arguments: arguments)
-        let name = try value("name", from: arguments).string ?? ""
+        let name = try value("name", from: arguments)
         let gitDir = "--git-dir=./\(name)/.git"
         let workTree = "--work-tree=./\(name)"
 
-        let cloneBar = console.loadingBar(title: "Cloning Template")
+        let isVerbose = arguments.isVerbose
+        let cloneBar = console.loadingBar(title: "Cloning Template", animated: !isVerbose)
         cloneBar.start()
 
         do {
-            _ = try console.backgroundExecute(program: "git", arguments: ["clone", "\(template)", "\(name)"])
+            _ = try console.execute(verbose: isVerbose, program: "git", arguments: ["clone", "\(template)", "\(name)"])
 
             if let checkout = arguments.options["tag"]?.string ?? arguments.options["branch"]?.string {
-                _ = try console.backgroundExecute(
+                _ = try console.execute(
+                    verbose: isVerbose,
                     program: "git",
                     arguments: [gitDir, workTree, "checkout", checkout]
                 )
@@ -60,10 +62,14 @@ public final class New: Command {
             cloneBar.finish()
         } catch ConsoleError.backgroundExecute(_, let error, _) {
             cloneBar.fail()
-            throw ToolboxError.general(error.string.trim())
+            throw ToolboxError.general(error.trim())
+        } catch {
+            // prevents foreground executions from logging 'Done' instead of 'Failed'
+            cloneBar.fail()
+            throw error
         }
 
-        let repository = console.loadingBar(title: "Updating Package Name")
+        let repository = console.loadingBar(title: "Updating Package Name", animated: !isVerbose)
         repository.start()
         do {
             let file = "\(name)/Package.swift"
@@ -76,19 +82,21 @@ public final class New: Command {
         }
         repository.finish()
 
-        let gitBar = console.loadingBar(title: "Initializing git repository")
+        let gitBar = console.loadingBar(title: "Initializing git repository", animated: !isVerbose)
         gitBar.start()
         do {
-            _ = try console.backgroundExecute(program: "git", arguments: [gitDir, "init"])
-            _ = try console.backgroundExecute(program: "git", arguments: [gitDir, workTree, "add", "."])
-            _ = try console.backgroundExecute(
+            _ = try console.execute(verbose: isVerbose, program: "git", arguments: [gitDir, "init"])
+            _ = try console.execute(verbose: isVerbose, program: "git", arguments: [gitDir, workTree, "add", "."])
+            _ = try console.execute(
+                verbose: isVerbose,
                 program: "git",
                 arguments: [gitDir, workTree, "commit", "-m", "\"created \(name) from template \(template)\""]
             )
+            gitBar.finish()
         } catch {
+            gitBar.fail()
             console.error("could not initialize git repository")
         }
-        gitBar.finish()
 
         console.print()
 

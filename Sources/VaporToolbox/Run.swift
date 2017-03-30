@@ -10,7 +10,6 @@ public final class Run: Command {
     ]
 
     public let signature: [Argument] = [
-        Option(name: "name", help: ["The package name."]),
         Option(name: "exec", help: ["The executable name."])
     ]
 
@@ -21,76 +20,102 @@ public final class Run: Command {
     }
 
     public func run(arguments: [String]) throws {
-        let folder: String
-
-        if arguments.flag("release") {
-            folder = "release"
-        } else {
-            folder = "debug"
-        }
-
         do {
-            _ = try console.backgroundExecute(program: "ls", arguments: [".build/\(folder)"])
-        } catch ConsoleError.backgroundExecute(_) {
-            throw ToolboxError.general("No .build/\(folder) folder found.")
-        }
+            let executable = try executablePath(arguments)
 
-        do {
-            let name: String
+            let configuredRunFlags = try Config.runFlags()
+            let passThrough = arguments + configuredRunFlags
 
-            if let n = arguments.options["name"]?.string {
-                name = n
-            } else if let n = try extractName() {
-                name = n
-            } else {
-                if arguments.options["name"]?.string == nil {
-                    console.info("Use --name to manually supply the package name.")
-                }
+            let packageName = try extractPackageName(with: console)
+            console.info("Running \(packageName) ...")
 
-                throw ToolboxError.general("Unable to determine package name.")
-            }
-
-            let exec = arguments.options["exec"]?.string ?? "App"
-
-            var passThrough = arguments.values
-            for (name, value) in arguments.options {
-                passThrough += "--\(name)=\(value)"
-            }
-
-            passThrough += try Config.runFlags()
-
-            console.info("Running \(name)...")
-
-            var path = ".build/\(folder)/\(name)"
-            do {
-                if FileManager.default.fileExists(atPath: "./\(path)") {
-                    try console.foregroundExecute(
-                        program: path,
-                        arguments: passThrough
-                    )
-                } else {
-                    path = ".build/\(folder)/\(exec)"
-                    try console.foregroundExecute(
-                        program: path,
-                        arguments: passThrough
-                    )
-                }
-            } catch ConsoleError.spawnProcess {
-                throw ToolboxError.general("Could not find \(path).")
-            }
-
+            try console.foregroundExecute(
+                program: executable,
+                arguments: passThrough
+            )
         } catch ConsoleError.execute(_) {
             throw ToolboxError.general("Run failed.")
         }
     }
 
-    private func extractName() throws -> String? {
-        let dump = try console.backgroundExecute(program: "swift", arguments: ["package", "dump-package"])
+    private func buildFolder(_ arguments: [String]) throws -> String {
+        let configuration = arguments.flag("release") ? "release" : "debug"
+        let folder = ".build/\(configuration)"
 
-        guard let json = try? JSON.init(serialized: dump.bytes) else {
-            return nil
+        do {
+            _ = try console.backgroundExecute(program: "ls", arguments: [folder])
+        } catch ConsoleError.backgroundExecute(_) {
+            throw ToolboxError.general("No builds found for \(configuration) configuration.")
         }
 
-        return json["name"]?.string
+        return folder
+    }
+
+    private func executablePath(_ arguments: [String]) throws -> String {
+        let folder = try buildFolder(arguments)
+        let exec = try arguments.options["exec"] ?? getExecutableToRun()
+        let executablePath = "\(folder)/\(exec)"
+        try verify(executablePath: executablePath)
+        return executablePath
+    }
+
+    private func verify(executablePath: String) throws {
+        let pathExists = try? console.backgroundExecute(program: "ls", arguments: [executablePath])
+        guard pathExists?.trim() == executablePath else {
+            console.warning("Could not find executable at \(executablePath).")
+            console.warning("Make sure 'vapor build' has been called.")
+            throw ToolboxError.general("No executable found.")
+        }
+    }
+
+    private func getExecutableToRun() throws -> String {
+        let executables = try findExecutables(with: console)
+        guard !executables.isEmpty else {
+            throw ToolboxError.general("No executables found")
+        }
+
+        // If there's only 1 executable, we'll use that
+        if executables.count == 1 {
+            return executables[0]
+        }
+
+        let title = "Which executable would you like to run?"
+        guard let executable = console.askList(withTitle: title, from: executables) else {
+            console.print("Please enter a valid number associated with your executable")
+            console.print("Use --exec=desiredExecutable to skip this step")
+            throw ToolboxError.general("No executable selected")
+        }
+        console.info("Thanks! Skip this question in the future by using '--exec=\(executable)'")
+        return executable
+    }
+}
+
+internal func extractPackageName(with console: ConsoleProtocol) throws -> String {
+    let dump = try console.backgroundExecute(program: "swift", arguments: ["package", "dump-package"])
+    guard let json = try? JSON(bytes: dump.bytes), let name = json["name"]?.string else {
+        throw ToolboxError.general("Unable to determine package name.")
+    }
+    return name
+}
+
+internal func findExecutables(with console: ConsoleProtocol) throws -> [String] {
+    let executables = try console.backgroundExecute(
+        program: "find",
+        arguments: ["./Sources", "-type", "f", "-name", "main.swift"]
+    )
+    let names = executables.components(separatedBy: "\n")
+        .flatMap { path in
+            return path.components(separatedBy: "/")
+                .dropLast() // drop main.swift
+                .last // get name of source folder
+    }
+
+    // For the use case where there's one package
+    // and user hasn't setup lower level paths
+    return try names.map { name in
+        if name == "Sources" {
+            return try extractPackageName(with: console)
+        }
+        return name
     }
 }
