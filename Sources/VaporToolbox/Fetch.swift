@@ -33,7 +33,7 @@ public final class Fetch: Command {
     }
 
     private func fetchWarning() throws {
-        if !buildFolderExists(with: console) {
+        if !project.buildFolderExists() {
             console.warning("No .build folder, fetch may take a while...")
         }
     }
@@ -51,13 +51,6 @@ public final class Fetch: Command {
         )
         depBar.finish()
     }
-}
-
-internal func buildFolderExists(with console: ConsoleProtocol) -> Bool {
-    do {
-        let ls = try console.backgroundExecute(program: "ls", arguments: ["-a", "."])
-        return ls.contains(".build")
-    } catch { return false }
 }
 
 extension Array where Element == String {

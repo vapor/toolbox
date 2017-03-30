@@ -25,6 +25,7 @@ public final class Clean: Command {
             console.warning("Cleaning will increase your build time ... ")
             console.warning("We recommend trying 'vapor update' first.")
             guard console.confirm("Would you like to clean anyways?") else { return }
+            console.info("Use `-y` to bypass this command in the future.")
         }
 
         let cleanBar = console.loadingBar(title: "Cleaning", animated: !arguments.isVerbose)
