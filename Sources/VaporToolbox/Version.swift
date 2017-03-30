@@ -22,7 +22,10 @@ public final class Version: Command {
         console.success("\(version)")
 
         guard verifySwiftProject() else { return }
-        guard try verifyVaporProject() else { return }
+        guard try isVaporProject(with: console) else {
+            console.warning("No Vapor dependency detected, unable to log Framework Version")
+            return
+        }
 
         // If we have a vapor project, but checkouts
         // don't exist yet, we'll need to build
@@ -41,22 +44,6 @@ public final class Version: Command {
 
         console.print("Vapor Framework: ", newLine: false)
         console.success("\(vapor)")
-    }
-
-    private func verifyVaporProject() throws -> Bool {
-        let dump = try console.backgroundExecute(program: "swift", arguments: ["package", "dump-package"])
-        let json = try JSON(bytes: dump.makeBytes())
-        let vapor = json["dependencies", "url"]?
-            .array?
-            .flatMap { $0.string }
-            .contains("https://github.com/vapor/vapor.git")
-            ?? false
-
-        if !vapor {
-            console.warning("No Vapor dependency detected, unable to log Framework Version")
-        }
-
-        return vapor
     }
 
     private func verifySwiftProject() -> Bool {
@@ -109,4 +96,14 @@ public final class Version: Command {
             .filter { $0.hasPrefix("vapor.git") }
             .first
     }
+}
+
+internal func isVaporProject(with console: ConsoleProtocol) throws -> Bool {
+    let dump = try console.backgroundExecute(program: "swift", arguments: ["package", "dump-package"])
+    let json = try? JSON(bytes: dump.makeBytes())
+    return json?["dependencies", "url"]?
+        .array?
+        .flatMap { $0.string }
+        .contains("https://github.com/vapor/vapor.git")
+        ?? false
 }

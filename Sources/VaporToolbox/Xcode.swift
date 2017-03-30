@@ -41,11 +41,19 @@ public final class Xcode: Command {
             throw error
         }
 
+        try logExecutableInfo()
+        try openXcode(arguments)
+    }
+
+    private func logExecutableInfo() throws {
+        // If it's not a Vapor project, don't log warnings
+        guard try isVaporProject(with: console) else { return }
+
         let executables = try findExecutables(with: console)
         if executables.isEmpty {
-            console.info("No executable found, make sure to create ", newLine: false)
-            console.info("a target that includes a 'main.swift' file, ", newLine: false)
-            console.info("then regenerate your project", newLine: true)
+            console.info("No executable found, make sure to create")
+            console.info("a target that includes a 'main.swift' file")
+            console.info("then regenerate your project")
         } else if executables.count == 1 {
             let executable = executables[0]
             console.info("Select the `\(executable)` scheme to run.")
@@ -55,8 +63,6 @@ public final class Xcode: Command {
                 console.print("- \(exec)")
             }
         }
-
-        try openXcode(arguments)
     }
 
     private func loadBuildFlags(_ arguments: [String]) throws -> [String] {
