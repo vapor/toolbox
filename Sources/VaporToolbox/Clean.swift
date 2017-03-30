@@ -24,8 +24,8 @@ public final class Clean: Command {
         if !override {
             console.warning("Cleaning will increase your build time ... ")
             console.warning("We recommend trying 'vapor update' first.")
+            guard console.confirm("Would you like to clean anyways?") else { return }
         }
-        guard console.confirm("Would you like to clean anyways?") else { return }
 
         let cleanBar = console.loadingBar(title: "Cleaning", animated: !arguments.isVerbose)
         cleanBar.start()

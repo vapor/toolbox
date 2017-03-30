@@ -10,21 +10,21 @@ final class TestConsole: ConsoleProtocol {
     var backgroundExecuteOutputBuffer: [String: String]
     var newLine: Bool
 
+    // MARK: Protocol conformance
+    var confirmOverride: Bool?
+    var size: (width: Int, height: Int)
+
     init() {
         inputBuffer = []
         outputBuffer = []
         executeBuffer = []
         backgroundExecuteOutputBuffer = [:]
 
-        confirmOverride = nil
+        confirmOverride = true
         size = (0, 0)
         newLine = false
     }
 
-    // MARK: Protocol conformance 
-
-    var confirmOverride: Bool?
-    var size: (width: Int, height: Int)
 
     func output(_ string: String, style: ConsoleStyle, newLine: Bool) {
         if self.newLine {
