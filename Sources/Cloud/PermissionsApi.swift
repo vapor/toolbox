@@ -22,7 +22,7 @@ public final class PermissionsApi<Model: PermissionModel> {
         let request = try Request(method: .get, uri: endpoint)
         request.access = token
 
-        let response = try client.respond(to: request)
+        let response = try client.respond(to: request, through: middleware)
         return try [Permission](node: response.json)
     }
 
@@ -31,7 +31,7 @@ public final class PermissionsApi<Model: PermissionModel> {
         let request = try Request(method: .get, uri: endpoint)
         request.access = token
 
-        let response = try client.respond(to: request)
+        let response = try client.respond(to: request, through: middleware)
         return try [Permission](node: response.json)
     }
 
@@ -45,7 +45,7 @@ public final class PermissionsApi<Model: PermissionModel> {
         try json.set("permissions", permissions)
         request.json = json
 
-        let response = try client.respond(to: request)
+        let response = try client.respond(to: request, through: middleware)
         return try [Permission](node: response.json)
     }
 }

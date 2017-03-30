@@ -17,14 +17,14 @@ extension AdminApi {
             let request = try Request(method: .post, uri: organizationsEndpoint)
             request.access = token
             request.json = try JSON(node: ["name": name])
-            let response = try client.respond(to: request)
+            let response = try client.respond(to: request, through: middleware)
             return try Organization(node: response.json)
         }
 
         public func all(with token: Token) throws -> [Organization] {
             let request = try Request(method: .get, uri: organizationsEndpoint)
             request.access = token
-            let response = try client.respond(to: request)
+            let response = try client.respond(to: request, through: middleware)
             // TODO: Should handle pagination
             return try [Organization](node: response.json?["data"])
         }
@@ -37,7 +37,7 @@ extension AdminApi {
             let request = try Request(method: .get, uri: organizationsEndpoint)
             request.access = token
             request.json = try JSON(node: ["id": id])
-            let response = try client.respond(to: request)
+            let response = try client.respond(to: request, through: middleware)
 
             // TODO: Discuss w/ Tanner, should this really be returning an array?
             let org = response.json?["data"]?.array?.first

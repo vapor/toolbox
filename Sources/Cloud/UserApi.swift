@@ -13,7 +13,7 @@ extension AdminApi {
             lastName: String,
             organization: String,
             image: String?
-            ) throws -> (user: User, token: Token) {
+        ) throws -> (user: User, token: Token) {
             try create(
                 email: email,
                 pass: pass,
@@ -52,7 +52,7 @@ extension AdminApi {
 
             let request = try Request(method: .post, uri: loginEndpoint)
             request.json = json
-            let response = try client.respond(to: request)
+            let response = try client.respond(to: request, through: middleware)
             guard
                 let access = response.json?["accessToken"]?.string,
                 let refresh = response.json?["refreshToken"]?.string
@@ -65,7 +65,7 @@ extension AdminApi {
             let request = try Request(method: .get, uri: meEndpoint)
             request.access = token
 
-            let response = try client.respond(to: request)
+            let response = try client.respond(to: request, through: middleware)
             return try User(node: response.json)
         }
     }

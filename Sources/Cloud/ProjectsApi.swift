@@ -19,7 +19,7 @@ extension AdminApi {
             }
             request.json = json
 
-            let response = try client.respond(to: request)
+            let response = try client.respond(to: request, through: middleware)
             return try Project(node: response.json)
         }
 
@@ -28,7 +28,7 @@ extension AdminApi {
             let request = try Request(method: .get, uri: endpoint)
             request.access = token
 
-            let response = try client.respond(to: request)
+            let response = try client.respond(to: request, through: middleware)
             let projects = response.json?["data"]
             return try [Project](node: projects)
         }
@@ -42,7 +42,7 @@ extension AdminApi {
             let request = try Request(method: .get, uri: endpoint)
             request.access = token
 
-            let response = try client.respond(to: request)
+            let response = try client.respond(to: request, through: middleware)
             return try Project(node: response.json)
         }
 
@@ -56,7 +56,7 @@ extension AdminApi {
             try json.set("color", color ?? project.color)
             request.json = json
 
-            let response = try client.respond(to: request)
+            let response = try client.respond(to: request, through: middleware)
             return try Project(node: response.json)
         }
 
@@ -65,7 +65,7 @@ extension AdminApi {
             let request = try Request(method: .get, uri: endpoint)
             request.access = token
 
-            let response = try client.respond(to: request)
+            let response = try client.respond(to: request, through: middleware)
             let colors = response.json?
                 .object?
                 .map { name, hex in
