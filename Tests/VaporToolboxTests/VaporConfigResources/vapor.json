@@ -5,12 +5,12 @@
             "linux": [
                 "--config:keys.one=1"
             ],
-            "macos": [
+            "mac": [
                 "mac-flag"
             ]
         },
         "test": {
-            "macos": [
+            "mac": [
               "macos-test-flag"
             ]
         }

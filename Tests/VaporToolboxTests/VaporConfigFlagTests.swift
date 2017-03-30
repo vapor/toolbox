@@ -22,7 +22,7 @@ class VaporConfigFlagsTests: XCTestCase {
     #endif
 
     func testBuildFlagsMac() throws {
-        let flags = try Config.buildFlags(rootDirectory: directory, os: "macos")
+        let flags = try Config.buildFlags(rootDirectory: directory, os: "mac")
         let expectation = [
             "-Xswiftc",
             "-I/usr/local/include/mysql",
@@ -33,7 +33,7 @@ class VaporConfigFlagsTests: XCTestCase {
     }
 
     func testRunFlagsMac() throws {
-        let flags = try Config.runFlags(rootDirectory: directory, os: "macos")
+        let flags = try Config.runFlags(rootDirectory: directory, os: "mac")
         let expectation = [
             "mac-flag",
             "mac-flag-2",
@@ -42,7 +42,7 @@ class VaporConfigFlagsTests: XCTestCase {
     }
 
     func testTestFlagsMac() throws {
-        let flags = try Config.testFlags(rootDirectory: directory, os: "macos")
+        let flags = try Config.testFlags(rootDirectory: directory, os: "mac")
         let expectation = [
             "macos-test-flag",
             "-Xswiftc",
