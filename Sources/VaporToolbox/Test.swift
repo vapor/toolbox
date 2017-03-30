@@ -39,6 +39,10 @@ public final class Test: Command {
             console.print()
 
             throw ToolboxError.general("Tests failed.")
+        } catch {
+            // prevents foreground executions from logging 'Done' instead of 'Failed'
+            testBar.fail()
+            throw error
         }
     }
     

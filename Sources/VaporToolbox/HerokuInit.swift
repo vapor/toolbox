@@ -132,6 +132,10 @@ public final class HerokuInit: Command {
             } catch ConsoleError.backgroundExecute(_, let message, _) {
               buildBar.fail()
               throw ToolboxError.general("Heroku push failed \(message)")
+            } catch {
+                // prevents foreground executions from logging 'Done' instead of 'Failed'
+                buildBar.fail()
+                throw error
             }
 
             let dynoBar = console.loadingBar(title: "Spinning up dynos", animated: !arguments.isVerbose)
@@ -142,6 +146,10 @@ public final class HerokuInit: Command {
             } catch ConsoleError.backgroundExecute(_, let message, _) {
                 dynoBar.fail()
                 throw ToolboxError.general("Unable to spin up dynos: \(message)")
+            } catch {
+                // prevents foreground executions from logging 'Done' instead of 'Failed'
+                dynoBar.fail()
+                throw error
             }
 
             console.print("Visit https://dashboard.heroku.com/apps/")

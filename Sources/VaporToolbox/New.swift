@@ -63,6 +63,10 @@ public final class New: Command {
         } catch ConsoleError.backgroundExecute(_, let error, _) {
             cloneBar.fail()
             throw ToolboxError.general(error.trim())
+        } catch {
+            // prevents foreground executions from logging 'Done' instead of 'Failed'
+            cloneBar.fail()
+            throw error
         }
 
         let repository = console.loadingBar(title: "Updating Package Name", animated: !isVerbose)
@@ -88,10 +92,11 @@ public final class New: Command {
                 program: "git",
                 arguments: [gitDir, workTree, "commit", "-m", "\"created \(name) from template \(template)\""]
             )
+            gitBar.finish()
         } catch {
+            gitBar.fail()
             console.error("could not initialize git repository")
         }
-        gitBar.finish()
 
         console.print()
 

@@ -41,6 +41,10 @@ public final class HerokuPush: Command {
         } catch ConsoleError.execute(_) {
             herokuBar.fail()
             throw ToolboxError.general("Unable to push to Heroku.")
+        } catch {
+            // prevents foreground executions from logging 'Done' instead of 'Failed'
+            herokuBar.fail()
+            throw error
         }
     }
 

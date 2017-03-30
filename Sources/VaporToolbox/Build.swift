@@ -67,6 +67,10 @@ public final class Build: Command {
         } catch ConsoleError.backgroundExecute(let code, let error, let output) {
             buildBar.fail()
             try backgroundError(command: command, code: code, error: error, output: output)
+        } catch {
+            // prevents foreground executions from logging 'Done' instead of 'Failed'
+            buildBar.fail()
+            throw error
         }
     }
 

@@ -35,6 +35,10 @@ public final class Xcode: Command {
             xcodeBar.fail()
             console.print(message)
             throw ToolboxError.general("Could not generate Xcode project: \(message)")
+        } catch {
+            // prevents foreground executions from logging 'Done' instead of 'Failed'
+            xcodeBar.fail()
+            throw error
         }
 
         let executables = try findExecutables(with: console)
