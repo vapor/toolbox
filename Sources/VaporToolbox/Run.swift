@@ -39,17 +39,13 @@ public final class Run: Command {
     }
 
     private func buildFolder(_ arguments: [String]) throws -> String {
-        let folder: String
-        if arguments.flag("release") {
-            folder = ".build/release"
-        } else {
-            folder = ".build/debug"
-        }
+        let configuration = arguments.flag("release") ? "release" : "debug"
+        let folder = ".build/\(configuration)"
 
         do {
             _ = try console.backgroundExecute(program: "ls", arguments: [folder])
         } catch ConsoleError.backgroundExecute(_) {
-            throw ToolboxError.general("No \(folder) folder found.")
+            throw ToolboxError.general("No builds found for \(configuration) configuration.")
         }
 
         return folder
@@ -64,9 +60,11 @@ public final class Run: Command {
     }
 
     private func verify(executablePath: String) throws {
-        let pathExists = try console.backgroundExecute(program: "ls", arguments: [executablePath])
-        guard pathExists.trim() == executablePath else {
-            throw ToolboxError.general("Could not find executable at \(executablePath)")
+        let pathExists = try? console.backgroundExecute(program: "ls", arguments: [executablePath])
+        guard pathExists?.trim() == executablePath else {
+            console.warning("Could not find executable at \(executablePath).")
+            console.warning("Make sure 'vapor build' has been called.")
+            throw ToolboxError.general("No executable found.")
         }
     }
 
