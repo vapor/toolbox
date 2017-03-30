@@ -63,6 +63,28 @@ final class AdminApi {
 
 extension AdminApi {
     final class UserApi {
+        func createAndLogin(
+            email: String,
+            pass: String,
+            firstName: String,
+            lastName: String,
+            organization: String,
+            image: String?
+        ) throws -> (user: User, token: String, refresh: String) {
+            try create(
+                email: email,
+                pass: pass,
+                firstName: firstName,
+                lastName: lastName,
+                organization: organization,
+                image: image
+            )
+            let (token, refresh) = try adminApi.user.login(email: email, pass: pass)
+            let user = try adminApi.user.get(accessToken: token)
+            return (user, token, refresh)
+        }
+
+        @discardableResult
         func create(email: String, pass: String, firstName: String, lastName: String, organization: String, image: String?) throws -> Response {
             var json = JSON([:])
             try json.set("email", email)
@@ -420,7 +442,7 @@ class UserApiTests: XCTestCase {
         let (email, pass, access) = try! testUserApi()
         let org = try! testOrganizationApi(email: email, pass: pass, access: access)
         try! testProjects(organization: org, access: access)
-        try testOrganizationPermissions(token: access)
+        try! testOrganizationPermissions(token: access)
     }
 
     func testUserApi() throws -> (email: String, pass: String, access: String) {
@@ -531,14 +553,31 @@ class UserApiTests: XCTestCase {
         let allPermissions = try adminApi.organizations.permissions.all(token: token)
 
         let org = organizations[0]
-        let individual = try adminApi.organizations.permissions.get(organization: org.id.uuidString, access: token)
 
         let email = "fake-\(Date())@gmail.com"
         let pass = "real-secure"
-        let newUser = try adminApi.user.login(email: email, pass: pass)
-        print("Individual organizations: \(individual)")
-        print("All permissions organization: \(allPermissions)")
-        print("")
+        let newUser = try adminApi.user.createAndLogin(
+            email: email,
+            pass: pass,
+            firstName: "Foo",
+            lastName: "Bar",
+            organization: "Real Organization",
+            image: nil
+        )
+
+        let prePermissions = try adminApi.organizations.permissions.get(
+            organization: org.id.uuidString,
+            access: newUser.token
+        )
+        XCTAssert(prePermissions.isEmpty)
+        let postPermissions = try adminApi.organizations.permissions.update(
+            // should this be ids?
+            allPermissions.map { $0.key },
+            forUser: newUser.user.id.uuidString,
+            inOrganization: org.id.uuidString,
+            token: token
+        )
+        XCTAssertEqual(postPermissions, allPermissions)
     }
 
     func testColors(access: String) throws {
