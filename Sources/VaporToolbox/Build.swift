@@ -44,11 +44,11 @@ public final class Build: Command {
     }
 
     private func fetch(_ arguments: [String]) throws {
-        // unless explicitly false, treat as true
-        let shouldFetch = arguments.option("fetch")?.bool ?? true
+        let needsFetch = !buildFolderExists(with: console)
+        let shouldFetch = arguments.option("fetch")?.bool ?? needsFetch
         guard shouldFetch else { return }
-
-        let arguments = arguments.removeFlags(["clean", "fetch"])
+        
+        let arguments = arguments.removeFlags(["clean", "fetch", "y"])
         let fetch = Fetch(console: console)
         try fetch.run(arguments: arguments)
     }

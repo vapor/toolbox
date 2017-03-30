@@ -33,13 +33,8 @@ public final class Fetch: Command {
     }
 
     private func fetchWarning() throws {
-        do {
-            let ls = try console.backgroundExecute(program: "ls", arguments: ["-a", "."])
-            if !ls.contains(".build") {
-                console.warning("No .build folder, fetch may take a while...")
-            }
-        } catch ConsoleError.backgroundExecute(_) {
-            // do nothing
+        if !buildFolderExists(with: console) {
+            console.warning("No .build folder, fetch may take a while...")
         }
     }
 
@@ -58,9 +53,16 @@ public final class Fetch: Command {
     }
 }
 
+internal func buildFolderExists(with console: ConsoleProtocol) -> Bool {
+    do {
+        let ls = try console.backgroundExecute(program: "ls", arguments: ["-a", "."])
+        return ls.contains(".build")
+    } catch { return false }
+}
+
 extension Array where Element == String {
     func removeFlags(_ flags: [String]) -> [String] {
-        let flags = flags.map { "--\($0)" }
+        let flags = flags.flatMap { ["--\($0)", "-\($0)"] }
         return filter { argument in
             for flag in flags where argument.hasPrefix(flag) {
                 return false
