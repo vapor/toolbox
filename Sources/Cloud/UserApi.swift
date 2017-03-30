@@ -2,6 +2,8 @@ import JSON
 import Vapor
 import HTTP
 
+let middleware = [AuthorizationMiddleware()]
+
 extension AdminApi {
     public final class UserApi {
         public func createAndLogin(
@@ -40,7 +42,7 @@ extension AdminApi {
             let request = try Request(method: .post, uri: usersEndpoint)
             request.json = json
 
-            return try client.respond(to: request)
+            return try client.respond(to: request, through: middleware)
         }
 
         public func login(email: String, pass: String) throws -> Token {
