@@ -1,5 +1,6 @@
 import Console
 import JSON
+import Foundation
 
 extension Command {
     public var project: Project {
