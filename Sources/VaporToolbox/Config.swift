@@ -63,11 +63,7 @@ extension FileManager {
 
         let rootConfig = loadVaporConfig(directory: rootDirectory)
 
-        #if swift(>=3.1)
-            let packagesDirectory = rootDirectory + ".build/checkouts/"
-        #else
-            let packagesDirectory = rootDirectory + "Packages/"
-        #endif
+        let packagesDirectory = rootDirectory + ".build/checkouts/"
         let packagesConfigs = try subDirectories(root: packagesDirectory)
             .map { packagesDirectory + $0 }
             .flatMap(loadVaporConfig)
