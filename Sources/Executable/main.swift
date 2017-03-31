@@ -2,7 +2,7 @@ import libc
 import Console
 import Foundation
 import VaporToolbox
-
+import Cloud
 // The toolbox bootstrap script replaces "master" during installation. Do not modify!
 let version = "master"
 let arguments = CommandLine.arguments
@@ -14,6 +14,8 @@ guard let executable = iterator.next() else {
     throw ConsoleError.noExecutable
 }
 
+let cloud = Cloud.group(terminal)
+
 do {
     try terminal.run(executable: executable, commands: [
         New(console: terminal),
@@ -24,6 +26,7 @@ do {
         Test(console: terminal),
         Xcode(console: terminal),
         Version(console: terminal, version: version),
+        cloud,
         Group(id: "heroku", commands: [
             HerokuInit(console: terminal),
             HerokuPush(console: terminal),

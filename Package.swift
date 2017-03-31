@@ -3,7 +3,7 @@ import PackageDescription
 let package = Package(
     name: "VaporToolbox",
     targets: [
-        Target(name: "VaporToolbox"),
+        Target(name: "VaporToolbox", dependencies: ["Cloud"]),
         Target(name: "Executable", dependencies: ["VaporToolbox"]),
         Target(name: "Cloud")
     ],

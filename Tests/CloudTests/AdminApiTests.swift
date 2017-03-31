@@ -5,8 +5,14 @@ import Foundation
 import HTTP
 @testable import Cloud
 
-class UserApiTests: XCTestCase {
-    func testCloud() throws {
+func newEmail() -> String {
+    return "fake-\(Date().timeIntervalSince1970)@gmail.com"
+}
+
+let pass = "real-secure"
+
+class AdminApiTests: XCTestCase {
+    func testAdminApi() throws {
         let (email, pass, token) = try! testUserApi()
         let org = try! testOrganizationApi(email: email, pass: pass, token: token)
         try! testProjects(organization: org, token: token)
@@ -15,14 +21,13 @@ class UserApiTests: XCTestCase {
 
     func testUserApi() throws -> (email: String, pass: String, access: Token) {
         // TODO: Breakout create/login/get to convenience
-        let email = "fake-\(Date().timeIntervalSince1970)@gmail.com"
-        let pass = "real-secure"
+        let email = newEmail()
         try createUser(email: email, pass: pass)
         let token = try adminApi.login(email: email, pass: pass)
         let user = try adminApi.user.get(with: token)
         XCTAssertEqual(user.email, email)
 
-        let newToken = try adminApi.access.refresh(with: token)
+        let newToken = try adminApi.access.refresh(token)
         XCTAssertNotEqual(token, newToken)
 
         return (email, pass, newToken)
@@ -67,12 +72,12 @@ class UserApiTests: XCTestCase {
         let project = try adminApi.projects.create(
             name: name,
             color: nil,
-            organizationId: organization.id.uuidString,
+            in: organization,
             with: token
         )
 
         let testPrefix = name.bytes.prefix(2).makeString()
-        let all = try adminApi.projects.get(query: testPrefix, with: token)
+        let all = try adminApi.projects.get(prefix: testPrefix, with: token)
         XCTAssert(all.contains(project))
 
         let single = try adminApi.projects.get(id: project.id, with: token)
@@ -95,8 +100,7 @@ class UserApiTests: XCTestCase {
         }
 
         // TODO: Make comprehensive code to create and login
-        let email = "fake-\(Date().timeIntervalSince1970)@gmail.com"
-        let pass = "real-secure"
+        let email = newEmail()
         try createUser(email: email, pass: pass)
         let newToken = try adminApi.login(email: email, pass: pass)
         let newUser = try adminApi.user.get(with: newToken)
@@ -104,10 +108,8 @@ class UserApiTests: XCTestCase {
         let currentPermissions = try adminApi.projects.permissions.get(for: single, with: newToken)
         XCTAssert(currentPermissions.isEmpty)
 
-        // TODO: why not id?
-        let perms = allPermissions.map { $0.key }
         let updatedPermissions = try adminApi.projects.permissions.set(
-            perms,
+            allPermissions,
             for: newUser,
             in: updated,
             with: token
@@ -122,8 +124,7 @@ class UserApiTests: XCTestCase {
 
         let org = organizations[0]
 
-        let email = "fake-\(Date())@gmail.com"
-        let pass = "real-secure"
+        let email = newEmail()
         let newToken = try adminApi.createAndLogin(
             email: email,
             pass: pass,
@@ -140,8 +141,7 @@ class UserApiTests: XCTestCase {
         )
         XCTAssert(prePermissions.isEmpty)
         let postPermissions = try adminApi.organizations.permissions.set(
-            // should this be ids?
-            allPermissions.map { $0.key },
+            allPermissions,
             for: newUser,
             in: org,
             with: token

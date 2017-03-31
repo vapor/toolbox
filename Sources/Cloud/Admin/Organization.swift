@@ -1,7 +1,7 @@
 import Node
 import Foundation
 
-public final class Organization: NodeInitializable {
+public struct Organization: NodeInitializable {
     public let id: UUID
     public let name: String
     public init(node: Node) throws {

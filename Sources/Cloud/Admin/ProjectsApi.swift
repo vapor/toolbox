@@ -7,30 +7,40 @@ extension AdminApi {
     public final class ProjectsApi {
         public let permissions = PermissionsApi<Project>(endpoint: projectsEndpoint, client: client)
 
-        public func create(name: String, color: String?, organizationId: String, with token: Token) throws -> Project {
-            let projectsUri = organizationsEndpoint.finished(with: "/") + organizationId + "/projects"
+        public func create(
+            name: String,
+            color: String?,
+            in org: Organization,
+            with token: Token
+        ) throws -> Project {
+            let projectsUri = organizationsEndpoint.finished(with: "/") + org.id.uuidString + "/projects"
             let request = try Request(method: .post, uri: projectsUri)
             request.access = token
 
             var json = JSON()
             try json.set("name", name)
-            if let color = color {
-                try json.set("color", color)
-            }
+            try json.set("color", color)
             request.json = json
 
-            let response = try client.respond(to: request, through: middleware)
+            let response = try client.respond(to: request)
             return try Project(node: response.json)
         }
 
-        public func get(query: String, with token: Token) throws -> [Project] {
-            let endpoint = projectsEndpoint + "?name=\(query)"
+        public func get(prefix: String, with token: Token) throws -> [Project] {
+            var endpoint = projectsEndpoint
+            if !prefix.isEmpty {
+                endpoint += "?name=\(prefix)"
+            }
             let request = try Request(method: .get, uri: endpoint)
             request.access = token
 
-            let response = try client.respond(to: request, through: middleware)
+            let response = try client.respond(to: request)
             let projects = response.json?["data"]
             return try [Project](node: projects)
+        }
+
+        public func all(with token: Token) throws -> [Project] {
+            return try get(prefix: "", with: token)
         }
 
         public func get(id: UUID, with token: Token) throws -> Project {
@@ -42,7 +52,7 @@ extension AdminApi {
             let request = try Request(method: .get, uri: endpoint)
             request.access = token
 
-            let response = try client.respond(to: request, through: middleware)
+            let response = try client.respond(to: request)
             return try Project(node: response.json)
         }
 
@@ -56,7 +66,7 @@ extension AdminApi {
             try json.set("color", color ?? project.color)
             request.json = json
 
-            let response = try client.respond(to: request, through: middleware)
+            let response = try client.respond(to: request)
             return try Project(node: response.json)
         }
 
@@ -64,8 +74,8 @@ extension AdminApi {
             let endpoint = projectsEndpoint.finished(with: "/") + "colors"
             let request = try Request(method: .get, uri: endpoint)
             request.access = token
-
-            let response = try client.respond(to: request, through: middleware)
+            
+            let response = try client.respond(to: request)
             let colors = response.json?
                 .object?
                 .map { name, hex in

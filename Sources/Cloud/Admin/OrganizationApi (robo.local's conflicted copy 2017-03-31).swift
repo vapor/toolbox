@@ -19,7 +19,9 @@ extension AdminApi {
             request.access = token
             request.json = try JSON(node: ["name": name])
 
-            let response = try client.respond(to: request)
+            let refresh = TokenRefreshMiddleware(token)
+            let middleware = [refresh]
+            let response = try client.respond(to: request, through: middleware)
             return try Organization(node: response.json)
         }
 
@@ -27,7 +29,9 @@ extension AdminApi {
             let request = try Request(method: .get, uri: organizationsEndpoint)
             request.access = token
 
-            let response = try client.respond(to: request)
+            let refresh = TokenRefreshMiddleware(token)
+            let middleware = [refresh]
+            let response = try client.respond(to: request, through: middleware)
             // TODO: Should handle pagination
             return try [Organization](node: response.json?["data"])
         }
@@ -41,7 +45,9 @@ extension AdminApi {
             request.access = token
             request.json = try JSON(node: ["id": id])
 
-            let response = try client.respond(to: request)
+            let refresh = TokenRefreshMiddleware(token)
+            let middleware = [refresh]
+            let response = try client.respond(to: request, through: middleware)
 
             // TODO: Discuss w/ Tanner, should this be returning 
             // an array for single item
@@ -52,15 +58,12 @@ extension AdminApi {
 }
 
 let tokenStorageKey = "cloud-client:token"
-let refreshStorageKey = "cloud-client:isRefreshRequest"
-
 extension Request {
     internal var access: Token {
         get { fatalError() }
         set {
             headers["Authorization"] = "Bearer \(newValue.access)"
             storage[tokenStorageKey] = newValue
-            storage[refreshStorageKey] = false
         }
     }
     internal var refresh: Token {
@@ -68,17 +71,11 @@ extension Request {
         set {
             headers["Authorization"] = "Bearer \(newValue.refresh)"
             storage[tokenStorageKey] = newValue
-            storage[refreshStorageKey] = false
         }
     }
     
     internal var token: Token? {
         return storage[tokenStorageKey] as? Token
-    }
-
-    internal var isRefreshRequest: Bool {
-        return storage[refreshStorageKey] as? Bool ?? false
-
     }
 }
 

@@ -3,14 +3,16 @@ import Vapor
 
 extension AdminApi {
     public final class AccessApi {
-        public func refresh(with token: Token) throws -> Token {
+        public func refresh(_ token: Token) throws -> Token {
             let request = try Request(method: .get, uri: refreshEndpoint)
             request.refresh = token
-            let response = try client.respond(to: request, through: middleware)
-            guard let refresh = response.json?["accessToken"]?.string else {
+
+            // No refresh middleware on token
+            let response = try client.respond(to: request, through: [])
+            guard let new = response.json?["accessToken"]?.string else {
                 throw "Bad response to refresh request: \(response)"
             }
-            return Token(access: token.access, refresh: refresh)
+            return Token(access: new, refresh: token.refresh)
         }
     }
 }

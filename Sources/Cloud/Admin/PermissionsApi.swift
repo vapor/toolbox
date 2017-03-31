@@ -22,7 +22,7 @@ public final class PermissionsApi<Model: PermissionModel> {
         let request = try Request(method: .get, uri: endpoint)
         request.access = token
 
-        let response = try client.respond(to: request, through: middleware)
+        let response = try client.respond(to: request)
         return try [Permission](node: response.json)
     }
 
@@ -31,21 +31,22 @@ public final class PermissionsApi<Model: PermissionModel> {
         let request = try Request(method: .get, uri: endpoint)
         request.access = token
 
-        let response = try client.respond(to: request, through: middleware)
+        let response = try client.respond(to: request)
         return try [Permission](node: response.json)
     }
 
-    public func set(_ permissions: [String], for user: User, in model: Model, with token: Token) throws -> [Permission] {
+    public func set(_ permissions: [Permission], for user: User, in model: Model, with token: Token) throws -> [Permission] {
         let endpoint = base.finished(with: "/") + model.id.uuidString + "/permissions"
         let request = try Request(method: .put, uri: endpoint)
         request.access = token
 
         var json = JSON([:])
         try json.set("userId", user.id.uuidString)
-        try json.set("permissions", permissions)
+        // TODO: Should this perhaps use id ?
+        try json.set("permissions", permissions.map { $0.key })
         request.json = json
 
-        let response = try client.respond(to: request, through: middleware)
+        let response = try client.respond(to: request)
         return try [Permission](node: response.json)
     }
 }

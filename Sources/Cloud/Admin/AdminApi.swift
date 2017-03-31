@@ -1,6 +1,10 @@
 import HTTP
 import Vapor
 
+public let adminApi = AdminApi()
+
+public var client = CloudClient<EngineClient>.self
+
 public final class AdminApi {
     internal static let base = "https://admin-api-staging.vapor.cloud/admin"
     internal static let usersEndpoint = "\(base)/users"
@@ -11,7 +15,6 @@ public final class AdminApi {
     internal static let projectsEndpoint = "\(base)/projects"
 
     // client
-    internal static let client = EngineClient.self
 
     public let user = UserApi()
     public let access = AccessApi()
@@ -41,21 +44,26 @@ extension AdminApi {
     }
 
     @discardableResult
-    public func create(email: String, pass: String, firstName: String, lastName: String, organizationName: String, image: String?) throws -> Response {
+    public func create(
+        email: String,
+        pass: String,
+        firstName: String,
+        lastName: String,
+        organizationName: String,
+        image: String?
+    ) throws -> Response {
         var json = JSON([:])
         try json.set("email", email)
         try json.set("password", pass)
         try json.set("name.first", firstName)
         try json.set("name.last", lastName)
         try json.set("organization.name", organizationName)
-        if let image = image {
-            try json.set("image", image)
-        }
+        try json.set("image", image)
 
         let request = try Request(method: .post, uri: AdminApi.usersEndpoint)
         request.json = json
 
-        return try AdminApi.client.respond(to: request, through: middleware)
+        return try client.respond(to: request)
     }
 
     public func login(email: String, pass: String) throws -> Token {
@@ -65,7 +73,7 @@ extension AdminApi {
 
         let request = try Request(method: .post, uri: AdminApi.loginEndpoint)
         request.json = json
-        let response = try AdminApi.client.respond(to: request, through: middleware)
+        let response = try client.respond(to: request)
         guard
             let access = response.json?["accessToken"]?.string,
             let refresh = response.json?["refreshToken"]?.string
