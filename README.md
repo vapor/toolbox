@@ -10,11 +10,44 @@ Learn more about Vapor Toolbox in the <a href="https://vapor.github.io/documenta
 
 ```sh
 # install Vapor Toolbox
-brew install vapor/tap/toolbox
+brew install vapor/tap/vapor
 ```
 
-## Linux / Manual
+## Linux
 ```sh
 # install Vapor Toolbox
-curl -sL toolbox.qutheory.io | bash
+# Ubuntu 16.04 / Ubuntu 16.10
 ```
+
+Install pre dependencies
+
+```sh
+sudo apt-get install software-properties-common python-software-properties
+```
+
+Import verification key with:
+
+```sh
+wget -q https://repo.vapor.codes/apt/keyring.gpg -O- | sudo apt-key add -
+```
+
+Add this repository to /etc/apt/sources.list as:
+
+```sh
+echo "deb https://repo.vapor.codes/apt $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/vapor.list
+```
+
+Update apt-get
+
+```sh
+sudo apt-get update
+```
+
+Install Swift and Vapor
+
+```
+sudo apt-get install swift vapor
+```
+
+See here for reference
+<https://repo.vapor.codes>
