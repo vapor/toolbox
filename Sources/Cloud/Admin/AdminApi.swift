@@ -6,7 +6,7 @@ public let adminApi = AdminApi()
 public var client = CloudClient<EngineClient>.self
 
 public final class AdminApi {
-    internal static let base = "https://admin-api-staging.vapor.cloud/admin"
+    internal static let base = "https://api.vapor.cloud/admin"
     internal static let usersEndpoint = "\(base)/users"
     internal static let loginEndpoint = "\(base)/login"
     internal static let meEndpoint = "\(base)/me"
