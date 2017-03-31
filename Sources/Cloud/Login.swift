@@ -12,7 +12,8 @@ public func group(_ console: ConsoleProtocol) -> Group {
             Refresh(console: console),
             TokenCommand(console: console),
             Organizations(console: console),
-            Projects(console: console)
+            Projects(console: console),
+            Applications(console: console),
         ],
         help: [
             "Commands for interacting with Vapor Cloud."
@@ -102,10 +103,7 @@ public final class TokenCommand: Command {
 
     public func run(arguments: [String]) throws {
         let limit = 25
-        guard let token = try Token.global() else {
-            throw "No token"
-        }
-
+        let token = try Token.global(with: console)
         let access: String
         if arguments.flag("full") {
             access = token.access
@@ -160,7 +158,7 @@ public final class Me: Command {
 
     public func run(arguments: [String]) {
         do {
-            guard let token = try Token.global() else { throw "" }
+            let token = try Token.global(with: console)
             let bar = console.loadingBar(title: "Fetching User")
             bar.start()
             do {
@@ -205,13 +203,7 @@ public final class Refresh: Command {
     }
 
     public func run(arguments: [String]) throws {
-        guard let token = try Token.global() else {
-            // TODO: Break out
-            console.info("No user currently logged in.")
-            console.warning("Use 'vapor cloud login' or")
-            console.warning("Create an account with 'vapor cloud signup'")
-            exit(1)
-        }
+        let token = try Token.global(with: console)
 
         let bar = console.loadingBar(title: "Refreshing Token")
         bar.start()
@@ -244,13 +236,7 @@ public final class Organizations: Command {
     }
 
     public func run(arguments: [String]) throws {
-        guard let token = try Token.global() else {
-            // TODO: Break out
-            console.info("No user currently logged in.")
-            console.warning("Use 'vapor cloud login' or")
-            console.warning("Create an account with 'vapor cloud signup'")
-            exit(1)
-        }
+        let token = try Token.global(with: console)
 
         let arguments = arguments.dropFirst().values
         guard !arguments.isEmpty || arguments.first == "list" else {
@@ -274,26 +260,6 @@ public final class Organizations: Command {
                 console.error("Error: \(error)")
             }
         }
-
-//        let bar = console.loadingBar(title: "Fetching Organizations")
-//        bar.start()
-//        do {
-//            let organizations: [Organization]
-//            if let id = arguments.first {
-//                let one = try adminApi.organizations.get(id: id, with: token)
-//                organizations = [one]
-//            } else {
-//                organizations = try adminApi.organizations.all(with: token)
-//            }
-//            bar.finish()
-//
-//            organizations.forEach { organization in
-//                console.info("- \(organization.name) : \(organization.id)")
-//            }
-//        } catch {
-//            bar.fail()
-//            throw "Error: \(error)"
-//        }
     }
 
     private func list(with token: Token) throws {
@@ -332,14 +298,7 @@ public final class Projects: Command {
     }
 
     public func run(arguments: [String]) throws {
-        guard let token = try Token.global() else {
-            // TODO: Break out
-            console.info("No user currently logged in.")
-            console.warning("Use 'vapor cloud login' or")
-            console.warning("Create an account with 'vapor cloud signup'")
-            exit(1)
-        }
-
+        let token = try Token.global(with: console)
         try list(with: token)
     }
 
@@ -367,6 +326,32 @@ public final class Projects: Command {
         } catch {
             bar.fail()
             throw "Error: \(error)"
+        }
+    }
+}
+
+public final class Applications: Command {
+    public let id = "applications"
+
+    public let signature: [Argument] = []
+
+    public let help: [String] = [
+        "Logs applications."
+    ]
+
+    public let console: ConsoleProtocol
+
+    public init(console: ConsoleProtocol) {
+        self.console = console
+    }
+
+    public func run(arguments: [String]) throws {
+        let token = try Token.global(with: console)
+        let projects = try adminApi.projects.all(with: token)
+        let project = try console.giveChoice(title: "Choose Project", in: projects)
+        let applications = try applicationApi.get(for: project, with: token)
+        applications.forEach { app in
+            console.info("\(app)")
         }
     }
 }
@@ -443,11 +428,18 @@ extension Token {
         try DataFile.save(bytes: bytes, to: tokenPath)
     }
 
-    static func global() throws -> Token? {
+    static func global(with console: ConsoleProtocol) throws -> Token {
         let raw = try Node.loadContents(path: tokenPath)
-        guard let access = raw["access"]?.string else { return nil }
-        guard let refresh = raw["refresh"]?.string else { return nil }
-        guard let timestamp = raw["expiration"]?.double else { return nil }
+        guard
+            let access = raw["access"]?.string,
+            let refresh = raw["refresh"]?.string,
+            let timestamp = raw["expiration"]?.double
+            else {
+                console.info("No user currently logged in.")
+                console.warning("Use 'vapor cloud login' or")
+                console.warning("Create an account with 'vapor cloud signup'")
+                exit(1)
+            }
 
         let expiration = Date(timeIntervalSince1970: timestamp)
         let token = Token(access: access, refresh: refresh, expiration: expiration)

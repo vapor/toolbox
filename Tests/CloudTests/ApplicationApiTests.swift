@@ -27,39 +27,6 @@ class ApplicationApiTests: XCTestCase {
         try Redis.subscribeDeployLog(id: id) { update in
             print("Got update: \(update)")
         }
-//        let redis = try! Redis.TCPClient(hostname: "34.250.153.203", port: 6379, password: nil)
-//        TCPClient.init()
-//        let channel = "deployLog_\(id.uuidString)"
-//        try redis.subscribe(channel: channel) { (data) in
-//            let js = try! data?
-//                .array?
-//                .flatMap { $0?.bytes }
-//                .last
-//                .flatMap { try JSON(bytes: $0) }
-//                ?? JSON([:])
-//
-//            let message = js["message"]?.string ?? "No message."
-//            print("Log: \(message)")
-//        }
-//
-//        _ = try Portal<Bool>.open({ (portal) in
-//            try redis.subscribe(channel: channel) { (data) in
-//                let js = try! data?
-//                    .array?
-//                    .flatMap { $0?.bytes }
-//                    .last
-//                    .flatMap { try JSON(bytes: $0) }
-//                    ?? JSON([:])
-//
-//                let serialized = try! js.serialize(prettyPrint: true).makeString()
-//                print(serialized)
-//                let message = js["message"]?.string ?? "No message."
-//                print("Log: \(message)")
-//                if js["ended"]?.bool == true {
-//                    portal.close(with: true)
-//                }
-//            }
-//        })
         print("response: \(response)")
         print("")
     }
