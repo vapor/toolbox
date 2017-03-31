@@ -27,10 +27,11 @@ class AdminApiTests: XCTestCase {
         let user = try adminApi.user.get(with: token)
         XCTAssertEqual(user.email, email)
 
-        let newToken = try adminApi.access.refresh(token)
-        XCTAssertNotEqual(token, newToken)
+        let pre = token.access
+        try adminApi.access.refresh(token)
+        XCTAssertNotEqual(token.access, pre)
 
-        return (email, pass, newToken)
+        return (email, pass, token)
     }
 
     func createUser(email: String, pass: String) throws {

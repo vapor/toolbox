@@ -1,10 +1,22 @@
 import Foundation
 
 public final class Token {
-    public fileprivate(set) var access: String
     public let refresh: String
+    public fileprivate(set) var access: String {
+        didSet {
+            didUpdate?(self)
+        }
+    }
+
+    // Currently just an estimation for debugging
     // TODO: Get from API?
-    public fileprivate(set) var expiration: Date
+    public fileprivate(set) var expiration: Date {
+        didSet {
+            didUpdate?(self)
+        }
+    }
+
+    public var didUpdate: ((Token) -> Void)?
 
     public init(access: String, refresh: String, expiration: Date? = nil) {
         self.access = access
@@ -24,6 +36,24 @@ public final class Token {
 
 import HTTP
 import Vapor
+
+extension AdminApi {
+    public final class AccessApi {
+        public func refresh(_ token: Token) throws {
+            let request = try Request(method: .get, uri: refreshEndpoint)
+            request.refresh = token
+
+            // No refresh middleware on token
+            let response = try client.respond(to: request, through: [])
+            guard let new = response.json?["accessToken"]?.string else {
+                throw "Bad response to refresh request: \(response)"
+            }
+            token.access = new
+            token.updateExpiration()
+        }
+    }
+}
+
 //
 //let autoRefresh = [TokenRefreshMiddleware()]
 //
@@ -70,14 +100,12 @@ public final class CloudClient<Wrapped: ClientProtocol>: ClientProtocol {
         // ensure there is a token associated with the request
         guard let token = request.token else { return response }
 
-        print("Attempting refresh")
-        let refreshed = try adminApi.access.refresh(token)
-        token.access = refreshed.access
-        token.updateExpiration()
+        // attempting refresh
+        try adminApi.access.refresh(token)
+        // Reset access header
         request.access = token
 
         // Attempted refresh, trying again
-        print("Refresh successful, trying again")
         return try wrapped.respond(to: request)
     }
 }

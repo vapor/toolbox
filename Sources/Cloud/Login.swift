@@ -216,8 +216,8 @@ public final class Refresh: Command {
         let bar = console.loadingBar(title: "Refreshing Token")
         bar.start()
         do {
-            let refreshed = try adminApi.access.refresh(token)
-            try refreshed.saveGlobal()
+            try adminApi.access.refresh(token)
+            try token.saveGlobal()
             bar.finish()
         } catch {
             bar.fail()
@@ -444,13 +444,21 @@ extension Token {
     }
 
     static func global() throws -> Token? {
-        let token = try Node.loadContents(path: tokenPath)
-        guard let access = token["access"]?.string else { return nil }
-        guard let refresh = token["refresh"]?.string else { return nil }
-        guard let timestamp = token["expiration"]?.double else { return nil }
+        let raw = try Node.loadContents(path: tokenPath)
+        guard let access = raw["access"]?.string else { return nil }
+        guard let refresh = raw["refresh"]?.string else { return nil }
+        guard let timestamp = raw["expiration"]?.double else { return nil }
 
         let expiration = Date(timeIntervalSince1970: timestamp)
-        return Token(access: access, refresh: refresh, expiration: expiration)
+        let token = Token(access: access, refresh: refresh, expiration: expiration)
+        token.didUpdate = { t in
+            do {
+                try t.saveGlobal()
+            } catch {
+                print("Failed to save updated token: \(error)")
+            }
+        }
+        return token
     }
 }
 
