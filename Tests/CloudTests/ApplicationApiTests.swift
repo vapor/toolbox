@@ -31,6 +31,21 @@ class ApplicationApiTests: XCTestCase {
         print("")
     }
 
+    func testInfoFromGitUrl() throws {
+//        let token = try adminApi.login(email: "test-1490982505.99255@gmail.com", pass: "real-secure")
+//        let hosts = try applicationApi.hosting.all(with: token)
+//        print(hosts)
+//        print("")
+//        let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/") + "hosting"
+//
+//        let request = try Request(method: .get, uri: endpoint)
+//        request.access = token
+//
+//        let response = try client.respond(to: request)
+//        print(response)
+//        print("")
+    }
+
     func _testCreateApplication() throws {
 //        let email = newEmail()
 //        print(" email '\(email)'")
@@ -43,23 +58,22 @@ class ApplicationApiTests: XCTestCase {
 //            organizationName: "Real Business, Inc.",
 //            image: nil
 //        )
-        let token = try! adminApi.login(email: "test-1490982505.99255@gmail.com", pass: "real-secure")
-
-        guard let org = try! adminApi.organizations.all(with: token).first else {
-            XCTFail("Failed to get organization for test user")
+        let token = try adminApi.login(email: "test-1490982505.99255@gmail.com", pass: "real-secure")
+        guard let project = try adminApi.projects.all(with: token).first else {
+            XCTFail("Failed to get project for test user")
             return
         }
 
-        let project = try! adminApi.projects.create(
-            name: "Test-Project",
-            color: nil,
-            in: org,
-            with: token
-        )
+//        let project = try! adminApi.projects.create(
+//            name: "Test-Project",
+//            color: nil,
+//            in: org,
+//            with: token
+//        )
 
         let name = testNamePrefix + Int(Date().timeIntervalSince1970).description
         let repo = name
-        let application = try! applicationApi.create(
+        let application = try applicationApi.create(
             for: project,
             repo: repo,
             name: name,
@@ -69,37 +83,37 @@ class ApplicationApiTests: XCTestCase {
         XCTAssertEqual(application.repo, repo)
         XCTAssertEqual(application.projectId, project.id)
 
-        let applications = try! applicationApi.get(for: project, with: token)
+        let applications = try applicationApi.get(for: project, with: token)
         XCTAssertEqual(applications.first, application)
 
-        let create = try! applicationApi.hosting.create(
+        let create = try applicationApi.hosting.create(
             for: application,
             git: "git@github.com:vapor/api-template.git",
             with: token
         )
-        let fetch = try! applicationApi.hosting.get(
+        let fetch = try applicationApi.hosting.get(
             for: application,
             with: token
         )
         XCTAssertEqual(create, fetch)
 
-        let update = try! applicationApi.hosting.update(
+        let update = try applicationApi.hosting.update(
             for: application,
             git: "git@github.com:vapor/light-template.git",
             with: token
         )
         XCTAssertNotEqual(update.gitUrl, fetch.gitUrl)
 
-        let environment = try! applicationApi.hosting.environments.create(
+        let environment = try applicationApi.hosting.environments.create(
             for: application,
             name: "staging",
             branch: "master",
             with: token
         )
 
-        let allEnvs = try! applicationApi.hosting.environments.all(for: application, with: token)
+        let allEnvs = try applicationApi.hosting.environments.all(for: application, with: token)
         XCTAssert(allEnvs.map { $0.id } .contains(environment.id))
-        try! applicationApi.deploy.deploy(
+        try applicationApi.deploy.deploy(
             for: application,
             env: environment,
             code: .incremental,

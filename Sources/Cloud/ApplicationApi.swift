@@ -66,6 +66,14 @@ extension ApplicationApi {
         let response = try client.respond(to: request)
         return try [Application](node: response.json?["data"])
     }
+
+    // TODO: See if we can add call on backend that doesn't require subcalls
+    public func all(with token: Token) throws -> [Application] {
+        let projects = try adminApi.projects.all(with: token)
+        return try projects.flatMap { project in
+            return try applicationApi.get(for: project, with: token)
+        }
+    }
 }
 
 public struct Hosting: NodeInitializable {
@@ -101,7 +109,7 @@ extension ApplicationApi {
             var json = JSON([:])
             try json.set("gitUrl", git)
             request.json = json
-
+            
             let response = try client.respond(to: request)
             return try Hosting(node: response.json)
         }
@@ -126,6 +134,15 @@ extension ApplicationApi {
 
             let response = try client.respond(to: request)
             return try Hosting(node: response.json)
+        }
+
+        // TODO: See if we can get an easier way to do this
+        public func all(with token: Token) throws -> [Hosting] {
+            let applications = try applicationApi.all(with: token)
+            return applications.flatMap { app in
+                // TODO: Not all applications have hosting, ask if can return empty array
+                return try? applicationApi.hosting.get(for: app, with: token)
+            }
         }
     }
 }
@@ -181,7 +198,149 @@ extension ApplicationApi.HostingApi {
     }
 }
 
-public enum DeployType: String {
+public struct Deploy: NodeInitializable {
+    public let application: Application
+    public let defaultBranch: String
+    // TODO: Rename deployOperations or operations
+    public let deployments: [Deployment]
+    public let id: UUID
+    public let name: String
+    public let replicas: Int
+    public let running: Bool
+
+    public init(node: Node) throws {
+        application = try node.get("application")
+        defaultBranch = try node.get("defaultBranch")
+        deployments = try node.get("deployments")
+        id = try node.get("id")
+        name = try node.get("name")
+        replicas = try node.get("replicas")
+        running = try node.get("running")
+    }
+}
+
+public struct Git: NodeInitializable {
+    public let branch: String
+    public let url: String
+
+    public init(node: Node) throws {
+        branch = try node.get("branch")
+        url = try node.get("url")
+    }
+}
+
+public enum DeployType: String, NodeInitializable {
+    case scale, code
+
+    public init(node: Node) throws {
+        guard
+            let string = node.string,
+            let new = DeployType(rawValue: string)
+            else {
+                throw NodeError.unableToConvert(input: node, expectation: "String", path: [])
+        }
+        self = new
+    }
+}
+
+// TODO: Rename, DeployOperation
+public struct Deployment: NodeInitializable {
+    public let repo: String
+    public let environment: String
+    public let git: Git
+    public let id: UUID
+    public let replicas: Int
+    public let status: String
+    public let version: String
+    public let domains: [String]
+    public let type: DeployType
+
+    public init(node: Node) throws {
+        repo = try node.get("environment.application.repoName")
+        environment = try node.get("environment.name")
+        git = try node.get("git")
+        id = try node.get("id")
+        replicas = try node.get("replicas")
+        status = try node.get("status")
+        type = try node.get("type.name")
+        version = try node.get("version")
+        domains = try node.get("domains")
+    }
+
+}
+
+//{
+//    "application":{
+//        "id":"2B4C22C7-3797-46DF-AC21-4A46D24E7494",
+//        "name":"test-1490986172",
+//        "project":{
+//            "id":"8CF0C5B1-E8B6-4E70-A125-6C188B4CA41F"
+//        },
+//        "repoName":"test-1490986172"
+//    },
+//    "defaultBranch":"master",
+//    "deployments":[
+//    {
+//    "databaseCredentials":{
+//    "password":"WtJI2lKWRgxkE\/v7LoTJERZ1G",
+//    "username":"\/VEY\/BQlzrFK7eQ"
+//    },
+//    "domains":[
+//
+//    ],
+//    "environment":{
+//    "application":{
+//    "repoName":"test-1490986172"
+//    },
+//    "name":"staging"
+//    },
+//    "git":{
+//    "branch":"master",
+//    "url":"git@github.com:vapor\/light-template.git"
+//    },
+//    "id":"736163E9-23D7-45D8-88E9-0999EBECEFCD",
+//    "replicas":1,
+//    "status":"working",
+//    "type":{
+//    "name":"scale"
+//    },
+//    "version":1
+//    },
+//    {
+//    "databaseCredentials":{
+//    "password":"WtJI2lKWRgxkE\/v7LoTJERZ1G",
+//    "username":"\/VEY\/BQlzrFK7eQ"
+//    },
+//    "domains":[
+//
+//    ],
+//    "environment":{
+//    "application":{
+//    "repoName":"test-1490986172"
+//    },
+//    "name":"staging"
+//    },
+//    "git":{
+//    "branch":"master",
+//    "url":"git@github.com:vapor\/light-template.git"
+//    },
+//    "id":"0DEE45F3-BA41-49D0-84B4-1A52AFC95B2F",
+//    "replicas":1,
+//    "status":"working",
+//    "type":{
+//    "method":"incremental",
+//    "name":"code"
+//    },
+//    "version":2
+//    }
+//    ],
+//    "id":"F31CDE3F-291B-4591-B441-2F6910049846",
+//    "name":"staging",
+//    "replicas":1,
+//    "running":true
+//}
+
+public enum BuildType: String {
     case clean, incremental
 }
 
@@ -191,9 +350,9 @@ extension ApplicationApi {
         public func deploy(
             for app: Application,
             env: Environment,
-            code: DeployType,
+            code: BuildType,
             with token: Token
-        ) throws {
+        ) throws -> Deploy {
             let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/")
                 + app.repo
                 + "/hosting/environments/"
@@ -203,12 +362,10 @@ extension ApplicationApi {
 
             var json = JSON([:])
             try json.set("code", code.rawValue)
-            try json.set("replicas", 1)
             request.json = json
             
             let response = try client.respond(to: request)
-            print("response: \(response)")
-            print("")
+            return try Deploy(node: response.json)
         }
 
         public func scale(for app: Application, env: Environment, replicas: Int, with token: Token) throws {

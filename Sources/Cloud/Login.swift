@@ -14,6 +14,9 @@ public func group(_ console: ConsoleProtocol) -> Group {
             Organizations(console: console),
             Projects(console: console),
             Applications(console: console),
+            DeployCloud(console: console),
+            Dump(console: console),
+            DeployCloud(console: console),
         ],
         help: [
             "Commands for interacting with Vapor Cloud."
@@ -217,6 +220,220 @@ public final class Refresh: Command {
         }
     }
 }
+
+public final class Dump: Command {
+    public let id = "dump"
+
+    public let signature: [Argument] = []
+
+    public let help: [String] = [
+        "Dump info."
+    ]
+
+    public let console: ConsoleProtocol
+
+    public init(console: ConsoleProtocol) {
+        self.console = console
+    }
+
+    public func run(arguments: [String]) throws {
+        let token = try Token.global(with: console)
+
+        let bar = console.loadingBar(title: "Gathering")
+        bar.start()
+        defer { bar.fail() }
+
+        let organizations = try adminApi.organizations.all(with: token)
+        let projects = try adminApi.projects.all(with: token)
+        let applications = try projects.flatMap { project in try applicationApi.get(for: project, with: token) }
+        let hosts = applications.flatMap { app in
+            try? applicationApi.hosting.get(for: app, with: token)
+        }
+
+        bar.finish()
+
+        organizations.forEach { org in
+            console.success("Organization:")
+            console.info("  Name: ", newLine: false)
+            console.print(org.name)
+            console.info("  Id: ", newLine: false)
+            console.print(org.id.uuidString)
+
+            let pros = org.projects(in: projects)
+            pros.forEach { pro in
+                console.success("  Project:")
+                console.info("    Name: ", newLine: false)
+                console.print(pro.name)
+                console.info("    Color: ", newLine: false)
+                console.print(pro.color)
+                console.info("    Id: ", newLine: false)
+                console.print(pro.id.uuidString)
+
+                let apps = pro.applications(in: applications)
+                apps.forEach { app in
+                    console.success("    Application:")
+                    console.info("      Name: ", newLine: false)
+                    console.print(app.name)
+                    console.info("      Repo: ", newLine: false)
+                    console.print(app.repo)
+                    console.info("      Id: ", newLine: false)
+                    console.print(app.id.uuidString)
+
+                    guard let host = app.hosting(in: hosts) else { return }
+                    console.success("      Hosting: ")
+                    console.info("          Git: ", newLine: false)
+                    console.print(host.gitUrl)
+                    console.info("          Id: ", newLine: false)
+                    console.print(host.id.uuidString)
+                }
+            }
+        }
+
+
+    }
+}
+
+extension Organization {
+    func projects(in projs: [Project]) -> [Project] {
+        return projs.filter { proj in
+            proj.organizationId == id
+        }
+    }
+}
+
+extension Project {
+    func applications(in apps: [Application]) -> [Application] {
+        return apps.filter { app in
+            app.projectId == id
+        }
+    }
+}
+
+extension Application {
+    func hosting(in hosts: [Hosting]) -> Hosting? {
+        return hosts
+            .lazy
+            .filter { host in
+                host.applicationId == self.id
+            }
+            .first
+    }
+}
+
+public final class DeployCloud: Command {
+    public let id = "deploy"
+
+    public let signature: [Argument] = []
+
+    public let help: [String] = [
+        "Gather metadata of cloud from local where possible"
+    ]
+
+    public let console: ConsoleProtocol
+
+    public init(console: ConsoleProtocol) {
+        self.console = console
+    }
+
+    public func run(arguments: [String]) throws {
+        let token = try Token.global(with: console)
+
+        /////
+
+        let orgsBar = console.loadingBar(title: "Loading Organizations")
+        defer { orgsBar.fail() }
+        orgsBar.start()
+        let organizations = try adminApi.organizations.all(with: token)
+        orgsBar.finish()
+
+        let org = try console.giveChoice(
+            title: "Which Organization?",
+            in: organizations
+        ) { org in "\(org.name) - \(org.id)" }
+
+        /////
+
+        let projBar = console.loadingBar(title: "Loading Projects")
+        defer { projBar.fail() }
+        projBar.start()
+        let projects = try adminApi.projects.all(with: token).filter { project in
+            project.organizationId == org.id
+        }
+        projBar.finish()
+
+        let proj = try console.giveChoice(
+            title: "Which Project?",
+            in: projects
+        ) { proj in return "\(proj.name) - \(proj.id)" }
+
+        /////
+
+        let appsBar = console.loadingBar(title: "Loading Applications")
+        defer { appsBar.fail() }
+        appsBar.start()
+        let apps = try applicationApi.get(for: proj, with: token)
+        appsBar.finish()
+
+        let app = try console.giveChoice(
+            title: "Which Application?",
+            in: apps
+        ) { app in return "\(app.name) - \(app.repo) - \(app.id)" }
+
+        /////
+
+        let envBar = console.loadingBar(title: "Loading Environments")
+        defer { envBar.fail() }
+        envBar.start()
+        let envs = try applicationApi.hosting.environments.all(for: app, with: token)
+        envBar.finish()
+
+        let env = try console.giveChoice(
+            title: "Which Environment?",
+            in: envs
+        ) { env in return "\(env.name)" }
+
+        /////
+
+        let deployBar = console.loadingBar(title: "Deploying")
+        defer { deployBar.fail() }
+        deployBar.start()
+        let deploy = try applicationApi.deploy.deploy(
+            for: app,
+            env: env,
+            code: .incremental,
+            with: token
+        )
+        deployBar.finish()
+
+        // No output for scale apis
+        if let _ = deploy.deployments.lazy.filter({ $0.type == .scale }).first {
+            let scaleBar = console.loadingBar(title: "Scaling", animated: false)
+            scaleBar.finish()
+        }
+
+        guard let code = deploy.deployments.lazy.filter({ $0.type == .code }).first else { return }
+        console.info("Connecting to build logs ...")
+        var logsBar: LoadingBar?
+        try Redis.subscribeDeployLog(id: code.id.uuidString) { update in
+            if update.type == .start {
+                logsBar = self.console.loadingBar(title: update.message)
+                logsBar?.start()
+            } else if update.success {
+                logsBar?.finish()
+            } else {
+                logsBar?.fail()
+            }
+            
+        }
+
+        console.success("Successfully deployed.")
+        console.info("Deployed: \n\(deploy)")
+    }
+}
+
+//extension Project {
+////    func applications
+//}
 
 // TODO: Paging
 public final class Organizations: Command {
@@ -477,12 +694,27 @@ extension FileManager {
 
 extension ConsoleProtocol {
     func giveChoice<T>(title: String, in array: [T]) throws -> T {
-        let list = array.map { "\($0)" }
-        guard
-            let selection = askList(withTitle: title, from: list),
-            let idx = list.index(of: selection)
-            else { throw "Invalid selection" }
+        return try giveChoice(title: title, in: array, display: { "\($0)" })
+    }
 
-        return array[idx]
+    func giveChoice<T>(title: String, in array: [T], display: (T) -> String) throws -> T {
+        info(title)
+        array.enumerated().forEach { idx, item in
+            let offset = idx + 1
+            info("\(offset): ", newLine: false)
+            let description = display(item)
+            print(description)
+        }
+
+        output("> ", style: .plain, newLine: false)
+        let raw = input()
+        guard let idx = Int(raw), (1...array.count).contains(idx) else {
+            // .count is implicitly offset, no need to adjust
+            throw "Invalid selection: \(raw), expected: 1...\(array.count)"
+        }
+
+        // undo previous offset back to 0 indexing
+        let offset = idx - 1
+        return array[offset]
     }
 }

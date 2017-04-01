@@ -34,7 +34,7 @@ public final class Redis {
 //     redis = try! Redis.TCPClient(hostname: "34.250.153.203", port: 6379, password: nil)
     static func subscribeDeployLog(id: String, _ updater: @escaping (Update) throws -> Void) throws {
         _ = try Portal<Bool>.open { portal in
-            let client = try TCPClient(hostname: "34.250.153.203", port: 6379, password: nil)
+            let client = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
             let deployLog = "deployLog_\(id)"
             try client.subscribe(channel: deployLog) { data in
                 do {
