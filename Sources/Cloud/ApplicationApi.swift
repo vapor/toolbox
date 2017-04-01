@@ -272,6 +272,10 @@ public enum BuildType: String {
     case clean, incremental
 }
 
+enum DeployError: Error {
+    case noHosting(for: Application)
+}
+
 extension ApplicationApi {
     public final class DeployApi {
         //gitBranch (String) (Optional) What branch should be deployed code (String) (Required) Should be incremental or clean
@@ -297,6 +301,13 @@ extension ApplicationApi {
             request.json = json
             
             let response = try client.respond(to: request)
+            if
+                response.status == .badRequest,
+                response.json?["reason"]?.string == "No hosting exists for this application." {
+                throw DeployError.noHosting(for: app)
+            }
+
+            // TODO: Make Better
             return try Deploy(node: response.json)
         }
         

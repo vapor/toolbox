@@ -340,39 +340,15 @@ public final class DeployCloud: Command {
 
     public func run(arguments: [String]) throws {
         let token = try Token.global(with: console)
-        /////
+
+        /// Setup
         let org = try getOrganization(arguments, with: token)
         let proj = try getProject(arguments, in: org, with: token)
+        let app = try getApp(arguments, in: proj, with: token)
+        let env = try getEnvironment(arguments, for: app, with: token)
+        let replicas = try getReplicas(arguments)
 
-        /////
-
-        let app = try selectApplication(
-            in: proj,
-            queryTitle: "Which Application?",
-            using: console,
-            with: token
-        )
-
-        /////
-
-        let envBar = console.loadingBar(title: "Loading Environments")
-        defer { envBar.fail() }
-        envBar.start()
-        let envs = try applicationApi.hosting.environments.all(for: app, with: token)
-        envBar.finish()
-
-        let env = try console.giveChoice(
-            title: "Which Environment?",
-            in: envs
-        ) { env in return "\(env.name)" }
-
-        /////
-
-        let answer = console.ask("How many replicas?")
-        guard let replicas = Int(answer), replicas > 0 else {
-            throw "Expected a number greater than 1, got \(answer)."
-        }
-
+        /// Deploy
         let deployBar = console.loadingBar(title: "Deploying")
         defer { deployBar.fail() }
         deployBar.start()
@@ -385,12 +361,13 @@ public final class DeployCloud: Command {
         )
         deployBar.finish()
 
-        // No output for scale apis
+        /// No output for scale apis
         if let _ = deploy.deployments.lazy.filter({ $0.type == .scale }).first {
             let scaleBar = console.loadingBar(title: "Scaling", animated: false)
             scaleBar.finish()
         }
 
+        /// Build Logs
         guard let code = deploy.deployments.lazy.filter({ $0.type == .code }).first else { return }
         console.info("Connecting to build logs ...")
         var logsBar: LoadingBar?
@@ -411,9 +388,15 @@ public final class DeployCloud: Command {
     }
 
     private func getOrganization(_ arguments: [String], with token: Token) throws -> Organization {
-        let organizationId = arguments.option("organizationId") ?? localConfig?["organizationId"]?.string
+        let organizationId = arguments.option("organizationId") ?? localConfig?["organization.id"]?.string
         if let id = organizationId {
-            return try adminApi.organizations.get(id: id, with: token)
+            let bar = console.loadingBar(title: "Loading Organization")
+            defer { bar.fail() }
+            bar.start()
+            let org = try adminApi.organizations.get(id: id, with: token)
+            bar.finish()
+            console.info("Loaded \(org.name)")
+            return org
         }
 
         return try selectOrganization(
@@ -424,9 +407,15 @@ public final class DeployCloud: Command {
     }
 
     private func getProject(_ arguments: [String], in org: Organization, with token: Token) throws -> Project {
-        let projectId = arguments.option("projectId") ?? localConfig?["projectId"]?.string
+        let projectId = arguments.option("projectId") ?? localConfig?["project.id"]?.string
         if let id = projectId {
-            return try adminApi.projects.get(id: id, with: token)
+            let bar = console.loadingBar(title: "Loading Project")
+            defer { bar.fail() }
+            bar.start()
+            let proj = try adminApi.projects.get(id: id, with: token)
+            bar.finish()
+            console.info("Loaded \(proj.name)")
+            return proj
         }
 
         return try selectProject(
@@ -438,12 +427,17 @@ public final class DeployCloud: Command {
     }
 
     private func getApp(_ arguments: [String], in proj: Project, with token: Token) throws -> Application {
-        let applicationId = arguments.option("applicationId") ?? localConfig?["applicationId"]?.string
+        let applicationId = arguments.option("applicationId") ?? localConfig?["application.id"]?.string
         if let id = applicationId {
+            let bar = console.loadingBar(title: "Loading App")
+            defer { bar.fail() }
+            bar.start()
             guard let app = try applicationApi.get(for: proj, with: token)
                 .lazy
                 .filter({ $0.id.uuidString == id })
                 .first else { throw "No application found w/ id: \(id). Try cloud setup again" }
+            bar.finish()
+            console.info("Loaded \(app.name)")
             return app
         }
 
@@ -453,6 +447,43 @@ public final class DeployCloud: Command {
             using: console,
             with: token
         )
+    }
+
+    ///
+    private func getEnvironment(_ arguments: [String], for app: Application, with token: Token) throws -> Environment {
+        if let env = arguments.option("env") {
+            let envBar = console.loadingBar(title: "Loading Environments")
+            defer { envBar.fail() }
+            envBar.start()
+            guard let loaded = try applicationApi
+                .hosting
+                .environments
+                .all(for: app, with: token)
+                .lazy
+                .filter({ $0.name == env})
+                .first
+                else { throw "Environment '\(env)' not found" }
+            envBar.finish()
+            console.info("Loaded \(loaded.name)")
+            return loaded
+        }
+
+        return try selectEnvironment(
+            for: app,
+            queryTitle: "Which Environment?",
+            using: console,
+            with: token
+        )
+    }
+
+    private func getReplicas(_ arguments: [String]) throws -> Int {
+        let existing = arguments.option("replicas")
+            ?? localConfig?["replicas"]?.string
+            ?? console.ask("How many replicas?")
+        guard let replicas = Int(existing), replicas > 0 else {
+            throw "Expected a number greater than 1, got \(existing)."
+        }
+        return replicas
     }
 }
 
@@ -511,6 +542,10 @@ func selectEnvironment(
     envBar.start()
     let envs = try applicationApi.hosting.environments.all(for: app, with: token)
     envBar.finish()
+
+    guard !envs.isEmpty else {
+        throw "No environments setup, make sure to create an environment for \(app.name)"
+    }
 
     return try console.giveChoice(
         title: "Which Environment?",
@@ -905,7 +940,7 @@ import Vapor
 let vaporConfigDir = "\(NSHomeDirectory())/.vapor"
 let tokenPath = "\(vaporConfigDir)/token.json"
 
-let localConfigPath = Core.workingDirectory().finished(with: "/") + ".vcloud.json"
+let localConfigPath = "./.vcloud.json"
 let localConfigBytes = (try? DataFile.load(path: localConfigPath)) ?? []
 let localConfig = try? JSON(bytes: localConfigBytes)
 
@@ -947,10 +982,16 @@ public final class CloudSetup: Command {
             with: token
         )
 
+        let answer = console.ask("How many replicas for this application?")
+        guard let replicas = Int(answer), replicas > 0 else {
+            throw "Expected a number greater than 1, got \(answer)."
+        }
+
         var json = JSON([:])
         try json.set("organization.id", org.id)
         try json.set("project.id", proj.id)
         try json.set("application.id", app.id)
+        try json.set("replicas", replicas)
         let file = try json.serialize(prettyPrint: true)
         try DataFile.save(bytes: file, to: localConfigPath)
 
