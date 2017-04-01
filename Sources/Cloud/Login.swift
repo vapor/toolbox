@@ -456,7 +456,6 @@ public final class DeployCloud: Command {
             defer { envBar.fail() }
             envBar.start()
             guard let loaded = try applicationApi
-                .hosting
                 .environments
                 .all(for: app, with: token)
                 .lazy
@@ -540,7 +539,7 @@ func selectEnvironment(
     let envBar = console.loadingBar(title: "Loading Environments")
     defer { envBar.fail() }
     envBar.start()
-    let envs = try applicationApi.hosting.environments.all(for: app, with: token)
+    let envs = try applicationApi.environments.all(for: app, with: token)
     envBar.finish()
 
     guard !envs.isEmpty else {
@@ -635,7 +634,13 @@ public final class Create: Command {
         let creating = console.loadingBar(title: "Creating \(name)")
         defer { creating.fail() }
         creating.start()
-        _ = try applicationApi.create(for: proj, repo: repo, name: name, with: token)
+        let new = try applicationApi.create(for: proj, repo: repo, name: name, with: token)
+        creating.finish()
+
+        let environment = console.loadingBar(title: "Creating Production Environment")
+        defer { environment.fail() }
+        environment.start()
+        _ = try applicationApi.environments.create(for: new, name: "production", branch: "master", with: token)
         creating.finish()
     }
 
@@ -665,7 +670,7 @@ public final class Create: Command {
         let creating = console.loadingBar(title: "Creating \(name)")
         defer { creating.fail() }
         creating.start()
-        _ = try applicationApi.hosting.environments.create(
+        _ = try applicationApi.environments.create(
             for: app,
             name: name,
             branch: branch,

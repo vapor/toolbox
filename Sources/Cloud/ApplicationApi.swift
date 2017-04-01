@@ -36,6 +36,7 @@ public final class ApplicationApi {
 
     public let hosting = HostingApi()
     public let deploy = DeployApi()
+    public let environments = EnvironmentsApi()
 }
 
 extension ApplicationApi {
@@ -98,7 +99,6 @@ public func == (lhs: Hosting, rhs: Hosting) -> Bool {
 
 extension ApplicationApi {
     public final class HostingApi {
-        public let environments = EnvironmentsApi()
 
         // TODO: git expects ssh url, ie: git@github.com:vapor/vapor.git
         public func create(for application: Application, git: String, with token: Token) throws -> Hosting {
@@ -166,7 +166,7 @@ public struct Environment: NodeInitializable {
     }
 }
 
-extension ApplicationApi.HostingApi {
+extension ApplicationApi {
     public final class EnvironmentsApi {
         public func create(
             for application: Application,
