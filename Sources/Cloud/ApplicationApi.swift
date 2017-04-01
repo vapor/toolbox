@@ -266,79 +266,7 @@ public struct Deployment: NodeInitializable {
         version = try node.get("version")
         domains = try node.get("domains")
     }
-
 }
-
-//{
-//    "application":{
-//        "id":"2B4C22C7-3797-46DF-AC21-4A46D24E7494",
-//        "name":"test-1490986172",
-//        "project":{
-//            "id":"8CF0C5B1-E8B6-4E70-A125-6C188B4CA41F"
-//        },
-//        "repoName":"test-1490986172"
-//    },
-//    "defaultBranch":"master",
-//    "deployments":[
-//    {
-//    "databaseCredentials":{
-//    "password":"WtJI2lKWRgxkE\/v7LoTJERZ1G",
-//    "username":"\/VEY\/BQlzrFK7eQ"
-//    },
-//    "domains":[
-//
-//    ],
-//    "environment":{
-//    "application":{
-//    "repoName":"test-1490986172"
-//    },
-//    "name":"staging"
-//    },
-//    "git":{
-//    "branch":"master",
-//    "url":"git@github.com:vapor\/light-template.git"
-//    },
-//    "id":"736163E9-23D7-45D8-88E9-0999EBECEFCD",
-//    "replicas":1,
-//    "status":"working",
-//    "type":{
-//    "name":"scale"
-//    },
-//    "version":1
-//    },
-//    {
-//    "databaseCredentials":{
-//    "password":"WtJI2lKWRgxkE\/v7LoTJERZ1G",
-//    "username":"\/VEY\/BQlzrFK7eQ"
-//    },
-//    "domains":[
-//
-//    ],
-//    "environment":{
-//    "application":{
-//    "repoName":"test-1490986172"
-//    },
-//    "name":"staging"
-//    },
-//    "git":{
-//    "branch":"master",
-//    "url":"git@github.com:vapor\/light-template.git"
-//    },
-//    "id":"0DEE45F3-BA41-49D0-84B4-1A52AFC95B2F",
-//    "replicas":1,
-//    "status":"working",
-//    "type":{
-//    "method":"incremental",
-//    "name":"code"
-//    },
-//    "version":2
-//    }
-//    ],
-//    "id":"F31CDE3F-291B-4591-B441-2F6910049846",
-//    "name":"staging",
-//    "replicas":1,
-//    "running":true
-//}
 
 public enum BuildType: String {
     case clean, incremental
@@ -349,6 +277,7 @@ extension ApplicationApi {
         //gitBranch (String) (Optional) What branch should be deployed code (String) (Required) Should be incremental or clean
         public func deploy(
             for app: Application,
+            replicas: Int?,
             env: Environment,
             code: BuildType,
             with token: Token
@@ -362,12 +291,15 @@ extension ApplicationApi {
 
             var json = JSON([:])
             try json.set("code", code.rawValue)
+            if let replicas = replicas {
+                try json.set("replicas", replicas)
+            }
             request.json = json
             
             let response = try client.respond(to: request)
             return try Deploy(node: response.json)
         }
-
+        
         public func scale(for app: Application, env: Environment, replicas: Int, with token: Token) throws {
             let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/")
                 + app.repo

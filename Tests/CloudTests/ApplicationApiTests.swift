@@ -11,10 +11,11 @@ let testNamePrefix = "test-"
 class ApplicationApiTests: XCTestCase {
     func testRedeploy() throws {
         let token = try! adminApi.login(email: "test-1490982505.99255@gmail.com", pass: "real-secure")
+
         let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/")
-            + "test-1490986172"
+            + "test-delete-me-123213"
             + "/hosting/environments/"
-            + "staging"
+            + "master"
         let request = try! Request(method: .patch, uri: endpoint)
         request.access = token
 
@@ -115,6 +116,7 @@ class ApplicationApiTests: XCTestCase {
         XCTAssert(allEnvs.map { $0.id } .contains(environment.id))
         try applicationApi.deploy.deploy(
             for: application,
+            replicas: 1,
             env: environment,
             code: .incremental,
             with: token
