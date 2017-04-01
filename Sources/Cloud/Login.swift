@@ -18,6 +18,8 @@ public func group(_ console: ConsoleProtocol) -> Group {
             Dump(console: console),
             DeployCloud(console: console),
             Create(console: console),
+            Add(console: console),
+            CloudSetup(console: console),
         ],
         help: [
             "Commands for interacting with Vapor Cloud."
@@ -338,21 +340,9 @@ public final class DeployCloud: Command {
 
     public func run(arguments: [String]) throws {
         let token = try Token.global(with: console)
-
         /////
-        let org = try selectOrganization(
-            queryTitle: "Which Organization?",
-            using: console,
-            with: token
-        )
-        /////
-
-        let proj = try selectProject(
-            in: org,
-            queryTitle: "Which Project?",
-            using: console,
-            with: token
-        )
+        let org = try getOrganization(arguments, with: token)
+        let proj = try getProject(arguments, in: org, with: token)
 
         /////
 
@@ -418,6 +408,51 @@ public final class DeployCloud: Command {
 
         console.success("Successfully deployed.")
         console.info("Deployed: \n\(deploy)")
+    }
+
+    private func getOrganization(_ arguments: [String], with token: Token) throws -> Organization {
+        let organizationId = arguments.option("organizationId") ?? localConfig?["organizationId"]?.string
+        if let id = organizationId {
+            return try adminApi.organizations.get(id: id, with: token)
+        }
+
+        return try selectOrganization(
+            queryTitle: "Which Organization?",
+            using: console,
+            with: token
+        )
+    }
+
+    private func getProject(_ arguments: [String], in org: Organization, with token: Token) throws -> Project {
+        let projectId = arguments.option("projectId") ?? localConfig?["projectId"]?.string
+        if let id = projectId {
+            return try adminApi.projects.get(id: id, with: token)
+        }
+
+        return try selectProject(
+            in: org,
+            queryTitle: "Which Project?",
+            using: console,
+            with: token
+        )
+    }
+
+    private func getApp(_ arguments: [String], in proj: Project, with token: Token) throws -> Application {
+        let applicationId = arguments.option("applicationId") ?? localConfig?["applicationId"]?.string
+        if let id = applicationId {
+            guard let app = try applicationApi.get(for: proj, with: token)
+                .lazy
+                .filter({ $0.id.uuidString == id })
+                .first else { throw "No application found w/ id: \(id). Try cloud setup again" }
+            return app
+        }
+
+        return try selectApplication(
+            in: proj,
+            queryTitle: "Which Application?",
+            using: console,
+            with: token
+        )
     }
 }
 
@@ -506,7 +541,6 @@ public final class Create: Command {
             (name: "Project", handler: createProject),
             (name: "Application", handler: createApplication),
             (name: "Environment", handler: createEnvironment),
-            (name: "Hosting", handler: createHosting),
         ]
 
         let choice = try console.giveChoice(
@@ -604,8 +638,40 @@ public final class Create: Command {
         )
         creating.finish()
     }
+}
 
-    func createHosting(with token: Token) throws {
+
+public final class Add: Command {
+    public let id = "add"
+
+    public let signature: [Argument] = []
+
+    public let help: [String] = [
+        ""
+    ]
+
+    public let console: ConsoleProtocol
+
+    public init(console: ConsoleProtocol) {
+        self.console = console
+    }
+
+    public func run(arguments: [String]) throws {
+        let token = try Token.global(with: console)
+
+        let creatables = [
+            (name: "Hosting", handler: addHosting),
+        ]
+
+        let choice = try console.giveChoice(
+            title: "What would you like to add?",
+            in: creatables
+        ) { return $0.0 }
+
+        try choice.handler(token)
+    }
+
+    func addHosting(with token: Token) throws {
         let org = try selectOrganization(
             queryTitle: "Which Organization would you like to add Hosting to?",
             using: console,
@@ -838,6 +904,61 @@ import Vapor
 // TODO: Get home directory
 let vaporConfigDir = "\(NSHomeDirectory())/.vapor"
 let tokenPath = "\(vaporConfigDir)/token.json"
+
+let localConfigPath = Core.workingDirectory().finished(with: "/") + ".vcloud.json"
+let localConfigBytes = (try? DataFile.load(path: localConfigPath)) ?? []
+let localConfig = try? JSON(bytes: localConfigBytes)
+
+public final class CloudSetup: Command {
+    public let id = "setup"
+
+    public let signature: [Argument] = []
+
+    public let help: [String] = [
+        "Refreshes vapor token, only while testing, will automate soon."
+    ]
+
+    public let console: ConsoleProtocol
+
+    public init(console: ConsoleProtocol) {
+        self.console = console
+    }
+
+    public func run(arguments: [String]) throws {
+        let token = try Token.global(with: console)
+
+        let org = try selectOrganization(
+            queryTitle: "Select Organization?",
+            using: console,
+            with: token
+        )
+
+        let proj = try selectProject(
+            in: org,
+            queryTitle: "Select Project?",
+            using: console,
+            with: token
+        )
+
+        let app = try selectApplication(
+            in: proj,
+            queryTitle: "Select Application?",
+            using: console,
+            with: token
+        )
+
+        var json = JSON([:])
+        try json.set("organization.id", org.id)
+        try json.set("project.id", proj.id)
+        try json.set("application.id", app.id)
+        let file = try json.serialize(prettyPrint: true)
+        try DataFile.save(bytes: file, to: localConfigPath)
+
+        let setup = console.loadingBar(title: "Setup Cloud", animated: false)
+        setup.finish()
+    }
+}
+
 
 extension Token {
     func saveGlobal() throws {
