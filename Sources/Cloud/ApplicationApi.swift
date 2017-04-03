@@ -187,8 +187,33 @@ extension ApplicationApi {
             return try Environment(node: response.json)
         }
 
+        public func update(forRepo repo: String, _ env: Environment, replicas: Int, with token: Token) throws -> Environment {
+            let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/")
+                + repo
+                + "/hosting/environments/"
+                + env.name
+            let request = try Request(method: .patch, uri: endpoint)
+            request.access = token
+
+            var json = JSON([:])
+            try json.set("replicas", replicas)
+            request.json = json
+
+            let response = try client.respond(to: request)
+            return try Environment(node: response.json)
+        }
+
         public func all(for application: Application, with token: Token) throws -> [Environment] {
             let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/") + application.repo + "/hosting/environments"
+            let request = try Request(method: .get, uri: endpoint)
+            request.access = token
+
+            let response = try client.respond(to: request)
+            return try [Environment](node: response.json)
+        }
+
+        public func all(forRepo repo: String, with token: Token) throws -> [Environment] {
+            let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/") + repo + "/hosting/environments"
             let request = try Request(method: .get, uri: endpoint)
             request.access = token
 
@@ -273,12 +298,11 @@ public enum BuildType: String {
 }
 
 enum DeployError: Error {
-    case noHosting(for: Application)
+    case noHosting(for: Application?)
 }
 
 extension ApplicationApi {
     public final class DeployApi {
-        //gitBranch (String) (Optional) What branch should be deployed code (String) (Required) Should be incremental or clean
         public func deploy(
             for app: Application,
             replicas: Int?,
@@ -286,10 +310,26 @@ extension ApplicationApi {
             code: BuildType,
             with token: Token
         ) throws -> Deploy {
+            return try deploy(
+                for: app.repo,
+                replicas: replicas,
+                env: env.name,
+                code: code,
+                with: token
+            )
+        }
+
+        public func deploy(
+            for repo: String,
+            replicas: Int?,
+            env: String,
+            code: BuildType,
+            with token: Token
+            ) throws -> Deploy {
             let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/")
-                + app.repo
+                + repo
                 + "/hosting/environments/"
-                + env.name
+                + env
             let request = try Request(method: .patch, uri: endpoint)
             request.access = token
 
@@ -299,23 +339,32 @@ extension ApplicationApi {
                 try json.set("replicas", replicas)
             }
             request.json = json
-            
+
             let response = try client.respond(to: request)
             if
                 response.status == .badRequest,
                 response.json?["reason"]?.string == "No hosting exists for this application." {
-                throw DeployError.noHosting(for: app)
+                throw DeployError.noHosting(for: nil)
             }
 
             // TODO: Make Better
             return try Deploy(node: response.json)
         }
-        
+
         public func scale(for app: Application, env: Environment, replicas: Int, with token: Token) throws {
+            try scale(
+                for: app.repo,
+                env: env.name,
+                replicas: replicas,
+                with: token
+            )
+        }
+        
+        public func scale(for repo: String, env: String, replicas: Int, with token: Token) throws {
             let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/")
-                + app.repo
+                + repo
                 + "/hosting/environments/"
-                + env.name
+                + env
             let request = try Request(method: .patch, uri: endpoint)
             request.access = token
 

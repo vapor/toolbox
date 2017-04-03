@@ -329,7 +329,7 @@ public final class DeployCloud: Command {
     public let signature: [Argument] = []
 
     public let help: [String] = [
-        "Gather metadata of cloud from local where possible"
+        "Deploy a project to Vapor Cloud"
     ]
 
     public let console: ConsoleProtocol
@@ -339,23 +339,23 @@ public final class DeployCloud: Command {
     }
 
     public func run(arguments: [String]) throws {
+        // drop 'deploy' from argument list
+        let arguments = arguments.dropFirst().array
         let token = try Token.global(with: console)
 
-        /// Setup
-        let org = try getOrganization(arguments, with: token)
-        let proj = try getProject(arguments, in: org, with: token)
-        let app = try getApp(arguments, in: proj, with: token)
-        let env = try getEnvironment(arguments, for: app, with: token)
-        let replicas = try getReplicas(arguments)
+
+        let repo = try getRepo(arguments, with: token)
+        let env = try getEnvironment(arguments, forRepo: repo, with: token)
+        let replicas = getReplicas(arguments)
 
         /// Deploy
         let deployBar = console.loadingBar(title: "Deploying")
         defer { deployBar.fail() }
         deployBar.start()
         let deploy = try applicationApi.deploy.deploy(
-            for: app,
+            for: repo,
             replicas: replicas,
-            env: env,
+            env: env.name,
             code: .incremental,
             with: token
         )
@@ -385,6 +385,17 @@ public final class DeployCloud: Command {
 
         console.success("Successfully deployed.")
         console.info("Deployed: \n\(deploy)")
+    }
+
+    private func getRepo(_ arguments: [String], with token: Token) throws -> String {
+        if let repo = arguments.values.first ?? localConfig?["application.repo"]?.string {
+            return repo
+        }
+
+        let org = try getOrganization(arguments, with: token)
+        let proj = try getProject(arguments, in: org, with: token)
+        let app = try getApp(arguments, in: proj, with: token)
+        return app.repo
     }
 
     private func getOrganization(_ arguments: [String], with token: Token) throws -> Organization {
@@ -449,15 +460,14 @@ public final class DeployCloud: Command {
         )
     }
 
-    ///
-    private func getEnvironment(_ arguments: [String], for app: Application, with token: Token) throws -> Environment {
+    private func getEnvironment(_ arguments: [String], forRepo repo: String, with token: Token) throws -> Environment {
         if let env = arguments.option("env") {
             let envBar = console.loadingBar(title: "Loading Environments")
             defer { envBar.fail() }
             envBar.start()
             guard let loaded = try applicationApi
                 .environments
-                .all(for: app, with: token)
+                .all(forRepo: repo, with: token)
                 .lazy
                 .filter({ $0.name == env})
                 .first
@@ -468,20 +478,17 @@ public final class DeployCloud: Command {
         }
 
         return try selectEnvironment(
-            for: app,
+            forRepo: repo,
             queryTitle: "Which Environment?",
             using: console,
             with: token
         )
     }
 
-    private func getReplicas(_ arguments: [String]) throws -> Int {
+    private func getReplicas(_ arguments: [String]) -> Int? {
         let existing = arguments.option("replicas")
             ?? localConfig?["replicas"]?.string
-            ?? console.ask("How many replicas?")
-        guard let replicas = Int(existing), replicas > 0 else {
-            throw "Expected a number greater than 1, got \(existing)."
-        }
+        guard let found = existing, let replicas = Int(found), replicas > 0 else { return nil }
         return replicas
     }
 }
@@ -532,18 +539,18 @@ func selectApplication(
 }
 
 func selectEnvironment(
-    for app: Application,
+    forRepo repo: String,
     queryTitle: String,
     using console: ConsoleProtocol,
     with token: Token) throws-> Environment {
     let envBar = console.loadingBar(title: "Loading Environments")
     defer { envBar.fail() }
     envBar.start()
-    let envs = try applicationApi.environments.all(for: app, with: token)
+    let envs = try applicationApi.environments.all(forRepo: repo, with: token)
     envBar.finish()
 
     guard !envs.isEmpty else {
-        throw "No environments setup, make sure to create an environment for \(app.name)"
+        throw "No environments setup, make sure to create an environment for repo \(repo)"
     }
 
     return try console.giveChoice(
@@ -637,11 +644,48 @@ public final class Create: Command {
         let new = try applicationApi.create(for: proj, repo: repo, name: name, with: token)
         creating.finish()
 
+        _ = try setupHosting(for: new, with: token)
+
         let environment = console.loadingBar(title: "Creating Production Environment")
         defer { environment.fail() }
         environment.start()
-        _ = try applicationApi.environments.create(for: new, name: "production", branch: "master", with: token)
+        let env = try applicationApi.environments.create(for: new, name: "production", branch: "master", with: token)
         environment.finish()
+
+        let scale = console.loadingBar(title: "Scaling")
+        defer { scale.fail() }
+        scale.start()
+        try applicationApi.environments.update(forRepo: repo, env, replicas: 1, with: token)
+        scale.finish()
+    }
+
+    private func setupHosting(for app: Application, with token: Token) throws -> Hosting {
+        var remote = ""
+        do {
+            // TODO: Validate SSH Url
+            remote = try console.backgroundExecute(
+                program: "git",
+                arguments: ["remote", "get-url", "origin"]
+                ).trim()
+        } catch {}
+
+        var useRemote = false
+        if !remote.isEmpty {
+            console.info("We found '\(remote)'")
+            useRemote = console.confirm("Would you like to deploy from this remote?")
+        }
+        if !useRemote {
+            console.info("What 'git' url should we apply to this hosting?")
+            remote = console.ask("We require ssh url format currently, ie: git@github.com:vapor/vapor.git")
+        }
+
+        let hosting = console.loadingBar(title: "Setting up Hosting")
+        defer { hosting.fail() }
+        hosting.start()
+        let new = try applicationApi.hosting.create(for: app, git: remote, with: token)
+        hosting.finish()
+
+        return new
     }
 
     private func createEnvironment(with token: Token) throws {
