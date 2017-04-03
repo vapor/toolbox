@@ -115,66 +115,6 @@ public final class ProjectInfo {
     }
 }
 
-final class GitInfo {
-    let console: ConsoleProtocol
-
-    init(_ console: ConsoleProtocol) {
-        self.console = console
-    }
-
-    public func isGitProject() -> Bool {
-        do {
-            // http://stackoverflow.com/a/16925062/2611971
-            let ls = try console.git(["rev-parse", "--is-inside-work-tree"])
-            return ls.contains("true")
-        } catch { return false }
-    }
-
-    public func currentBranch() throws -> String {
-        try assertGitRepo()
-
-        // http://stackoverflow.com/a/12142066/2611971
-        let branch = try console.git(["rev-parse", "--abbrev-ref", "HEAD"])
-        return branch.trim()
-    }
-
-    public func statusIsClean() throws -> Bool {
-        try assertGitRepo()
-
-        let status = try console.backgroundExecute(
-            program: "git",
-            arguments: ["status", "--porcelain"]
-        )
-        return status.isEmpty
-    }
-
-    /// This means, as compared to 'base', 'compare' is 
-    /// 'x' commits ahead, and 'x' commits behind
-    ///
-    /// to compare remote, for example do 
-    /// 'branchPosition(base: "master", compare: "origin/master")'
-    public func branchPosition(base: String, compare: String) throws -> (ahead: Int, behind: Int) {
-        try assertGitRepo()
-
-        // http://stackoverflow.com/a/27940027/2611971
-        // returns
-        // 1     7
-        // where compare is 1 commit behind, and 7 commits ahead
-        let result = try console.git(["rev-list", "--left-right", "--count", "\(base)...\(compare)"])
-        let split
-    }
-
-    func upstream() {
-        //git rev-parse --abbrev-ref --symbolic-full-name @{u}
-    }
-
-    private func assertGitRepo() throws {
-        guard isGitProject() else { throw GeneralError("Expected a git repository") }
-    }
-}
-
-extension ConsoleProtocol {
-    func git(_ arguments: [String]) throws -> String {
-        return try backgroundExecute(program: "git", arguments: arguments)
-    }
+extension Command {
+    public var projectInfo: ProjectInfo { return ProjectInfo(console) }
 }
