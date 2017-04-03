@@ -20,6 +20,7 @@ do {
         Build(console: terminal),
         Run(console: terminal),
         Fetch(console: terminal),
+        Update(console: terminal),
         Clean(console: terminal),
         Test(console: terminal),
         Xcode(console: terminal),
