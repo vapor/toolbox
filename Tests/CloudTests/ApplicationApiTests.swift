@@ -8,6 +8,17 @@ import Redis
 
 let testNamePrefix = "test-"
 
+class GitUrlTests: XCTestCase {
+    func testValidateGitUrl() throws {
+        XCTAssertTrue(isGitSSHUrl("git@github.com:vapor/vapor.git"))
+        XCTAssertFalse(isGitSSHUrl("https://github.com/vapor/vapor"))
+    }
+}
+import URI
+
+func validateGitUri(_ test: String) throws {
+
+}
 class ApplicationApiTests: XCTestCase {
     func testRedeploy() throws {
         let token = try! adminApi.login(email: "test-1490982505.99255@gmail.com", pass: "real-secure")
@@ -105,14 +116,14 @@ class ApplicationApiTests: XCTestCase {
         )
         XCTAssertNotEqual(update.gitUrl, fetch.gitUrl)
 
-        let environment = try applicationApi.hosting.environments.create(
+        let environment = try applicationApi.environments.create(
             for: application,
             name: "staging",
             branch: "master",
             with: token
         )
 
-        let allEnvs = try applicationApi.hosting.environments.all(for: application, with: token)
+        let allEnvs = try applicationApi.environments.all(for: application, with: token)
         XCTAssert(allEnvs.map { $0.id } .contains(environment.id))
         try applicationApi.deploy.deploy(
             for: application,

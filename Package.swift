@@ -3,9 +3,10 @@ import PackageDescription
 let package = Package(
     name: "VaporToolbox",
     targets: [
-        Target(name: "VaporToolbox", dependencies: ["Cloud"]),
+        Target(name: "VaporToolbox", dependencies: ["Cloud", "Shared"]),
         Target(name: "Executable", dependencies: ["VaporToolbox"]),
-        Target(name: "Cloud")
+        Target(name: "Cloud", dependencies: ["Shared"]),
+        Target(name: "Shared"),
     ],
     dependencies: [
         // Console protocols, terminal, and commands

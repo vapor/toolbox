@@ -36,6 +36,7 @@ public final class ApplicationApi {
 
     public let hosting = HostingApi()
     public let deploy = DeployApi()
+    // TODO: Should be off of hosting, these are hosting environments, not global
     public let environments = EnvironmentsApi()
 }
 
@@ -59,8 +60,11 @@ extension ApplicationApi {
         return try Application(node: response.json)
     }
 
-    public func get(for project: Project, with token: Token) throws -> [Application] {
-        let endpoint = ApplicationApi.applicationsEndpoint + "?projectId=\(project.id.uuidString)"
+    public func get(for project: Project, gitUrl: String? = nil, with token: Token) throws -> [Application] {
+        var endpoint = ApplicationApi.applicationsEndpoint + "?projectId=\(project.id.uuidString)"
+        if let gitUrl = gitUrl {
+            endpoint += "&hosting:gitUrl=\(gitUrl)"
+        }
         let request = try Request(method: .get, uri: endpoint)
         request.access = token
 

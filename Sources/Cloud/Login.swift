@@ -655,7 +655,7 @@ public final class Create: Command {
         let scale = console.loadingBar(title: "Scaling")
         defer { scale.fail() }
         scale.start()
-        try applicationApi.environments.update(forRepo: repo, env, replicas: 1, with: token)
+        _ = try applicationApi.environments.update(forRepo: repo, env, replicas: 1, with: token)
         scale.finish()
     }
 
@@ -1251,4 +1251,18 @@ public final class CurrentProject {
             return ls.contains(".build")
         } catch { return false }
     }
+}
+
+func isGitSSHUrl(_ string: String) -> Bool {
+    guard string.hasSuffix(".git") else { return false }
+    // git@github.com:vapor/vapor.git
+    let uri = string.makeBytes()
+    // git github.com:vapor/vapor.git
+    let atSplit = uri.split(separator: .at, maxSplits: 1, omittingEmptySubsequences: true)
+    guard atSplit.count == 2 else { return false }
+    // github.com:vapor/vapor.git
+    let colonSplit = atSplit[1].split(separator: .colon, maxSplits: 1, omittingEmptySubsequences: true)
+    // github.com vapor/vapor.git
+    guard colonSplit.count == 2 else { return false }
+    return true
 }
