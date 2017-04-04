@@ -27,10 +27,12 @@ extension AdminApi {
         }
 
         public func get(prefix: String, with token: Token) throws -> [Project] {
-            var endpoint = projectsEndpoint
+            // TODO: Size isn't active, 
+            var endpoint = projectsEndpoint + "?size=25"
             if !prefix.isEmpty {
-                endpoint += "?name=\(prefix)"
+                endpoint += "&name=\(prefix)"
             }
+
             let request = try Request(method: .get, uri: endpoint)
             request.access = token
 
@@ -54,6 +56,13 @@ extension AdminApi {
 
             let response = try client.respond(to: request)
             return try Project(node: response.json)
+        }
+
+        public func all(for org: Organization, with token: Token) throws -> [Project] {
+            // TODO: No endpoint for orgs yet, getting all and filtering manually,
+            // update in future
+            let projects = try all(with: token)
+            return projects.filter { $0.organizationId == org.id }
         }
 
         public func update(_ project: Project, name: String?, color: String?, with token: Token) throws -> Project {

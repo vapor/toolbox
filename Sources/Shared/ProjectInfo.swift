@@ -18,7 +18,10 @@ public final class ProjectInfo {
 
     /// Access project metadata through 'swift package dump-package'
     public func package() throws -> JSON? {
-        let dump = try console.backgroundExecute(program: "swift", arguments: ["package", "dump-package"])
+        let dump = try console.backgroundExecute(
+            program: "swift",
+            arguments: ["package", "dump-package"]
+        )
         return try? JSON(bytes: dump.makeBytes())
     }
 
@@ -31,8 +34,10 @@ public final class ProjectInfo {
         }
     }
 
-    public func isVaporProject() throws -> Bool {
-        return try dependencyURLs().contains("https://github.com/vapor/vapor.git")
+    public func isVaporProject() -> Bool {
+        do {
+            return try dependencyURLs().contains("https://github.com/vapor/vapor.git")
+        } catch { return false }
     }
 
     /// Get the name of the current Project

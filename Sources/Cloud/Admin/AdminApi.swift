@@ -5,6 +5,25 @@ public let adminApi = AdminApi()
 
 public var client = CloudClient<EngineClient>.self
 
+import Transport
+import TLS
+import Sockets
+extension FoundationClient: ClientProtocol {
+    public convenience init(
+        hostname: String,
+        port: Port,
+        _ securityLayer: SecurityLayer
+        ) throws {
+        let scheme: String
+        if case .none = securityLayer {
+            scheme = "http"
+        } else {
+            scheme = "https"
+        }
+        self.init(scheme: scheme, hostname: hostname, port: port)
+    }
+}
+
 public final class AdminApi {
     internal static let base = "https://api.vapor.cloud/admin"
     internal static let usersEndpoint = "\(base)/users"

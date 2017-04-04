@@ -1,5 +1,6 @@
 import Console
 import Foundation
+import URI
 
 public final class GitInfo {
     public let console: ConsoleProtocol
@@ -58,7 +59,15 @@ public final class GitInfo {
 
     public func remotes() throws -> [String] {
         try assertGitRepo()
-        return try console.git(["remote"]).components(separatedBy: "\n").map { $0.trim() }
+        return try console.git(["remote"])
+            .components(separatedBy: "\n")
+            .map { $0.trim() }
+            .filter { !$0.isEmpty }
+    }
+
+    public func remoteUrls() throws -> [String] {
+        return try remotes().map { try remoteUrl(for: $0) }
+
     }
 
     public func trackingOrigin() throws -> Bool {
@@ -85,7 +94,17 @@ public final class GitInfo {
         guard isGitProject() else { throw GeneralError("Expected a git repository") }
     }
 
-    private func isSSHUrl(_ string: String) -> Bool {
+    public func resolvedUrl(_ url: String) -> String? {
+        if isSSHUrl(url) {
+            return url
+        } else if let converted = convertToSSHUrl(url) {
+            return converted
+        } else {
+            return nil
+        }
+    }
+
+    public func isSSHUrl(_ string: String) -> Bool {
         guard string.hasSuffix(".git") else { return false }
         // git@github.com:vapor/vapor.git
         let uri = string.makeBytes()
@@ -97,6 +116,24 @@ public final class GitInfo {
         // github.com vapor/vapor.git
         guard colonSplit.count == 2 else { return false }
         return true
+    }
+
+    public func convertToSSHUrl(_ string: String) -> String? {
+        do {
+            let uri = try URI(string)
+            var path = uri.path
+            if path.hasPrefix("/") { path = path.makeBytes().dropFirst().makeString() }
+            if path.hasSuffix("/") { path = path.makeBytes().dropLast().makeString() }
+            path = path.finished(with: ".git")
+
+            var host = uri.hostname
+            if host.hasPrefix("www.") {
+                host = host.makeBytes().dropFirst(4).makeString()
+            }
+            let converted = "git@\(host):\(path)"
+            guard isSSHUrl(converted) else { return nil }
+            return converted
+        } catch { return nil }
     }
 }
 

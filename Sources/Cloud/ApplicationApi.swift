@@ -37,6 +37,7 @@ public final class ApplicationApi {
     public let hosting = HostingApi()
     public let deploy = DeployApi()
     // TODO: Should be off of hosting, these are hosting environments, not global
+    @available(*, deprecated: 1.0, renamed: "hosting.environments")
     public let environments = EnvironmentsApi()
 }
 
@@ -60,16 +61,30 @@ extension ApplicationApi {
         return try Application(node: response.json)
     }
 
-    public func get(for project: Project, gitUrl: String? = nil, with token: Token) throws -> [Application] {
-        var endpoint = ApplicationApi.applicationsEndpoint + "?projectId=\(project.id.uuidString)"
-        if let gitUrl = gitUrl {
-            endpoint += "&hosting:gitUrl=\(gitUrl)"
-        }
+    public func get(for project: Project, with token: Token) throws -> [Application] {
+        let endpoint = ApplicationApi.applicationsEndpoint + "?projectId=\(project.id.uuidString)"
         let request = try Request(method: .get, uri: endpoint)
         request.access = token
 
         let response = try client.respond(to: request)
         return try [Application](node: response.json?["data"])
+    }
+
+    public func get(forGit git: String, with token: Token) throws -> [Application] {
+        /// TODO: Temporary workaround to collect from gitHub URL
+        /// will add more
+        let projects = try adminApi.projects.all(with: token)
+        var app = [Application]()
+        for project in projects {
+            let endpoint = ApplicationApi.applicationsEndpoint
+                + "?projectId=\(project.id)"
+                + "&hosting:gitUrl=\(git)"
+            let request = try Request(method: .get, uri: endpoint)
+            request.access = token
+            let response = try client.respond(to: request)
+            app += try [Application](node: response.json?["data"])
+        }
+        return app
     }
 
     // TODO: See if we can add call on backend that doesn't require subcalls
@@ -103,6 +118,7 @@ public func == (lhs: Hosting, rhs: Hosting) -> Bool {
 
 extension ApplicationApi {
     public final class HostingApi {
+        let environments = EnvironmentsApi()
 
         // TODO: git expects ssh url, ie: git@github.com:vapor/vapor.git
         public func create(for application: Application, git: String, with token: Token) throws -> Hosting {
@@ -152,7 +168,7 @@ extension ApplicationApi {
 }
 
 public struct Environment: NodeInitializable {
-    public let applicationId: UUID
+    public let hostingId: UUID
     public let branch: String
     public let id: UUID
     public let name: String
@@ -160,8 +176,7 @@ public struct Environment: NodeInitializable {
     public let replicas: Int
 
     public init(node: Node) throws {
-        // TODO: Full Model?
-        applicationId = try node.get("application.id")
+        hostingId = try node.get("hosting.id")
         branch = try node.get("defaultBranch")
         id = try node.get("id")
         name = try node.get("name")
@@ -228,7 +243,7 @@ extension ApplicationApi {
 }
 
 public struct Deploy: NodeInitializable {
-    public let application: Application
+    public let hosting: Hosting
     public let defaultBranch: String
     // TODO: Rename deployOperations or operations
     public let deployments: [Deployment]
@@ -238,7 +253,7 @@ public struct Deploy: NodeInitializable {
     public let running: Bool
 
     public init(node: Node) throws {
-        application = try node.get("application")
+        hosting = try node.get("hosting")
         defaultBranch = try node.get("defaultBranch")
         deployments = try node.get("deployments")
         id = try node.get("id")
@@ -351,7 +366,6 @@ extension ApplicationApi {
                 throw DeployError.noHosting(for: nil)
             }
 
-            // TODO: Make Better
             return try Deploy(node: response.json)
         }
 

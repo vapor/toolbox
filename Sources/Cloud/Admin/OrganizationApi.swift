@@ -45,8 +45,13 @@ extension AdminApi {
 
             // TODO: Discuss w/ Tanner, should this be returning 
             // an array for single item
-            let org = response.json?["data"]?.array?.first
-            return try Organization(node: org)
+
+            if let org = response.json?["data"]?.array?.first {
+                return try Organization(node: org)
+            } else {
+                print("I think this endpoint might've been resolved, check it")
+                return try Organization(node: response.json)
+            }
         }
     }
 }

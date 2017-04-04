@@ -4,14 +4,30 @@ import Vapor
 import Foundation
 import HTTP
 import Redis
+import Console
+import Shared
 @testable import Cloud
 
 let testNamePrefix = "test-"
 
 class GitUrlTests: XCTestCase {
+    let git = GitInfo(Terminal(arguments: []))
+
     func testValidateGitUrl() throws {
-        XCTAssertTrue(isGitSSHUrl("git@github.com:vapor/vapor.git"))
-        XCTAssertFalse(isGitSSHUrl("https://github.com/vapor/vapor"))
+        XCTAssertTrue(git.isSSHUrl("git@github.com:vapor/vapor.git"))
+        XCTAssertFalse(git.isSSHUrl("https://github.com/vapor/vapor"))
+        XCTAssertNil(git.resolvedUrl("git@github"))
+    }
+
+    func testConvertGitUrl() throws {
+
+        let one = git.convertToSSHUrl("https://www.github.com/vapor/api-template/")
+        let two = git.convertToSSHUrl("https://github.com/vapor/api-template.git")
+        let three = git.convertToSSHUrl("https://www.github.com/vapor/api-template/")
+        let four = git.convertToSSHUrl("https://www.github.com/vapor/api-template/")
+
+        let expectation = "git@github.com:vapor/api-template.git"
+        [one, two, three, four].forEach { XCTAssertEqual($0, expectation) }
     }
 }
 import URI
@@ -20,28 +36,34 @@ func validateGitUri(_ test: String) throws {
 
 }
 class ApplicationApiTests: XCTestCase {
-    func testRedeploy() throws {
+    func testGitUrl() throws {
         let token = try! adminApi.login(email: "test-1490982505.99255@gmail.com", pass: "real-secure")
-
-        let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/")
-            + "test-delete-me-123213"
-            + "/hosting/environments/"
-            + "master"
-        let request = try! Request(method: .patch, uri: endpoint)
-        request.access = token
-
-        var json = JSON([:])
-        try json.set("code", "incremental")
-        request.json = json
-
-        let response = try! client.respond(to: request)
-        let id = try! response.json!["deployments.0.id"]!.string!
-        try Redis.subscribeDeployLog(id: id) { update in
-            print("Got update: \(update)")
-        }
-        print("response: \(response)")
+        let aps = try applicationApi.get(forGit: "git@github.com:vapor/light-template.git", with: token)
+        print("aps: \(aps)")
         print("")
     }
+//    func testRedeploy() throws {
+//        let token = try! adminApi.login(email: "test-1490982505.99255@gmail.com", pass: "real-secure")
+//
+//        let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/")
+//            + "test-delete-me-123213"
+//            + "/hosting/environments/"
+//            + "master"
+//        let request = try! Request(method: .patch, uri: endpoint)
+//        request.access = token
+//
+//        var json = JSON([:])
+//        try json.set("code", "incremental")
+//        request.json = json
+//
+//        let response = try! client.respond(to: request)
+//        let id = try! response.json!["deployments.0.id"]!.string!
+//        try Redis.subscribeDeployLog(id: id) { update in
+//            print("Got update: \(update)")
+//        }
+//        print("response: \(response)")
+//        print("")
+//    }
 
     func testInfoFromGitUrl() throws {
 //        let token = try adminApi.login(email: "test-1490982505.99255@gmail.com", pass: "real-secure")
