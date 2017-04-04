@@ -30,6 +30,7 @@ public final class AdminApi {
 }
 
 extension AdminApi {
+    // TODO: Rename signup/login, and signupAndLogin
     @discardableResult
     public func create(
         email: String,
@@ -38,7 +39,7 @@ extension AdminApi {
         lastName: String,
         organizationName: String,
         image: String?
-    ) throws -> Response {
+    ) throws -> User {
         var json = JSON([:])
         try json.set("email", email)
         try json.set("password", pass)
@@ -50,7 +51,8 @@ extension AdminApi {
         let request = try Request(method: .post, uri: AdminApi.usersEndpoint)
         request.json = json
 
-        return try client.respond(to: request)
+        let response = try client.respond(to: request)
+        return try User(node: response.json)
     }
 
     public func login(email: String, pass: String) throws -> Token {
@@ -76,8 +78,9 @@ extension AdminApi {
         lastName: String,
         organizationName: String,
         image: String?
-        ) throws -> Token {
-        try create(
+    ) throws -> (user: User, token: Token) {
+
+        let user = try create(
             email: email,
             pass: pass,
             firstName: firstName,
@@ -86,6 +89,8 @@ extension AdminApi {
             image: image
         )
 
-        return try login(email: email, pass: pass)
+        let token = try login(email: email, pass: pass)
+
+        return (user, token)
     }
 }

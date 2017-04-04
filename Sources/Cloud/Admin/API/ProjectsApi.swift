@@ -85,18 +85,10 @@ extension AdminApi {
             request.access = token
             
             let response = try client.respond(to: request)
-            let colors = response.json?
-                .object?
-                .map { name, hex in
-                    let hex = hex.string ?? ""
-                    return Color(name: name, hex: hex)
-                }
-                as  [Color]?
-            guard let unwrapped = colors else {
-                throw "Bad response project colors: \(response)"
+            let colors = try response.json?.object?.map { name, hex in
+                try Node(node: ["name": name, "hex": hex])
             }
-            
-            return unwrapped
+            return try [Color](node: colors)
         }
     }
 }

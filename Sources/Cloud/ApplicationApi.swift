@@ -31,8 +31,8 @@ public func == (lhs: Application, rhs: Application) -> Bool {
 
 public final class ApplicationApi {
     // TODO: Make Internal
-    public static let base = "https://api.vapor.cloud/application"
-    public static let applicationsEndpoint = "\(base)/applications"
+    internal static var base = "https://api.vapor.cloud/application"
+    internal static let applicationsEndpoint = "\(base)/applications"
 
     public let hosting = HostingApi()
     public let deploy = DeployApi()

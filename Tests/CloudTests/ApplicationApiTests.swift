@@ -35,13 +35,63 @@ import URI
 func validateGitUri(_ test: String) throws {
 
 }
-class ApplicationApiTests: XCTestCase {
-    func testGitUrl() throws {
-        let token = try! adminApi.login(email: "test-1490982505.99255@gmail.com", pass: "real-secure")
-        let aps = try applicationApi.get(forGit: "git@github.com:vapor/light-template.git", with: token)
-        print("aps: \(aps)")
-        print("")
+class ApplicationApiTests {
+    let user: User
+    let token: Token
+    let org: Organization
+    let proj: Project
+
+    init(token: Token, user: User, org: Organization, proj: Project) {
+        self.token = token
+        self.user = user
+        self.org = org
+        self.proj = proj
     }
+
+    func test() throws {
+        try testAll(expectCount: 0, contains: nil)
+        let app = try testCreate()
+        try testAll(expectCount: 1, contains: app)
+        try testProjectGet(expectCount: 1, contains: app)
+    }
+
+    func testCreate() throws -> Application {
+        let uniqueRepo = UUID().uuidString
+            .makeBytes()
+            .filter { $0 != .hyphen }
+            .prefix(20) // length limit
+            .makeString()
+        let app = try applicationApi.create(
+            for: proj,
+            repo: uniqueRepo,
+            name: "My App",
+            with: token
+        )
+
+        XCTAssertEqual(app.repo, uniqueRepo, "repo on app create doesn't match")
+        XCTAssertEqual(app.name, "My App", "name on app create doesn't match")
+        XCTAssertEqual(app.projectId, proj.id, "project id on app create doesn't match")
+
+        return app
+    }
+
+    func testAll(expectCount: Int, contains: Application?) throws {
+        let found = try applicationApi.all(with: token)
+        XCTAssertEqual(found.count, expectCount)
+        if let contains = contains {
+            XCTAssert(found.contains(contains), "\(found) doesn't contain \(contains)")
+        }
+    }
+
+    func testProjectGet(expectCount: Int, contains: Application) throws {
+        let found = try applicationApi.get(for: proj, with: token)
+        XCTAssertEqual(found.count, expectCount)
+        found.forEach { app in
+            XCTAssertEqual(app.projectId, proj.id)
+        }
+        XCTAssert(found.contains(contains), "\(found) doesn't contain \(contains)")
+    }
+
 //    func testRedeploy() throws {
 //        let token = try! adminApi.login(email: "test-1490982505.99255@gmail.com", pass: "real-secure")
 //

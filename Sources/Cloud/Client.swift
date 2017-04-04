@@ -3,6 +3,8 @@ import Sockets
 import Foundation
 import HTTP
 
+// TODO: Add middleware to find 500 response errors and throw proper swift errors
+
 public enum CloudClientError: Error {
     /// Refresh token is expired,
     /// fresh login required

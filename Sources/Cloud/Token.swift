@@ -92,3 +92,34 @@ extension AdminApi {
         }
     }
 }
+
+let tokenStorageKey = "cloud-client:token"
+let refreshStorageKey = "cloud-client:isRefreshRequest"
+
+extension Request {
+    internal var access: Token {
+        get { fatalError() }
+        set {
+            headers["Authorization"] = "Bearer \(newValue.access)"
+            storage[tokenStorageKey] = newValue
+            storage[refreshStorageKey] = false
+        }
+    }
+    internal var refresh: Token {
+        get { fatalError() }
+        set {
+            headers["Authorization"] = "Bearer \(newValue.refresh)"
+            storage[tokenStorageKey] = newValue
+            storage[refreshStorageKey] = false
+        }
+    }
+
+    internal var token: Token? {
+        return storage[tokenStorageKey] as? Token
+    }
+
+    internal var isRefreshRequest: Bool {
+        return storage[refreshStorageKey] as? Bool ?? false
+
+    }
+}
