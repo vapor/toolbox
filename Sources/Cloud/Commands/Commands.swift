@@ -4,17 +4,18 @@ public func group(_ console: ConsoleProtocol) -> Group {
     return Group(
         id: "cloud",
         commands: [
+            // User
             Login(console: console),
             Logout(console: console),
             Signup(console: console),
-            Me(console: console),
             Refresh(console: console),
+            Me(console: console),
+            // Debug
             TokenLog(console: console),
-            Organizations(console: console),
-            Projects(console: console),
-            Applications(console: console),
-            DeployCloud(console: console),
             Dump(console: console),
+            // Info
+            List(console: console),
+            // Deploy
             DeployCloud(console: console),
             Create(console: console),
             Add(console: console),

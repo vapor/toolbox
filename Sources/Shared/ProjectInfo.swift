@@ -2,10 +2,10 @@ import Console
 import JSON
 import Foundation
 
-struct GeneralError: Error {
-    let error: String
-    init(_ error: String) {
-        self.error = error
+public struct GeneralError: Error {
+    public let message: String
+    public init(_ message: String) {
+        self.message = message
     }
 }
 

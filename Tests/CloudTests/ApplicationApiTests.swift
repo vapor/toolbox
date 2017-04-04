@@ -30,11 +30,9 @@ class GitUrlTests: XCTestCase {
         [one, two, three, four].forEach { XCTAssertEqual($0, expectation) }
     }
 }
+
 import URI
 
-func validateGitUri(_ test: String) throws {
-
-}
 class ApplicationApiTests {
     let user: User
     let token: Token
