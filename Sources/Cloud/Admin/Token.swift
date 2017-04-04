@@ -1,3 +1,5 @@
+import Bits
+import JSON
 import Foundation
 
 public final class Token {
@@ -25,6 +27,29 @@ public final class Token {
     }
 }
 
+extension Token: Equatable {}
+public func == (lhs: Token, rhs: Token) -> Bool {
+    return lhs.access == rhs.access
+        && lhs.refresh == rhs.refresh
+}
+
+extension Token {
+    internal func unwrap() throws -> JSON {
+        let comps = access.components(separatedBy: ".")
+        guard comps.count == 3 else { throw "Invalid access token." }
+
+        let data = comps[1].makeBytes().base64URLDecoded
+        return try JSON(bytes: data)
+    }
+}
+
+extension JSON {
+    func prettyString() throws -> String {
+        let serialized = try serialize(prettyPrint: true)
+        return serialized.makeString()
+    }
+}
+
 import HTTP
 import Vapor
 
@@ -41,74 +66,5 @@ extension AdminApi {
             }
             token.access = new
         }
-    }
-}
-
-//
-//let autoRefresh = [TokenRefreshMiddleware()]
-//
-//class TokenRefreshMiddleware: Middleware {
-//    func respond(to request: Request, chainingTo next: Responder) throws -> Response {
-//        let response = try next.respond(to: request)
-//        // If we've already tried a refresh, then there's nothing for us to do
-//        guard !request.isRefreshRequest else { return response }
-//        // ensure that response is forbidden auth and might require refresh
-//        guard response.requiresRefresh else { return response }
-//        // ensure there is a token associated with the request
-//        guard let token = request.token else { return response }
-//
-//        print("Attempting refresh")
-//        let refreshed = try adminApi.access.refresh(token)
-//        token.access = refreshed.access
-//        token.updateExpiration()
-//        request.access = token
-//
-//        // Attempted refresh, trying again
-//        print("Refresh successful, trying again")
-//        return try next.respond(to: request)
-//    }
-//}
-
-enum CloudClientError: Error {
-    case requiresLogin
-}
-import Sockets
-
-public final class CloudClient<Wrapped: ClientProtocol>: ClientProtocol {
-    public let wrapped: Wrapped
-
-    public required init(hostname: String, port: Sockets.Port, _ securityLayer: SecurityLayer) throws {
-        wrapped = try Wrapped(hostname: hostname, port: port, securityLayer)
-    }
-
-    public func respond(to request: Request) throws -> Response {
-        let response = try wrapped.respond(to: request)
-        // If we've already tried a refresh, then there's nothing for us to do
-        guard !request.isRefreshRequest else { return response }
-        // ensure that response is forbidden auth and might require refresh
-        guard response.requiresRefresh else { return response }
-        // ensure there is a token associated with the request
-        guard let token = request.token else { return response }
-
-        // attempting refresh
-        try adminApi.access.refresh(token)
-        // Reset access header
-        request.access = token
-
-        // Attempted refresh, trying again
-        return try wrapped.respond(to: request)
-    }
-}
-
-extension Token: Equatable {}
-public func == (lhs: Token, rhs: Token) -> Bool {
-    return lhs.access == rhs.access
-        && lhs.refresh == rhs.refresh
-}
-
-extension Response {
-    // Attempt refresh for 401, 403, 419
-    var requiresRefresh: Bool {
-        return [401, 403, 419].contains(status.statusCode)
     }
 }

@@ -141,41 +141,8 @@ public final class TokenCommand: Command {
                     + " ..."
             }
         } else {
-            return try token.accessJSON()
+            return try token.unwrap().prettyString()
         }
-    }
-
-    func getRefresh(from token: Token, with arguments: [String]) -> String {
-        if arguments.flag("full") {
-            return token.refresh
-        } else {
-            return token.refresh
-                .makeBytes()
-                .prefix(limit)
-                .makeString()
-                + " ..."
-        }
-    }
-}
-
-import Bits
-
-
-extension Token {
-    func unwrap() throws -> JSON {
-        let comps = access.components(separatedBy: ".")
-        guard comps.count == 3 else {
-            throw "Invalid access token, expected 3 components"
-        }
-
-        let data = comps[1].makeBytes().base64URLDecoded
-        return try JSON(bytes: data)
-    }
-
-    func accessJSON() throws -> String {
-        let json = try unwrap()
-        let serialized = try json.serialize(prettyPrint: true)
-        return serialized.makeString()
     }
 }
 
