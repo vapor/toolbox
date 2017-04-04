@@ -237,10 +237,10 @@ public final class DeployCloud: Command {
         let deployBar = console.loadingBar(title: "Deploying")
         defer { deployBar.fail() }
         deployBar.start()
-        let deploy = try applicationApi.deploy.deploy(
-            for: repo,
+        let deploy = try applicationApi.deploy.push(
+            repo: repo,
+            envName: env.name,
             replicas: replicas,
-            env: env.name,
             code: .incremental,
             with: token
         )
@@ -536,13 +536,13 @@ public final class Create: Command {
         let environment = console.loadingBar(title: "Creating Production Environment")
         defer { environment.fail() }
         environment.start()
-        let env = try applicationApi.environments.create(for: new, name: "production", branch: "master", with: token)
+        let env = try applicationApi.hosting.environments.create(for: new, name: "production", branch: "master", with: token)
         environment.finish()
 
         let scale = console.loadingBar(title: "Scaling")
         defer { scale.fail() }
         scale.start()
-        _ = try applicationApi.environments.update(forRepo: repo, env, replicas: 1, with: token)
+        _ = try applicationApi.hosting.environments.setReplicas(count: 1, forRepo: repo, env: env, with: token)
         scale.finish()
     }
 
@@ -601,7 +601,7 @@ public final class Create: Command {
         let creating = console.loadingBar(title: "Creating \(name)")
         defer { creating.fail() }
         creating.start()
-        _ = try applicationApi.environments.create(
+        _ = try applicationApi.hosting.environments.create(
             for: app,
             name: name,
             branch: branch,
@@ -915,7 +915,7 @@ public final class CloudInit: Command {
 
         let environment = console.loadingBar(title: "Creating Production Environment")
         let env = try environment.perform {
-            return try applicationApi.environments.create(
+            return try applicationApi.hosting.environments.create(
                 for: new,
                 name: "production",
                 branch: "master",
@@ -925,7 +925,7 @@ public final class CloudInit: Command {
 
         let scale = console.loadingBar(title: "Scaling")
         try scale.perform {
-            _ = try applicationApi.environments.update(forRepo: repo, env, replicas: 1, with: token)
+            _ = try applicationApi.environments.setReplicas(count: 1, forRepo: repo, env: env, with: token)
         }
 
         return new

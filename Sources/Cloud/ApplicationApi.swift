@@ -168,7 +168,19 @@ public struct Environment: NodeInitializable {
     }
 }
 
+extension Environment: Equatable {}
+public func == (lhs: Environment, rhs: Environment) -> Bool {
+    return lhs.hostingId == rhs.hostingId
+        && lhs.branch == rhs.branch
+        && lhs.id == rhs.id
+        && lhs.name == rhs.name
+        && lhs.running == rhs.running
+        && lhs.replicas == rhs.replicas
+}
+
 extension ApplicationApi {
+    // TODO: ALl w/ forRepo instead of app
+
     public final class EnvironmentsApi {
         public func create(
             for application: Application,
@@ -189,7 +201,7 @@ extension ApplicationApi {
             return try Environment(node: response.json)
         }
 
-        public func update(forRepo repo: String, _ env: Environment, replicas: Int, with token: Token) throws -> Environment {
+        public func setReplicas(count: Int, forRepo repo: String, env: Environment, with token: Token) throws -> Environment {
             let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/")
                 + repo
                 + "/hosting/environments/"
@@ -198,7 +210,7 @@ extension ApplicationApi {
             request.access = token
 
             var json = JSON([:])
-            try json.set("replicas", replicas)
+            try json.set("replicas", count)
             request.json = json
 
             let response = try client.respond(to: request)
@@ -206,12 +218,7 @@ extension ApplicationApi {
         }
 
         public func all(for application: Application, with token: Token) throws -> [Environment] {
-            let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/") + application.repo + "/hosting/environments"
-            let request = try Request(method: .get, uri: endpoint)
-            request.access = token
-
-            let response = try client.respond(to: request)
-            return try [Environment](node: response.json)
+            return try all(forRepo: application.repo, with: token)
         }
 
         public func all(forRepo repo: String, with token: Token) throws -> [Environment] {
@@ -296,7 +303,7 @@ public struct Deployment: NodeInitializable {
 }
 
 public enum BuildType: String {
-    case clean, incremental
+    case clean, incremental, update
 }
 
 enum DeployError: Error {
@@ -305,33 +312,17 @@ enum DeployError: Error {
 
 extension ApplicationApi {
     public final class DeployApi {
-        public func deploy(
-            for app: Application,
+        public func push(
+            repo: String,
+            envName: String,
             replicas: Int?,
-            env: Environment,
-            code: BuildType,
-            with token: Token
-        ) throws -> Deploy {
-            return try deploy(
-                for: app.repo,
-                replicas: replicas,
-                env: env.name,
-                code: code,
-                with: token
-            )
-        }
-
-        public func deploy(
-            for repo: String,
-            replicas: Int?,
-            env: String,
             code: BuildType,
             with token: Token
             ) throws -> Deploy {
             let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/")
                 + repo
                 + "/hosting/environments/"
-                + env
+                + envName
             let request = try Request(method: .patch, uri: endpoint)
             request.access = token
 
@@ -352,20 +343,11 @@ extension ApplicationApi {
             return try Deploy(node: response.json)
         }
 
-        public func scale(for app: Application, env: Environment, replicas: Int, with token: Token) throws {
-            try scale(
-                for: app.repo,
-                env: env.name,
-                replicas: replicas,
-                with: token
-            )
-        }
-        
-        public func scale(for repo: String, env: String, replicas: Int, with token: Token) throws {
+        public func scale(repo: String, envName: String, replicas: Int, with token: Token) throws {
             let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/")
                 + repo
                 + "/hosting/environments/"
-                + env
+                + envName
             let request = try Request(method: .patch, uri: endpoint)
             request.access = token
 
