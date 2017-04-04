@@ -147,15 +147,6 @@ extension ApplicationApi {
             let response = try client.respond(to: request)
             return try Hosting(node: response.json)
         }
-
-        // TODO: See if we can get an easier way to do this
-        public func all(with token: Token) throws -> [Hosting] {
-            let applications = try applicationApi.all(with: token)
-            return applications.flatMap { app in
-                // TODO: Not all applications have hosting, ask if can return empty array
-                return try? applicationApi.hosting.get(for: app, with: token)
-            }
-        }
     }
 }
 

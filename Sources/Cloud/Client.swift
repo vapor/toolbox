@@ -9,6 +9,8 @@ public enum CloudClientError: Error {
     /// Refresh token is expired,
     /// fresh login required
     case loginRequired
+    case badGateway(Response, for: Request)
+    case badResponse(Response, for: Request)
 }
 
 /// This client should be used for accessing Vapor Cloud apis
@@ -24,7 +26,9 @@ public final class CloudClient<Wrapped: ClientProtocol>: ClientProtocol {
     public func respond(to request: Request) throws -> Response {
         let response = try wrapped.respond(to: request)
         try assertValid(request, response)
-        return try handle(request, response)
+        let processed = try handle(request, response)
+        try errorPass(request: request, response: processed)
+        return processed
     }
 
     private func handle(_ request: Request, _ response: Response) throws -> Response {
@@ -54,6 +58,13 @@ public final class CloudClient<Wrapped: ClientProtocol>: ClientProtocol {
         if request.isRefreshRequest && response.requiresRefresh {
             throw CloudClientError.loginRequired
         }
+    }
+
+    private func errorPass(request: Request, response: Response) throws {
+        if response.status.statusCode == 502 { throw CloudClientError.badGateway(response, for: request) }
+        guard let json = response.json else { return }
+        guard let _ = json["error"] else { return }
+        throw CloudClientError.badResponse(response, for: request)
     }
 
 }
