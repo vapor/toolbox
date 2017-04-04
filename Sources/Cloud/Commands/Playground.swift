@@ -2,150 +2,6 @@ import Console
 import Node
 import Shared
 
-public func group(_ console: ConsoleProtocol) -> Group {
-    return Group(
-        id: "cloud",
-        commands: [
-            Login(console: console),
-            Logout(console: console),
-            Signup(console: console),
-            Me(console: console),
-            Refresh(console: console),
-            TokenCommand(console: console),
-            Organizations(console: console),
-            Projects(console: console),
-            Applications(console: console),
-            DeployCloud(console: console),
-            Dump(console: console),
-            DeployCloud(console: console),
-            Create(console: console),
-            Add(console: console),
-            CloudSetup(console: console),
-            CloudInit(console: console)
-        ],
-        help: [
-            "Commands for interacting with Vapor Cloud."
-        ]
-    )
-}
-
-public final class Login: Command {
-    public let id = "login"
-
-    public let signature: [Argument] = []
-
-    public let help: [String] = [
-        "Logs you into Vapor Cloud."
-    ]
-
-    public let console: ConsoleProtocol
-
-    public init(console: ConsoleProtocol) {
-        self.console = console
-    }
-
-    public func run(arguments: [String]) throws {
-        let email = arguments.option("email") ?? console.ask("Email: ")
-        let pass = arguments.option("pass") ?? console.ask("Password: ")
-
-        let loginBar = console.loadingBar(title: "Logging in", animated: !arguments.flag("verbose"))
-        loginBar.start()
-        do {
-            let token = try adminApi.login(email: email, pass: pass)
-            try token.saveGlobal()
-            loginBar.finish()
-            console.success("Welcome back.")
-        } catch {
-            console.warning("Failed to login user")
-            console.warning("User 'vapor cloud signup' if you don't have an account")
-            loginBar.fail()
-            throw "Error: \(error)"
-        }
-    }
-}
-
-public final class Logout: Command {
-    public let id = "logout"
-
-    public let signature: [Argument] = []
-
-    public let help: [String] = [
-        "Logs you out of Vapor Cloud."
-    ]
-
-    public let console: ConsoleProtocol
-
-    public init(console: ConsoleProtocol) {
-        self.console = console
-    }
-
-    public func run(arguments: [String]) throws {
-        let bar = console.loadingBar(title: "Logging out")
-        bar.start()
-        do {
-            if FileManager.default.fileExists(atPath: tokenPath) {
-                _ = try DataFile.delete(at: tokenPath)
-            }
-            bar.finish()
-        } catch {
-            bar.fail()
-            throw "Error: \(error)"
-        }
-    }
-}
-
-public final class TokenCommand: Command {
-    public let id = "token"
-
-    public let signature: [Argument] = []
-
-    public let help: [String] = [
-        "Cached token metadata for debugging."
-    ]
-
-    public let console: ConsoleProtocol
-
-    private let limit = 25
-
-    public init(console: ConsoleProtocol) {
-        self.console = console
-    }
-
-    public func run(arguments: [String]) throws {
-        let token = try Token.global(with: console)
-        let access = try getAccess(from: token, with: arguments)
-        console.info("Access: ", newLine: true)
-        console.print(access)
-
-        console.info("Refresh: ", newLine: true)
-        console.print(token.refresh)
-
-        console.info("Expiration: ", newLine: true)
-        let expiration = token.expiration.timeIntervalSince1970 - Date().timeIntervalSince1970
-        if expiration >= 0 {
-            console.success("\(expiration) seconds from now.")
-        } else {
-            console.warning("\(expiration * -1) seconds ago.")
-        }
-    }
-
-    func getAccess(from token: Token, with arguments: [String]) throws -> String {
-        if arguments.flag("raw") {
-            if arguments.flag("full") {
-                return token.access
-            } else {
-                return token.access
-                    .makeBytes()
-                    .prefix(limit)
-                    .makeString()
-                    + " ..."
-            }
-        } else {
-            return try token.unwrap().prettyString()
-        }
-    }
-}
-
 // TODO: Cache info about current user?
 public final class Me: Command {
     public let id = "me"
@@ -409,11 +265,10 @@ public final class DeployCloud: Command {
             } else {
                 logsBar?.fail()
             }
-            
+
         }
 
         console.success("Successfully deployed.")
-//        console.info("Deployed: \n\(deploy)")
     }
 
     private func getRepo(_ arguments: [String], with token: Token) throws -> String {
@@ -614,7 +469,7 @@ public final class Create: Command {
             (name: "Project", handler: createProject),
             (name: "Application", handler: createApplication),
             (name: "Environment", handler: createEnvironment),
-        ]
+            ]
 
         let choice = try console.giveChoice(
             title: "What would you like to create?",
@@ -777,7 +632,7 @@ public final class Add: Command {
 
         let creatables = [
             (name: "Hosting", handler: addHosting),
-        ]
+            ]
 
         let choice = try console.giveChoice(
             title: "What would you like to add?",
@@ -1008,35 +863,35 @@ public final class CloudInit: Command {
         return try createApplication(for: proj, gitUrl: gitUrl, with: token)
     }
 
-//    private func getApplication(for proj: Project, gitUrl: String, with token: Token) throws -> Application {
-//        let bar = console.loadingBar(title: "Loading Applications", animated: true)
-//        let applications = try bar.perform {
-//            try applicationApi.get(for: proj, with: token)
-//        }
-//
-//        if !applications.isEmpty {
-//            console.info("I found the following apps:")
-//            applications.forEach { app in
-//                console.print("- \(app.name) - \(app.repo).vapor.cloud")
-//            }
-//            let useExisting = console.confirm("Would you like to use one of these?")
-//            if useExisting {
-//                return try console.giveChoice(
-//                    title: "Which one?",
-//                    in: applications
-//                ) { return "\($0.name) - \($0.repo).vapor.cloud" }
-//            }
-//        }
-//
-//        console.info("I didn't find an Application we could use,")
-//        let createNew = console.confirm("would you like to create one?")
-//        guard createNew else {
-//            console.info("Ok, you can create an Application later to get started.")
-//            throw "No application."
-//        }
-//
-//        return try createApplication(for: proj, with: token)
-//    }
+    //    private func getApplication(for proj: Project, gitUrl: String, with token: Token) throws -> Application {
+    //        let bar = console.loadingBar(title: "Loading Applications", animated: true)
+    //        let applications = try bar.perform {
+    //            try applicationApi.get(for: proj, with: token)
+    //        }
+    //
+    //        if !applications.isEmpty {
+    //            console.info("I found the following apps:")
+    //            applications.forEach { app in
+    //                console.print("- \(app.name) - \(app.repo).vapor.cloud")
+    //            }
+    //            let useExisting = console.confirm("Would you like to use one of these?")
+    //            if useExisting {
+    //                return try console.giveChoice(
+    //                    title: "Which one?",
+    //                    in: applications
+    //                ) { return "\($0.name) - \($0.repo).vapor.cloud" }
+    //            }
+    //        }
+    //
+    //        console.info("I didn't find an Application we could use,")
+    //        let createNew = console.confirm("would you like to create one?")
+    //        guard createNew else {
+    //            console.info("Ok, you can create an Application later to get started.")
+    //            throw "No application."
+    //        }
+    //
+    //        return try createApplication(for: proj, with: token)
+    //    }
 
     private func createApplication(for proj: Project, gitUrl: String, with token: Token) throws -> Application {
         console.info("What would you like to name your new Application?")
@@ -1222,16 +1077,6 @@ public final class CloudInit: Command {
     }
 }
 
-extension LoadingBar {
-    func perform<T>(_ op: () throws -> T) rethrows -> T {
-        defer { fail() }
-        start()
-        let result = try op()
-        finish()
-        return result
-    }
-}
-
 // TODO: Paging
 public final class Organizations: Command {
     public let id = "organizations"
@@ -1375,64 +1220,44 @@ public final class Applications: Command {
     }
 }
 
-public final class Signup: Command {
-    public let id = "signup"
-
-    public let signature: [Argument] = []
-
-    public let help: [String] = [
-        "Creates a new Vapor Cloud user."
-    ]
-
-    public let console: ConsoleProtocol
-
-    public init(console: ConsoleProtocol) {
-        self.console = console
-    }
-
-    public func run(arguments: [String]) throws {
-        let email = console.ask("Email: ")
-        let pass = console.ask("Password: ")
-        let confirmed = console.ask("Confirm Password: ")
-        guard pass == confirmed else {
-            throw "Password mismatch, please try again."
-        }
-        let firstName = console.ask("First Name: ")
-        let lastName = console.ask("Last Name: ")
-        let organization = "My Cloud"
-
-        let bar = console.loadingBar(title: "Creating User")
-        bar.start()
-        do {
-            try adminApi.create(
-                email: email,
-                pass: pass,
-                firstName: firstName,
-                lastName: lastName,
-                organizationName: organization,
-                image: nil
-            )
-            bar.finish()
-            console.success("Welcome to Vapor Cloud.")
-        } catch {
-            bar.fail()
-            throw "Error: \(error)"
-        }
-
-        guard console.confirm("Would you like to login now?") else { return }
-        let login = Login(console: console)
-
-        var arguments = arguments
-        arguments.append("--email=\(email)")
-        arguments.append("--pass=\(pass)")
-        try login.run(arguments: arguments)
-    }
-}
-
 import Core
 import JSON
 import Foundation
 import Vapor
+
+//final class LocalConfig: StructuredDataWrapper {
+//    static let path = "./vapor.json"
+//
+//    let context: Context
+//
+//    var wrapped: StructuredData {
+//        didSet {
+//            do {
+//                try save()
+//            } catch {
+//                print("Local config save failed")
+//            }
+//        }
+//    }
+//
+//    init(_ wrapped: StructuredData, in context: Context?) {
+//        self.wrapped = wrapped
+//        self.context = context ?? emptyContext
+//    }
+//
+//    static func load() throws -> LocalConfig {
+//        guard FileManager.default.fileExists(atPath: path) else {
+//            return LocalConfig([:])
+//        }
+//        let bytes = try DataFile.load(path: path)
+//        let json = try JSON(bytes: bytes)
+//        return LocalConfig(json)
+//    }
+//
+//    func save() throws {
+//
+//    }
+//}
 
 // TODO: Get home directory
 let vaporConfigDir = "\(NSHomeDirectory())/.vapor"
@@ -1509,11 +1334,11 @@ public final class CloudSetup: Command {
         )
 
         var json = JSON([:])
-//        try json.set("organization.id", org.id)
-//        try json.set("project.id", proj.id)
-//        try json.set("application.id", app.id)
+        //        try json.set("organization.id", org.id)
+        //        try json.set("project.id", proj.id)
+        //        try json.set("application.id", app.id)
         try json.set("app.repoName", app.repo)
-//        try json.set("replicas", replicas)
+        //        try json.set("replicas", replicas)
         let file = try json.serialize(prettyPrint: true)
         try DataFile.save(bytes: file, to: localConfigPath)
 
@@ -1548,7 +1373,7 @@ extension Token {
                 console.warning("Use 'vapor cloud login' or")
                 console.warning("Create an account with 'vapor cloud signup'")
                 throw "User not found."
-            }
+        }
 
         let token = Token(access: access, refresh: refresh)
         token.didUpdate = { t in
@@ -1586,7 +1411,7 @@ extension ConsoleProtocol {
     func giveChoice<T>(title: String, in array: [T]) throws -> T {
         return try giveChoice(title: title, in: array, display: { "\($0)" })
     }
-
+    
     func giveChoice<T>(title: String, in array: [T], display: (T) -> String) throws -> T {
         info(title)
         array.enumerated().forEach { idx, item in
@@ -1595,14 +1420,14 @@ extension ConsoleProtocol {
             let description = display(item)
             print(description)
         }
-
+        
         output("> ", style: .plain, newLine: false)
         let raw = input()
         guard let idx = Int(raw), (1...array.count).contains(idx) else {
             // .count is implicitly offset, no need to adjust
             throw "Invalid selection: \(raw), expected: 1...\(array.count)"
         }
-
+        
         // undo previous offset back to 0 indexing
         let offset = idx - 1
         return array[offset]

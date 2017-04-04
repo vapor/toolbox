@@ -8,24 +8,12 @@ public var client = CloudClient<EngineClient>.self
 import Transport
 import TLS
 import Sockets
-extension FoundationClient: ClientProtocol {
-    public convenience init(
-        hostname: String,
-        port: Port,
-        _ securityLayer: SecurityLayer
-        ) throws {
-        let scheme: String
-        if case .none = securityLayer {
-            scheme = "http"
-        } else {
-            scheme = "https"
-        }
-        self.init(scheme: scheme, hostname: hostname, port: port)
-    }
-}
 
+/// The admin api will be used for user based
+/// endpoints, for example, login/out
+/// access, and organizations
 public final class AdminApi {
-    internal static let base = "https://api.vapor.cloud/admin"
+    internal static var base = "https://api.vapor.cloud/admin"
     internal static let usersEndpoint = "\(base)/users"
     internal static let loginEndpoint = "\(base)/login"
     internal static let meEndpoint = "\(base)/me"
@@ -42,26 +30,6 @@ public final class AdminApi {
 }
 
 extension AdminApi {
-    public func createAndLogin(
-        email: String,
-        pass: String,
-        firstName: String,
-        lastName: String,
-        organizationName: String,
-        image: String?
-        ) throws -> Token {
-        try create(
-            email: email,
-            pass: pass,
-            firstName: firstName,
-            lastName: lastName,
-            organizationName: organizationName,
-            image: image
-        )
-
-        return try login(email: email, pass: pass)
-    }
-
     @discardableResult
     public func create(
         email: String,
@@ -99,5 +67,25 @@ extension AdminApi {
             else { throw "Bad response to login: \(response)" }
 
         return Token(access: access, refresh: refresh)
+    }
+
+    public func createAndLogin(
+        email: String,
+        pass: String,
+        firstName: String,
+        lastName: String,
+        organizationName: String,
+        image: String?
+        ) throws -> Token {
+        try create(
+            email: email,
+            pass: pass,
+            firstName: firstName,
+            lastName: lastName,
+            organizationName: organizationName,
+            image: image
+        )
+
+        return try login(email: email, pass: pass)
     }
 }

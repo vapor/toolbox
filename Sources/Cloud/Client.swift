@@ -3,6 +3,12 @@ import Sockets
 import Foundation
 import HTTP
 
+public enum CloudClientError: Error {
+    /// Refresh token is expired,
+    /// fresh login required
+    case loginRequired
+}
+
 /// This client should be used for accessing Vapor Cloud apis
 /// it will automatically attempt token refreshing when possible
 /// on unauthorized endpoints
@@ -44,7 +50,7 @@ public final class CloudClient<Wrapped: ClientProtocol>: ClientProtocol {
         // If we are getting Auth forbiddens on refresh request,
         // user is required to login again
         if request.isRefreshRequest && response.requiresRefresh {
-            throw "Refresh token has expired, please login again with 'vapor cloud login'"
+            throw CloudClientError.loginRequired
         }
     }
 
