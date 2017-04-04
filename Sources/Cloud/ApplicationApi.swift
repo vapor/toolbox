@@ -71,20 +71,12 @@ extension ApplicationApi {
     }
 
     public func get(forGit git: String, with token: Token) throws -> [Application] {
-        /// TODO: Temporary workaround to collect from gitHub URL
-        /// will add more
-        let projects = try adminApi.projects.all(with: token)
-        var app = [Application]()
-        for project in projects {
-            let endpoint = ApplicationApi.applicationsEndpoint
-                + "?projectId=\(project.id)"
-                + "&hosting:gitUrl=\(git)"
-            let request = try Request(method: .get, uri: endpoint)
-            request.access = token
-            let response = try client.respond(to: request)
-            app += try [Application](node: response.json?["data"])
-        }
-        return app
+        let endpoint = ApplicationApi.applicationsEndpoint
+            + "?hosting:gitUrl=\(git)"
+        let request = try Request(method: .get, uri: endpoint)
+        request.access = token
+        let response = try client.respond(to: request)
+        return try [Application](node: response.json?["data"])
     }
 
     // TODO: See if we can add call on backend that doesn't require subcalls

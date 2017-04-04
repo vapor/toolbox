@@ -57,7 +57,7 @@ public final class GitInfo {
         return try console.git(["rev-parse", "--abbrev-ref", "--symtolic-full-name", "@{u}"])
     }
 
-    public func remotes() throws -> [String] {
+    public func remoteNames() throws -> [String] {
         try assertGitRepo()
         return try console.git(["remote"])
             .components(separatedBy: "\n")
@@ -65,13 +65,20 @@ public final class GitInfo {
             .filter { !$0.isEmpty }
     }
 
+    public func remotes() throws -> [(name: String, url: String)] {
+        return try remoteNames().map { name in
+            let url = try remoteUrl(for: name)
+            return (name, url)
+        }
+    }
+
     public func remoteUrls() throws -> [String] {
-        return try remotes().map { try remoteUrl(for: $0) }
+        return try remoteNames().map { try remoteUrl(for: $0) }
 
     }
 
     public func trackingOrigin() throws -> Bool {
-        return try remotes().contains("origin")
+        return try remoteNames().contains("origin")
     }
 
     public func originUrl() throws -> String {
@@ -87,7 +94,7 @@ public final class GitInfo {
 
     public func remoteUrl(for remote: String) throws -> String {
         try assertGitRepo()
-        return try console.git(["remote", "get-url", remote])
+        return try console.git(["remote", "get-url", remote]).trim()
     }
 
     private func assertGitRepo() throws {

@@ -10,27 +10,18 @@ public final class Token {
 
     // Currently just an estimation for debugging
     // TODO: Get from API?
-    public fileprivate(set) var expiration: Date {
-        didSet {
-            didUpdate?(self)
-        }
+    public var expiration: Date {
+        let json = try? unwrap()
+        let timestamp = json?["exp"]?.double
+            ?? 0
+        return Date(timeIntervalSince1970: timestamp)
     }
 
     public var didUpdate: ((Token) -> Void)?
 
-    public init(access: String, refresh: String, expiration: Date? = nil) {
+    public init(access: String, refresh: String) {
         self.access = access
         self.refresh = refresh
-
-        // 15 minute timeout, 1 minute to be sure
-        let fourteenMinutes = 60.0 * 14.0
-        self.expiration = expiration ?? Date(timeIntervalSinceNow: fourteenMinutes)
-    }
-
-    fileprivate func updateExpiration() {
-        // 15 minute timeout, 1 minute to be sure
-        let fourteenMinutes = 60.0 * 14.0
-        self.expiration = Date(timeIntervalSinceNow: fourteenMinutes)
     }
 }
 
@@ -49,7 +40,6 @@ extension AdminApi {
                 throw "Bad response to refresh request: \(response)"
             }
             token.access = new
-            token.updateExpiration()
         }
     }
 }

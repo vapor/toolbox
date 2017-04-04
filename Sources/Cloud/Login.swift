@@ -105,46 +105,77 @@ public final class TokenCommand: Command {
 
     public let console: ConsoleProtocol
 
+    private let limit = 25
+
     public init(console: ConsoleProtocol) {
         self.console = console
     }
 
     public func run(arguments: [String]) throws {
-        let limit = 25
         let token = try Token.global(with: console)
-        let access: String
-        if arguments.flag("full") {
-            access = token.access
-        } else {
-            access = token.access
-                .makeBytes()
-                .prefix(limit)
-                .makeString()
-                + "..."
-        }
-
-        console.info("Access: ", newLine: false)
+        let access = try getAccess(from: token, with: arguments)
+        console.info("Access: ", newLine: true)
         console.print(access)
 
-        let refresh: String
-        if arguments.flag("full") {
-            refresh = token.refresh
-        } else {
-            refresh = token.refresh
-                .makeBytes()
-                .prefix(limit)
-                .makeString() + "..."
-        }
-        console.info("Refresh: ", newLine: false)
-        console.print(refresh)
+        console.info("Refresh: ", newLine: true)
+        console.print(token.refresh)
 
-        console.info("Expiration: ", newLine: false)
+        console.info("Expiration: ", newLine: true)
         let expiration = token.expiration.timeIntervalSince1970 - Date().timeIntervalSince1970
         if expiration >= 0 {
             console.success("\(expiration) seconds from now.")
         } else {
             console.warning("\(expiration * -1) seconds ago.")
         }
+    }
+
+    func getAccess(from token: Token, with arguments: [String]) throws -> String {
+        if arguments.flag("raw") {
+            if arguments.flag("full") {
+                return token.access
+            } else {
+                return token.access
+                    .makeBytes()
+                    .prefix(limit)
+                    .makeString()
+                    + " ..."
+            }
+        } else {
+            return try token.accessJSON()
+        }
+    }
+
+    func getRefresh(from token: Token, with arguments: [String]) -> String {
+        if arguments.flag("full") {
+            return token.refresh
+        } else {
+            return token.refresh
+                .makeBytes()
+                .prefix(limit)
+                .makeString()
+                + " ..."
+        }
+    }
+}
+
+import Bits
+
+
+extension Token {
+    func unwrap() throws -> JSON {
+        let comps = access.components(separatedBy: ".")
+        guard comps.count == 3 else {
+            throw "Invalid access token, expected 3 components"
+        }
+
+        let data = comps[1].makeBytes().base64URLDecoded
+        return try JSON(bytes: data)
+    }
+
+    func accessJSON() throws -> String {
+        let json = try unwrap()
+        let serialized = try json.serialize(prettyPrint: true)
+        return serialized.makeString()
     }
 }
 
@@ -232,7 +263,7 @@ public final class Dump: Command {
     public let signature: [Argument] = []
 
     public let help: [String] = [
-        "Dump info."
+        "Dump info for current user."
     ]
 
     public let console: ConsoleProtocol
@@ -250,10 +281,16 @@ public final class Dump: Command {
 
         let organizations = try adminApi.organizations.all(with: token)
         let projects = try adminApi.projects.all(with: token)
-        let applications = try projects.flatMap { project in try applicationApi.get(for: project, with: token) }
-        let hosts = applications.flatMap { app in
+        let applications = try projects.flatMap { project in
+            try applicationApi.get(for: project, with: token)
+        }
+        let hosts: [Hosting] = applications.flatMap { app in
             try? applicationApi.hosting.get(for: app, with: token)
         }
+        let envs: [Environment] = applications.flatMap { app in
+            try? applicationApi.hosting.environments.all(for: app, with: token)
+            }
+            .flatMap { $0 }
 
         bar.finish()
 
@@ -290,6 +327,21 @@ public final class Dump: Command {
                     console.print(host.gitUrl)
                     console.info("          Id: ", newLine: false)
                     console.print(host.id.uuidString)
+
+                    let hostEnvs = host.environments(in: envs)
+                    hostEnvs.forEach { env in
+                        console.success("          Environment:")
+                        console.info("            Name: ", newLine: false)
+                        console.print(env.name)
+                        console.info("            Branch: ", newLine: false)
+                        console.print(env.branch)
+                        console.info("            Id: ", newLine: false)
+                        console.print(env.id.description)
+                        console.info("            Running: ", newLine: false)
+                        console.print(env.running.description)
+                        console.info("            Replicas: ", newLine: false)
+                        console.print(env.replicas.description)
+                    }
                 }
             }
         }
@@ -322,6 +374,12 @@ extension Application {
                 host.applicationId == self.id
             }
             .first
+    }
+}
+
+extension Hosting {
+    func environments(in envs: [Environment]) -> [Environment] {
+        return envs.filter { $0.hostingId == id }
     }
 }
 
@@ -396,6 +454,7 @@ public final class DeployCloud: Command {
             return repo
         }
 
+        print("Load repo directly")
         let org = try getOrganization(arguments, with: token)
         let proj = try getProject(arguments, in: org, with: token)
         let app = try getApp(arguments, in: proj, with: token)
@@ -859,13 +918,13 @@ public final class CloudInit: Command {
                     "Would you like me to add '\(remote)' to your list of remotes?"
                 )
                 if add {
-                    let existingNames = try gitInfo.remotes()
+                    let existingNames = try gitInfo.remoteNames()
                     if !existingNames.contains("origin") {
                         _ = try console.backgroundExecute(program: "git", arguments: ["remote", "add", "origin", remote])
                         console.info("Added 'origin', after commiting your changes,")
                         console.info("push to this remote before deploying.")
                     } else {
-                        let name = try console.ask("What would you like to name your remote?")
+                        let name = console.ask("What would you like to name your remote?")
                         _ = try console.backgroundExecute(program: "git", arguments: ["remote", "add", name, remote])
                         console.info("Added '\(name)', after commiting your changes,")
                         console.info("push to this remote before deploying.")
@@ -1145,26 +1204,26 @@ public final class CloudInit: Command {
 
         // Check if we can infer remote
         if let inferred = inferGitRemote(from: remotes) {
-            console.info("I found '\(inferred)',")
+            console.info("I found '\(inferred.name)', pointing to '\(inferred.url)';")
             if console.confirm("would you like to use this?") {
-                return inferred
+                return inferred.url
             }
         }
 
         // Didn't infer easy remote, check if user wants
         // to select from existing
-        if remotes.count > 1 {
+        if !remotes.isEmpty {
             console.info("I found the following remotes:")
             remotes.forEach { remote in
-                console.print("- \(remote)")
+                console.print("- \(remote.name)")
             }
             if console.confirm("Would you like to use one of these?") {
                 let chosen = try console.giveChoice(
                     title: "Ok, which one?",
                     in: remotes
-                ) { $0 }
-                guard let resolved = gitInfo.resolvedUrl(chosen) else {
-                    throw foundBadGitUrl(chosen)
+                ) { $0.name }
+                guard let resolved = gitInfo.resolvedUrl(chosen.url) else {
+                    throw foundBadGitUrl(chosen.url)
                 }
                 return resolved
             }
@@ -1188,10 +1247,11 @@ public final class CloudInit: Command {
         return "Unable to resolve \(chosen)."
     }
 
-    private func inferGitRemote(from remotes: [String]) -> String? {
+    private func inferGitRemote(from remotes: [(name: String, url: String)]) -> (name: String, url: String)? {
         guard remotes.count == 1 else { return nil }
         let remote = remotes[0]
-        return gitInfo.resolvedUrl(remote)
+        guard let resolved = gitInfo.resolvedUrl(remote.url) else { return nil }
+        return (remote.name, resolved)
     }
 }
 
@@ -1366,6 +1426,10 @@ public final class Signup: Command {
     public func run(arguments: [String]) throws {
         let email = console.ask("Email: ")
         let pass = console.ask("Password: ")
+        let confirmed = console.ask("Confirm Password: ")
+        guard pass == confirmed else {
+            throw "Password mismatch, please try again."
+        }
         let firstName = console.ask("First Name: ")
         let lastName = console.ask("Last Name: ")
         let organization = "My Cloud"
@@ -1501,7 +1565,6 @@ extension Token {
         var json = JSON([:])
         try json.set("access", access)
         try json.set("refresh", refresh)
-        try json.set("expiration", expiration.timeIntervalSince1970)
 
         let bytes = try json.serialize()
         try DataFile.save(bytes: bytes, to: tokenPath)
@@ -1512,8 +1575,7 @@ extension Token {
         let raw = try Node.loadContents(path: tokenPath)
         guard
             let access = raw["access"]?.string,
-            let refresh = raw["refresh"]?.string,
-            let timestamp = raw["expiration"]?.double
+            let refresh = raw["refresh"]?.string
             else {
                 console.info("No user currently logged in.")
                 console.warning("Use 'vapor cloud login' or")
@@ -1521,8 +1583,7 @@ extension Token {
                 throw "User not found."
             }
 
-        let expiration = Date(timeIntervalSince1970: timestamp)
-        let token = Token(access: access, refresh: refresh, expiration: expiration)
+        let token = Token(access: access, refresh: refresh)
         token.didUpdate = { t in
             do {
                 try t.saveGlobal()
