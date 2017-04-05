@@ -108,7 +108,7 @@ public final class Dump: Command {
             try applicationApi.get(for: project, with: token)
         }
         let hosts: [Hosting] = applications.flatMap { app in
-            try? applicationApi.hosting.get(for: app, with: token)
+            try? applicationApi.hosting.get(forRepo: app.repo, with: token)
         }
         let envs: [Environment] = applications.flatMap { app in
             try? applicationApi.hosting.environments.all(for: app, with: token)
@@ -206,244 +206,16 @@ extension Hosting {
     }
 }
 
-public final class DeployCloud: Command {
-    public let id = "deploy"
-
-    public let signature: [Argument] = []
-
-    public let help: [String] = [
-        "Deploy a project to Vapor Cloud"
-    ]
-
-    public let console: ConsoleProtocol
-
-    public init(console: ConsoleProtocol) {
-        self.console = console
+extension ConsoleProtocol {
+    public func warnGitClean() throws {
+        let gitInfo = GitInfo(self)
+        guard gitInfo.isGitProject() else { return }
+        if try gitInfo.statusIsClean() { return }
+        info("You have uncommitted changes!")
+        let goRogue = confirm("Are you sure you'd like to continue?", style: .warning)
+        guard goRogue else { throw "Commit and try again." }
+        print("Rogue mode enabled ...")
     }
-
-    public func run(arguments: [String]) throws {
-        // drop 'deploy' from argument list
-        let arguments = arguments.dropFirst().array
-        let token = try Token.global(with: console)
-
-
-        let repo = try getRepo(arguments, with: token)
-        let env = try getEnvironment(arguments, forRepo: repo, with: token)
-        console.print("Deploying Environment: ", newLine: false)
-        console.info("\(env.name)")
-        let replicas = getReplicas(arguments)
-
-        /// Deploy
-        let deployBar = console.loadingBar(title: "Deploying")
-        defer { deployBar.fail() }
-        deployBar.start()
-        let deploy = try applicationApi.deploy.push(
-            repo: repo,
-            envName: env.name,
-            replicas: replicas,
-            code: .incremental,
-            with: token
-        )
-        deployBar.finish()
-
-        /// No output for scale apis
-        if let _ = deploy.deployments.lazy.filter({ $0.type == .scale }).first {
-            let scaleBar = console.loadingBar(title: "Scaling", animated: false)
-            scaleBar.finish()
-        }
-
-        /// Build Logs
-        guard let code = deploy.deployments.lazy.filter({ $0.type == .code }).first else { return }
-        console.info("Connecting to build logs ...")
-        var logsBar: LoadingBar?
-        try Redis.subscribeDeployLog(id: code.id.uuidString) { update in
-            if update.type == .start {
-                logsBar = self.console.loadingBar(title: update.message)
-                logsBar?.start()
-            } else if update.success {
-                logsBar?.finish()
-            } else {
-                logsBar?.fail()
-            }
-
-        }
-
-        console.success("Successfully deployed.")
-    }
-
-    private func getRepo(_ arguments: [String], with token: Token) throws -> String {
-        if let repo = arguments.values.first ?? localConfig?["application.repo"]?.string {
-            return repo
-        }
-
-        print("Load repo directly")
-        let org = try getOrganization(arguments, with: token)
-        let proj = try getProject(arguments, in: org, with: token)
-        let app = try getApp(arguments, in: proj, with: token)
-        return app.repo
-    }
-
-    private func getOrganization(_ arguments: [String], with token: Token) throws -> Organization {
-        let organizationId = arguments.option("organizationId") ?? localConfig?["organization.id"]?.string
-        if let id = organizationId {
-            let bar = console.loadingBar(title: "Loading Organization")
-            defer { bar.fail() }
-            bar.start()
-            let org = try adminApi.organizations.get(id: id, with: token)
-            bar.finish()
-            console.info("Loaded \(org.name)")
-            return org
-        }
-
-        return try selectOrganization(
-            queryTitle: "Which Organization?",
-            using: console,
-            with: token
-        )
-    }
-
-    private func getProject(_ arguments: [String], in org: Organization, with token: Token) throws -> Project {
-        let projectId = arguments.option("projectId") ?? localConfig?["project.id"]?.string
-        if let id = projectId {
-            let bar = console.loadingBar(title: "Loading Project")
-            defer { bar.fail() }
-            bar.start()
-            let proj = try adminApi.projects.get(id: id, with: token)
-            bar.finish()
-            console.info("Loaded \(proj.name)")
-            return proj
-        }
-
-        return try selectProject(
-            in: org,
-            queryTitle: "Which Project?",
-            using: console,
-            with: token
-        )
-    }
-
-    private func getApp(_ arguments: [String], in proj: Project, with token: Token) throws -> Application {
-        let applicationId = arguments.option("applicationId") ?? localConfig?["application.id"]?.string
-        if let id = applicationId {
-            let bar = console.loadingBar(title: "Loading App")
-            defer { bar.fail() }
-            bar.start()
-            guard let app = try applicationApi.get(for: proj, with: token)
-                .lazy
-                .filter({ $0.id.uuidString == id })
-                .first else { throw "No application found w/ id: \(id). Try cloud setup again" }
-            bar.finish()
-            console.info("Loaded \(app.name)")
-            return app
-        }
-
-        return try selectApplication(
-            in: proj,
-            queryTitle: "Which Application?",
-            using: console,
-            with: token
-        )
-    }
-
-    private func getEnvironment(_ arguments: [String], forRepo repo: String, with token: Token) throws -> Environment {
-        if let env = arguments.option("env") {
-            let envBar = console.loadingBar(title: "Loading Environments")
-            defer { envBar.fail() }
-            envBar.start()
-            guard let loaded = try applicationApi
-                .environments
-                .all(forRepo: repo, with: token)
-                .lazy
-                .filter({ $0.name == env})
-                .first
-                else { throw "Environment '\(env)' not found" }
-            envBar.finish()
-            console.info("Loaded \(loaded.name)")
-            return loaded
-        }
-
-        return try selectEnvironment(
-            forRepo: repo,
-            queryTitle: "Which Environment?",
-            using: console,
-            with: token
-        )
-    }
-
-    private func getReplicas(_ arguments: [String]) -> Int? {
-        let existing = arguments.option("replicas")
-            ?? localConfig?["replicas"]?.string
-        guard let found = existing, let replicas = Int(found), replicas > 0 else { return nil }
-        return replicas
-    }
-}
-
-func selectOrganization(queryTitle: String, using console: ConsoleProtocol, with token: Token) throws -> Organization {
-    let orgsBar = console.loadingBar(title: "Loading Organizations")
-    defer { orgsBar.fail() }
-    orgsBar.start()
-    let organizations = try adminApi.organizations.all(with: token)
-    orgsBar.finish()
-
-    return try console.giveChoice(
-        title: queryTitle,
-        in: organizations
-    ) { org in "\(org.name)" }
-}
-
-func selectProject(in org: Organization, queryTitle: String, using console: ConsoleProtocol, with token: Token) throws -> Project {
-    let projBar = console.loadingBar(title: "Loading Projects")
-    defer { projBar.fail() }
-    projBar.start()
-    let projects = try adminApi.projects.all(with: token).filter { project in
-        project.organizationId == org.id
-    }
-    projBar.finish()
-
-    return try console.giveChoice(
-        title: queryTitle,
-        in: projects
-    ) { proj in return "\(proj.name) - \(proj.id)" }
-}
-
-func selectApplication(
-    in proj: Project,
-    queryTitle: String,
-    using console: ConsoleProtocol,
-    with token: Token) throws -> Application {
-    let appsBar = console.loadingBar(title: "Loading Applications")
-    defer { appsBar.fail() }
-    appsBar.start()
-    let apps = try applicationApi.get(for: proj, with: token)
-    appsBar.finish()
-
-    return try console.giveChoice(
-        title: queryTitle,
-        in: apps
-    ) { app in return "\(app.name) - \(app.repo) - \(app.id)" }
-}
-
-func selectEnvironment(
-    forRepo repo: String,
-    queryTitle: String,
-    using console: ConsoleProtocol,
-    with token: Token) throws-> Environment {
-    let envBar = console.loadingBar(title: "Loading Environments")
-    defer { envBar.fail() }
-    envBar.start()
-    let envs = try applicationApi.hosting.environments.all(forRepo: repo, with: token)
-    envBar.finish()
-
-    guard !envs.isEmpty else {
-        throw "No environments setup, make sure to create an environment for repo \(repo)"
-    }
-
-    if envs.count == 1 { return envs[0] }
-
-    return try console.giveChoice(
-        title: "Which Environment?",
-        in: envs
-    ) { env in return "\(env.name)" }
 }
 
 public final class Create: Command {
@@ -1100,6 +872,7 @@ let localConfigBytes = (try? DataFile.load(path: localConfigPath)) ?? []
 var localConfig: JSON? {
     get {
         do {
+            guard localConfigExists else { return nil }
             let bytes = try DataFile.load(path: localConfigPath)
             return try JSON(bytes: bytes)
         } catch {

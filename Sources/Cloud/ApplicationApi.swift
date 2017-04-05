@@ -61,6 +61,20 @@ extension ApplicationApi {
         return try Application(node: response.json)
     }
 
+    // TODO: Fill in with endpoint
+//    public func get(forRepo repo: String, with token: Token) throws -> Application? {
+//        let projects = try adminApi.projects.all(with: token)
+//        return try projects.lazy
+//            .flatMap { proj in
+//                let apps = try applicationApi.get(for: proj, with: token)
+//                return apps
+//                    .lazy
+//                    .filter { app in app.repo == repo }
+//                    .first
+//            }
+//            .first
+//    }
+
     public func get(for project: Project, with token: Token) throws -> [Application] {
         let endpoint = ApplicationApi.applicationsEndpoint + "?projectId=\(project.id.uuidString)"
         let request = try Request(method: .get, uri: endpoint)
@@ -126,8 +140,8 @@ extension ApplicationApi {
             return try Hosting(node: response.json)
         }
         
-        public func get(for application: Application, with token: Token) throws -> Hosting {
-            let endpoint = applicationsEndpoint.finished(with: "/") + application.repo + "/hosting"
+        public func get(forRepo repo: String, with token: Token) throws -> Hosting {
+            let endpoint = applicationsEndpoint.finished(with: "/") + repo + "/hosting"
             let request = try Request(method: .get, uri: endpoint)
             request.access = token
 
@@ -303,6 +317,8 @@ public struct Deployment: NodeInitializable {
 }
 
 public enum BuildType: String {
+    static let all: [BuildType] = [.clean, .incremental, .update]
+    
     case clean, incremental, update
 }
 
@@ -315,6 +331,7 @@ extension ApplicationApi {
         public func push(
             repo: String,
             envName: String,
+            gitBranch: String?,
             replicas: Int?,
             code: BuildType,
             with token: Token
@@ -330,6 +347,9 @@ extension ApplicationApi {
             try json.set("code", code.rawValue)
             if let replicas = replicas {
                 try json.set("replicas", replicas)
+            }
+            if let branch = gitBranch {
+                try json.set("gitBranch", branch)
             }
             request.json = json
 

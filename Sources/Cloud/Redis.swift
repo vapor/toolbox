@@ -45,7 +45,7 @@ public final class Redis {
                         .flatMap { try? JSON(bytes: $0) }
                     let update = try Update(node: json)
                     try updater(update)
-                    guard update.isLast else { return }
+                    guard update.isLast || !update.success else { return }
                     portal.close(with: true)
                 } catch {
                     portal.close(with: error)

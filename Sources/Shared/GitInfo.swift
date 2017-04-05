@@ -2,6 +2,12 @@ import Console
 import Foundation
 import URI
 
+extension Array {
+    func suffix(while pass: (Element) -> Bool) -> ArraySlice<Element> {
+        return reversed().prefix(while: pass)
+    }
+}
+
 public final class GitInfo {
     public let console: ConsoleProtocol
 
@@ -32,6 +38,41 @@ public final class GitInfo {
         return status.isEmpty
     }
 
+    public func localBranches() throws -> [String] {
+        try assertGitRepo()
+
+        return try console.git(["branch"])
+            .components(separatedBy: "\n")
+            .map { branch in
+                let trim = branch.trim()
+                guard trim.hasPrefix("* ") else { return trim }
+                // drop '* '
+                return trim.bytes.dropFirst(2).makeString()
+            }
+            .filter { !$0.isEmpty }
+    }
+
+    public func remoteBranches(for remote: String) throws -> [String] {
+        let prefix = remote + "/"
+        let prefixLength = prefix.makeBytes().count
+        return try console.git(["branch", "-r"])
+            .components(separatedBy: "\n")
+            .map { $0.trim() }
+            .filter { $0.hasPrefix(prefix) && !$0.contains("->") }
+            .map { $0.makeBytes().dropFirst(prefixLength).makeString() }
+    }
+
+    public func remote(forUrl expect: String) throws -> String? {
+        guard let expect = resolvedUrl(expect) else { return nil }
+        return try remotes()
+            .lazy
+            .filter { _, url in
+                guard let resolved = self.resolvedUrl(url) else { return false }
+                return resolved == expect
+            }
+            .first?
+            .name
+    }
     /// This means, as compared to 'base', 'compare' is
     /// 'x' commits ahead, and 'x' commits behind
     ///
@@ -44,10 +85,32 @@ public final class GitInfo {
         // returns
         // 1     7
         // where compare is 1 commit behind, and 7 commits ahead
-        let result = try console.git(["rev-list", "--left-right", "--count", "\(base)...\(compare)"])
-        let split = result.components(separatedBy: " ").map { $0.trim() } .flatMap { Int($0) }
-        guard split.count == 2 else { throw GeneralError("Unable to get branch position") }
-        return (split[0], split[1])
+        let args = ["rev-list", "--left-right", "--count", "\(base)...\(compare)"]
+        let result = try console.git(args).trim().makeBytes()
+        let behind = result.prefix(while: { $0.isDigit })
+        let ahead = result.suffix(while: { $0.isDigit })
+
+        guard let b = Int(behind.makeString()), let a = Int(ahead.makeString()) else {
+            throw GeneralError("Unable to get branch position")
+        }
+
+        return (b, a)
+//        let values = result.trim()
+//        print("Got branch result: \(result)")
+//        let comps = result.components(separatedBy: " ")
+//        print("Coms: \(comps)")
+//        let trimmed = comps.map { $0.trim() }
+//        print("Trim: \(trimmed)")
+//        print("Ints: \(trimmed.flatMap { Int($0) })")
+//        // everything here needs to be here
+//        let split = result
+//            .trim()
+//            .components(separatedBy: "\t")
+//            .map { $0.trim() }
+//            .flatMap { Int($0) }
+//        print("Got branch comps: \(split)")
+//        guard split.count == 2 else { throw GeneralError("Unable to get branch position") }
+//        return (split[0], split[1])
     }
 
     public func upstreamBranch() throws -> String {

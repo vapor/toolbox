@@ -78,7 +78,8 @@ public final class List: Command {
         }
 
         apps.forEach { app in
-            console.info("- \(app.name)", newLine: !showIds)
+            console.info("- \(app.name)", newLine: false)
+            console.print(" (\(app.repo).vapor.cloud)", newLine: !showIds)
             if showIds {
                 console.print(": \(app.id)")
             }

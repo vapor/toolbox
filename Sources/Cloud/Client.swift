@@ -25,7 +25,6 @@ public final class CloudClient<Wrapped: ClientProtocol>: ClientProtocol {
 
     public func respond(to request: Request) throws -> Response {
         let response = try wrapped.respond(to: request)
-        try assertValid(request, response)
         let processed = try handle(request, response)
         try errorPass(request: request, response: processed)
         return processed
@@ -49,10 +48,12 @@ public final class CloudClient<Wrapped: ClientProtocol>: ClientProtocol {
         request.access = token
 
         // Attempted refresh, trying again
-        return try wrapped.respond(to: request)
+        let response = try wrapped.respond(to: request)
+        try assertRefreshPass(request, response)
+        return response
     }
 
-    private func assertValid(_ request: Request, _ response: Response) throws {
+    private func assertRefreshPass(_ request: Request, _ response: Response) throws {
         // If we are getting Auth forbiddens on refresh request,
         // user is required to login again
         if request.isRefreshRequest && response.requiresRefresh {

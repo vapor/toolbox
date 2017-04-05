@@ -110,7 +110,7 @@ extension Request {
         set {
             headers["Authorization"] = "Bearer \(newValue.refresh)"
             storage[tokenStorageKey] = newValue
-            storage[refreshStorageKey] = false
+            storage[refreshStorageKey] = true
         }
     }
 

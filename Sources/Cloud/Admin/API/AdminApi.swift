@@ -6,6 +6,13 @@ public let adminApi = AdminApi()
 public var client = CloudClient<EngineClient>.self
 
 import Transport
+extension FoundationClient: ClientProtocol {
+    public convenience init(hostname: String, port: Port, _ securityLayer: SecurityLayer) throws {
+        // TODO: Forcing https a tm
+        self.init(scheme: "https", hostname: hostname, port: port)
+    }
+}
+import Transport
 import TLS
 import Sockets
 
