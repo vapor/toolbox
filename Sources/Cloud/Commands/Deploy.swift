@@ -23,7 +23,7 @@ public final class DeployCloud: Command {
         let arguments = arguments.dropFirst().array
         let token = try Token.global(with: console)
 
-        let repo = try getRepo(arguments, with: token)
+        let repo = try getRepo(arguments, console: console, with: token)
 
         let env = try selectEnvironment(
             args: arguments,
@@ -119,40 +119,6 @@ public final class DeployCloud: Command {
         )
     }
 
-    private func getRepo(_ arguments: [String], with token: Token) throws -> String {
-        let localConfig = try LocalConfig.load()
-        if let repo = arguments.option("repo") ?? localConfig["app.repo"]?.string {
-            return repo
-        }
-
-        if gitInfo.isGitProject() {
-            let apps = try gitInfo
-                .remotes()
-                .flatMap { remote -> [Application] in
-                    guard let resolved = gitInfo.resolvedUrl(remote.url) else { return [] }
-                    guard let apps = try? applicationApi.get(forGit: resolved, with: token) else { return [] }
-                    return apps
-                }
-
-            if apps.count == 1 {
-                let found = apps[0]
-                console.info("I found, '\(found.name)'.")
-                console.info("https://\(found.repo).vapor.cloud")
-                let useThis = console.confirm("Would you like to use this app?")
-                if useThis { return found.repo }
-            } else {
-                console.info("I found too many apps, that match remotes in this repo,")
-                console.info("yell at Logan to ask me to use one of these.")
-                console.info("Instead, I'm going to ask a bunch of questions.")
-            }
-        }
-
-        let org = try getOrganization(arguments, with: token)
-        let proj = try getProject(arguments, in: org, with: token)
-        let app = try getApp(arguments, in: proj, with: token)
-        return app.repo
-    }
-
     private func inferRepo(with token: Token) -> String? {
         guard gitInfo.isGitProject() else { return nil }
         do {
@@ -173,68 +139,6 @@ public final class DeployCloud: Command {
                 return nil
             }
         } catch { return nil }
-    }
-
-    private func getOrganization(_ arguments: [String], with token: Token) throws -> Organization {
-        let organizationId = arguments.option("org") ?? localConfig?["organization.id"]?.string
-        if let id = organizationId {
-            let bar = console.loadingBar(title: "Loading Organization")
-            defer { bar.fail() }
-            bar.start()
-            let org = try adminApi.organizations.get(id: id, with: token)
-            bar.finish()
-            console.info("Loaded \(org.name)")
-            return org
-        }
-
-        return try selectOrganization(
-            queryTitle: "Which Organization?",
-            using: console,
-            with: token
-        )
-    }
-
-    private func getProject(_ arguments: [String], in org: Organization, with token: Token) throws -> Project {
-        let projectId = arguments.option("proj") ?? localConfig?["project.id"]?.string
-        if let id = projectId {
-            let bar = console.loadingBar(title: "Loading Project")
-            defer { bar.fail() }
-            bar.start()
-            let proj = try adminApi.projects.get(id: id, with: token)
-            bar.finish()
-            console.info("Loaded \(proj.name)")
-            return proj
-        }
-
-        return try selectProject(
-            in: org,
-            queryTitle: "Which Project?",
-            using: console,
-            with: token
-        )
-    }
-
-    private func getApp(_ arguments: [String], in proj: Project, with token: Token) throws -> Application {
-        let applicationId = arguments.option("app") ?? localConfig?["application.id"]?.string
-        if let id = applicationId {
-            let bar = console.loadingBar(title: "Loading App")
-            defer { bar.fail() }
-            bar.start()
-            guard let app = try applicationApi.get(for: proj, with: token)
-                .lazy
-                .filter({ $0.id.uuidString == id })
-                .first else { throw "No application found w/ id: \(id). Try cloud setup again" }
-            bar.finish()
-            console.info("Loaded \(app.name)")
-            return app
-        }
-
-        return try selectApplication(
-            in: proj,
-            queryTitle: "Which Application?",
-            using: console,
-            with: token
-        )
     }
 
     private func getHosting(forRepo repo: String, with token: Token) throws -> Hosting {
@@ -317,6 +221,104 @@ public final class DeployCloud: Command {
         guard goRogue else { throw "Push git changes to remote and start again." }
         console.success("Entering override codes ...")
     }
+}
+
+
+func getOrganization(_ arguments: [String], console: ConsoleProtocol, with token: Token) throws -> Organization {
+    let organizationId = arguments.option("org") ?? localConfig?["organization.id"]?.string
+    if let id = organizationId {
+        let bar = console.loadingBar(title: "Loading Organization")
+        defer { bar.fail() }
+        bar.start()
+        let org = try adminApi.organizations.get(id: id, with: token)
+        bar.finish()
+        console.info("Loaded \(org.name)")
+        return org
+    }
+
+    return try selectOrganization(
+        queryTitle: "Which Organization?",
+        using: console,
+        with: token
+    )
+}
+
+func getProject(_ arguments: [String], console: ConsoleProtocol, in org: Organization, with token: Token) throws -> Project {
+    let projectId = arguments.option("proj") ?? localConfig?["project.id"]?.string
+    if let id = projectId {
+        let bar = console.loadingBar(title: "Loading Project")
+        defer { bar.fail() }
+        bar.start()
+        let proj = try adminApi.projects.get(id: id, with: token)
+        bar.finish()
+        console.info("Loaded \(proj.name)")
+        return proj
+    }
+
+    return try selectProject(
+        in: org,
+        queryTitle: "Which Project?",
+        using: console,
+        with: token
+    )
+}
+
+func getApp(_ arguments: [String], console: ConsoleProtocol, in proj: Project, with token: Token) throws -> Application {
+    let applicationId = arguments.option("app") ?? localConfig?["application.id"]?.string
+    if let id = applicationId {
+        let bar = console.loadingBar(title: "Loading App")
+        defer { bar.fail() }
+        bar.start()
+        guard let app = try applicationApi.get(for: proj, with: token)
+            .lazy
+            .filter({ $0.id.uuidString == id })
+            .first else { throw "No application found w/ id: \(id). Try cloud setup again" }
+        bar.finish()
+        console.info("Loaded \(app.name)")
+        return app
+    }
+
+    return try selectApplication(
+        in: proj,
+        queryTitle: "Which Application?",
+        using: console,
+        with: token
+    )
+}
+
+func getRepo(_ arguments: [String], console: ConsoleProtocol, with token: Token) throws -> String {
+    let gitInfo = GitInfo(console)
+    let localConfig = try LocalConfig.load()
+    if let repo = arguments.option("repo") ?? localConfig["app.repo"]?.string {
+        return repo
+    }
+
+    if gitInfo.isGitProject() {
+        let apps = try gitInfo
+            .remotes()
+            .flatMap { remote -> [Application] in
+                guard let resolved = gitInfo.resolvedUrl(remote.url) else { return [] }
+                guard let apps = try? applicationApi.get(forGit: resolved, with: token) else { return [] }
+                return apps
+        }
+
+        if apps.count == 1 {
+            let found = apps[0]
+            console.info("I found, '\(found.name)'.")
+            console.info("https://\(found.repo).vapor.cloud")
+            let useThis = console.confirm("Would you like to use this app?")
+            if useThis { return found.repo }
+        } else {
+            console.info("I found too many apps, that match remotes in this repo,")
+            console.info("yell at Logan to ask me to use one of these.")
+            console.info("Instead, I'm going to ask a bunch of questions.")
+        }
+    }
+
+    let org = try getOrganization(arguments, console: console, with: token)
+    let proj = try getProject(arguments, console: console, in: org, with: token)
+    let app = try getApp(arguments, console: console, in: proj, with: token)
+    return app.repo
 }
 
 func selectOrganization(queryTitle: String, using console: ConsoleProtocol, with token: Token) throws -> Organization {
