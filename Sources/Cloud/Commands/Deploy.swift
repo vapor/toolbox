@@ -204,7 +204,7 @@ public final class DeployCloud: Command {
 
         if ahead > 0 {
             if behind == 0 {
-                console.print("'\(local) is ", newLine: false)
+                console.print("\(local) is ", newLine: false)
             }
             console.success("\(ahead) ", newLine: false)
             console.print("commits ahead.")
