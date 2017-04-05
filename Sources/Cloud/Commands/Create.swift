@@ -140,6 +140,13 @@ public final class Create: Command {
                 with: token
             )
         }
+
+        console.info("Your application is now ready.")
+        let deployNow = console.confirm("Would you like to deploy \(new.name) now?")
+        guard deployNow else { return }
+        let deploy = DeployCloud(console: console)
+        let args = ["deploy", "--repo=\(new.repo)"]
+        try deploy.run(arguments: args)
     }
 
     private func getProject(with token: Token, args: [String]) throws -> Project {

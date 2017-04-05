@@ -316,7 +316,7 @@ public struct Deployment: NodeInitializable {
 }
 
 public enum BuildType: String {
-    static let all: [BuildType] = [.clean, .incremental, .update]
+    static let all: [BuildType] = [.incremental, .update, .clean]
     
     case clean, incremental, update
 }
