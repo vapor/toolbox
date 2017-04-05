@@ -41,7 +41,6 @@ public final class DeployCloud: Command {
 
         if gitInfo.isGitProject(), let matchingRemote = try gitInfo.remote(forUrl: hosting.gitUrl) {
             // verify there's not uncommitted changes
-            print("verifying")
             try verify(deployBranch: branch, remote: matchingRemote)
         }
 
@@ -189,7 +188,6 @@ public final class DeployCloud: Command {
         let remote = remote + "/" + deployBranch
 
         let (behind, ahead) = try gitInfo.branchPosition(base: remote, compare: local)
-        print("Got ahead behind: \(ahead):\(behind)")
         if behind == 0 && ahead == 0 { return }
 
         console.print()
