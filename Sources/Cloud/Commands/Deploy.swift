@@ -131,7 +131,7 @@ public final class DeployCloud: Command {
                     guard let resolved = gitInfo.resolvedUrl(remote.url) else { return [] }
                     guard let apps = try? applicationApi.get(forGit: resolved, with: token) else { return [] }
                     return apps
-            }
+                }
 
             if apps.count == 1 {
                 let found = apps[0]
@@ -194,7 +194,7 @@ public final class DeployCloud: Command {
     }
 
     private func getProject(_ arguments: [String], in org: Organization, with token: Token) throws -> Project {
-        let projectId = arguments.option("projectId") ?? localConfig?["project.id"]?.string
+        let projectId = arguments.option("proj") ?? localConfig?["project.id"]?.string
         if let id = projectId {
             let bar = console.loadingBar(title: "Loading Project")
             defer { bar.fail() }
@@ -214,7 +214,7 @@ public final class DeployCloud: Command {
     }
 
     private func getApp(_ arguments: [String], in proj: Project, with token: Token) throws -> Application {
-        let applicationId = arguments.option("applicationId") ?? localConfig?["application.id"]?.string
+        let applicationId = arguments.option("app") ?? localConfig?["application.id"]?.string
         if let id = applicationId {
             let bar = console.loadingBar(title: "Loading App")
             defer { bar.fail() }
@@ -236,16 +236,6 @@ public final class DeployCloud: Command {
         )
     }
 
-    private func getEnvironment(_ arguments: [String], forRepo repo: String, with token: Token) throws -> Environment {
-        return try selectEnvironment(
-            args: arguments,
-            forRepo: repo,
-            queryTitle: "Which Environment?",
-            using: console,
-            with: token
-        )
-    }
-
     private func getHosting(forRepo repo: String, with token: Token) throws -> Hosting {
         return try applicationApi.hosting.get(forRepo: repo, with: token)
     }
@@ -260,11 +250,15 @@ public final class DeployCloud: Command {
     private func getBranch(_ arguments: [String], gitUrl: String, env: Environment) throws -> String {
         if let branch = arguments.option("branch") { return branch }
 
-        var useDefault = arguments.flag("useDefaultBranch")
-        if !useDefault {
+        var useDefault = arguments.option("useDefaultBranch")?.bool
+            ?? localConfig?["useDefaultBranch"]?.bool
+
+        if useDefault == nil {
             useDefault = console.confirm("Use default branch, '\(env.branch)'?")
         }
-        guard !useDefault else { return env.branch }
+
+        let use = useDefault ?? false
+        guard !use else { return env.branch }
 
         if let remote = try gitInfo.remote(forUrl: gitUrl) {
             let foundBranches = try gitInfo.remoteBranches(for: remote)
