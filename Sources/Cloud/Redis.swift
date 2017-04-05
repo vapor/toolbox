@@ -2,6 +2,7 @@ import Redis
 import Node
 import JSON
 import Core
+import Foundation
 
 public enum UpdateType: String, NodeInitializable {
     case start, stop
@@ -52,5 +53,54 @@ public final class Redis {
                 }
             }
         }
+    }
+
+    static func tailLogs(repo: String, envName: String, since: String, with token: Token) throws {
+        let client = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+
+        // the channel we want logs posted to
+        let listenChannel = UUID().uuidString
+        // the replica to listen to
+        let replicaController = "\(repo)-\(envName)"
+
+        var message = JSON([:])
+        // app request
+        try message.set("channel", listenChannel)
+        try message.set("rc", replicaController)
+        /*
+         `5s` = 5 seconds
+         `5m` = 5 minutes
+         `5h` = 5 hours
+         */
+        try message.set("since", since)
+        try message.set("token", token.rePack())
+
+        var start = message
+        try start.set("status", "start")
+
+        var exit = message
+        try exit.set("status", "exit")
+
+        // replica controller to tail
+        try client.publish(channel: "requestLog", message)
+
+        try client.subscribe(channel: listenChannel, { (data) in
+            guard let log = data?
+                .array?
+                .flatMap({ $0?.bytes })
+                .last?
+                .makeString()
+                else { return }
+            print(log)
+        })
+    }
+}
+
+extension Token {
+    func rePack() throws -> String {
+        var json = JSON([:])
+        try json.set("access", access)
+        try json.set("refresh", refresh)
+        return try json.makeBytes().makeString()
     }
 }

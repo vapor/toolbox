@@ -13,6 +13,8 @@ public func group(_ console: ConsoleProtocol) -> Group {
             // Debug
             TokenLog(console: console),
             Dump(console: console),
+            // App Debugging
+            CloudLogs(console: console),
             // Info
             List(console: console),
             // Deploy
