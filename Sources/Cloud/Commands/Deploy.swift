@@ -135,7 +135,7 @@ public final class DeployCloud: Command {
 
             if apps.count == 1 {
                 let found = apps[0]
-                console.info("I found, '\(found.name)',")
+                console.info("I found, '\(found.name)'.")
                 console.info("https://\(found.repo).vapor.cloud")
                 let useThis = console.confirm("Would you like to use this app?")
                 if useThis { return found.repo }
@@ -175,7 +175,7 @@ public final class DeployCloud: Command {
     }
 
     private func getOrganization(_ arguments: [String], with token: Token) throws -> Organization {
-        let organizationId = arguments.option("organizationId") ?? localConfig?["organization.id"]?.string
+        let organizationId = arguments.option("org") ?? localConfig?["organization.id"]?.string
         if let id = organizationId {
             let bar = console.loadingBar(title: "Loading Organization")
             defer { bar.fail() }

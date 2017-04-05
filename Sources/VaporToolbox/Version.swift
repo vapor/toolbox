@@ -22,7 +22,7 @@ public final class Version: Command {
         console.success("\(version)")
 
         guard projectInfo.isSwiftProject() else { return }
-        guard try projectInfo.isVaporProject() else {
+        guard projectInfo.isVaporProject() else {
             console.warning("No Vapor dependency detected, unable to log Framework Version")
             return
         }

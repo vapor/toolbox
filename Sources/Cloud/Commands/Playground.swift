@@ -697,7 +697,7 @@ public final class CloudInit: Command {
 
         let scale = console.loadingBar(title: "Scaling")
         try scale.perform {
-            _ = try applicationApi.environments.setReplicas(count: 1, forRepo: repo, env: env, with: token)
+            _ = try applicationApi.hosting.environments.setReplicas(count: 1, forRepo: repo, env: env, with: token)
         }
 
         return new

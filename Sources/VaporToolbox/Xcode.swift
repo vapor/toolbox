@@ -47,7 +47,7 @@ public final class Xcode: Command {
 
     private func logExecutableInfo() throws {
         // If it's not a Vapor project, don't log warnings
-        guard try projectInfo.isVaporProject() else { return }
+        guard projectInfo.isVaporProject() else { return }
 
         let executables = try projectInfo.availableExecutables()
         if executables.isEmpty {
