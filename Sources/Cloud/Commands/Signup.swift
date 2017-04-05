@@ -30,7 +30,7 @@ public final class Signup: Command {
         let lastName = console.ask("Last Name: ")
 
         let defaultOrg = "\(firstName)'s Cloud"
-        var organization = console.ask("Organization? (enter to use '\(defaultOrg)')")
+        var organization = console.ask("Organization? (enter to use '\(defaultOrg)')").trim()
         if organization.isEmpty {
             organization = defaultOrg
         }
