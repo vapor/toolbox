@@ -17,10 +17,12 @@ public func group(_ console: ConsoleProtocol) -> Group {
             List(console: console),
             // Deploy
             DeployCloud(console: console),
+            // Create
             Create(console: console),
-            Add(console: console),
-            CloudSetup(console: console),
-            CloudInit(console: console)
+            // Temporarily disabling not ready commands
+            // Add(console: console),
+            // CloudSetup(console: console),
+            // CloudInit(console: console)
         ],
         help: [
             "Commands for interacting with Vapor Cloud."
