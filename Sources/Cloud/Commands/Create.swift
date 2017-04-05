@@ -116,6 +116,9 @@ public final class Create: Command {
             try applicationApi.create(for: proj, repo: repo, name: name, with: token)
         }
 
+        //print("If user exits after creating, before setting up hosting, needs a way to add hosting/env later")
+        //print("ideally, detect no hosting, and create automatically")
+
         _ = try setupHosting(for: new, with: token, args: args)
 
         let environment = console.loadingBar(title: "Creating Production Environment")

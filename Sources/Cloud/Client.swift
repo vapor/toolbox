@@ -64,8 +64,8 @@ public final class CloudClient<Wrapped: ClientProtocol>: ClientProtocol {
     private func errorPass(request: Request, response: Response) throws {
         if response.status.statusCode == 502 { throw CloudClientError.badGateway(response, for: request) }
         guard let json = response.json else { return }
-        guard let _ = json["error"] else { return }
-        throw CloudClientError.badResponse(response, for: request)
+        guard let _ = json["error"], let reason = json["reason"]?.string else { return }
+        throw reason
     }
 
 }
