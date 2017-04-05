@@ -61,7 +61,6 @@ extension ApplicationApi {
         return try Application(node: response.json)
     }
 
-    // TODO: Fill in with endpoint
 //    public func get(forRepo repo: String, with token: Token) throws -> Application? {
 //        let projects = try adminApi.projects.all(with: token)
 //        return try projects.lazy
@@ -197,12 +196,12 @@ extension ApplicationApi {
 
     public final class EnvironmentsApi {
         public func create(
-            for application: Application,
+            forRepo repo: String,
             name: String,
             branch: String,
             with token: Token
         ) throws -> Environment {
-            let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/") + application.repo + "/hosting/environments"
+            let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/") + repo + "/hosting/environments"
             let request = try Request(method: .post, uri: endpoint)
             request.access = token
 

@@ -224,7 +224,7 @@ public final class Create: Command {
     public let signature: [Argument] = []
 
     public let help: [String] = [
-        "Refreshes vapor token, only while testing, will automate soon."
+        "Used for creating new things"
     ]
 
     public let console: ConsoleProtocol
@@ -234,6 +234,8 @@ public final class Create: Command {
     }
 
     public func run(arguments: [String]) throws {
+        // drop 'create'
+        let arguments = arguments.dropFirst().array
         let token = try Token.global(with: console)
 
         let creatables = [
@@ -241,145 +243,227 @@ public final class Create: Command {
             (name: "Project", handler: createProject),
             (name: "Application", handler: createApplication),
             (name: "Environment", handler: createEnvironment),
-            ]
+        ]
 
-        let choice = try console.giveChoice(
-            title: "What would you like to create?",
-            in: creatables
-        ) { return $0.0 }
+        let preLoaded = creatables.lazy
+            .filter { id, function in
+                for argument in arguments where id.lowercased().hasPrefix(argument) {
+                    return true
+                }
+                return false
+            }
+            .first
 
-        try choice.handler(token)
+        if let pre = preLoaded {
+            try pre.handler(token, arguments)
+        } else {
+            let choice = try console.giveChoice(
+                title: "What would you like to create?",
+                in: creatables
+            ) { return $0.0 }
+
+            try choice.handler(token, arguments)
+        }
     }
 
-    private func createOrganization(with token: Token) throws {
-        let name = console.ask("What would you like to name your new Organization?")
+    private func createOrganization(with token: Token, args: [String]) throws {
+        let name: String
+        if let n = args.option("name") {
+            name = n
+        } else {
+            name = console.ask("What would you like to name your new Organization?")
+        }
+
         let creating = console.loadingBar(title: "Creating \(name)")
-        defer { creating.fail() }
-        creating.start()
-        let new = try adminApi.organizations.create(name: name, with: token)
-        creating.finish()
-        console.info("\(new.name) - \(new.id)")
+        let new = try creating.perform {
+            try adminApi.organizations.create(name: name, with: token)
+        }
+
+        console.info("Created: ", newLine: false)
+        console.print(new.name)
+        console.info("Id: ", newLine: false)
+        console.print(new.id.uuidString)
     }
 
-    private func createProject(with token: Token) throws {
-        let org = try selectOrganization(
-            queryTitle: "Which organization would you like to create a Project for?",
-            using: console,
-            with: token
-        )
+    private func createProject(with token: Token, args: [String]) throws {
+        let org: Organization
+        if let orgId = args.option("org") {
+            org = try adminApi.organizations.get(id: orgId, with: token)
+        } else {
+            org = try selectOrganization(
+                queryTitle: "Which organization would you like to create a Project for?",
+                using: console,
+                with: token
+            )
+        }
 
-        let name = console.ask("What would you like to name your new Project?")
+        let name: String
+        if let n = args.option("name") {
+            name = n
+        } else {
+            name = console.ask("What would you like to name your new Project?")
+        }
+
         let creating = console.loadingBar(title: "Creating \(name)")
-        defer { creating.fail() }
-        creating.start()
-        _ = try adminApi.projects.create(name: name, color: nil, in: org, with: token)
-        creating.finish()
+        try creating.perform {
+            _ = try adminApi.projects.create(name: name, color: nil, in: org, with: token)
+        }
     }
 
-    private func createApplication(with token: Token) throws {
-        let org = try selectOrganization(
-            queryTitle: "Which Organization would you like to create an Application for?",
-            using: console,
-            with: token
-        )
+    private func createApplication(with token: Token, args: [String]) throws {
+        let proj = try getProject(with: token, args: args)
 
-        let proj = try selectProject(
-            in: org,
-            queryTitle: "Which Project would you like to create an Application for?",
-            using: console,
-            with: token
-        )
+        let name: String
+        if let n = args.option("name") {
+            name = n
+        } else {
+            console.info("What would you like to name your new Application?")
+            name = console.ask("(A human readable name)")
+        }
 
-        console.info("What would you like to name your new Application?")
-        let name = console.ask("(A human readable name)")
-
-        console.info("How would you like to identify your new Application?")
-        console.info("This needs to be unique, if it doesn't work, it may already be taken.")
-        let repo = console.ask("(your-answer.vapor.cloud)")
+        let repo: String
+        if let r = args.option("repo") {
+            repo = r
+        } else {
+            console.info("How would you like to identify your new Application?")
+            console.info("This needs to be unique, if it doesn't work, it may already be taken.")
+            repo = console.ask("(your-answer.vapor.cloud)")
+        }
 
         let creating = console.loadingBar(title: "Creating \(name)")
-        defer { creating.fail() }
-        creating.start()
-        let new = try applicationApi.create(for: proj, repo: repo, name: name, with: token)
-        creating.finish()
+        let new = try creating.perform {
+            try applicationApi.create(for: proj, repo: repo, name: name, with: token)
+        }
 
-        _ = try setupHosting(for: new, with: token)
+        _ = try setupHosting(for: new, with: token, args: args)
 
         let environment = console.loadingBar(title: "Creating Production Environment")
-        defer { environment.fail() }
-        environment.start()
-        let env = try applicationApi.hosting.environments.create(for: new, name: "production", branch: "master", with: token)
-        environment.finish()
+        let env = try environment.perform {
+             try applicationApi.hosting.environments.create(
+                forRepo: new.repo,
+                name: "production",
+                branch: "master",
+                with: token
+            )
+        }
 
         let scale = console.loadingBar(title: "Scaling")
-        defer { scale.fail() }
-        scale.start()
-        _ = try applicationApi.hosting.environments.setReplicas(count: 1, forRepo: repo, env: env, with: token)
-        scale.finish()
+        try scale.perform {
+            _ = try applicationApi.hosting.environments.setReplicas(
+                count: 1,
+                forRepo: repo,
+                env: env,
+                with: token
+            )
+        }
     }
 
-    private func setupHosting(for app: Application, with token: Token) throws -> Hosting {
-        var remote = ""
-        do {
-            // TODO: Validate SSH Url
-            remote = try console.backgroundExecute(
-                program: "git",
-                arguments: ["remote", "get-url", "origin"]
-                ).trim()
-        } catch {}
-
-        var useRemote = false
-        if !remote.isEmpty {
-            console.info("We found '\(remote)'")
-            useRemote = console.confirm("Would you like to deploy from this remote?")
+    private func getProject(with token: Token, args: [String]) throws -> Project {
+        if let projId = args.option("proj") {
+            return try adminApi.projects.get(id: projId, with: token)
         }
-        if !useRemote {
-            console.info("What 'git' url should we apply to this hosting?")
-            remote = console.ask("We require ssh url format currently, ie: git@github.com:vapor/vapor.git")
+
+        let org: Organization
+        if let orgId = args.option("org") {
+            org = try adminApi.organizations.get(id: orgId, with: token)
+        } else {
+            org = try selectOrganization(
+                queryTitle: "Which organization would you like to use?",
+                using: console,
+                with: token
+            )
+        }
+
+        return try selectProject(
+            in: org,
+            queryTitle: "Which Project would you like to use?",
+            using: console,
+            with: token
+        )
+    }
+
+    private func setupHosting(for app: Application, with token: Token, args: [String]) throws -> Hosting {
+        var remote: String = ""
+        if let gitUrl = args.option("gitUrl") {
+            remote = gitUrl
+        } else {
+            do {
+                // TODO: Validate SSH Url
+                remote = try console.backgroundExecute(
+                    program: "git",
+                    arguments: ["remote", "get-url", "origin"]
+                    ).trim()
+            } catch {}
+
+            var useRemote = false
+            if !remote.isEmpty {
+                console.info("We found '\(remote)'")
+                useRemote = console.confirm("Would you like to use this remote to deploy?")
+            }
+            if !useRemote {
+                console.info("What 'git' url should we apply to this hosting?")
+                let answer = console.ask(
+                    "We require ssh url format currently, ie: git@github.com:vapor/vapor.git"
+                )
+                guard let resolved = gitInfo.resolvedUrl(answer) else {
+                    console.warning("Unable to resolve gitUrl '\(answer)'")
+                    throw "Please use ssh formatted git url, ie: git@github.com:vapor/vapor.git"
+                }
+                remote = resolved
+            }
         }
 
         let hosting = console.loadingBar(title: "Setting up Hosting")
-        defer { hosting.fail() }
-        hosting.start()
-        let new = try applicationApi.hosting.create(for: app, git: remote, with: token)
-        hosting.finish()
-
-        return new
+        return try hosting.perform {
+            try applicationApi.hosting.create(
+                for: app,
+                git: remote,
+                with: token
+            )
+        }
     }
 
-    private func createEnvironment(with token: Token) throws {
-        let org = try selectOrganization(
-            queryTitle: "Which Organization would you like to create an Environment for?",
-            using: console,
-            with: token
-        )
+    private func createEnvironment(with token: Token, args: [String]) throws {
+        let repo = try getCloudRepo(with: token, args: args)
 
-        let proj = try selectProject(
-            in: org,
-            queryTitle: "Which Project would you like to create an Environment for?",
-            using: console,
-            with: token
-        )
+        let name: String
+        if let n = args.option("name") {
+            name = n
+        } else {
+            name = console.ask("What would you like to name your new Environment?")
+        }
 
-        let app = try selectApplication(
-            in: proj,
-            queryTitle: "Which Application would you like to create an Environment for?",
-            using: console,
-            with: token
-        )
+        let branch: String
+        if let b = args.option("branch") {
+            branch = b
+        } else {
+            branch = console.ask("(What 'git' branch should we deploy for this Environment?")
+        }
 
-        let name = console.ask("What would you like to name your new Environment?")
-        let branch = console.ask("(What 'git' branch should we deploy for this Environment?")
         let creating = console.loadingBar(title: "Creating \(name)")
-        defer { creating.fail() }
-        creating.start()
-        _ = try applicationApi.hosting.environments.create(
-            for: app,
-            name: name,
-            branch: branch,
+        try creating.perform {
+            _ = try applicationApi.hosting.environments.create(
+                forRepo: repo,
+                name: name,
+                branch: branch,
+                with: token
+            )
+        }
+    }
+
+    private func getCloudRepo(with token: Token, args: [String]) throws -> String {
+        if let repo = args.option("repo") {
+            return repo
+        }
+
+        let project = try getProject(with: token, args: args)
+        let app = try selectApplication(
+            in: project,
+            queryTitle: "Which App?",
+            using: console,
             with: token
         )
-        creating.finish()
+        return app.repo
     }
 }
 
@@ -688,7 +772,7 @@ public final class CloudInit: Command {
         let environment = console.loadingBar(title: "Creating Production Environment")
         let env = try environment.perform {
             return try applicationApi.hosting.environments.create(
-                for: new,
+                forRepo: new.repo,
                 name: "production",
                 branch: "master",
                 with: token

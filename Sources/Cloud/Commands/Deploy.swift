@@ -319,30 +319,38 @@ public final class DeployCloud: Command {
 
 func selectOrganization(queryTitle: String, using console: ConsoleProtocol, with token: Token) throws -> Organization {
     let orgsBar = console.loadingBar(title: "Loading Organizations")
-    defer { orgsBar.fail() }
-    orgsBar.start()
-    let organizations = try adminApi.organizations.all(with: token)
-    orgsBar.finish()
+    let orgs = try orgsBar.perform {
+        try adminApi.organizations.all(with: token)
+    }
 
-    return try console.giveChoice(
-        title: queryTitle,
-        in: organizations
-    ) { org in "\(org.name)" }
+    if orgs.isEmpty {
+        throw "No organizations found, make one with 'vapor cloud create org'"
+    } else if orgs.count == 1 {
+        return orgs[0]
+    } else {
+        return try console.giveChoice(
+            title: queryTitle,
+            in: orgs
+        ) { org in "\(org.name)" }
+    }
 }
 
 func selectProject(in org: Organization, queryTitle: String, using console: ConsoleProtocol, with token: Token) throws -> Project {
     let projBar = console.loadingBar(title: "Loading Projects")
-    defer { projBar.fail() }
-    projBar.start()
-    let projects = try adminApi.projects.all(with: token).filter { project in
-        project.organizationId == org.id
+    let projs = try projBar.perform {
+        try adminApi.projects.all(for: org, with: token)
     }
-    projBar.finish()
 
-    return try console.giveChoice(
-        title: queryTitle,
-        in: projects
-    ) { proj in return "\(proj.name)" }
+    if projs.isEmpty {
+        throw "No projects found, make one with 'vapor cloud create proj'"
+    } else if projs.count == 1 {
+        return projs[0]
+    } else {
+        return try console.giveChoice(
+            title: queryTitle,
+            in: projs
+        ) { proj in return "\(proj.name)" }
+    }
 }
 
 func selectApplication(
