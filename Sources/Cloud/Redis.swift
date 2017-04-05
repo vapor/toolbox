@@ -32,7 +32,6 @@ public struct Update: NodeInitializable {
 }
 
 public final class Redis {
-//     redis = try! Redis.TCPClient(hostname: "34.250.153.203", port: 6379, password: nil)
     static func subscribeDeployLog(id: String, _ updater: @escaping (Update) throws -> Void) throws {
         _ = try Portal<Bool>.open { portal in
             let client = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
@@ -55,7 +54,13 @@ public final class Redis {
         }
     }
 
-    static func tailLogs(repo: String, envName: String, since: String, with token: Token) throws {
+    static func tailLogs(
+        console: ConsoleProtocol,
+        repo: String,
+        envName: String,
+        since: String,
+        with token: Token
+    ) throws {
         let client = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
 
         // the channel we want logs posted to
@@ -81,18 +86,24 @@ public final class Redis {
         var exit = message
         try exit.set("status", "exit")
 
-        // replica controller to tail
-        try client.publish(channel: "requestLog", message)
+        // Publish start and kill exit
+        try client.publish(channel: "requestLog", start)
+        console.registerKillListener { _ in
+            _ = try? client.publish(channel: "requestLog", exit)
+        }
 
-        try client.subscribe(channel: listenChannel, { (data) in
+        try client.subscribe(channel: listenChannel) { (data) in
             guard let log = data?
                 .array?
                 .flatMap({ $0?.bytes })
                 .last?
+                .split(separator: .space, maxSplits: 1)
+                .last?
                 .makeString()
                 else { return }
-            print(log)
-        })
+
+            console.print(log)
+        }
     }
 }
 

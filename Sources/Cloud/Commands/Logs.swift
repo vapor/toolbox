@@ -22,6 +22,7 @@ public final class CloudLogs: Command {
         let since = arguments.option("since") ?? "60s"
         
         try Redis.tailLogs(
+            console: console,
             repo: repo,
             envName: env,
             since: since,
