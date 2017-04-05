@@ -28,7 +28,13 @@ public final class Signup: Command {
         }
         let firstName = console.ask("First Name: ")
         let lastName = console.ask("Last Name: ")
-        let organization = "My Cloud"
+
+        let defaultOrg = "\(firstName)'s Cloud"
+        var organization = console.ask("Organization? (enter to use '\(defaultOrg)')")
+        if organization.isEmpty {
+            organization = defaultOrg
+        }
+
 
         let bar = console.loadingBar(title: "Creating User")
         try bar.perform {
