@@ -368,10 +368,16 @@ func selectApplication(
     let apps = try applicationApi.get(for: proj, with: token)
     appsBar.finish()
 
-    return try console.giveChoice(
-        title: queryTitle,
-        in: apps
-    ) { app in return "\(app.name) (\(app.repo).vapor.cloud)" }
+    if apps.isEmpty {
+        throw "No applications found, make one with 'vapor cloud create app'"
+    } else if apps.count == 1 {
+        return apps[0]
+    } else {
+        return try console.giveChoice(
+            title: queryTitle,
+            in: apps
+        ) { app in return "\(app.name) (\(app.repo).vapor.cloud)" }
+    }
 }
 
 func selectEnvironment(
