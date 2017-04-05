@@ -110,11 +110,7 @@ public final class DeployCloud: Command {
 
         return try console.giveChoice(
             title: "Build type?",
-            in: [
-                BuildType.clean,
-                BuildType.incremental,
-                BuildType.update
-            ]
+            in: BuildType.all
         )
     }
 
