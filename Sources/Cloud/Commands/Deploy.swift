@@ -221,7 +221,7 @@ public final class DeployCloud: Command {
 func getOrganization(_ arguments: [String], console: ConsoleProtocol, with token: Token) throws -> Organization {
     let organizationId = arguments.option("org") ?? localConfig?["organization.id"]?.string
     if let id = organizationId {
-        let bar = console.loadingBar(title: "Loading Organization")
+        let bar = console.loadingBar(title: "Loading Organizations")
         defer { bar.fail() }
         bar.start()
         let org = try adminApi.organizations.get(id: id, with: token)
