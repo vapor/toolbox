@@ -62,11 +62,13 @@ public final class CloudClient<Wrapped: ClientProtocol>: ClientProtocol {
     }
 
     private func errorPass(request: Request, response: Response) throws {
-        if response.status.statusCode == 502 { throw CloudClientError.badGateway(response, for: request) }
-        guard let json = response.json else { return }
-        guard let _ = json["error"], let reason = json["reason"]?.string else { return }
-        print("RESP: \n\(response)")
-        throw reason
+        if let json = response.json, let _ = json["error"], let reason = json["reason"]?.string {
+            throw "\(response.status.statusCode) - " + reason
+        }
+
+        guard 200...299 ~= response.status.statusCode else {
+            throw "\(response.status.statusCode) - " + response.status.reason
+        }
     }
 
 }

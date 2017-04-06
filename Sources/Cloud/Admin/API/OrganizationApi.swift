@@ -22,12 +22,11 @@ extension AdminApi {
         }
 
         public func all(with token: Token) throws -> [Organization] {
-            print("Getting all orgs")
             let request = try Request(method: .get, uri: organizationsEndpoint)
             request.access = token
 
             let response = try client.respond(to: request)
-            print("Got all orgs: \n\(response)")
+            
             // TODO: Should handle pagination
             return try [Organization](node: response.json?["data"])
         }

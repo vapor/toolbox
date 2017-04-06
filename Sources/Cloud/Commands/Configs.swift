@@ -46,10 +46,9 @@ public final class CloudConfigs: Command {
 
         let options = [
             (id: "", runner: getConfigs),
-            (id: "add", runner: { repo, env, token in
-                    try self.addConfigs(values.dropFirst().array, forRepo: repo, envName: env, with: token)
-                }
-            )
+            (id: "add", runner: addConfigs),
+            (id: "replace", runner: replaceConfigs),
+            (id: "delete", runner: deleteConfigs),
         ]
 
 
@@ -58,10 +57,10 @@ public final class CloudConfigs: Command {
         }.first
 
         let runner = selection?.runner ?? getConfigs
-        try runner(repo, env, token)
+        try runner(values, repo, env, token)
     }
 
-    func getConfigs(forRepo repo: String, envName env: String, with token: Token) throws {
+    func getConfigs(args: [String], forRepo repo: String, envName env: String, with token: Token) throws {
         let configs = try applicationApi
             .hosting
             .environments
@@ -80,7 +79,9 @@ public final class CloudConfigs: Command {
         }
     }
 
-    func addConfigs(_ configs: [String], forRepo repo: String, envName env: String, with token: Token) throws {
+    func addConfigs(args: [String], forRepo repo: String, envName env: String, with token: Token) throws {
+        // drop 'add'
+        let configs = args.values.dropFirst()
         guard !configs.isEmpty else {
             throw "No configs found to add"
         }
@@ -100,8 +101,62 @@ public final class CloudConfigs: Command {
             keyVal[key] = val
         }
 
-        try applicationApi.hosting.environments.configs.add(
+        _ = try applicationApi.hosting.environments.configs.add(
             keyVal,
+            forRepo: repo,
+            envName: env,
+            with: token
+        )
+    }
+
+    func replaceConfigs(args: [String], forRepo repo: String, envName env: String, with token: Token) throws {
+        // drop 'replace'
+        let configs = args.values.dropFirst()
+        guard !configs.isEmpty else {
+            throw "No configs found to add"
+        }
+        guard
+            console.confirm("This will overwrite any existing configurations, are you sure?")
+            else { return }
+
+        var keyVal = [String: String]()
+        try configs.forEach { config in
+            let comps = config.makeBytes().split(
+                separator: .equals,
+                maxSplits: 1,
+                omittingEmptySubsequences: true
+            )
+            guard comps.count == 2 else {
+                throw "Invalid config argument \(config)"
+            }
+            let key = comps[0].makeString()
+            let val = comps[1].makeString()
+            keyVal[key] = val
+        }
+
+        _ = try applicationApi.hosting.environments.configs.replace(
+            keyVal,
+            forRepo: repo,
+            envName: env,
+            with: token
+        )
+    }
+
+    func deleteConfigs(args: [String], forRepo repo: String, envName env: String, with token: Token) throws {
+        // drop 'delete'
+        let configs = args.values.dropFirst().array
+
+        if configs.isEmpty {
+            console.warning("Are you sure you want to delete all configurations?")
+        } else {
+            console.warning("Are you sure you want to delete these configurations?")
+        }
+        guard
+            console.confirm("There is no undo.", style: .warning)
+            else { return }
+
+        _ = try applicationApi.hosting.environments.configs.delete(
+            keys: configs,
             forRepo: repo,
             envName: env,
             with: token

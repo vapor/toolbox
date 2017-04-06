@@ -667,7 +667,14 @@ extension ConsoleProtocol {
             // .count is implicitly offset, no need to adjust
             throw "Invalid selection: \(raw), expected: 1...\(array.count)"
         }
-        
+
+        // + 1 for > input line
+        // + 1 for title line
+        let lines = array.count + 2
+        for _ in 1...lines {
+            clear(.line)
+        }
+
         // undo previous offset back to 0 indexing
         let offset = idx - 1
         return array[offset]

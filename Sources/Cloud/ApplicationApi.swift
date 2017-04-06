@@ -277,7 +277,12 @@ extension ApplicationApi {
             return try [Config](node: response.json)
         }
 
-        func add(_ configs: [String: String], forRepo repo: String, envName env: String, with token: Token) throws {
+        func add(
+            _ configs: [String: String],
+            forRepo repo: String,
+            envName env: String,
+            with token: Token
+        ) throws -> [Config] {
             let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/")
                 + repo
                 + "/hosting/environments/"
@@ -289,8 +294,44 @@ extension ApplicationApi {
             request.json = try JSON(node: configs)
 
             let response = try client.respond(to: request)
-            print(response)
-            print("")
+            return try [Config](node: response.json)
+        }
+
+        func replace(
+            _ configs: [String: String],
+            forRepo repo: String,
+            envName env: String,
+            with token: Token
+            ) throws -> [Config] {
+            let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/")
+                + repo
+                + "/hosting/environments/"
+                + env.finished(with: "/")
+                + "configurations"
+            let request = try Request(method: .put, uri: endpoint)
+            request.access = token
+            request.json = try JSON(node: configs)
+
+            let response = try client.respond(to: request)
+            return try [Config](node: response.json)
+        }
+
+        func delete(
+            keys: [String],
+            forRepo repo: String,
+            envName env: String,
+            with token: Token
+        ) throws {
+            let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/")
+                + repo
+                + "/hosting/environments/"
+                + env.finished(with: "/")
+                + "configurations"
+            let request = try Request(method: .delete, uri: endpoint)
+            request.access = token
+            request.json = try JSON(node: keys)
+
+            _ = try client.respond(to: request)
         }
     }
 }
