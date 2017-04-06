@@ -21,6 +21,8 @@ public func group(_ console: ConsoleProtocol) -> Group {
             DeployCloud(console: console),
             // Create
             Create(console: console),
+            // Run remote commands
+            CloudRun(console: console),
             // Temporarily disabling not ready commands
             // Add(console: console),
             // CloudSetup(console: console),

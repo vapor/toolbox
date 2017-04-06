@@ -296,7 +296,9 @@ func getRepo(_ arguments: [String], console: ConsoleProtocol, with token: Token)
                 return apps
         }
 
-        if apps.count == 1 {
+        if apps.isEmpty {
+            console.print("No apps found matching existing remotes")
+        } else if apps.count == 1 {
             let found = apps[0]
             console.info("I found, '\(found.name)'.")
             console.info("https://\(found.repo).vapor.cloud")
@@ -306,6 +308,9 @@ func getRepo(_ arguments: [String], console: ConsoleProtocol, with token: Token)
             console.info("I found too many apps, that match remotes in this repo,")
             console.info("yell at Logan to ask me to use one of these.")
             console.info("Instead, I'm going to ask a bunch of questions.")
+            apps.forEach { app in
+                console.print("- \(app.name) (\(app.repo).vapor.cloud)")
+            }
         }
     }
 

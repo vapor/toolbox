@@ -1,12 +1,10 @@
-import Foundation
-
-public final class CloudLogs: Command {
-    public let id = "logs"
+public final class CloudRun: Command {
+    public let id = "run"
 
     public let signature: [Argument] = []
 
     public let help: [String] = [
-        "Refreshes vapor token."
+        "Runs commands on your application"
     ]
 
     public let console: ConsoleProtocol
@@ -16,8 +14,21 @@ public final class CloudLogs: Command {
     }
 
     public func run(arguments: [String]) throws {
+        // drop 'run'
+        let arguments = arguments.dropFirst().array
+        guard arguments.count > 1 else {
+            console.warning("No command passed to 'vapor cloud run'")
+            throw "Expected command, ie 'vapor cloud run prepare'"
+        }
+        let command = arguments[0]
+
         let token = try Token.global(with: console)
-        let repo = try getRepo(arguments, console: console, with: token)
+        let repo = try getRepo(
+            arguments,
+            console: console,
+            with: token
+        )
+
         let env: String
         if let name = arguments.option("env") {
             env = name
@@ -33,13 +44,11 @@ public final class CloudLogs: Command {
             env = e.name
         }
 
-        let since = arguments.option("since") ?? "60s"
-
-        try Redis.tailLogs(
+        try Redis.runCommand(
             console: console,
+            command: command,
             repo: repo,
             envName: env,
-            since: since,
             with: token
         )
     }
