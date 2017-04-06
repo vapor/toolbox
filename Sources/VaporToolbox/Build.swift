@@ -35,19 +35,21 @@ public final class Build: Command {
             try fetch.run(arguments: [])
         }
 
-        if arguments.options["modulemap"]?.bool != false {
-            do {
-                let mod = try console.backgroundExecute(program: "/bin/sh", arguments: ["-c", "ls Packages | grep CLibreSSL"]).trim()
-                _ = try console.backgroundExecute(program: "ls", arguments: ["Packages/\(mod)/Sources/CLibreSSL/include/module.modulemap"])
-            } catch {
-                // not found
+        #if !swift(>=3.1)
+            if arguments.options["modulemap"]?.bool != false {
                 do {
-                    _ = try console.backgroundExecute(program: "/bin/sh", arguments: ["-c", "printf \"module CLibreSSL {\\n    header \\\"CLibreSSL.h\\\"\\n    link \\\"CLibreSSL\\\"\\n}\" > Packages/CLibreSSL-1.0.0/Sources/CLibreSSL/include/module.modulemap"])
+                    let mod = try console.backgroundExecute(program: "/bin/sh", arguments: ["-c", "ls Packages | grep CLibreSSL"]).trim()
+                    _ = try console.backgroundExecute(program: "ls", arguments: ["Packages/\(mod)/Sources/CLibreSSL/include/module.modulemap"])
                 } catch {
-                    console.warning("Could not add CLibreSSL Module Map: \(error)")
+                    // not found
+                    do {
+                        _ = try console.backgroundExecute(program: "/bin/sh", arguments: ["-c", "printf \"module CLibreSSL {\\n    header \\\"CLibreSSL.h\\\"\\n    link \\\"CLibreSSL\\\"\\n}\" > Packages/CLibreSSL-1.0.0/Sources/CLibreSSL/include/module.modulemap"])
+                    } catch {
+                        console.warning("Could not add CLibreSSL Module Map: \(error)")
+                    }
                 }
             }
-        }
+        #endif
 
         var buildFlags: [String] = []
 

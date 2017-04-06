@@ -18,6 +18,7 @@ do {
     try terminal.run(executable: executable, commands: [
         New(console: terminal),
         Build(console: terminal),
+        Update(console: terminal),
         Run(console: terminal),
         Fetch(console: terminal),
         Clean(console: terminal),
