@@ -297,7 +297,7 @@ func getRepo(_ arguments: [String], console: ConsoleProtocol, with token: Token)
         }
 
         if apps.isEmpty {
-            console.print("No apps found matching existing remotes")"
+            console.print("No apps found matching existing remotes")
         } else if apps.count == 1 {
             let found = apps[0]
             console.info("I found, '\(found.name)'.")

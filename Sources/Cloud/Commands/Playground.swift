@@ -596,16 +596,24 @@ extension Token {
 
     // TODO: Give opportunity to login/signup right here
     static func global(with console: ConsoleProtocol) throws -> Token {
+        func notLoggedIn() -> Error {
+            console.info("No user currently logged in.")
+            console.warning("Use 'vapor cloud login' or")
+            console.warning("Create an account with 'vapor cloud signup'")
+            return "User not found."
+        }
+
+        guard FileManager.default.fileExists(atPath: tokenPath) else {
+            throw notLoggedIn()
+        }
+
         let raw = try Node.loadContents(path: tokenPath)
         guard
             let access = raw["access"]?.string,
             let refresh = raw["refresh"]?.string
             else {
-                console.info("No user currently logged in.")
-                console.warning("Use 'vapor cloud login' or")
-                console.warning("Create an account with 'vapor cloud signup'")
-                throw "User not found."
-        }
+                throw notLoggedIn()
+            }
 
         let token = Token(access: access, refresh: refresh)
         token.didUpdate = { t in
