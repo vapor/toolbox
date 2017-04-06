@@ -4,6 +4,7 @@ import JSON
 import Core
 import Foundation
 import libc
+import Sockets
 
 public enum UpdateType: String, NodeInitializable {
     case start, stop
@@ -32,10 +33,20 @@ public struct Update: NodeInitializable {
     }
 }
 
+extension Client where StreamType == TCPInternetSocket {
+    static func cloudRedis() throws -> TCPClient {
+        return try .init(
+            hostname: "redis.eu.vapor.cloud",
+            port: 6379,
+            password: nil
+        )
+    }
+}
+
 public final class Redis {
     static func subscribeDeployLog(id: String, _ updater: @escaping (Update) throws -> Void) throws {
         _ = try Portal<Bool>.open { portal in
-            let client = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+            let client = try TCPClient.cloudRedis()
             let deployLog = "deployLog_\(id)"
             try client.subscribe(channel: deployLog) { data in
                 do {
@@ -62,7 +73,6 @@ public final class Redis {
         since: String,
         with token: Token
     ) throws {
-        let client = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
 
         // the channel we want logs posted to
         let listenChannel = UUID().uuidString
@@ -88,12 +98,14 @@ public final class Redis {
         try exit.set("status", "exit")
 
         // Publish start and kill exit
-        try client.publish(channel: "requestLog", start)
+        let pubClient = try TCPClient.cloudRedis()
+        try pubClient.publish(channel: "requestLog", start)
         console.registerKillListener { _ in
-            _ = try? client.publish(channel: "requestLog", exit)
+            _ = try? pubClient.publish(channel: "requestLog", exit)
         }
 
-        try client.subscribe(channel: listenChannel) { (data) in
+        let listenClient = try TCPClient.cloudRedis()
+        try listenClient.subscribe(channel: listenChannel) { (data) in
             guard let log = data?
                 .array?
                 .flatMap({ $0?.bytes })
@@ -114,7 +126,6 @@ public final class Redis {
         envName: String,
         with token: Token
     ) throws {
-        let client = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
         let listenChannel = UUID().uuidString
         let replicaController = repo + "-" + envName
 
@@ -131,13 +142,14 @@ public final class Redis {
         try stop.set("status", "exit")
 
         // Publish start and kill exit
-        try client.publish(channel: "runCommand", start)
+        let pubClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+        try pubClient.publish(channel: "runCommand", start)
         console.registerKillListener { _ in
-            print("Ending run command")
-            _ = try? client.publish(channel: "runCommand", stop)
+            _ = try? pubClient.publish(channel: "runCommand", stop)
         }
 
-        try client.subscribe(channel: listenChannel) { ( data) in
+        let listenClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+        try listenClient.subscribe(channel: listenChannel) { ( data) in
             guard
                 let log = data?
                     .array?
@@ -150,10 +162,9 @@ public final class Redis {
 
             guard log != "EXIT!" else {
                 do {
-                    _ = try client.publish(channel: "runCommand", stop)
+                    _ = try pubClient.publish(channel: "runCommand", stop)
                     exit(0)
                 } catch {
-                    console.error("Failed to exit redis - \(error)")
                     exit(1)
                 }
             }

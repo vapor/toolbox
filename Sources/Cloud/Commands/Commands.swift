@@ -22,7 +22,7 @@ public func group(_ console: ConsoleProtocol) -> Group {
             // Create
             Create(console: console),
             // Run remote commands
-            CloudCommand(console: console),
+            CloudRun(console: console),
             // Temporarily disabling not ready commands
             // Add(console: console),
             // CloudSetup(console: console),
