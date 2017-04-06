@@ -18,8 +18,7 @@ public final class Xcode: Command {
     }
 
     public func run(arguments: [String]) throws {
-        let fetch = Fetch(console: console)
-        try fetch.run(arguments: arguments)
+        try fetch(arguments)
 
         let isVerbose = arguments.isVerbose
         let xcodeBar = console.loadingBar(title: "Generating Xcode Project", animated: !isVerbose)
@@ -43,6 +42,16 @@ public final class Xcode: Command {
 
         try logExecutableInfo()
         try openXcode(arguments)
+    }
+
+    private func fetch(_ arguments: [String]) throws {
+        let needsFetch = !project.buildFolderExists()
+        let shouldFetch = arguments.option("fetch")?.bool ?? needsFetch
+        guard shouldFetch else { return }
+
+        let arguments = arguments.removeFlags(["clean", "fetch", "y"])
+        let fetch = Fetch(console: console)
+        try fetch.run(arguments: arguments)
     }
 
     private func logExecutableInfo() throws {
