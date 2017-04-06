@@ -195,6 +195,8 @@ extension ApplicationApi {
     // TODO: ALl w/ forRepo instead of app
 
     public final class EnvironmentsApi {
+        let configs = ConfigsApi()
+
         public func create(
             forRepo repo: String,
             name: String,
@@ -244,6 +246,55 @@ extension ApplicationApi {
         }
     }
 }
+
+public struct Config: NodeInitializable {
+    public let id: UUID
+    public let key: String
+    public let value: String
+    public let environmentId: UUID
+
+    public init(node: Node) throws {
+        id = try node.get("id")
+        key = try node.get("key")
+        value = try node.get("value")
+        environmentId = try node.get("environment.id")
+    }
+}
+
+extension ApplicationApi {
+    public final class ConfigsApi {
+        func get(forRepo repo: String, envName env: String, with token: Token) throws -> [Config] {
+            let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/")
+                + repo
+                + "/hosting/environments/"
+                + env.finished(with: "/")
+                + "configurations"
+
+            let request = try Request(method: .get, uri: endpoint)
+            request.access = token
+
+            let response = try client.respond(to: request)
+            return try [Config](node: response.json)
+        }
+
+        func add(_ configs: [String: String], forRepo repo: String, envName env: String, with token: Token) throws {
+            let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/")
+                + repo
+                + "/hosting/environments/"
+                + env.finished(with: "/")
+                + "configurations"
+
+            let request = try Request(method: .patch, uri: endpoint)
+            request.access = token
+            request.json = try JSON(node: configs)
+
+            let response = try client.respond(to: request)
+            print(response)
+            print("")
+        }
+    }
+}
+
 
 public struct Deploy: NodeInitializable {
     public let hosting: Hosting
