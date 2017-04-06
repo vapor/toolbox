@@ -18,8 +18,8 @@ public final class Xcode: Command {
     }
 
     public func run(arguments: [String]) throws {
-        let build = Build(console: console)
-        try build.run(arguments: arguments)
+        let fetch = Fetch(console: console)
+        try fetch.run(arguments: arguments)
 
         let isVerbose = arguments.isVerbose
         let xcodeBar = console.loadingBar(title: "Generating Xcode Project", animated: !isVerbose)
@@ -47,9 +47,9 @@ public final class Xcode: Command {
 
     private func logExecutableInfo() throws {
         // If it's not a Vapor project, don't log warnings
-        guard try project.isVaporProject() else { return }
+        guard projectInfo.isVaporProject() else { return }
 
-        let executables = try project.availableExecutables()
+        let executables = try projectInfo.availableExecutables()
         if executables.isEmpty {
             console.info("No executable found, make sure to create")
             console.info("a target that includes a 'main.swift' file")

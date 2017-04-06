@@ -21,8 +21,8 @@ public final class Version: Command {
         console.print("Vapor Toolbox: ", newLine: false)
         console.success("\(version)")
 
-        guard project.isSwiftProject() else { return }
-        guard try project.isVaporProject() else {
+        guard projectInfo.isSwiftProject() else { return }
+        guard projectInfo.isVaporProject() else {
             console.warning("No Vapor dependency detected, unable to log Framework Version")
             return
         }
@@ -40,7 +40,7 @@ public final class Version: Command {
             try build()
         }
 
-        let vapor = try project.vaporVersion()
+        let vapor = try projectInfo.vaporVersion()
 
         console.print("Vapor Framework: ", newLine: false)
         console.success("\(vapor)")
@@ -55,6 +55,6 @@ public final class Version: Command {
     }
 
     private func vaporCheckoutExists() throws -> Bool {
-        return try project.vaporCheckout() != nil
+        return try projectInfo.vaporCheckout() != nil
     }
 }

@@ -22,7 +22,7 @@ class RunTests: XCTestCase {
         do {
             try command.run(arguments: [])
             XCTFail("command.run was expected to fail, but did not")
-        } catch ToolboxError.general(let message) where message == "Unable to determine package name." {
+        } catch let error as GeneralError where error.message == "Unable to determine package name." {
             // error thrown is expected :+1:
         }
     }
