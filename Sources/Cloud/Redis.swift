@@ -3,6 +3,7 @@ import Node
 import JSON
 import Core
 import Foundation
+import libc
 
 public enum UpdateType: String, NodeInitializable {
     case start, stop
@@ -102,6 +103,61 @@ public final class Redis {
                 .makeString()
                 else { return }
 
+            console.print(log)
+        }
+    }
+
+    static func runCommand(
+        console: ConsoleProtocol,
+        command: String,
+        repo: String,
+        envName: String,
+        with token: Token
+    ) throws {
+        let client = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+        let listenChannel = UUID().uuidString
+        let replicaController = repo + "-" + envName
+
+        var message = JSON([:])
+        try message.set("channel", listenChannel)
+        try message.set("rc", replicaController)
+        try message.set("command", command)
+        try message.set("environment", envName)
+
+        var start = message
+        try start.set("status", "start")
+
+        var stop = message
+        try stop.set("status", "exit")
+
+        // Publish start and kill exit
+        try client.publish(channel: "runCommand", start)
+        console.registerKillListener { _ in
+            print("Ending run command")
+            _ = try? client.publish(channel: "runCommand", stop)
+        }
+
+        try client.subscribe(channel: listenChannel) { ( data) in
+            guard
+                let log = data?
+                    .array?
+                    .flatMap({ $0?.bytes })
+                    .last?
+                    .split(separator: .space, maxSplits: 1)
+                    .last?
+                    .makeString()
+                else { return }
+
+            guard log != "EXIT!" else {
+                do {
+                    _ = try client.publish(channel: "runCommand", stop)
+                    exit(0)
+                } catch {
+                    console.error("Failed to exit redis - \(error)")
+                    exit(1)
+                }
+            }
+            
             console.print(log)
         }
     }
