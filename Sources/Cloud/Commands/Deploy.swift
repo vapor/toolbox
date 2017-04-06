@@ -24,20 +24,24 @@ public final class DeployCloud: Command {
         let token = try Token.global(with: console)
 
         let repo = try getRepo(arguments, console: console, with: token)
+        console.print("Application: ", newLine: false)
+        console.info("\(repo)")
 
         let env = try selectEnvironment(
             args: arguments,
             forRepo: repo,
-            queryTitle: "Which Environment?",
+            queryTitle: "Which environment?",
             using: console,
             with: token
         )
 
-        console.print("Deploying Environment: ", newLine: false)
+        console.print("Environment: ", newLine: false)
         console.info("\(env.name)")
         let replicas = getReplicas(arguments)
         let hosting = try getHosting(forRepo: repo, with: token)
         let branch = try getBranch(arguments, gitUrl: hosting.gitUrl, env: env)
+        console.print("Branch: ", newLine: false)
+        console.info("\(branch)")
 
         if gitInfo.isGitProject(), let matchingRemote = try gitInfo.remote(forUrl: hosting.gitUrl) {
             // verify there's not uncommitted changes
@@ -45,9 +49,15 @@ public final class DeployCloud: Command {
         }
 
         let buildType = try getBuildType(arguments)
+        console.print("Build type: ", newLine: false)
+        console.info("\(buildType.rawValue)")
+        
+        guard console.confirm("Is the above information correct?") else {
+            return
+        }
 
         /// Deploy
-        let deployBar = console.loadingBar(title: "Deploying")
+        let deployBar = console.loadingBar(title: "Creating deployment")
         let deploy = try deployBar.perform {
             return try applicationApi.deploy.push(
                 repo: repo,
@@ -154,7 +164,7 @@ public final class DeployCloud: Command {
             ?? localConfig?["useDefaultBranch"]?.bool
 
         if useDefault == nil {
-            useDefault = console.confirm("Use default branch, '\(env.branch)'?")
+            useDefault = console.confirm("Use default branch? (\(env.branch))")
         }
 
         let use = useDefault ?? false
@@ -283,7 +293,7 @@ func getApp(_ arguments: [String], console: ConsoleProtocol, in proj: Project, w
 func getRepo(_ arguments: [String], console: ConsoleProtocol, with token: Token) throws -> String {
     let gitInfo = GitInfo(console)
     let localConfig = try LocalConfig.load()
-    if let repo = arguments.option("repo") ?? localConfig["app.repo"]?.string {
+    if let repo = arguments.option("app") ?? localConfig["app.repo"]?.string {
         return repo
     }
 
@@ -300,10 +310,7 @@ func getRepo(_ arguments: [String], console: ConsoleProtocol, with token: Token)
             console.print("No apps found matching existing remotes")
         } else if apps.count == 1 {
             let found = apps[0]
-            console.info("I found, '\(found.name)'.")
-            console.info("https://\(found.repo).vapor.cloud")
-            let useThis = console.confirm("Would you like to use this app?")
-            if useThis { return found.repo }
+            return found.repo
         } else {
             console.info("I found too many apps, that match remotes in this repo,")
             console.info("yell at Logan to ask me to use one of these.")
@@ -386,13 +393,10 @@ func selectEnvironment(
     using console: ConsoleProtocol,
     with token: Token) throws-> Environment {
 
-    let envBar = console.loadingBar(title: "Loading Environments")
-    let envs = try envBar.perform {
-        try applicationApi
+    let envs = try applicationApi
             .hosting
             .environments
             .all(forRepo: repo, with: token)
-    }
     guard !envs.isEmpty else { throw "No environments found for '\(repo).vapor.cloud'" }
 
     if let env = args.option("env") {
