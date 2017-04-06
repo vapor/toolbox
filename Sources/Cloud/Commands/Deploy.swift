@@ -316,7 +316,7 @@ func getRepo(_ arguments: [String], console: ConsoleProtocol, with token: Token)
             let found = apps[0]
             console.print("Detected application ", newLine: false)
             console.info(found.repo, newLine: false)
-            print(" using git")
+            console.print(" using git")
             return found.repo
         } else {
             console.info("I found too many apps, that match remotes in this repo,")
