@@ -121,13 +121,34 @@ public func == (lhs: Hosting, rhs: Hosting) -> Bool {
     && lhs.applicationId == rhs.applicationId
 }
 
+import Console
+extension ApplicationApi {
+    public final class DatabaseApi {
+        public func create(forRepo repo: String, envName env: String, with token: Token) throws {
+            let endpoint = applicationsEndpoint.finished(with: "/")
+                + repo
+                + "/hosting/environments/"
+                + env
+                + "/database"
+            let req = try Request(method: .post, uri: endpoint)
+            req.access = token
+
+            // FIXME: temporarily hardcoding database id
+            req.json = ["database": ["id": "A93DE7EC-9F64-4932-B86A-075CDD22AFB6"]]
+            let resp = try client.respond(to: req)
+            print(resp)
+            print("asdfasdf")
+        }
+    }
+}
+
 extension ApplicationApi {
     public final class HostingApi {
         let environments = EnvironmentsApi()
 
         // TODO: git expects ssh url, ie: git@github.com:vapor/vapor.git
-        public func create(for application: Application, git: String, with token: Token) throws -> Hosting {
-            let endpoint = applicationsEndpoint.finished(with: "/") + application.repo + "/hosting"
+        public func create(forRepo repo: String, git: String, with token: Token) throws -> Hosting {
+            let endpoint = applicationsEndpoint.finished(with: "/") + repo + "/hosting"
             let request = try Request(method: .post, uri: endpoint)
             request.access = token
 
@@ -195,7 +216,8 @@ extension ApplicationApi {
     // TODO: ALl w/ forRepo instead of app
 
     public final class EnvironmentsApi {
-        let configs = ConfigsApi()
+        public let configs = ConfigsApi()
+        public let database = DatabaseApi()
 
         public func create(
             forRepo repo: String,
@@ -263,7 +285,7 @@ public struct Config: NodeInitializable {
 
 extension ApplicationApi {
     public final class ConfigsApi {
-        func get(forRepo repo: String, envName env: String, with token: Token) throws -> [Config] {
+        public func get(forRepo repo: String, envName env: String, with token: Token) throws -> [Config] {
             let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/")
                 + repo
                 + "/hosting/environments/"
@@ -277,7 +299,7 @@ extension ApplicationApi {
             return try [Config](node: response.json)
         }
 
-        func add(
+        public func add(
             _ configs: [String: String],
             forRepo repo: String,
             envName env: String,
@@ -297,7 +319,7 @@ extension ApplicationApi {
             return try [Config](node: response.json)
         }
 
-        func replace(
+        public func replace(
             _ configs: [String: String],
             forRepo repo: String,
             envName env: String,
@@ -316,7 +338,7 @@ extension ApplicationApi {
             return try [Config](node: response.json)
         }
 
-        func delete(
+        public func delete(
             keys: [String],
             forRepo repo: String,
             envName env: String,

@@ -21,8 +21,8 @@ public final class Signup: Command {
 
     private func signup() throws -> (email: String, password: String) {
         let email = console.ask("Email: ")
-        let pass = console.ask("Password: ")
-        let confirmed = console.ask("Confirm Password: ")
+        let pass = console.ask("Password: ", secure: true)
+        let confirmed = console.ask("Confirm Password: ", secure: true)
         guard pass == confirmed else {
             throw "Password mismatch, please try again."
         }

@@ -71,7 +71,7 @@ public final class Add: Command {
         defer { creating.fail() }
         creating.start()
         _ = try applicationApi.hosting.create(
-            for: app,
+            forRepo: app.repo,
             git: git,
             with: token
         )
@@ -313,7 +313,7 @@ public final class CloudInit: Command {
             )
         }
 
-        _ = try setupHosting(for: new, gitUrl: gitUrl, with: token)
+        _ = try setupHosting(forRepo: new.repo, gitUrl: gitUrl, with: token)
 
         let environment = console.loadingBar(title: "Creating Production Environment")
         let env = try environment.perform {
@@ -406,11 +406,11 @@ public final class CloudInit: Command {
         }
     }
 
-    private func setupHosting(for app: Application, gitUrl: String, with token: Token) throws -> Hosting {
+    private func setupHosting(forRepo repo: String, gitUrl: String, with token: Token) throws -> Hosting {
         let hosting = console.loadingBar(title: "Setting up Hosting")
         return try hosting.perform {
             try applicationApi.hosting.create(
-                for: app,
+                forRepo: repo,
                 git: gitUrl,
                 with: token
             )

@@ -63,10 +63,12 @@ public final class CloudClient<Wrapped: ClientProtocol>: ClientProtocol {
 
     private func errorPass(request: Request, response: Response) throws {
         if let json = response.json, let _ = json["error"], let reason = json["reason"]?.string {
+            print("response:\n\(response)\nrequest:\n\(request)")
             throw "\(response.status.statusCode) - " + reason
         }
 
         guard 200...299 ~= response.status.statusCode else {
+            print("response:\n\(response)\nrequest:\n\(request)")
             throw "\(response.status.statusCode) - " + response.status.reason
         }
     }
