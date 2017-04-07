@@ -51,3 +51,14 @@ sudo apt-get install swift vapor
 
 See here for reference
 <https://repo.vapor.codes>
+
+## Manual
+
+You can manually install the toolbox on platforms that aren't supported by Homebrew or our APT repo.
+
+```sh
+git clone git@github.com:vapor/toolbox.git
+cd toolbox
+swift build -c release
+mv .build/release/Executable /usr/local/bin/vapor
+```
