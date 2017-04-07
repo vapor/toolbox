@@ -270,7 +270,7 @@ public final class Create: Command {
         if let b = args.option("branch") {
             branch = b
         } else {
-            branch = console.ask("(What 'git' branch should we deploy for this Environment?")
+            branch = console.ask("What 'git' branch should we deploy for this Environment?")
         }
 
         let creating = console.loadingBar(title: "Creating \(name)")
