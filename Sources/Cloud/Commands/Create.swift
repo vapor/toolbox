@@ -109,7 +109,6 @@ public final class Create: Command {
             repo = r
         } else {
             console.info("How would you like to identify your new Application?")
-            console.info("This needs to be unique, if it doesn't work, it may already be taken.")
             repo = console.ask("(your-answer.vapor.cloud)")
         }
 

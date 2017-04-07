@@ -134,7 +134,7 @@ extension ApplicationApi {
             req.access = token
 
             // FIXME: temporarily hardcoding database id
-            req.json = ["database": ["id": "A93DE7EC-9F64-4932-B86A-075CDD22AFB6"]]
+            req.json = ["databaseServer": ["id": "A93DE7EC-9F64-4932-B86A-075CDD22AFB6"]]
             let resp = try client.respond(to: req)
             print(resp)
             print("asdfasdf")
