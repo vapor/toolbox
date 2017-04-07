@@ -243,7 +243,7 @@ public final class Create: Command {
     }
 
     private func getCloudRepo(with token: Token, args: [String]) throws -> String {
-        if let repo = args.option("repo") {
+        if let repo = args.option("app") {
             return repo
         }
 
