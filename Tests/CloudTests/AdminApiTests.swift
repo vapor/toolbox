@@ -195,7 +195,7 @@ final class ProjectApiTests {
         }
 
         found.forEach { proj in
-            XCTAssertEqual(proj.organizationId, org.id)
+            XCTAssertEqual(proj.organization.id, org.id)
         }
     }
 
@@ -207,7 +207,7 @@ final class ProjectApiTests {
             with: token
         )
 
-        XCTAssertEqual(new.organizationId, org.id)
+        XCTAssertEqual(new.organization.id, org.id)
         XCTAssertEqual(new.name, "My Proj")
         return new
     }

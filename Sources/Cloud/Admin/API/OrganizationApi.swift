@@ -31,6 +31,11 @@ extension AdminApi {
             return try [Organization](node: response.json?["data"])
         }
 
+        public func get(id: Identifier?, with token: Token) throws -> Organization {
+            let uuid = try id.uuid()
+            return try get(id: uuid, with: token)
+        }
+
         public func get(id: UUID, with token: Token) throws -> Organization {
             return try get(id: id.uuidString, with: token)
         }

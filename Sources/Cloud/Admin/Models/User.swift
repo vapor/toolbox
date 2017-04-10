@@ -21,6 +21,31 @@ extension ModelOrIdentifier {
     }
 }
 
+public func == <T: Identifiable & JSONConvertible & Equatable>(
+    lhs: ModelOrIdentifier<T>,
+    rhs: ModelOrIdentifier<T>) -> Bool {
+    switch (lhs, rhs) {
+    case (.identifier(let l), .identifier(let r)):
+        return l == r
+    case (.model(let l), .model(let r)):
+        return l == r
+    default:
+        return false
+    }
+}
+
+extension Identifier {
+    func uuid() throws -> UUID {
+        return try UUID(node: self)
+    }
+}
+
+extension Optional where Wrapped == Identifier {
+    func uuid() throws -> UUID {
+        return try UUID(node: self)
+    }
+}
+
 extension Stitched {
     public func uuid() throws -> UUID {
         return try UUID(node: id)

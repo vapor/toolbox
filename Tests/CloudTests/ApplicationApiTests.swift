@@ -78,7 +78,7 @@ class ApplicationApiTests {
 
         XCTAssertEqual(app.repo, uniqueRepo, "repo on app create doesn't match")
         XCTAssertEqual(app.name, "My App", "name on app create doesn't match")
-        XCTAssertEqual(app.projectId, proj.id, "project id on app create doesn't match")
+        try XCTAssertEqual(app.projectId, proj.uuid(), "project id on app create doesn't match")
 
         return app
     }
@@ -94,8 +94,8 @@ class ApplicationApiTests {
     func testProjectGet(expectCount: Int, contains: Application) throws {
         let found = try applicationApi.get(for: proj, with: token)
         XCTAssertEqual(found.count, expectCount)
-        found.forEach { app in
-            XCTAssertEqual(app.projectId, proj.id)
+        try found.forEach { app in
+            try XCTAssertEqual(app.projectId, proj.uuid())
         }
         XCTAssert(found.contains(contains), "\(found) doesn't contain \(contains)")
     }

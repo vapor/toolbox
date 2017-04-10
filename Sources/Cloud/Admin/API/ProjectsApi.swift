@@ -46,6 +46,11 @@ extension AdminApi {
             return try get(prefix: "", with: token)
         }
 
+        public func get(id: Identifier?, with token: Token) throws -> Project {
+            let uuid = try id.uuid()
+            return try get(id: uuid, with: token)
+        }
+
         public func get(id: UUID, with token: Token) throws -> Project {
             return try get(id: id.uuidString, with: token)
         }
