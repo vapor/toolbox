@@ -165,11 +165,11 @@ public final class DeployCloud: Command {
             ?? localConfig?["useDefaultBranch"]?.bool
 
         if useDefault == nil {
-            useDefault = console.confirm("Use default branch? (\(env.branch))")
+            useDefault = console.confirm("Use default branch? (\(env.defaultBranch))")
         }
 
         let use = useDefault ?? false
-        guard !use else { return env.branch }
+        guard !use else { return env.defaultBranch }
 
         if let remote = try gitInfo.remote(forUrl: gitUrl) {
             let foundBranches = try gitInfo.remoteBranches(for: remote)

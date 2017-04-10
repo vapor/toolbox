@@ -199,10 +199,10 @@ final class EnvironmentApiTests {
             with: token
         )
 
-        XCTAssertEqual(env.branch, "master")
+        XCTAssertEqual(env.defaultBranch, "master")
         XCTAssertEqual(env.name, "new-env")
         XCTAssertEqual(env.replicas, 0)
-        try! XCTAssertEqual(env.hostingId, hosting.uuid())
+        XCTAssertEqual(env.hosting.id, hosting.id)
         XCTAssertEqual(env.running, false)
 
         return env
@@ -219,8 +219,8 @@ final class EnvironmentApiTests {
         )
         
         XCTAssertEqual(patched.name, env.name)
-        XCTAssertEqual(patched.hostingId, env.hostingId)
-        XCTAssertEqual(patched.branch, env.branch)
+        XCTAssertEqual(patched.hosting.id, env.hosting.id)
+        XCTAssertEqual(patched.defaultBranch, env.defaultBranch)
         XCTAssertEqual(patched.replicas, 1)
     }
 }

@@ -84,9 +84,9 @@ public final class Dump: Command {
                         console.info("            Name: ", newLine: false)
                         console.print(env.name)
                         console.info("            Branch: ", newLine: false)
-                        console.print(env.branch)
+                        console.print(env.defaultBranch)
                         console.info("            Id: ", newLine: false)
-                        console.print(env.id.description)
+                        console.print(env.id?.string ?? "<no-id>")
                         console.info("            Running: ", newLine: false)
                         console.print(env.running.description)
                         console.info("            Replicas: ", newLine: false)
@@ -129,9 +129,6 @@ extension Application {
 
 extension Hosting {
     func environments(in envs: [Environment]) -> [Environment] {
-        return envs.filter {
-            // TODO:
-            try! $0.hostingId == id.uuid()
-        }
+        return envs.filter { $0.hosting.id == id }
     }
 }

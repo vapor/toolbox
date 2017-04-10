@@ -3,22 +3,9 @@ import Vapor
 import Foundation
 import Node
 import JSON
+@_exported import Applications
 
 public let applicationApi = ApplicationApi()
-
-//public struct Application: NodeInitializable {
-//    public let id: UUID
-//    public let name: String
-//    public let projectId: UUID
-//    public let repo: String
-//
-//    public init(node: Node) throws {
-//        id = try node.get("id")
-//        name = try node.get("name")
-//        projectId = try node.get("project.id")
-//        repo = try node.get("repoName")
-//    }
-//}
 
 extension Application {
     // TODO:
@@ -110,26 +97,12 @@ extension ApplicationApi {
     }
 }
 
-@_exported import Applications
-
-//public struct Hosting: NodeInitializable {
-//    public let id: UUID
-//    public let gitUrl: String
-//    public let applicationId: UUID
-//
-//    public init(node: Node) throws {
-//        id = try node.get("id")
-//        gitUrl = try node.get("gitUrl")
-//        applicationId = try node.get("application.id")
-//    }
-//}
-
 extension Hosting: Stitched {}
 extension Hosting: Equatable {}
 public func == (lhs: Hosting, rhs: Hosting) -> Bool {
     return lhs.id == rhs.id
     && lhs.gitUrl == rhs.gitUrl
-    && lhs.application == rhs.application
+    && lhs.application.id == rhs.application.id
 }
 
 import Console
@@ -195,28 +168,13 @@ extension ApplicationApi {
     }
 }
 
-public struct Environment: NodeInitializable {
-    public let hostingId: UUID
-    public let branch: String
-    public let id: UUID
-    public let name: String
-    public let running: Bool
-    public let replicas: Int
+public typealias Environment = Applications.Environment
 
-    public init(node: Node) throws {
-        hostingId = try node.get("hosting.id")
-        branch = try node.get("defaultBranch")
-        id = try node.get("id")
-        name = try node.get("name")
-        running = try node.get("running")
-        replicas = try node.get("replicas")
-    }
-}
-
+extension Environment: Stitched {}
 extension Environment: Equatable {}
 public func == (lhs: Environment, rhs: Environment) -> Bool {
-    return lhs.hostingId == rhs.hostingId
-        && lhs.branch == rhs.branch
+    return lhs.hosting.id == rhs.hosting.id
+        && lhs.defaultBranch == rhs.defaultBranch
         && lhs.id == rhs.id
         && lhs.name == rhs.name
         && lhs.running == rhs.running
