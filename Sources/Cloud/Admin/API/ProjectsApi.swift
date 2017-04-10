@@ -5,7 +5,7 @@ import Vapor
 
 extension AdminApi {
     public final class ProjectsApi {
-        public let permissions = PermissionsApi<Project>(endpoint: projectsEndpoint, client: client)
+        public let permissions = PermissionsApi<ProjectPermission, Project>(endpoint: projectsEndpoint, client: client)
 
         public func create(
             name: String,

@@ -7,7 +7,7 @@ extension String: Error {}
 
 extension AdminApi {
     public final class OrganizationApi {
-        public let permissions = PermissionsApi<Organization>(
+        public let permissions = PermissionsApi<OrganizationPermission, Organization>(
             endpoint: organizationsEndpoint,
             client: client
         )

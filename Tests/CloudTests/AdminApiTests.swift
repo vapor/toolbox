@@ -136,7 +136,7 @@ final class OrganizationApiTests {
             .organizations
             .permissions
             .get(for: org, with: token)
-        XCTAssertEqualUnordered(all, owned)
+        XCTAssertEqualUnordered(all, owned, ==)
 
         let new = try adminApi.createAndLogin(
             email: newEmail(),
@@ -155,13 +155,13 @@ final class OrganizationApiTests {
             in: org,
             with: token
         )
-        XCTAssertEqualUnordered(set, all)
+        XCTAssertEqualUnordered(set, all, ==)
         
         let updated = try adminApi.organizations.permissions.get(
             for: org,
             with: new.token
         )
-        XCTAssertEqualUnordered(updated, all)
+        XCTAssertEqualUnordered(updated, all, ==)
     }
 }
 
@@ -252,7 +252,7 @@ final class ProjectApiTests {
             .projects
             .permissions
             .get(for: proj, with: token)
-        XCTAssertEqualUnordered(all, owned)
+        XCTAssertEqualUnordered(all, owned, ==)
 
         let new = try adminApi.createAndLogin(
             email: newEmail(),
@@ -271,13 +271,13 @@ final class ProjectApiTests {
             in: proj,
             with: token
         )
-        XCTAssertEqualUnordered(set, all)
+        XCTAssertEqualUnordered(set, all, ==)
 
         let updated = try adminApi.projects.permissions.get(
             for: proj,
             with: new.token
         )
-        XCTAssertEqualUnordered(updated, all)
+        XCTAssertEqualUnordered(updated, all, ==)
     }
 }
 
@@ -287,6 +287,22 @@ func XCTAssertEqualUnordered<T: Equatable>(_ lhs: [T], _ rhs: [T]) {
         fail()
     }
     let trues = lhs.map(rhs.contains).filter { $0 }
+    if trues.count != lhs.count {
+        fail()
+    }
+}
+
+func XCTAssertEqualUnordered<T>(_ lhs: [T], _ rhs: [T], _ equals: @escaping (T, T) -> Bool) {
+    func fail() { XCTFail("lhs: \(lhs) != \(rhs)") }
+    if lhs.count != rhs.count {
+        fail()
+    }
+
+    let trues = lhs.flatMap { item in
+        return rhs.first { compare in
+            equals(item, compare)
+        }
+    }
     if trues.count != lhs.count {
         fail()
     }
