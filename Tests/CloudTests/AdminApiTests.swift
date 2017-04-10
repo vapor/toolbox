@@ -60,9 +60,9 @@ final class AdminApiTests {
         )
 
         XCTAssertEqual(user.email, email)
-        XCTAssertEqual(user.firstName, "Test")
-        XCTAssertEqual(user.lastName, "User")
-        XCTAssertNil(user.imageUrl)
+        XCTAssertEqual(user.name.first, "Test")
+        XCTAssertEqual(user.name.last, "User")
+        XCTAssertNil(user.image)
 
         return (user, token)
     }
@@ -151,7 +151,7 @@ final class OrganizationApiTests {
 
         let set = try adminApi.organizations.permissions.set(
             all,
-            forUser: new.user.id,
+            forUser: new.user.uuid(),
             in: org,
             with: token
         )
@@ -267,7 +267,7 @@ final class ProjectApiTests {
 
         let set = try adminApi.projects.permissions.set(
             all,
-            forUser: new.user.id,
+            forUser: new.user.uuid(),
             in: proj,
             with: token
         )

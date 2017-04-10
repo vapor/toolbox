@@ -20,6 +20,12 @@ import JSON
 //    }
 //}
 
+extension User {
+    public func uuid() throws -> UUID {
+        return try UUID(node: id)
+    }
+}
+
 extension User: NodeInitializable {
     public convenience init(node: Node) throws {
         guard node.context.isJSON else { throw "Expected JSON" }

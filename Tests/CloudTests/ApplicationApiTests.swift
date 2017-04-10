@@ -127,7 +127,7 @@ final class HostingTests {
 
     func testCreate() throws -> Hosting {
         let hosting = try applicationApi.hosting.create(
-            for: app,
+            forRepo: app.repo,
             git: gitUrl,
             with: token
         )
@@ -138,7 +138,7 @@ final class HostingTests {
     }
 
     func testGet(expect: Hosting?) throws {
-        let found = try? applicationApi.hosting.get(for: app, with: token)
+        let found = try? applicationApi.hosting.get(forRepo: app.repo, with: token)
         XCTAssertEqual(found, expect)
     }
 
@@ -193,7 +193,7 @@ final class EnvironmentApiTests {
 
     func testCreate() throws -> Cloud.Environment {
         let env = try applicationApi.hosting.environments.create(
-            for: app,
+            forRepo: app.repo,
             name: "new-env",
             branch: "master",
             with: token
@@ -244,6 +244,7 @@ final class DeployApiTests {
         return try applicationApi.deploy.push(
             repo: app.repo,
             envName: env.name,
+            gitBranch: nil,
             replicas: nil,
             code: .update,
             with: token

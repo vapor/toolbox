@@ -71,4 +71,9 @@ final class TestConsole: ConsoleProtocol {
     private func exec(_ command: String, args: [String]) {
         executeBuffer.append(command + (!args.isEmpty ? " " + args.joined(separator: " ") : ""))
     }
+
+    /// Upon a console instance being killed for example w/ ctrl+c
+    /// a console should forward the message to kill listeners
+    func registerKillListener(_ listener: @escaping (Int32) -> Void) {
+    }
 }
