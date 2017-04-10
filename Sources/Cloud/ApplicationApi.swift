@@ -52,7 +52,7 @@ extension ApplicationApi {
         request.access = token
 
         var json = JSON([:])
-        try json.set("project.id", project.id.uuidString)
+        try json.set("project.id", project.id)
         try json.set("repoName", repo)
         try json.set("name", name)
         request.json = json
@@ -75,7 +75,8 @@ extension ApplicationApi {
 //    }
 
     public func get(for project: Project, with token: Token) throws -> [Application] {
-        let endpoint = ApplicationApi.applicationsEndpoint + "?projectId=\(project.id.uuidString)"
+        let id = try project.uuid().uuidString
+        let endpoint = ApplicationApi.applicationsEndpoint + "?projectId=\(id)"
         let request = try Request(method: .get, uri: endpoint)
         request.access = token
 

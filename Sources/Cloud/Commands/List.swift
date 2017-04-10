@@ -52,7 +52,9 @@ public final class List: Command {
         orgs.forEach { org in
             console.info("- \(org.name)", newLine: !showIds)
             if showIds {
-                console.print(": \(org.id)")
+                let uuid = try? org.uuid().uuidString
+                let id = uuid ?? "<no-id>"
+                console.print(": \(id)")
             }
         }
     }
@@ -66,7 +68,9 @@ public final class List: Command {
         projs.forEach { proj in
             console.info("- \(proj.name)", newLine: !showIds)
             if showIds {
-                console.print(": \(proj.id)")
+                let uuid = try? proj.uuid().uuidString
+                let id = uuid ?? "<no-id>"
+                console.print(": \(id)")
             }
         }
     }

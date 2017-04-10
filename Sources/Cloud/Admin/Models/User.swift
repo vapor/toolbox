@@ -10,6 +10,17 @@ public protocol Stitched: NodeInitializable {
     init(json: JSON) throws
 }
 
+extension ModelOrIdentifier {
+    var id: Identifier? {
+        switch self {
+        case .identifier(let id):
+            return id
+        case .model(let model):
+            return model.id
+        }
+    }
+}
+
 extension Stitched {
     public func uuid() throws -> UUID {
         return try UUID(node: id)

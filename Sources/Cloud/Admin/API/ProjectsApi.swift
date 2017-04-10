@@ -13,7 +13,8 @@ extension AdminApi {
             in org: Organization,
             with token: Token
         ) throws -> Project {
-            let projectsUri = organizationsEndpoint.finished(with: "/") + org.id.uuidString + "/projects"
+            let id = try org.uuid().uuidString
+            let projectsUri = organizationsEndpoint.finished(with: "/") + id + "/projects"
             let request = try Request(method: .post, uri: projectsUri)
             request.access = token
 
@@ -62,11 +63,12 @@ extension AdminApi {
             // TODO: No endpoint for orgs yet, getting all and filtering manually,
             // update in future
             let projects = try all(with: token)
-            return projects.filter { $0.organizationId == org.id }
+            return projects.filter { $0.organization.id == org.id }
         }
 
         public func update(_ project: Project, name: String?, color: String?, with token: Token) throws -> Project {
-            let endpoint = projectsEndpoint.finished(with: "/") + project.id.uuidString
+            let id = try project.uuid().uuidString
+            let endpoint = projectsEndpoint.finished(with: "/") + id
             let request = try Request(method: .patch, uri: endpoint)
             request.access = token
 

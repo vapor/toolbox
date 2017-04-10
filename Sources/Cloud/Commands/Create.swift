@@ -64,8 +64,10 @@ public final class Create: Command {
 
         console.info("Created: ", newLine: false)
         console.print(new.name)
-        console.info("Id: ", newLine: false)
-        console.print(new.id.uuidString)
+        if let id = new.id?.string {
+            console.info("Id: ", newLine: false)
+            console.print(id)
+        }
     }
 
     private func createProject(with token: Token, args: [String]) throws {

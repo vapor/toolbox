@@ -2,13 +2,8 @@ import Foundation
 import Vapor
 import HTTP
 
-public protocol PermissionModel {
-    var id: UUID { get }
-}
-extension Organization: PermissionModel {}
-extension Project: PermissionModel {}
 
-public final class PermissionsApi<PermissionType: Permission, Model: PermissionModel> {
+public final class PermissionsApi<PermissionType: Permission, Model: Stitched> {
     public let base: String
     public let client: ClientProtocol.Type
 
@@ -18,7 +13,8 @@ public final class PermissionsApi<PermissionType: Permission, Model: PermissionM
     }
 
     public func get(for model: Model, with token: Token) throws -> [PermissionType] {
-        let endpoint = base.finished(with: "/") + model.id.uuidString + "/permissions"
+        let id = try model.uuid().uuidString
+        let endpoint = base.finished(with: "/") + id + "/permissions"
         let request = try Request(method: .get, uri: endpoint)
         request.access = token
 
@@ -36,7 +32,8 @@ public final class PermissionsApi<PermissionType: Permission, Model: PermissionM
     }
 
     public func set(_ permissions: [PermissionType], forUser user: UUID, in model: Model, with token: Token) throws -> [PermissionType] {
-        let endpoint = base.finished(with: "/") + model.id.uuidString + "/permissions"
+        let id = try model.uuid().uuidString
+        let endpoint = base.finished(with: "/") + id + "/permissions"
         let request = try Request(method: .put, uri: endpoint)
         request.access = token
 

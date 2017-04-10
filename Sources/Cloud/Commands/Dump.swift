@@ -39,8 +39,10 @@ public final class Dump: Command {
             console.success("Organization:")
             console.info("  Name: ", newLine: false)
             console.print(org.name)
-            console.info("  Id: ", newLine: false)
-            console.print(org.id.uuidString)
+            if let id = org.id?.string {
+                console.info("  Id: ", newLine: false)
+                console.print(id)
+            }
 
             let pros = org.projects(in: projects)
             pros.forEach { pro in
@@ -49,8 +51,11 @@ public final class Dump: Command {
                 console.print(pro.name)
                 console.info("    Color: ", newLine: false)
                 console.print(pro.color)
-                console.info("    Id: ", newLine: false)
-                console.print(pro.id.uuidString)
+
+                if let id = pro.id?.string {
+                    console.info("    Id: ", newLine: false)
+                    console.print(id)
+                }
 
                 let apps = pro.applications(in: applications)
                 apps.forEach { app in
@@ -94,7 +99,7 @@ public final class Dump: Command {
 extension Organization {
     func projects(in projs: [Project]) -> [Project] {
         return projs.filter { proj in
-            proj.organizationId == id
+            proj.organization.id == id
         }
     }
 }
@@ -102,7 +107,8 @@ extension Organization {
 extension Project {
     func applications(in apps: [Application]) -> [Application] {
         return apps.filter { app in
-            app.projectId == id
+            // TODO: == id
+            try! app.projectId == uuid()
         }
     }
 }
