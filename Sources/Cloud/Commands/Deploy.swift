@@ -276,7 +276,7 @@ func getApp(_ arguments: [String], console: ConsoleProtocol, in proj: Project, w
         bar.start()
         guard let app = try applicationApi.get(for: proj, with: token)
             .lazy
-            .filter({ $0.id.uuidString == id })
+            .filter({ $0.id?.string == id })
             .first else { throw "No application found w/ id: \(id). Try cloud setup again" }
         bar.finish()
         console.info("Loaded \(app.name)")

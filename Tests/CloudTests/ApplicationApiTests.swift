@@ -78,7 +78,7 @@ class ApplicationApiTests {
 
         XCTAssertEqual(app.repo, uniqueRepo, "repo on app create doesn't match")
         XCTAssertEqual(app.name, "My App", "name on app create doesn't match")
-        try XCTAssertEqual(app.projectId, proj.uuid(), "project id on app create doesn't match")
+        XCTAssertEqual(app.projectId, proj.id, "project id on app create doesn't match")
 
         return app
     }
@@ -94,8 +94,8 @@ class ApplicationApiTests {
     func testProjectGet(expectCount: Int, contains: Application) throws {
         let found = try applicationApi.get(for: proj, with: token)
         XCTAssertEqual(found.count, expectCount)
-        try found.forEach { app in
-            try XCTAssertEqual(app.projectId, proj.uuid())
+        found.forEach { app in
+            XCTAssertEqual(app.projectId, proj.id)
         }
         XCTAssert(found.contains(contains), "\(found) doesn't contain \(contains)")
     }
@@ -132,7 +132,7 @@ final class HostingTests {
             with: token
         )
 
-        XCTAssertEqual(hosting.applicationId, app.id)
+        XCTAssertEqual(hosting.application.id, app.id)
         XCTAssertEqual(hosting.gitUrl, gitUrl)
         return hosting
     }
@@ -151,7 +151,7 @@ final class HostingTests {
         )
 
         XCTAssertEqual(new.gitUrl, subGit)
-        XCTAssertEqual(new.applicationId, app.id)
+        XCTAssertEqual(new.application.id, app.id)
         XCTAssertNotEqual(new, input)
 
         // Revert
@@ -202,7 +202,7 @@ final class EnvironmentApiTests {
         XCTAssertEqual(env.branch, "master")
         XCTAssertEqual(env.name, "new-env")
         XCTAssertEqual(env.replicas, 0)
-        XCTAssertEqual(env.hostingId, hosting.id)
+        try! XCTAssertEqual(env.hostingId, hosting.uuid())
         XCTAssertEqual(env.running, false)
 
         return env

@@ -68,8 +68,7 @@ public final class List: Command {
         projs.forEach { proj in
             console.info("- \(proj.name)", newLine: !showIds)
             if showIds {
-                let uuid = try? proj.uuid().uuidString
-                let id = uuid ?? "<no-id>"
+                let id = proj.id?.string ?? "<no-id>"
                 console.print(": \(id)")
             }
         }
@@ -85,7 +84,8 @@ public final class List: Command {
             console.info("- \(app.name)", newLine: false)
             console.print(" (\(app.repo).vapor.cloud)", newLine: !showIds)
             if showIds {
-                console.print(": \(app.id)")
+                let id = app.id?.string ?? "<no-id>"
+                console.print(": \(id)")
             }
         }
     }

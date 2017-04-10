@@ -9,8 +9,8 @@ let package = Package(
         Target(name: "Shared"),
     ],
     dependencies: [
-        // Console protocols, terminal, and commands
         .Package(url: "git@github.com:vapor-cloud/admin.git", majorVersion: 0),
+        .Package(url: "git@github.com:vapor-cloud/application.git", majorVersion: 0),
         .Package(url: "https://github.com/vapor/console.git", Version(2,0,0, prereleaseIdentifiers: ["beta"])),
         .Package(url: "https://github.com/vapor/json.git", Version(2,0,0, prereleaseIdentifiers: ["beta"])),
         .Package(url: "https://github.com/vapor/vapor.git", Version(2,0,0, prereleaseIdentifiers: ["beta"])),

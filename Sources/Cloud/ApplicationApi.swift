@@ -6,27 +6,35 @@ import JSON
 
 public let applicationApi = ApplicationApi()
 
-public struct Application: NodeInitializable {
-    public let id: UUID
-    public let name: String
-    public let projectId: UUID
-    public let repo: String
+//public struct Application: NodeInitializable {
+//    public let id: UUID
+//    public let name: String
+//    public let projectId: UUID
+//    public let repo: String
+//
+//    public init(node: Node) throws {
+//        id = try node.get("id")
+//        name = try node.get("name")
+//        projectId = try node.get("project.id")
+//        repo = try node.get("repoName")
+//    }
+//}
 
-    public init(node: Node) throws {
-        id = try node.get("id")
-        name = try node.get("name")
-        projectId = try node.get("project.id")
-        repo = try node.get("repoName")
+extension Application {
+    // TODO:
+    //    @available(*, deprecated: 1.0, renamed: "repoName")
+    public var repo: String {
+        return repoName
     }
 }
 
+extension Application: Stitched {}
 extension Application: Equatable {}
-
 public func == (lhs: Application, rhs: Application) -> Bool {
     return lhs.id == rhs.id
         && lhs.name == rhs.name
         && lhs.projectId == rhs.projectId
-        && lhs.repo == rhs.repo
+        && lhs.repoName == rhs.repoName
 }
 
 public final class ApplicationApi {
@@ -102,24 +110,26 @@ extension ApplicationApi {
     }
 }
 
-public struct Hosting: NodeInitializable {
-    public let id: UUID
-    public let gitUrl: String
-    public let applicationId: UUID
+@_exported import Applications
 
-    public init(node: Node) throws {
-        id = try node.get("id")
-        gitUrl = try node.get("gitUrl")
-        applicationId = try node.get("application.id")
-    }
-}
+//public struct Hosting: NodeInitializable {
+//    public let id: UUID
+//    public let gitUrl: String
+//    public let applicationId: UUID
+//
+//    public init(node: Node) throws {
+//        id = try node.get("id")
+//        gitUrl = try node.get("gitUrl")
+//        applicationId = try node.get("application.id")
+//    }
+//}
 
+extension Hosting: Stitched {}
 extension Hosting: Equatable {}
-
 public func == (lhs: Hosting, rhs: Hosting) -> Bool {
     return lhs.id == rhs.id
     && lhs.gitUrl == rhs.gitUrl
-    && lhs.applicationId == rhs.applicationId
+    && lhs.application == rhs.application
 }
 
 import Console

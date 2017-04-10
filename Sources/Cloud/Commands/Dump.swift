@@ -64,15 +64,19 @@ public final class Dump: Command {
                     console.print(app.name)
                     console.info("      Repo: ", newLine: false)
                     console.print(app.repo)
-                    console.info("      Id: ", newLine: false)
-                    console.print(app.id.uuidString)
+                    if let id = app.id?.string {
+                        console.info("      Id: ", newLine: false)
+                        console.print(id)
+                    }
 
                     guard let host = app.hosting(in: hosts) else { return }
                     console.success("      Hosting: ")
                     console.info("          Git: ", newLine: false)
                     console.print(host.gitUrl)
-                    console.info("          Id: ", newLine: false)
-                    console.print(host.id.uuidString)
+                    if let id = host.id?.string {
+                        console.info("          Id: ", newLine: false)
+                        console.print(id)
+                    }
 
                     let hostEnvs = host.environments(in: envs)
                     hostEnvs.forEach { env in
@@ -107,8 +111,7 @@ extension Organization {
 extension Project {
     func applications(in apps: [Application]) -> [Application] {
         return apps.filter { app in
-            // TODO: == id
-            try! app.projectId == uuid()
+            return app.projectId == id
         }
     }
 }
@@ -118,7 +121,7 @@ extension Application {
         return hosts
             .lazy
             .filter { host in
-                host.applicationId == self.id
+                host.application.id == self.id
             }
             .first
     }
@@ -126,6 +129,9 @@ extension Application {
 
 extension Hosting {
     func environments(in envs: [Environment]) -> [Environment] {
-        return envs.filter { $0.hostingId == id }
+        return envs.filter {
+            // TODO:
+            try! $0.hostingId == id.uuid()
+        }
     }
 }
