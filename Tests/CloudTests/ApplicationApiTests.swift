@@ -176,15 +176,16 @@ final class EnvironmentApiTests {
     }
 
     func test() throws -> Cloud.Environment {
-        try testAll(expectCount: 0, contains: nil)
-        let env = try testCreate()
-        try testAll(expectCount: 1, contains: env)
-        try testUpdate(with: env)
+        try! testAll(expectCount: 0, contains: nil)
+        let env = try! testCreate()
+        try! testAll(expectCount: 1, contains: env)
+        try testMakeDB(with: env)
+        try! testUpdate(with: env)
         return env
     }
 
     func testAll(expectCount: Int, contains: Cloud.Environment?) throws {
-        let found = try applicationApi.hosting.environments.all(for: app, with: token)
+        let found = try! applicationApi.hosting.environments.all(for: app, with: token)
         XCTAssertEqual(found.count, expectCount)
         if let contains = contains {
             XCTAssert(found.contains(contains))
@@ -192,7 +193,7 @@ final class EnvironmentApiTests {
     }
 
     func testCreate() throws -> Cloud.Environment {
-        let env = try applicationApi.hosting.environments.create(
+        let env = try! applicationApi.hosting.environments.create(
             forRepo: app.repoName,
             name: "new-env",
             branch: "master",
@@ -208,10 +209,18 @@ final class EnvironmentApiTests {
         return env
     }
 
+    func testMakeDB(with env: Cloud.Environment) throws {
+        let _ = try applicationApi.hosting.environments.database.create(
+            forRepo: app.repoName,
+            envName: env.name,
+            with: token
+        )
+    }
+
     func testUpdate(with env: Cloud.Environment) throws {
         XCTAssertEqual(env.replicas, 0)
 
-        let patched = try applicationApi.hosting.environments.setReplicas(
+        let patched = try! applicationApi.hosting.environments.setReplicas(
             count: 1,
             forRepo: app.repoName,
             env: env,
@@ -236,11 +245,11 @@ final class DeployApiTests {
     }
 
     func test() throws {
-        let _ = try testPush()
-        let _ = try testScale()
+        let _ = try! testPush()
+        let _ = try! testScale()
     }
 
-    func testPush() throws -> Deploy {
+    func testPush() throws -> DeployInfo {
         return try applicationApi.deploy.push(
             repo: app.repoName,
             envName: env.name,

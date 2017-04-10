@@ -309,10 +309,9 @@ extension ApplicationApi {
     }
 }
 
-public struct Deploy: NodeInitializable {
+public struct DeployInfo: NodeInitializable {
     public let hosting: Hosting
     public let defaultBranch: String
-    // TODO: Rename deployOperations or operations
     public let deployments: [Deployment]
     public let id: UUID
     public let name: String
@@ -342,12 +341,32 @@ extension Deployment.Method {
     }
 }
 
-//public typealias asdf = Deploy.Deployment
-
-public enum BuildType: String {
+public typealias BuildType = Deployment.CodeMethod
+extension BuildType {
     static let all: [BuildType] = [.incremental, .update, .clean]
-    
-    case clean, incremental, update
+    public var rawValue: String {
+        switch self {
+        case .clean:
+            return "clean"
+        case .incremental:
+            return "incremental"
+        case .update:
+            return "update"
+        }
+    }
+
+    public init?(rawValue: String) {
+        switch rawValue {
+        case "clean":
+            self = .clean
+        case "incremental":
+            self = .incremental
+        case "update":
+            self = .update
+        default:
+            return nil
+        }
+    }
 }
 
 enum DeployError: Error {
@@ -363,7 +382,7 @@ extension ApplicationApi {
             replicas: Int?,
             code: BuildType,
             with token: Token
-            ) throws -> Deploy {
+            ) throws -> DeployInfo {
             let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/")
                 + repo
                 + "/hosting/environments/"
@@ -388,7 +407,7 @@ extension ApplicationApi {
                 throw DeployError.noHosting(for: nil)
             }
 
-            return try Deploy(node: response.json)
+            return try DeployInfo(node: response.json)
         }
 
         public func scale(repo: String, envName: String, replicas: Int, with token: Token) throws {

@@ -36,67 +36,53 @@ public final class Dump: Command {
         bar.finish()
 
         organizations.forEach { org in
-            console.success("Organization:")
-            console.info("  Name: ", newLine: false)
-            console.print(org.name)
-            if let id = org.id?.string {
-                console.info("  Id: ", newLine: false)
-                console.print(id)
-            }
+            console.log(org, padding: 0)
 
             let pros = org.projects(in: projects)
             pros.forEach { pro in
-                console.success("  Project:")
-                console.info("    Name: ", newLine: false)
-                console.print(pro.name)
-                console.info("    Color: ", newLine: false)
-                console.print(pro.color)
-
-                if let id = pro.id?.string {
-                    console.info("    Id: ", newLine: false)
-                    console.print(id)
-                }
+                console.log(pro, padding: 2)
 
                 let apps = pro.applications(in: applications)
                 apps.forEach { app in
-                    console.success("    Application:")
-                    console.info("      Name: ", newLine: false)
-                    console.print(app.name)
-                    console.info("      Repo: ", newLine: false)
-                    console.print(app.repoName)
-                    if let id = app.id?.string {
-                        console.info("      Id: ", newLine: false)
-                        console.print(id)
-                    }
+                    console.log(app, padding: 4)
+//                    console.success("    Application:")
+//                    console.info("      Name: ", newLine: false)
+//                    console.print(app.name)
+//                    console.info("      Repo: ", newLine: false)
+//                    console.print(app.repoName)
+//                    if let id = app.id?.string {
+//                        console.info("      Id: ", newLine: false)
+//                        console.print(id)
+//                    }
 
                     guard let host = app.hosting(in: hosts) else { return }
-                    console.success("      Hosting: ")
-                    console.info("          Git: ", newLine: false)
-                    console.print(host.gitUrl)
-                    if let id = host.id?.string {
-                        console.info("          Id: ", newLine: false)
-                        console.print(id)
-                    }
+                    console.log(host, padding: 6)
+//                    console.success("      Hosting: ")
+//                    console.info("        Git: ", newLine: false)
+//                    console.print(host.gitUrl)
+//                    if let id = host.id?.string {
+//                        console.info("        Id: ", newLine: false)
+//                        console.print(id)
+//                    }
 
                     let hostEnvs = host.environments(in: envs)
                     hostEnvs.forEach { env in
-                        console.success("          Environment:")
-                        console.info("            Name: ", newLine: false)
-                        console.print(env.name)
-                        console.info("            Branch: ", newLine: false)
-                        console.print(env.defaultBranch)
-                        console.info("            Id: ", newLine: false)
-                        console.print(env.id?.string ?? "<no-id>")
-                        console.info("            Running: ", newLine: false)
-                        console.print(env.running.description)
-                        console.info("            Replicas: ", newLine: false)
-                        console.print(env.replicas.description)
+                        console.log(env, padding: 8)
+//                        console.success("        Environment:")
+//                        console.info("          Name: ", newLine: false)
+//                        console.print(env.name)
+//                        console.info("          Branch: ", newLine: false)
+//                        console.print(env.defaultBranch)
+//                        console.info("          Id: ", newLine: false)
+//                        console.print(env.id?.string ?? "<no-id>")
+//                        console.info("          Running: ", newLine: false)
+//                        console.print(env.running.description)
+//                        console.info("          Replicas: ", newLine: false)
+//                        console.print(env.replicas.description)
                     }
                 }
             }
         }
-
-
     }
 }
 
