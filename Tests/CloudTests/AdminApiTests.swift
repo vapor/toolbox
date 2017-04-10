@@ -15,8 +15,8 @@ class ApiTests: XCTestCase {
     override func setUp() {
         super.setUp()
         // TODO: Uncomment if staging is consistent
-        AdminApi.base = "https://admin-api-staging.vapor.cloud/admin"
-        ApplicationApi.base = "https://application-api-staging.vapor.cloud/application"
+//        AdminApi.base = "https://admin-api-staging.vapor.cloud/admin"
+//        ApplicationApi.base = "https://application-api-staging.vapor.cloud/application"
     }
 
     func testApis() throws {

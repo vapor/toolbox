@@ -26,7 +26,7 @@ public final class Dump: Command {
             try applicationApi.get(for: project, with: token)
         }
         let hosts: [Hosting] = applications.flatMap { app in
-            try? applicationApi.hosting.get(forRepo: app.repo, with: token)
+            try? applicationApi.hosting.get(forRepo: app.repoName, with: token)
         }
         let envs: [Environment] = applications.flatMap { app in
             try? applicationApi.hosting.environments.all(for: app, with: token)
@@ -63,7 +63,7 @@ public final class Dump: Command {
                     console.info("      Name: ", newLine: false)
                     console.print(app.name)
                     console.info("      Repo: ", newLine: false)
-                    console.print(app.repo)
+                    console.print(app.repoName)
                     if let id = app.id?.string {
                         console.info("      Id: ", newLine: false)
                         console.print(id)

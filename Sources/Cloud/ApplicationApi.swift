@@ -4,16 +4,9 @@ import Foundation
 import Node
 import JSON
 @_exported import Applications
+@_exported import Deploy
 
 public let applicationApi = ApplicationApi()
-
-extension Application {
-    // TODO:
-    //    @available(*, deprecated: 1.0, renamed: "repoName")
-    public var repo: String {
-        return repoName
-    }
-}
 
 extension Application: Stitched {}
 extension Application: Equatable {}
@@ -154,7 +147,7 @@ extension ApplicationApi {
         }
 
         public func update(for application: Application, git: String, with token: Token) throws -> Hosting {
-            let endpoint = applicationsEndpoint.finished(with: "/") + application.repo + "/hosting"
+            let endpoint = applicationsEndpoint.finished(with: "/") + application.repoName + "/hosting"
             let request = try Request(method: .patch, uri: endpoint)
             request.access = token
 
@@ -224,7 +217,7 @@ extension ApplicationApi {
         }
 
         public func all(for application: Application, with token: Token) throws -> [Environment] {
-            return try all(forRepo: application.repo, with: token)
+            return try all(forRepo: application.repoName, with: token)
         }
 
         public func all(forRepo repo: String, with token: Token) throws -> [Environment] {
@@ -238,19 +231,8 @@ extension ApplicationApi {
     }
 }
 
-public struct Config: NodeInitializable {
-    public let id: UUID
-    public let key: String
-    public let value: String
-    public let environmentId: UUID
-
-    public init(node: Node) throws {
-        id = try node.get("id")
-        key = try node.get("key")
-        value = try node.get("value")
-        environmentId = try node.get("environment.id")
-    }
-}
+public typealias Config = Configuration
+extension Config: Stitched {}
 
 extension ApplicationApi {
     public final class ConfigsApi {
@@ -327,7 +309,6 @@ extension ApplicationApi {
     }
 }
 
-
 public struct Deploy: NodeInitializable {
     public let hosting: Hosting
     public let defaultBranch: String
@@ -349,54 +330,19 @@ public struct Deploy: NodeInitializable {
     }
 }
 
-public struct Git: NodeInitializable {
-    public let branch: String
-    public let url: String
-
-    public init(node: Node) throws {
-        branch = try node.get("branch")
-        url = try node.get("url")
+extension Deployment: Stitched {}
+extension Deployment.Method {
+    public var isScaleDeploy: Bool {
+        guard case .scale = self else { return false }
+        return true
+    }
+    public var isCodeDeploy: Bool {
+        guard case .code = self else { return false }
+        return true
     }
 }
 
-public enum DeployType: String, NodeInitializable {
-    case scale, code
-
-    public init(node: Node) throws {
-        guard
-            let string = node.string,
-            let new = DeployType(rawValue: string)
-            else {
-                throw NodeError.unableToConvert(input: node, expectation: "String", path: [])
-        }
-        self = new
-    }
-}
-
-// TODO: Rename, DeployOperation
-public struct Deployment: NodeInitializable {
-    public let repo: String
-    public let environment: String
-    public let git: Git
-    public let id: UUID
-    public let replicas: Int
-    public let status: String
-    public let version: String
-    public let domains: [String]
-    public let type: DeployType
-
-    public init(node: Node) throws {
-        repo = try node.get("environment.application.repoName")
-        environment = try node.get("environment.name")
-        git = try node.get("git")
-        id = try node.get("id")
-        replicas = try node.get("replicas")
-        status = try node.get("status")
-        type = try node.get("type.name")
-        version = try node.get("version")
-        domains = try node.get("domains")
-    }
-}
+//public typealias asdf = Deploy.Deployment
 
 public enum BuildType: String {
     static let all: [BuildType] = [.incremental, .update, .clean]

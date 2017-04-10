@@ -71,20 +71,21 @@ public final class DeployCloud: Command {
         }
 
         /// No output for scale apis
-        if let _ = deploy.deployments.lazy.filter({ $0.type == .scale }).first {
+        if let _ = deploy.deployments.lazy.filter({ $0.type.isScaleDeploy }).first {
             let scaleBar = console.loadingBar(title: "Scaling", animated: false)
             scaleBar.finish()
         }
 
         /// Build Logs
-        guard let code = deploy.deployments.lazy.filter({ $0.type == .code }).first else { return }
+        guard let codeDeployment = deploy.deployments.lazy.filter({ $0.type.isCodeDeploy }).first else { return }
         console.info("Connecting to build logs ...")
         var waitingInQueue = console.loadingBar(title: "Waiting in Queue")
         defer { waitingInQueue.fail() }
         waitingInQueue.start()
 
+        let id = try codeDeployment.uuid().uuidString
         var logsBar: LoadingBar?
-        try Redis.subscribeDeployLog(id: code.id.uuidString) { update in
+        try Redis.subscribeDeployLog(id: id) { update in
             waitingInQueue.finish()
 
             if update.type == .start {
@@ -137,7 +138,7 @@ public final class DeployCloud: Command {
             }
 
             if apps.count == 1 {
-                return apps[0].repo
+                return apps[0].repoName
             } else {
                 console.info("I found too many apps, that match remotes in this repo,")
                 console.info("yell at Logan to ask me to use one of these.")
@@ -315,15 +316,15 @@ func getRepo(_ arguments: [String], console: ConsoleProtocol, with token: Token)
         } else if apps.count == 1 {
             let found = apps[0]
             console.print("Detected application ", newLine: false)
-            console.info(found.repo, newLine: false)
+            console.info(found.repoName, newLine: false)
             console.print(" using git")
-            return found.repo
+            return found.repoName
         } else {
             console.info("I found too many apps, that match remotes in this repo,")
             console.info("yell at Logan to ask me to use one of these.")
             console.info("Instead, I'm going to ask a bunch of questions.")
             apps.forEach { app in
-                console.print("- \(app.name) (\(app.repo).vapor.cloud)")
+                console.print("- \(app.name) (\(app.repoName).vapor.cloud)")
             }
         }
     }
@@ -331,7 +332,7 @@ func getRepo(_ arguments: [String], console: ConsoleProtocol, with token: Token)
     let org = try getOrganization(arguments, console: console, with: token)
     let proj = try getProject(arguments, console: console, in: org, with: token)
     let app = try getApp(arguments, console: console, in: proj, with: token)
-    return app.repo
+    return app.repoName
 }
 
 func selectOrganization(queryTitle: String, using console: ConsoleProtocol, with token: Token) throws -> Organization {
@@ -389,7 +390,7 @@ func selectApplication(
         return try console.giveChoice(
             title: queryTitle,
             in: apps
-        ) { app in return "\(app.name) (\(app.repo).vapor.cloud)" }
+        ) { app in return "\(app.name) (\(app.repoName).vapor.cloud)" }
     }
 }
 

@@ -82,7 +82,7 @@ public final class List: Command {
 
         apps.forEach { app in
             console.info("- \(app.name)", newLine: false)
-            console.print(" (\(app.repo).vapor.cloud)", newLine: !showIds)
+            console.print(" (\(app.repoName).vapor.cloud)", newLine: !showIds)
             if showIds {
                 let id = app.id?.string ?? "<no-id>"
                 console.print(": \(id)")

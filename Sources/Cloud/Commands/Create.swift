@@ -122,12 +122,12 @@ public final class Create: Command {
         //print("If user exits after creating, before setting up hosting, needs a way to add hosting/env later")
         //print("ideally, detect no hosting, and create automatically")
 
-        _ = try setupHosting(forRepo: new.repo, with: token, args: args)
+        _ = try setupHosting(forRepo: new.repoName, with: token, args: args)
 
         let environment = console.loadingBar(title: "Creating Production Environment")
         let env = try environment.perform {
             try applicationApi.hosting.environments.create(
-                forRepo: new.repo,
+                forRepo: new.repoName,
                 name: "production",
                 branch: "master",
                 with: token
@@ -155,7 +155,7 @@ public final class Create: Command {
         let deployNow = console.confirm("Would you like to deploy \(new.name) now?")
         guard deployNow else { return }
         let deploy = DeployCloud(console: console)
-        let args = ["deploy", "--app=\(new.repo)", "--env=\(env.name)"]
+        let args = ["deploy", "--app=\(new.repoName)", "--env=\(env.name)"]
         try deploy.run(arguments: args)
     }
 
@@ -297,6 +297,6 @@ public final class Create: Command {
             using: console,
             with: token
         )
-        return app.repo
+        return app.repoName
     }
 }

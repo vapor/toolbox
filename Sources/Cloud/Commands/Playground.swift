@@ -71,7 +71,7 @@ public final class Add: Command {
         defer { creating.fail() }
         creating.start()
         _ = try applicationApi.hosting.create(
-            forRepo: app.repo,
+            forRepo: app.repoName,
             git: git,
             with: token
         )
@@ -162,7 +162,7 @@ public final class CloudInit: Command {
         console.info()
 
         guard projectInfo.isVaporProject() else {
-            console.info("Call 'vapor cloud deploy \(app.repo)'")
+            console.info("Call 'vapor cloud deploy \(app.repoName)'")
             console.info("to push your app.")
             let deployNow = console.confirm("Would you like to deploy now?")
             guard deployNow else {
@@ -170,7 +170,7 @@ public final class CloudInit: Command {
                 return
             }
             let deploy = DeployCloud(console: console)
-            try deploy.run(arguments: ["deploy", app.repo])
+            try deploy.run(arguments: ["deploy", app.repoName])
             return
         }
 
@@ -221,7 +221,7 @@ public final class CloudInit: Command {
         try config.set("updated", Date().timeIntervalSince1970)
         try config.set("project.id", app.projectId)
         try config.set("application.id", app.id)
-        try config.set("application.repo", app.repo)
+        try config.set("application.repo", app.repoName)
         let file = try config.serialize(prettyPrint: true)
         try DataFile.save(bytes: file, to: localConfigPath)
         return true
@@ -236,14 +236,14 @@ public final class CloudInit: Command {
         if !applications.isEmpty {
             console.info("I found the following apps matching '\(git)':")
             applications.forEach { app in
-                console.print("- \(app.name) (\(app.repo).vapor.cloud)")
+                console.print("- \(app.name) (\(app.repoName).vapor.cloud)")
             }
             let useExisting = console.confirm("Would you like to use one of these?")
             if useExisting {
                 return try console.giveChoice(
                     title: "Which one?",
                     in: applications
-                ) { return "\($0.name) (\($0.repo).vapor.cloud)" }
+                ) { return "\($0.name) (\($0.repoName).vapor.cloud)" }
             }
         }
 
@@ -313,12 +313,12 @@ public final class CloudInit: Command {
             )
         }
 
-        _ = try setupHosting(forRepo: new.repo, gitUrl: gitUrl, with: token)
+        _ = try setupHosting(forRepo: new.repoName, gitUrl: gitUrl, with: token)
 
         let environment = console.loadingBar(title: "Creating Production Environment")
         let env = try environment.perform {
             return try applicationApi.hosting.environments.create(
-                forRepo: new.repo,
+                forRepo: new.repoName,
                 name: "production",
                 branch: "master",
                 with: token
@@ -569,7 +569,7 @@ public final class CloudSetup: Command {
         //        try json.set("organization.id", org.id)
         //        try json.set("project.id", proj.id)
         //        try json.set("application.id", app.id)
-        try json.set("app.repoName", app.repo)
+        try json.set("app.repoName", app.repoName)
         //        try json.set("replicas", replicas)
         let file = try json.serialize(prettyPrint: true)
         try DataFile.save(bytes: file, to: localConfigPath)
