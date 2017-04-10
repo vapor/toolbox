@@ -34,6 +34,11 @@ do {
         ], help: [
             "Commands to help deploy to Heroku."
         ]),
+        Group(id: "provider", commands: [
+            ProviderAdd(console: terminal)
+        ], help: [
+            "Commands to help manage providers."
+        ]),
     ], arguments: Array(iterator), help: [
         "Join our Slack if you have questions, need help,",
         "or want to contribute: http://vapor.team"
