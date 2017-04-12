@@ -7,7 +7,7 @@ extension String: Error {}
 
 extension AdminApi {
     public final class OrganizationApi {
-        public let permissions = PermissionsApi<Organization>(
+        public let permissions = PermissionsApi<OrganizationPermission, Organization>(
             endpoint: organizationsEndpoint,
             client: client
         )
@@ -26,8 +26,14 @@ extension AdminApi {
             request.access = token
 
             let response = try client.respond(to: request)
+            
             // TODO: Should handle pagination
             return try [Organization](node: response.json?["data"])
+        }
+
+        public func get(id: Identifier?, with token: Token) throws -> Organization {
+            let uuid = try id.uuid()
+            return try get(id: uuid, with: token)
         }
 
         public func get(id: UUID, with token: Token) throws -> Organization {

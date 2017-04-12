@@ -15,8 +15,8 @@ class ApiTests: XCTestCase {
     override func setUp() {
         super.setUp()
         // TODO: Uncomment if staging is consistent
-        AdminApi.base = "https://admin-api-staging.vapor.cloud/admin"
-        ApplicationApi.base = "https://application-api-staging.vapor.cloud/application"
+//        AdminApi.base = "https://admin-api-staging.vapor.cloud/admin"
+//        ApplicationApi.base = "https://application-api-staging.vapor.cloud/application"
     }
 
     func testApis() throws {
@@ -60,9 +60,9 @@ final class AdminApiTests {
         )
 
         XCTAssertEqual(user.email, email)
-        XCTAssertEqual(user.firstName, "Test")
-        XCTAssertEqual(user.lastName, "User")
-        XCTAssertNil(user.imageUrl)
+        XCTAssertEqual(user.name.first, "Test")
+        XCTAssertEqual(user.name.last, "User")
+        XCTAssertNil(user.image)
 
         return (user, token)
     }
@@ -136,7 +136,7 @@ final class OrganizationApiTests {
             .organizations
             .permissions
             .get(for: org, with: token)
-        XCTAssertEqualUnordered(all, owned)
+        XCTAssertEqualUnordered(all, owned, ==)
 
         let new = try adminApi.createAndLogin(
             email: newEmail(),
@@ -151,17 +151,17 @@ final class OrganizationApiTests {
 
         let set = try adminApi.organizations.permissions.set(
             all,
-            forUser: new.user.id,
+            forUser: new.user.uuid(),
             in: org,
             with: token
         )
-        XCTAssertEqualUnordered(set, all)
+        XCTAssertEqualUnordered(set, all, ==)
         
         let updated = try adminApi.organizations.permissions.get(
             for: org,
             with: new.token
         )
-        XCTAssertEqualUnordered(updated, all)
+        XCTAssertEqualUnordered(updated, all, ==)
     }
 }
 
@@ -195,7 +195,7 @@ final class ProjectApiTests {
         }
 
         found.forEach { proj in
-            XCTAssertEqual(proj.organizationId, org.id)
+            XCTAssertEqual(proj.organization.id, org.id)
         }
     }
 
@@ -207,7 +207,7 @@ final class ProjectApiTests {
             with: token
         )
 
-        XCTAssertEqual(new.organizationId, org.id)
+        XCTAssertEqual(new.organization.id, org.id)
         XCTAssertEqual(new.name, "My Proj")
         return new
     }
@@ -252,7 +252,7 @@ final class ProjectApiTests {
             .projects
             .permissions
             .get(for: proj, with: token)
-        XCTAssertEqualUnordered(all, owned)
+        XCTAssertEqualUnordered(all, owned, ==)
 
         let new = try adminApi.createAndLogin(
             email: newEmail(),
@@ -267,17 +267,17 @@ final class ProjectApiTests {
 
         let set = try adminApi.projects.permissions.set(
             all,
-            forUser: new.user.id,
+            forUser: new.user.uuid(),
             in: proj,
             with: token
         )
-        XCTAssertEqualUnordered(set, all)
+        XCTAssertEqualUnordered(set, all, ==)
 
         let updated = try adminApi.projects.permissions.get(
             for: proj,
             with: new.token
         )
-        XCTAssertEqualUnordered(updated, all)
+        XCTAssertEqualUnordered(updated, all, ==)
     }
 }
 
@@ -287,6 +287,22 @@ func XCTAssertEqualUnordered<T: Equatable>(_ lhs: [T], _ rhs: [T]) {
         fail()
     }
     let trues = lhs.map(rhs.contains).filter { $0 }
+    if trues.count != lhs.count {
+        fail()
+    }
+}
+
+func XCTAssertEqualUnordered<T>(_ lhs: [T], _ rhs: [T], _ equals: @escaping (T, T) -> Bool) {
+    func fail() { XCTFail("lhs: \(lhs) != \(rhs)") }
+    if lhs.count != rhs.count {
+        fail()
+    }
+
+    let trues = lhs.flatMap { item in
+        return rhs.first { compare in
+            equals(item, compare)
+        }
+    }
     if trues.count != lhs.count {
         fail()
     }

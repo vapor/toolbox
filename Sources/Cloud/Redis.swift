@@ -19,6 +19,7 @@ public enum UpdateType: String, NodeInitializable {
         self = new
     }
 }
+
 public struct Update: NodeInitializable {
     public let message: String
     public let success: Bool

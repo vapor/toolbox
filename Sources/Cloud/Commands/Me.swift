@@ -21,13 +21,16 @@ public final class Me: Command {
         let user = try bar.perform {
             try adminApi.user.get(with: token)
         }
-        console.success("Name: ", newLine: false)
-        console.print("\(user.firstName) \(user.lastName)")
-        console.success("Email: ", newLine: false)
-        console.print("\(user.email)")
-
-        guard arguments.flag("id") else { return }
-        console.success("Id: ", newLine: false)
-        console.print("\(user.id.uuidString)")
+        console.log(user)
+//        console.success("Name: ", newLine: false)
+//        console.print(user.name.full)
+//        console.success("Email: ", newLine: false)
+//        console.print("\(user.email)")
+//
+//        guard arguments.flag("id") else { return }
+//        if let id = user.id?.string {
+//            console.success("Id: ", newLine: false)
+//            console.print(id)
+//        }
     }
 }

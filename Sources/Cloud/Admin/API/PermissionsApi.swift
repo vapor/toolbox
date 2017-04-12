@@ -2,13 +2,8 @@ import Foundation
 import Vapor
 import HTTP
 
-public protocol PermissionModel {
-    var id: UUID { get }
-}
-extension Organization: PermissionModel {}
-extension Project: PermissionModel {}
 
-public final class PermissionsApi<Model: PermissionModel> {
+public final class PermissionsApi<PermissionType: Permission, Model: Stitched> {
     public let base: String
     public let client: ClientProtocol.Type
 
@@ -17,26 +12,28 @@ public final class PermissionsApi<Model: PermissionModel> {
         self.client = client
     }
 
-    public func get(for model: Model, with token: Token) throws -> [Permission] {
-        let endpoint = base.finished(with: "/") + model.id.uuidString + "/permissions"
+    public func get(for model: Model, with token: Token) throws -> [PermissionType] {
+        let id = try model.uuid().uuidString
+        let endpoint = base.finished(with: "/") + id + "/permissions"
         let request = try Request(method: .get, uri: endpoint)
         request.access = token
 
         let response = try client.respond(to: request)
-        return try [Permission](node: response.json)
+        return try [PermissionType](node: response.json)
     }
 
-    public func all(with token: Token) throws -> [Permission] {
+    public func all(with token: Token) throws -> [PermissionType] {
         let endpoint = base.finished(with: "/") + "permissions"
         let request = try Request(method: .get, uri: endpoint)
         request.access = token
 
         let response = try client.respond(to: request)
-        return try [Permission](node: response.json)
+        return try [PermissionType](node: response.json)
     }
 
-    public func set(_ permissions: [Permission], forUser user: UUID, in model: Model, with token: Token) throws -> [Permission] {
-        let endpoint = base.finished(with: "/") + model.id.uuidString + "/permissions"
+    public func set(_ permissions: [PermissionType], forUser user: UUID, in model: Model, with token: Token) throws -> [PermissionType] {
+        let id = try model.uuid().uuidString
+        let endpoint = base.finished(with: "/") + id + "/permissions"
         let request = try Request(method: .put, uri: endpoint)
         request.access = token
 
@@ -46,6 +43,6 @@ public final class PermissionsApi<Model: PermissionModel> {
         request.json = json
 
         let response = try client.respond(to: request)
-        return try [Permission](node: response.json)
+        return try [PermissionType](node: response.json)
     }
 }

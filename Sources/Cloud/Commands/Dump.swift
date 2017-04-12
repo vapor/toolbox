@@ -26,7 +26,7 @@ public final class Dump: Command {
             try applicationApi.get(for: project, with: token)
         }
         let hosts: [Hosting] = applications.flatMap { app in
-            try? applicationApi.hosting.get(forRepo: app.repo, with: token)
+            try? applicationApi.hosting.get(forRepo: app.repoName, with: token)
         }
         let envs: [Environment] = applications.flatMap { app in
             try? applicationApi.hosting.environments.all(for: app, with: token)
@@ -36,65 +36,60 @@ public final class Dump: Command {
         bar.finish()
 
         organizations.forEach { org in
-            console.success("Organization:")
-            console.info("  Name: ", newLine: false)
-            console.print(org.name)
-            console.info("  Id: ", newLine: false)
-            console.print(org.id.uuidString)
+            console.log(org, padding: 0)
 
             let pros = org.projects(in: projects)
             pros.forEach { pro in
-                console.success("  Project:")
-                console.info("    Name: ", newLine: false)
-                console.print(pro.name)
-                console.info("    Color: ", newLine: false)
-                console.print(pro.color)
-                console.info("    Id: ", newLine: false)
-                console.print(pro.id.uuidString)
+                console.log(pro, padding: 2)
 
                 let apps = pro.applications(in: applications)
                 apps.forEach { app in
-                    console.success("    Application:")
-                    console.info("      Name: ", newLine: false)
-                    console.print(app.name)
-                    console.info("      Repo: ", newLine: false)
-                    console.print(app.repo)
-                    console.info("      Id: ", newLine: false)
-                    console.print(app.id.uuidString)
+                    console.log(app, padding: 4)
+//                    console.success("    Application:")
+//                    console.info("      Name: ", newLine: false)
+//                    console.print(app.name)
+//                    console.info("      Repo: ", newLine: false)
+//                    console.print(app.repoName)
+//                    if let id = app.id?.string {
+//                        console.info("      Id: ", newLine: false)
+//                        console.print(id)
+//                    }
 
                     guard let host = app.hosting(in: hosts) else { return }
-                    console.success("      Hosting: ")
-                    console.info("          Git: ", newLine: false)
-                    console.print(host.gitUrl)
-                    console.info("          Id: ", newLine: false)
-                    console.print(host.id.uuidString)
+                    console.log(host, padding: 6)
+//                    console.success("      Hosting: ")
+//                    console.info("        Git: ", newLine: false)
+//                    console.print(host.gitUrl)
+//                    if let id = host.id?.string {
+//                        console.info("        Id: ", newLine: false)
+//                        console.print(id)
+//                    }
 
                     let hostEnvs = host.environments(in: envs)
                     hostEnvs.forEach { env in
-                        console.success("          Environment:")
-                        console.info("            Name: ", newLine: false)
-                        console.print(env.name)
-                        console.info("            Branch: ", newLine: false)
-                        console.print(env.branch)
-                        console.info("            Id: ", newLine: false)
-                        console.print(env.id.description)
-                        console.info("            Running: ", newLine: false)
-                        console.print(env.running.description)
-                        console.info("            Replicas: ", newLine: false)
-                        console.print(env.replicas.description)
+                        console.log(env, padding: 8)
+//                        console.success("        Environment:")
+//                        console.info("          Name: ", newLine: false)
+//                        console.print(env.name)
+//                        console.info("          Branch: ", newLine: false)
+//                        console.print(env.defaultBranch)
+//                        console.info("          Id: ", newLine: false)
+//                        console.print(env.id?.string ?? "<no-id>")
+//                        console.info("          Running: ", newLine: false)
+//                        console.print(env.running.description)
+//                        console.info("          Replicas: ", newLine: false)
+//                        console.print(env.replicas.description)
                     }
                 }
             }
         }
-
-
     }
 }
 
 extension Organization {
     func projects(in projs: [Project]) -> [Project] {
         return projs.filter { proj in
-            proj.organizationId == id
+            proj.organization.id == id
         }
     }
 }
@@ -102,7 +97,7 @@ extension Organization {
 extension Project {
     func applications(in apps: [Application]) -> [Application] {
         return apps.filter { app in
-            app.projectId == id
+            return app.projectId == id
         }
     }
 }
@@ -112,7 +107,7 @@ extension Application {
         return hosts
             .lazy
             .filter { host in
-                host.applicationId == self.id
+                host.application.id == self.id
             }
             .first
     }
@@ -120,6 +115,6 @@ extension Application {
 
 extension Hosting {
     func environments(in envs: [Environment]) -> [Environment] {
-        return envs.filter { $0.hostingId == id }
+        return envs.filter { $0.hosting.id == id }
     }
 }

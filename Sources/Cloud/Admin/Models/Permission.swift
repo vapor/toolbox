@@ -1,17 +1,15 @@
 import Node
 import Foundation
+import Admin
 
-public struct Permission: NodeInitializable {
-    public let id: UUID
-    public let key: String
-
-    public init(node: Node) throws {
-        id = try node.get("id")
-        key = try node.get("key")
-    }
+public protocol Permission: Stitched {
+    var key: String { get }
+    var id: Identifier? { get }
 }
 
-extension Permission: Equatable {}
+extension ProjectPermission: Permission {}
+extension OrganizationPermission: Permission {}
+
 public func == (lhs: Permission, rhs: Permission) -> Bool {
     return lhs.id == rhs.id
         && lhs.key == rhs.key

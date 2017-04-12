@@ -3,30 +3,18 @@ import Vapor
 import Foundation
 import Node
 import JSON
+@_exported import Applications
+@_exported import Deploy
 
 public let applicationApi = ApplicationApi()
 
-public struct Application: NodeInitializable {
-    public let id: UUID
-    public let name: String
-    public let projectId: UUID
-    public let repo: String
-
-    public init(node: Node) throws {
-        id = try node.get("id")
-        name = try node.get("name")
-        projectId = try node.get("project.id")
-        repo = try node.get("repoName")
-    }
-}
-
+extension Application: Stitched {}
 extension Application: Equatable {}
-
 public func == (lhs: Application, rhs: Application) -> Bool {
     return lhs.id == rhs.id
         && lhs.name == rhs.name
         && lhs.projectId == rhs.projectId
-        && lhs.repo == rhs.repo
+        && lhs.repoName == rhs.repoName
 }
 
 public final class ApplicationApi {
@@ -52,7 +40,7 @@ extension ApplicationApi {
         request.access = token
 
         var json = JSON([:])
-        try json.set("project.id", project.id.uuidString)
+        try json.set("project.id", project.id)
         try json.set("repoName", repo)
         try json.set("name", name)
         request.json = json
@@ -75,7 +63,8 @@ extension ApplicationApi {
 //    }
 
     public func get(for project: Project, with token: Token) throws -> [Application] {
-        let endpoint = ApplicationApi.applicationsEndpoint + "?projectId=\(project.id.uuidString)"
+        let id = try project.uuid().uuidString
+        let endpoint = ApplicationApi.applicationsEndpoint + "?projectId=\(id)"
         let request = try Request(method: .get, uri: endpoint)
         request.access = token
 
@@ -101,24 +90,33 @@ extension ApplicationApi {
     }
 }
 
-public struct Hosting: NodeInitializable {
-    public let id: UUID
-    public let gitUrl: String
-    public let applicationId: UUID
-
-    public init(node: Node) throws {
-        id = try node.get("id")
-        gitUrl = try node.get("gitUrl")
-        applicationId = try node.get("application.id")
-    }
-}
-
+extension Hosting: Stitched {}
 extension Hosting: Equatable {}
-
 public func == (lhs: Hosting, rhs: Hosting) -> Bool {
     return lhs.id == rhs.id
     && lhs.gitUrl == rhs.gitUrl
-    && lhs.applicationId == rhs.applicationId
+    && lhs.application.id == rhs.application.id
+}
+
+import Console
+extension ApplicationApi {
+    public final class DatabaseApi {
+        public func create(forRepo repo: String, envName env: String, with token: Token) throws {
+            let endpoint = applicationsEndpoint.finished(with: "/")
+                + repo
+                + "/hosting/environments/"
+                + env
+                + "/database"
+            let req = try Request(method: .post, uri: endpoint)
+            req.access = token
+
+            // FIXME: temporarily hardcoding database id
+            req.json = ["databaseServer": ["id": "A93DE7EC-9F64-4932-B86A-075CDD22AFB6"]]
+            let resp = try client.respond(to: req)
+            print(resp)
+            print("asdfasdf")
+        }
+    }
 }
 
 extension ApplicationApi {
@@ -126,8 +124,8 @@ extension ApplicationApi {
         let environments = EnvironmentsApi()
 
         // TODO: git expects ssh url, ie: git@github.com:vapor/vapor.git
-        public func create(for application: Application, git: String, with token: Token) throws -> Hosting {
-            let endpoint = applicationsEndpoint.finished(with: "/") + application.repo + "/hosting"
+        public func create(forRepo repo: String, git: String, with token: Token) throws -> Hosting {
+            let endpoint = applicationsEndpoint.finished(with: "/") + repo + "/hosting"
             let request = try Request(method: .post, uri: endpoint)
             request.access = token
 
@@ -149,7 +147,7 @@ extension ApplicationApi {
         }
 
         public func update(for application: Application, git: String, with token: Token) throws -> Hosting {
-            let endpoint = applicationsEndpoint.finished(with: "/") + application.repo + "/hosting"
+            let endpoint = applicationsEndpoint.finished(with: "/") + application.repoName + "/hosting"
             let request = try Request(method: .patch, uri: endpoint)
             request.access = token
 
@@ -163,28 +161,13 @@ extension ApplicationApi {
     }
 }
 
-public struct Environment: NodeInitializable {
-    public let hostingId: UUID
-    public let branch: String
-    public let id: UUID
-    public let name: String
-    public let running: Bool
-    public let replicas: Int
+public typealias Environment = Applications.Environment
 
-    public init(node: Node) throws {
-        hostingId = try node.get("hosting.id")
-        branch = try node.get("defaultBranch")
-        id = try node.get("id")
-        name = try node.get("name")
-        running = try node.get("running")
-        replicas = try node.get("replicas")
-    }
-}
-
+extension Environment: Stitched {}
 extension Environment: Equatable {}
 public func == (lhs: Environment, rhs: Environment) -> Bool {
-    return lhs.hostingId == rhs.hostingId
-        && lhs.branch == rhs.branch
+    return lhs.hosting.id == rhs.hosting.id
+        && lhs.defaultBranch == rhs.defaultBranch
         && lhs.id == rhs.id
         && lhs.name == rhs.name
         && lhs.running == rhs.running
@@ -195,6 +178,9 @@ extension ApplicationApi {
     // TODO: ALl w/ forRepo instead of app
 
     public final class EnvironmentsApi {
+        public let configs = ConfigsApi()
+        public let database = DatabaseApi()
+
         public func create(
             forRepo repo: String,
             name: String,
@@ -231,7 +217,7 @@ extension ApplicationApi {
         }
 
         public func all(for application: Application, with token: Token) throws -> [Environment] {
-            return try all(forRepo: application.repo, with: token)
+            return try all(forRepo: application.repoName, with: token)
         }
 
         public func all(forRepo repo: String, with token: Token) throws -> [Environment] {
@@ -245,10 +231,87 @@ extension ApplicationApi {
     }
 }
 
-public struct Deploy: NodeInitializable {
+public typealias Config = Configuration
+extension Config: Stitched {}
+
+extension ApplicationApi {
+    public final class ConfigsApi {
+        public func get(forRepo repo: String, envName env: String, with token: Token) throws -> [Config] {
+            let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/")
+                + repo
+                + "/hosting/environments/"
+                + env.finished(with: "/")
+                + "configurations"
+
+            let request = try Request(method: .get, uri: endpoint)
+            request.access = token
+
+            let response = try client.respond(to: request)
+            return try [Config](node: response.json)
+        }
+
+        public func add(
+            _ configs: [String: String],
+            forRepo repo: String,
+            envName env: String,
+            with token: Token
+        ) throws -> [Config] {
+            let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/")
+                + repo
+                + "/hosting/environments/"
+                + env.finished(with: "/")
+                + "configurations"
+
+            let request = try Request(method: .patch, uri: endpoint)
+            request.access = token
+            request.json = try JSON(node: configs)
+
+            let response = try client.respond(to: request)
+            return try [Config](node: response.json)
+        }
+
+        public func replace(
+            _ configs: [String: String],
+            forRepo repo: String,
+            envName env: String,
+            with token: Token
+            ) throws -> [Config] {
+            let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/")
+                + repo
+                + "/hosting/environments/"
+                + env.finished(with: "/")
+                + "configurations"
+            let request = try Request(method: .put, uri: endpoint)
+            request.access = token
+            request.json = try JSON(node: configs)
+
+            let response = try client.respond(to: request)
+            return try [Config](node: response.json)
+        }
+
+        public func delete(
+            keys: [String],
+            forRepo repo: String,
+            envName env: String,
+            with token: Token
+        ) throws {
+            let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/")
+                + repo
+                + "/hosting/environments/"
+                + env.finished(with: "/")
+                + "configurations"
+            let request = try Request(method: .delete, uri: endpoint)
+            request.access = token
+            request.json = try JSON(node: keys)
+
+            _ = try client.respond(to: request)
+        }
+    }
+}
+
+public struct DeployInfo: NodeInitializable {
     public let hosting: Hosting
     public let defaultBranch: String
-    // TODO: Rename deployOperations or operations
     public let deployments: [Deployment]
     public let id: UUID
     public let name: String
@@ -266,59 +329,44 @@ public struct Deploy: NodeInitializable {
     }
 }
 
-public struct Git: NodeInitializable {
-    public let branch: String
-    public let url: String
-
-    public init(node: Node) throws {
-        branch = try node.get("branch")
-        url = try node.get("url")
+extension Deployment: Stitched {}
+extension Deployment.Method {
+    public var isScaleDeploy: Bool {
+        guard case .scale = self else { return false }
+        return true
+    }
+    public var isCodeDeploy: Bool {
+        guard case .code = self else { return false }
+        return true
     }
 }
 
-public enum DeployType: String, NodeInitializable {
-    case scale, code
-
-    public init(node: Node) throws {
-        guard
-            let string = node.string,
-            let new = DeployType(rawValue: string)
-            else {
-                throw NodeError.unableToConvert(input: node, expectation: "String", path: [])
-        }
-        self = new
-    }
-}
-
-// TODO: Rename, DeployOperation
-public struct Deployment: NodeInitializable {
-    public let repo: String
-    public let environment: String
-    public let git: Git
-    public let id: UUID
-    public let replicas: Int
-    public let status: String
-    public let version: String
-    public let domains: [String]
-    public let type: DeployType
-
-    public init(node: Node) throws {
-        repo = try node.get("environment.application.repoName")
-        environment = try node.get("environment.name")
-        git = try node.get("git")
-        id = try node.get("id")
-        replicas = try node.get("replicas")
-        status = try node.get("status")
-        type = try node.get("type.name")
-        version = try node.get("version")
-        domains = try node.get("domains")
-    }
-}
-
-public enum BuildType: String {
+public typealias BuildType = Deployment.CodeMethod
+extension BuildType {
     static let all: [BuildType] = [.incremental, .update, .clean]
-    
-    case clean, incremental, update
+    public var rawValue: String {
+        switch self {
+        case .clean:
+            return "clean"
+        case .incremental:
+            return "incremental"
+        case .update:
+            return "update"
+        }
+    }
+
+    public init?(rawValue: String) {
+        switch rawValue {
+        case "clean":
+            self = .clean
+        case "incremental":
+            self = .incremental
+        case "update":
+            self = .update
+        default:
+            return nil
+        }
+    }
 }
 
 enum DeployError: Error {
@@ -334,7 +382,7 @@ extension ApplicationApi {
             replicas: Int?,
             code: BuildType,
             with token: Token
-            ) throws -> Deploy {
+            ) throws -> DeployInfo {
             let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/")
                 + repo
                 + "/hosting/environments/"
@@ -359,7 +407,7 @@ extension ApplicationApi {
                 throw DeployError.noHosting(for: nil)
             }
 
-            return try Deploy(node: response.json)
+            return try DeployInfo(node: response.json)
         }
 
         public func scale(repo: String, envName: String, replicas: Int, with token: Token) throws {

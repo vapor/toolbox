@@ -49,12 +49,7 @@ public final class List: Command {
             try adminApi.organizations.all(with: token)
         }
 
-        orgs.forEach { org in
-            console.info("- \(org.name)", newLine: !showIds)
-            if showIds {
-                console.print(": \(org.id)")
-            }
-        }
+        orgs.forEach { console.log($0) }
     }
 
     func listProjects(with token: Token, showIds: Bool) throws {
@@ -63,12 +58,7 @@ public final class List: Command {
             try adminApi.projects.all(with: token)
         }
 
-        projs.forEach { proj in
-            console.info("- \(proj.name)", newLine: !showIds)
-            if showIds {
-                console.print(": \(proj.id)")
-            }
-        }
+        projs.forEach { console.log($0) }
     }
 
     func listApplications(with token: Token, showIds: Bool) throws {
@@ -77,12 +67,6 @@ public final class List: Command {
             try applicationApi.all(with: token)
         }
 
-        apps.forEach { app in
-            console.info("- \(app.name)", newLine: false)
-            console.print(" (\(app.repo).vapor.cloud)", newLine: !showIds)
-            if showIds {
-                console.print(": \(app.id)")
-            }
-        }
+        apps.forEach { console.log($0) }
     }
 }

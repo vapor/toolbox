@@ -24,6 +24,8 @@ public final class Create: Command {
             (name: "Project", handler: createProject),
             (name: "Application", handler: createApplication),
             (name: "Environment", handler: createEnvironment),
+            (name: "Hosting", handler: createHosting),
+            (name: "Database", handler: createDatabase),
         ]
 
         let preLoaded = creatables.lazy
@@ -62,8 +64,10 @@ public final class Create: Command {
 
         console.info("Created: ", newLine: false)
         console.print(new.name)
-        console.info("Id: ", newLine: false)
-        console.print(new.id.uuidString)
+        if let id = new.id?.string {
+            console.info("Id: ", newLine: false)
+            console.print(id)
+        }
     }
 
     private func createProject(with token: Token, args: [String]) throws {
@@ -107,7 +111,6 @@ public final class Create: Command {
             repo = r
         } else {
             console.info("How would you like to identify your new Application?")
-            console.info("This needs to be unique, if it doesn't work, it may already be taken.")
             repo = console.ask("(your-answer.vapor.cloud)")
         }
 
@@ -119,34 +122,74 @@ public final class Create: Command {
         //print("If user exits after creating, before setting up hosting, needs a way to add hosting/env later")
         //print("ideally, detect no hosting, and create automatically")
 
-        _ = try setupHosting(for: new, with: token, args: args)
+        _ = try setupHosting(forRepo: new.repoName, with: token, args: args)
 
         let environment = console.loadingBar(title: "Creating Production Environment")
         let env = try environment.perform {
             try applicationApi.hosting.environments.create(
-                forRepo: new.repo,
+                forRepo: new.repoName,
                 name: "production",
                 branch: "master",
                 with: token
             )
         }
 
-        let scale = console.loadingBar(title: "Scaling")
-        try scale.perform {
-            _ = try applicationApi.hosting.environments.setReplicas(
-                count: 1,
-                forRepo: repo,
-                env: env,
-                with: token
-            )
-        }
+//        let scale = console.loadingBar(title: "Scaling")
+//        try scale.perform {
+//            _ = try applicationApi.hosting.environments.setReplicas(
+//                count: 1,
+//                forRepo: repo,
+//                env: env,
+//                with: token
+//            )
+//        }
+
+        // Temporarily setting up database by default
+        try applicationApi.hosting.environments.database.create(
+            forRepo: repo,
+            envName: env.name,
+            with: token
+        )
 
         console.info("Your application is now ready.")
         let deployNow = console.confirm("Would you like to deploy \(new.name) now?")
         guard deployNow else { return }
         let deploy = DeployCloud(console: console)
-        let args = ["deploy", "--repo=\(new.repo)"]
+        let args = ["deploy", "--app=\(new.repoName)", "--env=\(env.name)"]
         try deploy.run(arguments: args)
+    }
+
+    private func createHosting(with token: Token, args: [String]) throws {
+        let repo = try getRepo(args, console: console, with: token)
+        _ = try setupHosting(forRepo: repo, with: token, args: args)
+    }
+
+    private func createDatabase(with token: Token, args: [String]) throws {
+        let repo = try getRepo(args, console: console, with: token)
+        let env = try getEnv(forRepo: repo, args: args, with: token)
+        try applicationApi.hosting.environments.database.create(
+            forRepo: repo,
+            envName: env,
+            with: token
+        )
+    }
+
+    private func getEnv(forRepo repo: String, args: [String], with token: Token) throws -> String {
+        let env: String
+        if let name = args.option("env") {
+            env = name
+        } else {
+            let e = try selectEnvironment(
+                args: args,
+                forRepo: repo,
+                queryTitle: "Which Environment?",
+                using: console,
+                with: token
+            )
+
+            env = e.name
+        }
+        return env
     }
 
     private func getProject(with token: Token, args: [String]) throws -> Project {
@@ -173,7 +216,7 @@ public final class Create: Command {
         )
     }
 
-    private func setupHosting(for app: Application, with token: Token, args: [String]) throws -> Hosting {
+    private func setupHosting(forRepo repo: String, with token: Token, args: [String]) throws -> Hosting {
         var remote: String = ""
         if let gitUrl = args.option("gitUrl") {
             remote = gitUrl
@@ -203,11 +246,11 @@ public final class Create: Command {
                 remote = resolved
             }
         }
-
+        
         let hosting = console.loadingBar(title: "Setting up Hosting")
         return try hosting.perform {
             try applicationApi.hosting.create(
-                for: app,
+                forRepo: repo,
                 git: remote,
                 with: token
             )
@@ -228,7 +271,7 @@ public final class Create: Command {
         if let b = args.option("branch") {
             branch = b
         } else {
-            branch = console.ask("(What 'git' branch should we deploy for this Environment?")
+            branch = console.ask("What 'git' branch should we deploy for this Environment?")
         }
 
         let creating = console.loadingBar(title: "Creating \(name)")
@@ -243,7 +286,7 @@ public final class Create: Command {
     }
 
     private func getCloudRepo(with token: Token, args: [String]) throws -> String {
-        if let repo = args.option("repo") {
+        if let repo = args.option("app") {
             return repo
         }
 
@@ -254,6 +297,6 @@ public final class Create: Command {
             using: console,
             with: token
         )
-        return app.repo
+        return app.repoName
     }
 }

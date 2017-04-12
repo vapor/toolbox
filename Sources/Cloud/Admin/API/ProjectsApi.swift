@@ -5,7 +5,7 @@ import Vapor
 
 extension AdminApi {
     public final class ProjectsApi {
-        public let permissions = PermissionsApi<Project>(endpoint: projectsEndpoint, client: client)
+        public let permissions = PermissionsApi<ProjectPermission, Project>(endpoint: projectsEndpoint, client: client)
 
         public func create(
             name: String,
@@ -13,7 +13,8 @@ extension AdminApi {
             in org: Organization,
             with token: Token
         ) throws -> Project {
-            let projectsUri = organizationsEndpoint.finished(with: "/") + org.id.uuidString + "/projects"
+            let id = try org.uuid().uuidString
+            let projectsUri = organizationsEndpoint.finished(with: "/") + id + "/projects"
             let request = try Request(method: .post, uri: projectsUri)
             request.access = token
 
@@ -45,6 +46,11 @@ extension AdminApi {
             return try get(prefix: "", with: token)
         }
 
+        public func get(id: Identifier?, with token: Token) throws -> Project {
+            let uuid = try id.uuid()
+            return try get(id: uuid, with: token)
+        }
+
         public func get(id: UUID, with token: Token) throws -> Project {
             return try get(id: id.uuidString, with: token)
         }
@@ -62,11 +68,12 @@ extension AdminApi {
             // TODO: No endpoint for orgs yet, getting all and filtering manually,
             // update in future
             let projects = try all(with: token)
-            return projects.filter { $0.organizationId == org.id }
+            return projects.filter { $0.organization.id == org.id }
         }
 
         public func update(_ project: Project, name: String?, color: String?, with token: Token) throws -> Project {
-            let endpoint = projectsEndpoint.finished(with: "/") + project.id.uuidString
+            let id = try project.uuid().uuidString
+            let endpoint = projectsEndpoint.finished(with: "/") + id
             let request = try Request(method: .patch, uri: endpoint)
             request.access = token
 

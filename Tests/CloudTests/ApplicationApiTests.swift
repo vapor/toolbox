@@ -76,7 +76,7 @@ class ApplicationApiTests {
             with: token
         )
 
-        XCTAssertEqual(app.repo, uniqueRepo, "repo on app create doesn't match")
+        XCTAssertEqual(app.repoName, uniqueRepo, "repo on app create doesn't match")
         XCTAssertEqual(app.name, "My App", "name on app create doesn't match")
         XCTAssertEqual(app.projectId, proj.id, "project id on app create doesn't match")
 
@@ -95,7 +95,7 @@ class ApplicationApiTests {
         let found = try applicationApi.get(for: proj, with: token)
         XCTAssertEqual(found.count, expectCount)
         found.forEach { app in
-            XCTAssertEqual(app.projectId, proj.id)
+            XCTAssertEqual(app.projectId, proj.id, #line.description)
         }
         XCTAssert(found.contains(contains), "\(found) doesn't contain \(contains)")
     }
@@ -127,18 +127,18 @@ final class HostingTests {
 
     func testCreate() throws -> Hosting {
         let hosting = try applicationApi.hosting.create(
-            for: app,
+            forRepo: app.repoName,
             git: gitUrl,
             with: token
         )
 
-        XCTAssertEqual(hosting.applicationId, app.id)
+        XCTAssertEqual(hosting.application.id, app.id, #line.description)
         XCTAssertEqual(hosting.gitUrl, gitUrl)
         return hosting
     }
 
     func testGet(expect: Hosting?) throws {
-        let found = try? applicationApi.hosting.get(for: app, with: token)
+        let found = try? applicationApi.hosting.get(forRepo: app.repoName, with: token)
         XCTAssertEqual(found, expect)
     }
 
@@ -151,7 +151,7 @@ final class HostingTests {
         )
 
         XCTAssertEqual(new.gitUrl, subGit)
-        XCTAssertEqual(new.applicationId, app.id)
+        XCTAssertEqual(new.application.id, app.id, #line.description)
         XCTAssertNotEqual(new, input)
 
         // Revert
@@ -176,15 +176,16 @@ final class EnvironmentApiTests {
     }
 
     func test() throws -> Cloud.Environment {
-        try testAll(expectCount: 0, contains: nil)
-        let env = try testCreate()
-        try testAll(expectCount: 1, contains: env)
-        try testUpdate(with: env)
+        try! testAll(expectCount: 0, contains: nil)
+        let env = try! testCreate()
+        try! testAll(expectCount: 1, contains: env)
+        try testMakeDB(with: env)
+        try! testUpdate(with: env)
         return env
     }
 
     func testAll(expectCount: Int, contains: Cloud.Environment?) throws {
-        let found = try applicationApi.hosting.environments.all(for: app, with: token)
+        let found = try! applicationApi.hosting.environments.all(for: app, with: token)
         XCTAssertEqual(found.count, expectCount)
         if let contains = contains {
             XCTAssert(found.contains(contains))
@@ -192,35 +193,43 @@ final class EnvironmentApiTests {
     }
 
     func testCreate() throws -> Cloud.Environment {
-        let env = try applicationApi.hosting.environments.create(
-            for: app,
+        let env = try! applicationApi.hosting.environments.create(
+            forRepo: app.repoName,
             name: "new-env",
             branch: "master",
             with: token
         )
 
-        XCTAssertEqual(env.branch, "master")
+        XCTAssertEqual(env.defaultBranch, "master")
         XCTAssertEqual(env.name, "new-env")
         XCTAssertEqual(env.replicas, 0)
-        XCTAssertEqual(env.hostingId, hosting.id)
+        XCTAssertEqual(env.hosting.id, hosting.id, #line.description)
         XCTAssertEqual(env.running, false)
 
         return env
     }
 
+    func testMakeDB(with env: Cloud.Environment) throws {
+        let _ = try applicationApi.hosting.environments.database.create(
+            forRepo: app.repoName,
+            envName: env.name,
+            with: token
+        )
+    }
+
     func testUpdate(with env: Cloud.Environment) throws {
         XCTAssertEqual(env.replicas, 0)
 
-        let patched = try applicationApi.hosting.environments.setReplicas(
+        let patched = try! applicationApi.hosting.environments.setReplicas(
             count: 1,
-            forRepo: app.repo,
+            forRepo: app.repoName,
             env: env,
             with: token
         )
         
         XCTAssertEqual(patched.name, env.name)
-        XCTAssertEqual(patched.hostingId, env.hostingId)
-        XCTAssertEqual(patched.branch, env.branch)
+        XCTAssertEqual(patched.hosting.id, env.hosting.id, #line.description)
+        XCTAssertEqual(patched.defaultBranch, env.defaultBranch)
         XCTAssertEqual(patched.replicas, 1)
     }
 }
@@ -236,14 +245,15 @@ final class DeployApiTests {
     }
 
     func test() throws {
-        let _ = try testPush()
-        let _ = try testScale()
+        let _ = try! testPush()
+        let _ = try! testScale()
     }
 
-    func testPush() throws -> Deploy {
+    func testPush() throws -> DeployInfo {
         return try applicationApi.deploy.push(
-            repo: app.repo,
+            repo: app.repoName,
             envName: env.name,
+            gitBranch: nil,
             replicas: nil,
             code: .update,
             with: token
@@ -252,7 +262,7 @@ final class DeployApiTests {
 
     func testScale() throws {
         try applicationApi.deploy.scale(
-            repo: app.repo,
+            repo: app.repoName,
             envName: env.name,
             replicas: 2,
             with: token
