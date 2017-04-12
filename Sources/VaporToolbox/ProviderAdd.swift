@@ -21,8 +21,12 @@ public final class ProviderAdd: Command {
     }
     
     public func run(arguments: [String]) throws {
+        try console.warnGitClean()
+        guard !arguments.isEmpty else {
+            throw CommandError.general("Expected to receive a provider as an argument")
+        }
+
         var provider = arguments[1]
-        
         guard projectInfo.isVaporProject() else {
             throw CommandError.general("Run this command in a Vapor project directory")
         }
