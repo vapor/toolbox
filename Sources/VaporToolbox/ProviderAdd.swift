@@ -61,7 +61,7 @@ public final class ProviderAdd: Command {
         let res: Response
         do {
             res = try bar.perform {
-                return  try EngineClient.get("https://api.github.com/repos/\(repo)/tags")
+                return  try EngineClient.factory.get("https://api.github.com/repos/\(repo)/tags")
             }
         } catch {
             throw CommandError.general("GitHub API request failed")
