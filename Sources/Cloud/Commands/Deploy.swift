@@ -39,7 +39,7 @@ public final class DeployCloud: Command {
 
         if gitInfo.isGitProject(), let matchingRemote = try gitInfo.remote(forUrl: hosting.gitUrl) {
             // verify there's not uncommitted changes
-            try verify(deployBranch: branch, remote: matchingRemote)
+            try gitInfo.verify(local: branch, remote: matchingRemote)
         }
 
         let buildType = try getBuildType(arguments)
@@ -163,15 +163,17 @@ public final class DeployCloud: Command {
         if let branch = arguments.option("branch") { return branch }
         return env.defaultBranch
     }
+}
 
-    private func verify(deployBranch: String, remote: String) throws {
-        // TODO: Rename isGitDirectory
-        guard gitInfo.isGitProject() else { return }
+extension GitInfo {
+    public func verify(local localBranch: String, remote: String, upstream: String? = nil) throws {
+        guard isGitProject() else { return }
 
-        let local = deployBranch
-        let remote = remote + "/" + deployBranch
+        let local = localBranch
+        let upstream = upstream ?? localBranch
+        let remote = remote + "/" + upstream
 
-        let (behind, ahead) = try gitInfo.branchPosition(base: remote, compare: local)
+        let (behind, ahead) = try branchPosition(base: remote, compare: local)
         if behind == 0 && ahead == 0 { return }
 
         console.print()
@@ -204,7 +206,6 @@ public final class DeployCloud: Command {
         console.success("Entering override codes ...")
     }
 }
-
 
 func getOrganization(_ arguments: [String], console: ConsoleProtocol, with token: Token) throws -> Organization {
     let organizationId = arguments.option("org") ?? localConfig?["organization.id"]?.string
