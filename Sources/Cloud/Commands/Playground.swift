@@ -648,11 +648,11 @@ extension FileManager {
 }
 
 extension ConsoleProtocol {
-    func giveChoice<T>(title: String, in array: [T]) throws -> T {
+    public func giveChoice<T>(title: String, in array: [T]) throws -> T {
         return try giveChoice(title: title, in: array, display: { "\($0)" })
     }
     
-    func giveChoice<T>(title: String, in array: [T], display: (T) -> String) throws -> T {
+    public func giveChoice<T>(title: String, in array: [T], display: (T) -> String) throws -> T {
         info(title)
         array.enumerated().forEach { idx, item in
             let offset = idx + 1
