@@ -119,7 +119,7 @@ public final class ProviderAdd: Command {
             
             try DataFile.save(bytes: new.makeBytes(), to: "Package.swift")
             
-            console.success("Added \(repo) version \(choice.special) to Package.swift.")
+            console.success("Added \(repo) version \(choice.description) to Package.swift.")
             
             console.print("Project update required after changing dependencies.")
             if console.confirm("Update project now?") {
