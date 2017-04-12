@@ -5,9 +5,9 @@ import HTTP
 
 public final class PermissionsApi<PermissionType: Permission, Model: Stitched> {
     public let base: String
-    public let client: ClientProtocol.Type
+    public let client: ClientFactoryProtocol
 
-    public init(endpoint: String, client: ClientProtocol.Type) {
+    public init(endpoint: String, client: ClientFactoryProtocol) {
         self.base = endpoint
         self.client = client
     }

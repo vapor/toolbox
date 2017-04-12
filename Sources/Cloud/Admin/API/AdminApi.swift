@@ -3,7 +3,7 @@ import Vapor
 
 public let adminApi = AdminApi()
 
-public var client = CloudClient<EngineClient>.self
+public var client = ClientFactory<CloudClient<EngineClient>>()
 
 import Transport
 extension FoundationClient: ClientProtocol {

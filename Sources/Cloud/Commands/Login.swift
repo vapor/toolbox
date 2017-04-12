@@ -34,31 +34,3 @@ public final class Login: Command {
         }
     }
 }
-
-extension ConsoleProtocol {
-        /**
-         Requests input from the console
-         after displaying the desired prompt.
-         */
-    public func ask(_ prompt: String, style: ConsoleStyle = .info, secure: Bool) -> String {
-        output(prompt, style: style)
-        output("> ", style: style, newLine: false)
-        if secure {
-            return secureInput()
-        } else {
-            return input()
-        }
-    }
-
-    // TODO: Remove when console is upgraded
-    fileprivate func secureInput() -> String {
-        // http://stackoverflow.com/a/30878869/2611971
-        let entry: UnsafeMutablePointer<Int8> = getpass("")
-        let pointer: UnsafePointer<CChar> = .init(entry)
-        var pass = String(validatingUTF8: pointer) ?? ""
-        if pass.hasSuffix("\n") {
-            pass = pass.makeBytes().dropLast().makeString()
-        }
-        return pass
-    }
-}
