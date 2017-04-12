@@ -35,7 +35,7 @@ public final class DeployCloud: Command {
 
         let replicas = getReplicas(arguments)
         let hosting = try getHosting(forRepo: repo, with: token)
-        let branch = try getBranch(arguments, gitUrl: hosting.gitUrl, env: env)
+        let branch = try getBranch(arguments, env: env)
 
         if gitInfo.isGitProject(), let matchingRemote = try gitInfo.remote(forUrl: hosting.gitUrl) {
             // verify there's not uncommitted changes
@@ -159,33 +159,9 @@ public final class DeployCloud: Command {
         return replicas
     }
 
-    private func getBranch(_ arguments: [String], gitUrl: String, env: Environment) throws -> String {
+    private func getBranch(_ arguments: [String], env: Environment) throws -> String {
         if let branch = arguments.option("branch") { return branch }
-
-        var useDefault = arguments.option("useDefaultBranch")?.bool
-            ?? localConfig?["useDefaultBranch"]?.bool
-
-        if useDefault == nil {
-            useDefault = console.confirm("Use default branch? (\(env.defaultBranch))")
-        }
-
-        let use = useDefault ?? false
-        guard !use else { return env.defaultBranch }
-
-        if let remote = try gitInfo.remote(forUrl: gitUrl) {
-            let foundBranches = try gitInfo.remoteBranches(for: remote)
-            console.info("I found some branches at '\(gitUrl)',")
-            return try console.giveChoice(
-                title: "Which one would you like to deploy?",
-                in: foundBranches
-            ) { $0 }
-        }
-
-        return getCustomBranch()
-    }
-
-    private func getCustomBranch() -> String {
-        return console.ask("What branch would you like to deploy?")
+        return env.defaultBranch
     }
 
     private func verify(deployBranch: String, remote: String) throws {
