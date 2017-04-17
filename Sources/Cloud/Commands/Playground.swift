@@ -641,8 +641,12 @@ extension Node {
 extension FileManager {
     func createVaporConfigFolderIfNecessary() throws {
         var isDirectory: ObjCBool = false
-        fileExists(atPath: vaporConfigDir, isDirectory: &isDirectory)
-        guard !isDirectory.boolValue else { return }
+        _ = fileExists(atPath: vaporConfigDir, isDirectory: &isDirectory)
+        #if os(Linux)
+            guard !isDirectory else { return }
+        #else
+            guard !isDirectory.boolValue else { return }
+        #endif
         try createDirectory(atPath: vaporConfigDir, withIntermediateDirectories: true)
     }
 }
