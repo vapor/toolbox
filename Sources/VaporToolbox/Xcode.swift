@@ -88,10 +88,12 @@ public final class Xcode: Command {
         }
 
         // Setup passthrough
-        buildFlags += arguments
+        let clean = arguments
             .removeFlags(["clean", "run", "debug", "verbose", "fetch", "release", "y"])
+        buildFlags += clean
             .options
             .map { name, value in "--\(name)=\(value)" }
+        buildFlags += clean.values
 
         return buildFlags
     }

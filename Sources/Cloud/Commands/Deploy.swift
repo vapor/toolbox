@@ -35,11 +35,11 @@ public final class DeployCloud: Command {
 
         let replicas = getReplicas(arguments)
         let hosting = try getHosting(forRepo: repo, with: token)
-        let branch = try getBranch(arguments, gitUrl: hosting.gitUrl, env: env)
+        let branch = try getBranch(arguments, env: env)
 
         if gitInfo.isGitProject(), let matchingRemote = try gitInfo.remote(forUrl: hosting.gitUrl) {
             // verify there's not uncommitted changes
-            try verify(deployBranch: branch, remote: matchingRemote)
+            try gitInfo.verify(local: branch, remote: matchingRemote)
         }
 
         let buildType = try getBuildType(arguments)
@@ -159,43 +159,21 @@ public final class DeployCloud: Command {
         return replicas
     }
 
-    private func getBranch(_ arguments: [String], gitUrl: String, env: Environment) throws -> String {
+    private func getBranch(_ arguments: [String], env: Environment) throws -> String {
         if let branch = arguments.option("branch") { return branch }
-
-        var useDefault = arguments.option("useDefaultBranch")?.bool
-            ?? localConfig?["useDefaultBranch"]?.bool
-
-        if useDefault == nil {
-            useDefault = console.confirm("Use default branch? (\(env.defaultBranch))")
-        }
-
-        let use = useDefault ?? false
-        guard !use else { return env.defaultBranch }
-
-        if let remote = try gitInfo.remote(forUrl: gitUrl) {
-            let foundBranches = try gitInfo.remoteBranches(for: remote)
-            console.info("I found some branches at '\(gitUrl)',")
-            return try console.giveChoice(
-                title: "Which one would you like to deploy?",
-                in: foundBranches
-            ) { $0 }
-        }
-
-        return getCustomBranch()
+        return env.defaultBranch
     }
+}
 
-    private func getCustomBranch() -> String {
-        return console.ask("What branch would you like to deploy?")
-    }
+extension GitInfo {
+    public func verify(local localBranch: String, remote: String, upstream: String? = nil) throws {
+        guard isGitProject() else { return }
 
-    private func verify(deployBranch: String, remote: String) throws {
-        // TODO: Rename isGitDirectory
-        guard gitInfo.isGitProject() else { return }
+        let local = localBranch
+        let upstream = upstream ?? localBranch
+        let remote = remote + "/" + upstream
 
-        let local = deployBranch
-        let remote = remote + "/" + deployBranch
-
-        let (behind, ahead) = try gitInfo.branchPosition(base: remote, compare: local)
+        let (behind, ahead) = try branchPosition(base: remote, compare: local)
         if behind == 0 && ahead == 0 { return }
 
         console.print()
@@ -228,7 +206,6 @@ public final class DeployCloud: Command {
         console.success("Entering override codes ...")
     }
 }
-
 
 func getOrganization(_ arguments: [String], console: ConsoleProtocol, with token: Token) throws -> Organization {
     let organizationId = arguments.option("org") ?? localConfig?["organization.id"]?.string

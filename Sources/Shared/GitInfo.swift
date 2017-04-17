@@ -113,11 +113,32 @@ public final class GitInfo {
 //        return (split[0], split[1])
     }
 
-    public func upstreamBranch() throws -> String {
+    public func upstreamBranch() throws -> (remote: String, branch: String) {
         try assertGitRepo()
 
         // http://stackoverflow.com/a/9753364/2611971
-        return try console.git(["rev-parse", "--abbrev-ref", "--symtolic-full-name", "@{u}"])
+        let output = try console.git(
+            ["rev-parse", "--abbrev-ref", "--symtolic-full-name", "@{u}"]
+        )
+
+        let upstream = output.makeBytes()
+            .split(
+                separator: .newLine,
+                omittingEmptySubsequences: true
+            )
+            .last
+            ?? []
+        let components = upstream.split(
+            separator: .forwardSlash,
+            maxSplits: 1
+        )
+        guard components.count == 2 else {
+            throw GeneralError("unable to get upstream")
+        }
+
+        let remote = components[0].makeString()
+        let branch = components[1].makeString()
+        return (remote, branch)
     }
 
     public func remoteNames() throws -> [String] {
