@@ -124,25 +124,14 @@ public final class Create: Command {
 
         _ = try setupHosting(forRepo: new.repoName, with: token, args: args)
 
-        let environment = console.loadingBar(title: "Creating Production Environment")
-        let env = try environment.perform {
-            try applicationApi.hosting.environments.create(
-                forRepo: new.repoName,
-                name: "production",
-                branch: "master",
-                with: token
-            )
-        }
-
-//        let scale = console.loadingBar(title: "Scaling")
-//        try scale.perform {
-//            _ = try applicationApi.hosting.environments.setReplicas(
-//                count: 1,
-//                forRepo: repo,
-//                env: env,
-//                with: token
-//            )
-//        }
+        let replicaSize = args.option("replicaSize").flatMap(ReplicaSize.init)
+        let env = try makeEnvironment(
+            with: token,
+            repo: repo,
+            name: "production",
+            branch: "master",
+            replicaSize: replicaSize
+        )
 
         // Temporarily setting up database by default
         try applicationApi.hosting.environments.database.create(
@@ -157,6 +146,10 @@ public final class Create: Command {
         let deploy = DeployCloud(console: console)
         let args = ["deploy", "--app=\(new.repoName)", "--env=\(env.name)"]
         try deploy.run(arguments: args)
+    }
+
+    private func askReplicaSize() throws -> ReplicaSize {
+        return try console.giveChoice(title: "What Replica Size?", in: ReplicaSize.all) { $0.string }
     }
 
     private func createHosting(with token: Token, args: [String]) throws {
@@ -259,27 +252,29 @@ public final class Create: Command {
 
     private func createEnvironment(with token: Token, args: [String]) throws {
         let repo = try getCloudRepo(with: token, args: args)
+        let name = args.option("name")
+        let branch = args.option("branch")
+        let replicaSize = args.option("replicaSize").flatMap(ReplicaSize.init)
+        _ = try makeEnvironment(
+            with: token,
+            repo: repo,
+            name: name,
+            branch: branch, replicaSize: replicaSize
+        )
+    }
 
-        let name: String
-        if let n = args.option("name") {
-            name = n
-        } else {
-            name = console.ask("What would you like to name your new Environment?")
-        }
+    private func makeEnvironment(with token: Token, repo: String, name: String?, branch: String?, replicaSize: ReplicaSize?) throws -> Environment {
+        let name = name ?? console.ask("What would you like to name your new Environment?")
+        let branch = branch ?? console.ask("What 'git' branch should we deploy for this Environment?")
+        let replicaSize = try replicaSize ?? askReplicaSize()
 
-        let branch: String
-        if let b = args.option("branch") {
-            branch = b
-        } else {
-            branch = console.ask("What 'git' branch should we deploy for this Environment?")
-        }
-
-        let creating = console.loadingBar(title: "Creating \(name)")
-        try creating.perform {
-            _ = try applicationApi.hosting.environments.create(
+        let creating = console.loadingBar(title: "Creating \(name) environment")
+        return try creating.perform {
+            try applicationApi.hosting.environments.create(
                 forRepo: repo,
                 name: name,
                 branch: branch,
+                replicaSize: replicaSize,
                 with: token
             )
         }
@@ -299,4 +294,29 @@ public final class Create: Command {
         )
         return app.repoName
     }
+}
+
+extension ReplicaSize {
+    static let all: [ReplicaSize] = {
+        switch ReplicaSize.free {
+        case .free:
+            break
+        case .small:
+            break
+        case .medium:
+            break
+        case .large:
+            break
+        case .xlarge:
+            break
+        }
+
+        return [
+            .free,
+            .small,
+            .medium,
+            .large,
+            .xlarge
+        ]
+    }()
 }

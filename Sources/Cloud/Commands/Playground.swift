@@ -321,6 +321,7 @@ public final class CloudInit: Command {
                 forRepo: new.repoName,
                 name: "production",
                 branch: "master",
+                replicaSize: .free,
                 with: token
             )
         }
