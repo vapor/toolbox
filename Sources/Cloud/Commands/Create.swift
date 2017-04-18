@@ -255,11 +255,18 @@ public final class Create: Command {
         let name = args.option("name")
         let branch = args.option("branch")
         let replicaSize = args.option("replicaSize").flatMap(ReplicaSize.init)
-        _ = try makeEnvironment(
+        let env = try makeEnvironment(
             with: token,
             repo: repo,
             name: name,
             branch: branch, replicaSize: replicaSize
+        )
+
+        // Temporarily setting up database by default
+        try applicationApi.hosting.environments.database.create(
+            forRepo: repo,
+            envName: env.name,
+            with: token
         )
     }
 
