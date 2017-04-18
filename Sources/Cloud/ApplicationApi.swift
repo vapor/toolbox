@@ -112,9 +112,20 @@ extension ApplicationApi {
 
             // FIXME: temporarily hardcoding database id
             req.json = ["databaseServer": ["id": "A93DE7EC-9F64-4932-B86A-075CDD22AFB6"]]
-            let resp = try client.respond(to: req)
-            print(resp)
-            print("asdfasdf")
+            _ = try client.respond(to: req)
+            /*
+             Response
+             - HTTP/1.1 200 OK
+             - Headers:
+             Date: Tue, 18 Apr 2017 11:39:08 GMT
+             Content-Type: application/json; charset=utf-8
+             Content-Length: 268
+             Connection: keep-alive
+             Server: nginx
+             Strict-Transport-Security: max-age=15724800; includeSubDomains; preload
+             - Body:
+             {"databaseServer":"A93DE7EC-9F64-4932-B86A-075CDD22AFB6","environment":{"defaultBranch":"master","hosting":{"id":"6101D006-5604-4D80-961A-B4B1B717872C"},"id":"DE74E95C-9743-45D4-A9C7-DA150B3C151C","name":"production","replicas":0,"replicaSize":"free","running":false}}
+             */
         }
     }
 }
@@ -185,6 +196,7 @@ extension ApplicationApi {
             forRepo repo: String,
             name: String,
             branch: String,
+            replicaSize: ReplicaSize,
             with token: Token
         ) throws -> Environment {
             let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/") + repo + "/hosting/environments"
@@ -194,6 +206,7 @@ extension ApplicationApi {
             var json = JSON([:])
             try json.set("name", name)
             try json.set("defaultBranch", branch)
+            try json.set("replicaSize", replicaSize)
             request.json = json
 
             let response = try client.respond(to: request)

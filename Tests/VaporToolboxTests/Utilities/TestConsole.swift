@@ -4,6 +4,7 @@ import libc
 @testable import VaporToolbox
 
 final class TestConsole: ConsoleProtocol {
+
     var inputBuffer: [String]
     var outputBuffer: [String]
     var executeBuffer: [String]
@@ -44,6 +45,10 @@ final class TestConsole: ConsoleProtocol {
         let input = inputBuffer.joined(separator: "\n")
         inputBuffer = []
         return input
+    }
+
+    func secureInput() -> String {
+        return input()
     }
 
     func clear(_ clear: ConsoleClear) {
