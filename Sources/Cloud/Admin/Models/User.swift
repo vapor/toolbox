@@ -1,8 +1,6 @@
 import Node
 import Foundation
-import Admin
 import JSON
-@_exported import Admin
 
 extension Name: Equatable {}
 public func == (lhs: Name, rhs: Name) -> Bool {

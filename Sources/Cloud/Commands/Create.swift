@@ -1,4 +1,3 @@
-
 public final class Create: Command {
     public let id = "create"
 
@@ -9,9 +8,11 @@ public final class Create: Command {
     ]
 
     public let console: ConsoleProtocol
+    public let cloudFactory: CloudAPIFactory
 
-    public init(console: ConsoleProtocol) {
+    public init(_ console: ConsoleProtocol, _ cloudFactory: CloudAPIFactory) {
         self.console = console
+        self.cloudFactory = cloudFactory
     }
 
     public func run(arguments: [String]) throws {
@@ -124,9 +125,8 @@ public final class Create: Command {
 
         _ = try setupHosting(forRepo: new.repoName, with: token, args: args)
 
-        let replicaSize = args.option("replicaSize").flatMap(ReplicaSize.init)
+        let replicaSize = try ReplicaSize(node: args.option("replicaSize"))
         let env = try makeEnvironment(
-            with: token,
             repo: repo,
             name: "production",
             branch: "master",
@@ -254,37 +254,87 @@ public final class Create: Command {
         let repo = try getCloudRepo(with: token, args: args)
         let name = args.option("name")
         let branch = args.option("branch")
-        let replicaSize = args.option("replicaSize").flatMap(ReplicaSize.init)
-        let env = try makeEnvironment(
-            with: token,
+        let replicaSize: ReplicaSize
+        
+        if let size = args.option("replicaSize") {
+            replicaSize = try ReplicaSize(node: size)
+        } else {
+            replicaSize = try console.giveChoice(title: "What size replica(s)?", in: ReplicaSize.all)
+        }
+        
+        _ = try makeEnvironment(
             repo: repo,
             name: name,
-            branch: branch, replicaSize: replicaSize
-        )
-
-        // Temporarily setting up database by default
-        try applicationApi.hosting.environments.database.create(
-            forRepo: repo,
-            envName: env.name,
-            with: token
+            branch: branch,
+            replicaSize: replicaSize
         )
     }
 
-    private func makeEnvironment(with token: Token, repo: String, name: String?, branch: String?, replicaSize: ReplicaSize?) throws -> Environment {
-        let name = name ?? console.ask("What would you like to name your new Environment?")
-        let branch = branch ?? console.ask("What 'git' branch should we deploy for this Environment?")
-        let replicaSize = try replicaSize ?? askReplicaSize()
+    private func makeEnvironment(repo: String, name: String?, branch: String?, replicaSize: ReplicaSize?) throws -> Environment {
+        console.print("Environment names correspond to:")
+        console.print("- Subfolders of Config, e.g., Config/staging/*.json")
+        console.print("- Hosted URLs, e.g., http://myproject-staging.vapor.cloud")
+        console.print("Good environment names resemble git branch names,")
+        console.print("i.e., develop, staging, production, testing.")
+        var name = name
+            ?? console.ask("What name for this environment?")
+        name = name.lowercased()
+        
+        let branch = branch
+            ?? console.ask("What 'git' branch should we deploy for this Environment?")
+        
+        let replicaSize = try replicaSize
+            ?? askReplicaSize()
 
-        let creating = console.loadingBar(title: "Creating \(name) environment")
-        return try creating.perform {
-            try applicationApi.hosting.environments.create(
-                forRepo: repo,
+        try console.verify(information: [
+            "app": repo,
+            "environment": name,
+            "default branch": branch,
+            "replica size": "\(replicaSize)"
+        ])
+        
+        let cloud = try cloudFactory.makeAuthedClient(with: console)
+        
+        let repoName = Identifier(repo)
+        let env: Environment = try console.loadingBar(title: "Creating \(name) environment") {
+            let env = Environment(
+                id: nil,
+                hosting: .identifier(""),
                 name: name,
-                branch: branch,
+                replicas: 0,
                 replicaSize: replicaSize,
-                with: token
+                defaultBranch: branch
             )
+            
+            return try cloud.create(env, for: .identifier(repoName))
         }
+        let environmentName = Identifier(env.name)
+        console.success("Environment '\(env.name)' created.")
+        
+        if console.confirm("Add a database?") {
+            let servers = try cloud.databaseServers()
+            let server = try console.giveChoice(
+                title: "Which database server?",
+                in: servers
+            ) { server in
+                return "\(server.name) (\(server.kind))"
+            }
+            
+            let database = try Database(
+                id: nil,
+                databaseServer: .model(server),
+                environment: .model(env)
+            )
+            
+            _ = try cloud.create(
+                database,
+                for: .identifier(repoName),
+                in: .identifier(environmentName)
+            )
+            console.success("Created database")
+        }
+        
+        return env
     }
 
     private func getCloudRepo(with token: Token, args: [String]) throws -> String {

@@ -14,7 +14,7 @@ guard let executable = iterator.next() else {
     throw ConsoleError.noExecutable
 }
 
-let cloud = Cloud.group(terminal)
+let cloud = try Cloud.group(terminal)
 
 do {
     try terminal.run(executable: executable, commands: [

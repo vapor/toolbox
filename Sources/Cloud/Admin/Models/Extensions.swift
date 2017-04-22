@@ -1,8 +1,6 @@
 import Node
 import Foundation
-import Admin
 import JSON
-@_exported import Admin
 
 /// Used to stitch external models into the environment
 public protocol Stitched: NodeConvertible {

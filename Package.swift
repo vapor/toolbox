@@ -9,12 +9,19 @@ let package = Package(
         Target(name: "Shared"),
     ],
     dependencies: [
-        .Package(url: "git@github.com:vapor-cloud/admin.git", majorVersion: 0),
-        .Package(url: "git@github.com:vapor-cloud/application.git", majorVersion: 0),
-        .Package(url: "git@github.com:vapor-cloud/deploy.git", majorVersion: 0),
+        // Vapor Cloud clients.
+        .Package(url: "git@github.com:vapor-cloud/clients.git", majorVersion: 0),
+        
+        // Core console protocol.
         .Package(url: "https://github.com/vapor/console.git", Version(2,0,0, prereleaseIdentifiers: ["beta"])),
+        
+        // JSON parsing / serializing.
         .Package(url: "https://github.com/vapor/json.git", Version(2,0,0, prereleaseIdentifiers: ["beta"])),
+        
+        // Vapor web framework.
         .Package(url: "https://github.com/vapor/vapor.git", Version(2,0,0, prereleaseIdentifiers: ["beta"])),
-        .Package(url: "https://github.com/vapor/redbird.git", Version(2,0,0, prereleaseIdentifiers: ["beta"])),
+        
+        // Redis
+        .Package(url: "https://github.com/vapor/redis.git", Version(2,0,0, prereleaseIdentifiers: ["beta"])),
     ]
 )

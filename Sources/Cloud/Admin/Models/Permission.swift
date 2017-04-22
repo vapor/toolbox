@@ -1,6 +1,5 @@
 import Node
 import Foundation
-import Admin
 
 public protocol Permission: Stitched {
     var key: String { get }

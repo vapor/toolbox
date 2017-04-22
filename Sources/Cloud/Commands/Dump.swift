@@ -97,7 +97,7 @@ extension Organization {
 extension Project {
     func applications(in apps: [Application]) -> [Application] {
         return apps.filter { app in
-            return app.projectId == id
+            return app.project.id == id
         }
     }
 }
