@@ -30,7 +30,7 @@ public final class LocalConfig: StructuredDataWrapper {
         guard FileManager.default.fileExists(atPath: path) else {
             return LocalConfig([:])
         }
-        let bytes = try DataFile.load(path: path)
+        let bytes = try DataFile.read(at: path)
         let json = try JSON(bytes: bytes)
         return LocalConfig(json)
     }
@@ -38,6 +38,6 @@ public final class LocalConfig: StructuredDataWrapper {
     public func save() throws {
         let json = JSON(self)
         let bytes = try json.serialize(prettyPrint: true)
-        try DataFile.save(bytes: bytes, to: LocalConfig.path)
+        try DataFile.write(bytes, to: LocalConfig.path)
     }
 }

@@ -219,11 +219,11 @@ public final class CloudInit: Command {
         }
         var config = localConfig ?? JSON([:])
         try config.set("updated", Date().timeIntervalSince1970)
-        try config.set("project.id", app.projectId)
+        try config.set("project.id", app.project.id)
         try config.set("application.id", app.id)
         try config.set("application.repo", app.repoName)
         let file = try config.serialize(prettyPrint: true)
-        try DataFile.save(bytes: file, to: localConfigPath)
+        try DataFile.write(file, to: localConfigPath)
         return true
     }
 
@@ -499,12 +499,12 @@ let localConfigPath = "./.vcloud.json"
 var localConfigExists: Bool {
     return FileManager.default.fileExists(atPath: localConfigPath)
 }
-let localConfigBytes = (try? DataFile.load(path: localConfigPath)) ?? []
+let localConfigBytes = (try? DataFile.read(at: localConfigPath)) ?? []
 var localConfig: JSON? {
     get {
         do {
             guard localConfigExists else { return nil }
-            let bytes = try DataFile.load(path: localConfigPath)
+            let bytes = try DataFile.read(at: localConfigPath)
             return try JSON(bytes: bytes)
         } catch {
             print("Error loading local config: \(error)")
@@ -515,7 +515,7 @@ var localConfig: JSON? {
         do {
             let json = newValue ?? [:]
             let serialized = try json.serialize(prettyPrint: true)
-            try DataFile.save(bytes: serialized, to: localConfigPath)
+            try DataFile.write(serialized, to: localConfigPath)
         } catch {
             print("Error updating local config: \(error)")
         }
@@ -573,7 +573,7 @@ public final class CloudSetup: Command {
         try json.set("app.repoName", app.repoName)
         //        try json.set("replicas", replicas)
         let file = try json.serialize(prettyPrint: true)
-        try DataFile.save(bytes: file, to: localConfigPath)
+        try DataFile.write(file, to: localConfigPath)
 
         let setup = console.loadingBar(title: "Setup Cloud", animated: false)
         setup.finish()
@@ -592,7 +592,7 @@ extension Token {
         try json.set("refresh", refresh)
 
         let bytes = try json.serialize()
-        try DataFile.save(bytes: bytes, to: tokenPath)
+        try DataFile.write(bytes, to: tokenPath)
     }
 
     // TODO: Give opportunity to login/signup right here
@@ -633,7 +633,7 @@ extension Node {
      Load the file at a path as raw bytes, or as parsed JSON representation
      */
     fileprivate static func loadContents(path: String) throws -> Node {
-        let data = try DataFile().load(path: path)
+        let data = try DataFile.read(at: path)
         guard path.hasSuffix(".json") else { return .bytes(data) }
         return try JSON(bytes: data).converted()
     }

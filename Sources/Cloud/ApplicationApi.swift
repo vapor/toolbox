@@ -3,8 +3,6 @@ import Vapor
 import Foundation
 import Node
 import JSON
-@_exported import Applications
-@_exported import Deploy
 
 public let applicationApi = ApplicationApi()
 
@@ -13,13 +11,13 @@ extension Application: Equatable {}
 public func == (lhs: Application, rhs: Application) -> Bool {
     return lhs.id == rhs.id
         && lhs.name == rhs.name
-        && lhs.projectId == rhs.projectId
+        && lhs.project.id == rhs.project.id
         && lhs.repoName == rhs.repoName
 }
 
 public final class ApplicationApi {
     // TODO: Make Internal
-    internal static var base = "https://api.vapor.cloud/application"
+    internal static var base = "http://0.0.0.0:8100/application"
     internal static let applicationsEndpoint = "\(base)/applications"
 
     public let hosting = HostingApi()
@@ -172,7 +170,7 @@ extension ApplicationApi {
     }
 }
 
-public typealias Environment = Applications.Environment
+public typealias Environment = CloudModels.Environment
 
 extension Environment: Stitched {}
 extension Environment: Equatable {}

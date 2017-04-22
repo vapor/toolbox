@@ -1,6 +1,5 @@
 import Node
 import Foundation
-import Models
 import JSON
 
 extension Project: Stitched {}

@@ -1,6 +1,10 @@
 @_exported import Console
 
-public func group(_ console: ConsoleProtocol) -> Group {
+public func group(_ console: ConsoleProtocol) throws -> Group {
+    // create api factories
+    let clientFactory = ClientFactory<EngineClient>()
+    let cloudFactory = try CloudAPIFactory(baseURL: "https://api.vapor.cloud", clientFactory)
+    
     return Group(
         id: "cloud",
         commands: [
@@ -20,7 +24,7 @@ public func group(_ console: ConsoleProtocol) -> Group {
             // Deploy
             DeployCloud(console: console),
             // Create
-            Create(console: console),
+            Create(console, cloudFactory),
             // Run remote commands
             CloudRun(console: console),
             CloudConfigs(console: console),

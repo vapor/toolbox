@@ -45,7 +45,7 @@ public final class ProviderAdd: Command {
             repo = "vapor/\(provider)"
         }
         
-        let package = try DataFile.load(path: "Package.swift").makeString()
+        let package = try DataFile.read(at: "Package.swift").makeString()
         
         guard !package.contains(repo) else {
             throw CommandError.general("Package.swift already contains \(provider)")
@@ -121,7 +121,7 @@ public final class ProviderAdd: Command {
             new += "        " + packageEntry + ",\n"
             new += String(split[1]) ?? ""
             
-            try DataFile.save(bytes: new.makeBytes(), to: "Package.swift")
+            try DataFile.write(new.makeBytes(), to: "Package.swift")
             
             console.success("Added \(repo) version \(choice.description) to Package.swift.")
             
