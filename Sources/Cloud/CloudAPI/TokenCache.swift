@@ -1,33 +1,28 @@
-extension CloudAPIFactory {
-    /// Creates a CloudAPI client authenticated
-    /// with the global JWT token
-    func makeAuthedClient(with console: ConsoleProtocol) throws -> CloudAPI {
-        let cache = try TokenCache.global(with: console)
-        let factory = try AccessTokenFactory(cache, self)
-        return try makeClient(using: factory)
-    }
-}
-
 import Foundation
 
-final class TokenCache: CloudClients.TokenCache {
+/// Stores access and refresh tokens in 
+/// a JSON file.
+final class TokenCache {
     init() throws {
         try FileManager.default.createVaporConfigFolderIfNecessary()
     }
     
+    /// Loads the token cache or throws
+    /// an error that login is required
     static func global(with console: ConsoleProtocol) throws -> TokenCache {
         let cache = try TokenCache()
         
         guard try cache.getRefreshToken() != nil else {
             console.info("No user currently logged in.")
-            console.print("- Login: vapor cloud login")
-            console.print("- Sign up: vapor cloud signup")
+            console.detail("Login", "vapor cloud login")
+            console.detail("Sign up", "vapor cloud signup")
             throw "Login required"
         }
         
         return cache
     }
     
+    /// The JSON file
     var cache: JSON {
         get {
             do {
@@ -47,7 +42,10 @@ final class TokenCache: CloudClients.TokenCache {
             }
         }
     }
-    
+}
+
+/// Conforms to Cloud API token cache
+extension TokenCache: CloudClients.TokenCache {
     func getAccessToken() throws -> AccessToken? {
         guard let access = cache["access"]?.string else {
             return nil
