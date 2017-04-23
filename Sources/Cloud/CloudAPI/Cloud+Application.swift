@@ -1,4 +1,7 @@
 extension CloudAPI {
+    /// Dynamically chooses an application based on
+    /// input arguments, git in the working directory,
+    /// and lists pulled from cloud API.
     func application(
         for arguments: [String],
         using console: ConsoleProtocol
