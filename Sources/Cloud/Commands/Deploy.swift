@@ -70,20 +70,16 @@ public final class DeployCloud: Command {
             )
         }
 
-        /// No output for scale apis
-        if let _ = deploy.deployments.lazy.filter({ $0.type.isScaleDeploy }).first {
-            let scaleBar = console.loadingBar(title: "Scaling", animated: false)
-            scaleBar.finish()
-        }
-
         /// Build Logs
-        guard let codeDeployment = deploy.deployments.lazy.filter({ $0.type.isCodeDeploy }).first else { return }
+        guard deploy.deployment.type.isCodeDeploy else {
+            return
+        }
         console.info("Connecting to build logs ...")
         var waitingInQueue = console.loadingBar(title: "Waiting in Queue")
         defer { waitingInQueue.fail() }
         waitingInQueue.start()
 
-        let id = try codeDeployment.uuid().uuidString
+        let id = try deploy.deployment.uuid().uuidString
         var logsBar: LoadingBar?
         try Redis.subscribeDeployLog(id: id) { update in
             waitingInQueue.finish()

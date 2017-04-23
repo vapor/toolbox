@@ -323,7 +323,7 @@ extension ApplicationApi {
 public struct DeployInfo: NodeInitializable {
     public let hosting: Hosting
     public let defaultBranch: String
-    public let deployments: [Deployment]
+    public let deployment: Deployment
     public let id: UUID
     public let name: String
     public let replicas: Int
@@ -332,7 +332,7 @@ public struct DeployInfo: NodeInitializable {
     public init(node: Node) throws {
         hosting = try node.get("hosting")
         defaultBranch = try node.get("defaultBranch")
-        deployments = try node.get("deployments")
+        deployment = try node.get("deployment")
         id = try node.get("id")
         name = try node.get("name")
         replicas = try node.get("replicas")
