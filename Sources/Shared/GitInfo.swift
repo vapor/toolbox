@@ -234,6 +234,10 @@ extension ConsoleProtocol {
     }
 }
 
+extension ConsoleProtocol {
+    public var gitInfo: GitInfo { return GitInfo(self) }
+}
+
 extension Command {
     public var gitInfo: GitInfo { return GitInfo(console) }
 }

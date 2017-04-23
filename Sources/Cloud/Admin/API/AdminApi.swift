@@ -20,7 +20,7 @@ import Sockets
 /// endpoints, for example, login/out
 /// access, and organizations
 public final class AdminApi {
-    internal static var base = "https://api.vapor.cloud/admin"
+    internal static var base = "\(cloudURL)/admin"
     internal static let usersEndpoint = "\(base)/users"
     internal static let loginEndpoint = "\(base)/login"
     internal static let meEndpoint = "\(base)/me"

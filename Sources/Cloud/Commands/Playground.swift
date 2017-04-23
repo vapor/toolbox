@@ -232,6 +232,7 @@ public final class CloudInit: Command {
         let applications = try bar.perform {
             try applicationApi.get(forGit: git, with: token)
         }
+        console.clear(lines: 1)
 
         if !applications.isEmpty {
             console.info("I found the following apps matching '\(git)':")
@@ -339,6 +340,7 @@ public final class CloudInit: Command {
         let orgs = try bar.perform {
             try adminApi.organizations.all(with: token)
         }
+        console.clear(lines: 1)
 
         if !orgs.isEmpty {
             console.info("I found the following Organizations:")
@@ -373,6 +375,7 @@ public final class CloudInit: Command {
         let orgs = try bar.perform {
             try adminApi.projects.all(for: org, with: token)
         }
+        console.clear(lines: 1)
 
         if !orgs.isEmpty {
             console.info("I found the following Organizations:")

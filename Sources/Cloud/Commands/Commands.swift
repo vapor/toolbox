@@ -1,9 +1,13 @@
 @_exported import Console
+import Foundation
 
 public func group(_ console: ConsoleProtocol) throws -> Group {
     // create api factories
     let clientFactory = ClientFactory<EngineClient>()
-    let cloudFactory = try CloudAPIFactory(baseURL: "https://api.vapor.cloud", clientFactory)
+    let cloudFactory = try CloudAPIFactory(
+        baseURL: cloudURL,
+        clientFactory
+    )
     
     return Group(
         id: "cloud",
@@ -32,6 +36,7 @@ public func group(_ console: ConsoleProtocol) throws -> Group {
             // Add(console: console),
             // CloudSetup(console: console),
             // CloudInit(console: console)
+            OpenDatabase(console, cloudFactory)
         ],
         help: [
             "Commands for interacting with Vapor Cloud."
