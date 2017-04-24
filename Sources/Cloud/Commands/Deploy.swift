@@ -313,6 +313,7 @@ func selectOrganization(queryTitle: String, using console: ConsoleProtocol, with
     let orgs = try orgsBar.perform {
         try adminApi.organizations.all(with: token)
     }
+    console.clear(lines: 1)
 
     if orgs.isEmpty {
         throw "No organizations found, make one with 'vapor cloud create org'"
@@ -331,6 +332,7 @@ func selectProject(in org: Organization, queryTitle: String, using console: Cons
     let projs = try projBar.perform {
         try adminApi.projects.all(for: org, with: token)
     }
+    console.clear(lines: 1)
 
     if projs.isEmpty {
         throw "No projects found, make one with 'vapor cloud create proj'"
@@ -354,6 +356,7 @@ func selectApplication(
     appsBar.start()
     let apps = try applicationApi.get(for: proj, with: token)
     appsBar.finish()
+    console.clear(lines: 1)
 
     if apps.isEmpty {
         throw "No applications found, make one with 'vapor cloud create app'"

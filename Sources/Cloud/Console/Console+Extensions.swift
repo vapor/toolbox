@@ -11,13 +11,22 @@ extension LoadingBar {
 }
 
 extension ConsoleProtocol {
+    public func detail(_ key: String, _ value: String) {
+        self.print("\(key): ", newLine: false)
+        self.info(value)
+    }
     public func verify(information: [String: String]) throws {
         for (key, value) in information {
-            self.print("\(key): ", newLine: false)
-            self.info(value)
+            self.detail(key, value)
         }
         guard confirm("Is the above information correct?") else {
             throw "Cancelled"
+        }
+    }
+    
+    public func clear(lines: Int) {
+        for _ in 0..<lines {
+            self.clear(.line)
         }
     }
 }
