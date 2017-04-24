@@ -15,6 +15,7 @@ extension ConsoleProtocol {
         self.print("\(key): ", newLine: false)
         self.info(value)
     }
+    
     public func verify(information: [String: String]) throws {
         for (key, value) in information {
             self.detail(key, value)
@@ -27,6 +28,11 @@ extension ConsoleProtocol {
     public func clear(lines: Int) {
         for _ in 0..<lines {
             self.clear(.line)
+        }
+    }
+    public func verifyAboveCorrect() throws {
+        guard confirm("Is the above information correct?") else {
+            throw "Cancelled"
         }
     }
 }

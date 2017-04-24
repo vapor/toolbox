@@ -14,26 +14,13 @@ extension CloudAPI {
             // picks an application by choosing
             // a project and then application
             func chooseFromList() throws -> Application {
-                let projects = try console.loadingBar(title: "Loading projects", ephemeral: true) {
-                    return try self.projects()
-                }
-                
-                let project = try console.giveChoice(
-                    title: "Which project?", in: projects
-                ) { project in
-                    return project.name
-                }
-                console.detail("project", project.name)
-                
                 let apps = try console.loadingBar(title: "Loading applications", ephemeral: true) {
-                    return try applications(
-                        projectId: project.assertIdentifier()
-                    )
+                    return try applications()
                 }
                 
                 guard apps.count > 0 else {
                     console.warning("No applications found.")
-                    console.print("Use: vapor cloud create")
+                    console.detail("Create application", "vapor cloud create app")
                     throw "Application required"
                 }
                 

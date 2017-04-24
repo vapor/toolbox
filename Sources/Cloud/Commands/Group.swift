@@ -9,6 +9,26 @@ public func group(_ console: ConsoleProtocol) throws -> Group {
         clientFactory
     )
     
+    let create = Group(id: "create", commands: [
+        CreateOrganization(console, cloudFactory),
+        CreateProject(console, cloudFactory),
+        CreateApplication(console, cloudFactory),
+        CreateHosting(console, cloudFactory),
+        CreateEnvironment(console, cloudFactory),
+        CreateDatabase(console, cloudFactory)
+    ], help: [
+        "Create new instances of Vapor Cloud objects like",
+        "applications, envrionments, databases, etc."
+    ])
+    
+    let config = Group(id: "config", commands: [
+        ConfigDump(console, cloudFactory),
+        ConfigModify(console, cloudFactory),
+        ConfigDelete(console, cloudFactory),
+    ], help: [
+        "View, create, modify, and delete environment configs"
+    ])
+    
     return Group(
         id: "cloud",
         commands: [
@@ -28,10 +48,10 @@ public func group(_ console: ConsoleProtocol) throws -> Group {
             // Deploy
             DeployCloud(console: console),
             // Create
-            Create(console, cloudFactory),
+            create,
             // Run remote commands
             CloudRun(console: console),
-            CloudConfigs(console: console),
+            config,
             // Temporarily disabling not ready commands
             // Add(console: console),
             // CloudSetup(console: console),
