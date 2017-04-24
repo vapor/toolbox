@@ -17,7 +17,7 @@ extension CloudAPI {
             
             guard envs.count > 0 else {
                 console.warning("No environments found.")
-                console.print("Use: vapor cloud create")
+                console.print("Use: vapor cloud create env")
                 throw "Environment required"
             }
             

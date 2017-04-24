@@ -92,7 +92,7 @@ extension Hosting: Stitched {}
 extension Hosting: Equatable {}
 public func == (lhs: Hosting, rhs: Hosting) -> Bool {
     return lhs.id == rhs.id
-    && lhs.gitUrl == rhs.gitUrl
+    && lhs.gitURL == rhs.gitURL
     && lhs.application.id == rhs.application.id
 }
 

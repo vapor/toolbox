@@ -37,7 +37,7 @@ public final class DeployCloud: Command {
         let hosting = try getHosting(forRepo: repo, with: token)
         let branch = try getBranch(arguments, env: env)
 
-        if gitInfo.isGitProject(), let matchingRemote = try gitInfo.remote(forUrl: hosting.gitUrl) {
+        if gitInfo.isGitProject(), let matchingRemote = try gitInfo.remote(forUrl: hosting.gitURL) {
             // verify there's not uncommitted changes
             try gitInfo.verify(local: branch, remote: matchingRemote)
         }
