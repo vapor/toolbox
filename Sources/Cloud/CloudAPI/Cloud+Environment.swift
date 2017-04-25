@@ -2,7 +2,7 @@ extension CloudAPI {
     /// Dynamically chooses an environment based on
     /// input arguments and lists from the Cloud API.
     func environment(
-        in app: ModelOrIdentifier<Application>,
+        on app: ModelOrIdentifier<Application>,
         for arguments: [String],
         using console: ConsoleProtocol
     ) throws -> Environment {

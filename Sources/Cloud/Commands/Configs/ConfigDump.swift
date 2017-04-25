@@ -28,7 +28,7 @@ public final class ConfigDump: Command {
     public func run(arguments: [String]) throws {
         let cloud = try cloudFactory.makeAuthedClient(with: console)
         let app = try cloud.application(for: arguments, using: console)
-        let env = try cloud.environment(in: .model(app), for: arguments, using: console)
+        let env = try cloud.environment(on: .model(app), for: arguments, using: console)
         
         let configs = try console.loadingBar(title: "Loading configs", ephemeral: true) {
             return try cloud.configurations(

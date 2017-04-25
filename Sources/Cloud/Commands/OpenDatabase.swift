@@ -23,7 +23,7 @@ public final class OpenDatabase: Command {
         let app = try cloud.application(for: arguments, using: console)
         let repoName = Identifier(app.repoName)
         let env = try cloud.environment(
-            in: .identifier(repoName),
+            on: .identifier(repoName),
             for: arguments,
             using: console
         )
@@ -35,6 +35,12 @@ public final class OpenDatabase: Command {
         let url = try "\(cloudURL)/application/applications/\(app.repoName)/hosting/environments/\(env.name)/database/pma?_authorizationBearer=\(token.makeString())"
         
         console.success("Opening database...")
-        try console.foregroundExecute(program: "/bin/sh", arguments: ["-c", "open \(url)"])
+        
+        #if os(Linux)
+            let open = "xdg-open"
+        #else
+            let open = "open"
+        #endif
+        try console.foregroundExecute(program: "/bin/sh", arguments: ["-c", "\(open) \(url)"])
     }
 }

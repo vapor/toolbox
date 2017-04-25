@@ -30,7 +30,7 @@ public final class CreateDatabase: Command {
         let cloud = try cloudFactory.makeAuthedClient(with: console)
         
         let app = try cloud.application(for: arguments, using: console)
-        let env = try cloud.environment(in: .model(app), for: arguments, using: console)
+        let env = try cloud.environment(on: .model(app), for: arguments, using: console)
         
         let servers = try cloud.databaseServers()
         let server = try console.giveChoice(
