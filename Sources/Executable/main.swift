@@ -4,7 +4,7 @@ import Foundation
 import VaporToolbox
 import Cloud
 // The toolbox bootstrap script replaces "master" during installation. Do not modify!
-let version = "3.0.0-beta.4"
+let version = "master"
 let arguments = CommandLine.arguments
 let terminal = Terminal(arguments: arguments)
 
