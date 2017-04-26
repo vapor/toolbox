@@ -101,7 +101,7 @@ extension Node {
      Load the file at a path as raw bytes, or as parsed JSON representation
      */
     fileprivate static func loadContents(path: String) throws -> Node {
-        let data = try DataFile().load(path: path)
+        let data = try DataFile().read(at: path)
         guard path.hasSuffix(".json") else { return .bytes(data) }
         return try JSON(bytes: data).converted()
     }
