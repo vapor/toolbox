@@ -169,8 +169,8 @@ public final class CloudInit: Command {
                 console.print("Bye for now.")
                 return
             }
-            let deploy = DeployCloud(console: console)
-            try deploy.run(arguments: ["deploy", app.repoName])
+            //let deploy = DeployCloud(console, )
+            // try deploy.run(arguments: ["deploy", app.repoName])
             return
         }
 
@@ -206,8 +206,8 @@ public final class CloudInit: Command {
             return
         }
 
-        let deploy = DeployCloud(console: console)
-        try deploy.run(arguments: ["deploy"])
+        // let deploy = DeployCloud(console: console, <#CloudAPIFactory#>)
+        // try deploy.run(arguments: ["deploy"])
     }
 
     func addConfig(for app: Application) throws -> Bool {
@@ -655,36 +655,206 @@ extension FileManager {
     }
 }
 
-extension ConsoleProtocol {
-    public func giveChoice<T>(title: String, in array: [T]) throws -> T {
-        return try giveChoice(title: title, in: array, display: { "\($0)" })
+func getOrganization(_ arguments: [String], console: ConsoleProtocol, with token: Token) throws -> Organization {
+    let organizationId = arguments.option("org") ?? localConfig?["organization.id"]?.string
+    if let id = organizationId {
+        let bar = console.loadingBar(title: "Loading organizations")
+        defer { bar.fail() }
+        bar.start()
+        let org = try adminApi.organizations.get(id: id, with: token)
+        bar.finish()
+        console.info("Loaded \(org.name)")
+        return org
     }
     
-    public func giveChoice<T>(title: String, in array: [T], display: (T) -> String) throws -> T {
-        info(title)
-        array.enumerated().forEach { idx, item in
-            let offset = idx + 1
-            info("\(offset): ", newLine: false)
-            let description = display(item)
-            print(description)
+    return try selectOrganization(
+        queryTitle: "Which organization?",
+        using: console,
+        with: token
+    )
+}
+
+func getProject(_ arguments: [String], console: ConsoleProtocol, in org: Organization, with token: Token) throws -> Project {
+    let projectId = arguments.option("proj") ?? localConfig?["project.id"]?.string
+    if let id = projectId {
+        let bar = console.loadingBar(title: "Loading Project")
+        defer { bar.fail() }
+        bar.start()
+        let proj = try adminApi.projects.get(id: id, with: token)
+        bar.finish()
+        console.info("Loaded \(proj.name)")
+        return proj
+    }
+    
+    return try selectProject(
+        in: org,
+        queryTitle: "Which project?",
+        using: console,
+        with: token
+    )
+}
+
+func getApp(_ arguments: [String], console: ConsoleProtocol, in proj: Project, with token: Token) throws -> Application {
+    let applicationId = arguments.option("app") ?? localConfig?["application.id"]?.string
+    if let id = applicationId {
+        let bar = console.loadingBar(title: "Loading App")
+        defer { bar.fail() }
+        bar.start()
+        guard let app = try applicationApi.get(for: proj, with: token)
+            .lazy
+            .filter({ $0.id?.string == id })
+            .first else { throw "No application found w/ id: \(id)" }
+        bar.finish()
+        console.info("Loaded \(app.name)")
+        return app
+    }
+    
+    return try selectApplication(
+        in: proj,
+        queryTitle: "Which application?",
+        using: console,
+        with: token
+    )
+}
+
+func getRepo(_ arguments: [String], console: ConsoleProtocol, with token: Token) throws -> String {
+    let gitInfo = GitInfo(console)
+    let localConfig = try LocalConfig.load()
+    if let repo = arguments.option("app") ?? localConfig["app.repo"]?.string {
+        return repo
+    }
+    
+    if gitInfo.isGitProject() {
+        let apps = try gitInfo
+            .remotes()
+            .flatMap { remote -> [Application] in
+                guard let resolved = gitInfo.resolvedUrl(remote.url) else { return [] }
+                let appsBar = console.loadingBar(title: "Loading applications")
+                let apps = try appsBar.perform {
+                    try applicationApi.get(forGit: resolved, with: token)
+                }
+                return apps
         }
         
-        output("> ", style: .plain, newLine: false)
-        let raw = input()
-        guard let idx = Int(raw), (1...array.count).contains(idx) else {
-            // .count is implicitly offset, no need to adjust
-            throw "Invalid selection: \(raw), expected: 1...\(array.count)"
+        if apps.isEmpty {
+            console.print("No apps found matching existing remotes")
+        } else if apps.count == 1 {
+            let found = apps[0]
+            console.print("Detected application ", newLine: false)
+            console.info(found.repoName, newLine: false)
+            console.print(" using git")
+            return found.repoName
+        } else {
+            console.info("I found too many apps, that match remotes in this repo,")
+            console.info("yell at Logan to ask me to use one of these.")
+            console.info("Instead, I'm going to ask a bunch of questions.")
+            apps.forEach { app in
+                console.print("- \(app.name) (\(app.repoName).vapor.cloud)")
+            }
         }
+    }
+    
+    let org = try getOrganization(arguments, console: console, with: token)
+    let proj = try getProject(arguments, console: console, in: org, with: token)
+    let app = try getApp(arguments, console: console, in: proj, with: token)
+    return app.repoName
+}
 
-        // + 1 for > input line
-        // + 1 for title line
-        let lines = array.count + 2
-        for _ in 1...lines {
-            clear(.line)
-        }
-
-        // undo previous offset back to 0 indexing
-        let offset = idx - 1
-        return array[offset]
+func selectOrganization(queryTitle: String, using console: ConsoleProtocol, with token: Token) throws -> Organization {
+    let orgsBar = console.loadingBar(title: "Loading Organizations")
+    let orgs = try orgsBar.perform {
+        try adminApi.organizations.all(with: token)
+    }
+    console.clear(lines: 1)
+    
+    if orgs.isEmpty {
+        throw "No organizations found, make one with 'vapor cloud create org'"
+    } else if orgs.count == 1 {
+        return orgs[0]
+    } else {
+        return try console.giveChoice(
+            title: queryTitle,
+            in: orgs
+        ) { org in "\(org.name)" }
     }
 }
+
+func selectProject(in org: Organization, queryTitle: String, using console: ConsoleProtocol, with token: Token) throws -> Project {
+    let projBar = console.loadingBar(title: "Loading Projects")
+    let projs = try projBar.perform {
+        try adminApi.projects.all(for: org, with: token)
+    }
+    console.clear(lines: 1)
+    
+    if projs.isEmpty {
+        throw "No projects found, make one with 'vapor cloud create proj'"
+    } else if projs.count == 1 {
+        return projs[0]
+    } else {
+        return try console.giveChoice(
+            title: queryTitle,
+            in: projs
+        ) { proj in return "\(proj.name)" }
+    }
+}
+
+func selectApplication(
+    in proj: Project,
+    queryTitle: String,
+    using console: ConsoleProtocol,
+    with token: Token) throws -> Application {
+    let appsBar = console.loadingBar(title: "Loading Applications")
+    defer { appsBar.fail() }
+    appsBar.start()
+    let apps = try applicationApi.get(for: proj, with: token)
+    appsBar.finish()
+    console.clear(lines: 1)
+    
+    if apps.isEmpty {
+        throw "No applications found, make one with 'vapor cloud create app'"
+    } else if apps.count == 1 {
+        return apps[0]
+    } else {
+        return try console.giveChoice(
+            title: queryTitle,
+            in: apps
+        ) { app in return "\(app.name) (\(app.repoName).vapor.cloud)" }
+    }
+}
+
+func selectEnvironment(
+    args: [String] = [],
+    forRepo repo: String,
+    queryTitle: String,
+    using console: ConsoleProtocol,
+    with token: Token) throws-> Environment {
+    
+    let envBar = console.loadingBar(title: "Loading environments")
+    let envs = try envBar.perform {
+        try applicationApi
+            .hosting
+            .environments
+            .all(forRepo: repo, with: token)
+    }
+    guard !envs.isEmpty else { throw "No environments found for '\(repo).vapor.cloud'" }
+    
+    if let env = args.option("env") {
+        guard let loaded = envs.lazy
+            .filter({ $0.name == env})
+            .first
+            else { throw "Environment '\(env)' not found" }
+        return loaded
+    }
+    
+    guard !envs.isEmpty else {
+        throw "No environments setup, make sure to create an environment for repo \(repo)"
+    }
+    
+    guard envs.count > 1 else { return envs[0] }
+    
+    return try console.giveChoice(
+        title: "Which environment?",
+        in: envs
+    ) { env in return "\(env.name)" }
+}
+

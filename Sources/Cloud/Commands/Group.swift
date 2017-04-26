@@ -46,7 +46,7 @@ public func group(_ console: ConsoleProtocol) throws -> Group {
             // Info
             List(console: console),
             // Deploy
-            DeployCloud(console: console),
+            DeployCloud(console, cloudFactory),
             // Create
             create,
             // Run remote commands
