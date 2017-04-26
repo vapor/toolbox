@@ -4,6 +4,13 @@ import libc
 @testable import VaporToolbox
 
 final class TestConsole: ConsoleProtocol {
+    /// Returns a string of input read from the console
+    /// until a line feed character was found,
+    /// hides entry for security
+    func secureInput() -> String {
+        return ""
+    }
+
     var inputBuffer: [String]
     var outputBuffer: [String]
     var executeBuffer: [String]
