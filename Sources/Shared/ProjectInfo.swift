@@ -120,6 +120,10 @@ public final class ProjectInfo {
     }
 }
 
+extension ConsoleProtocol {
+    public var projectInfo: ProjectInfo { return ProjectInfo(self) }
+}
+
 extension Command {
     public var projectInfo: ProjectInfo { return ProjectInfo(console) }
 }

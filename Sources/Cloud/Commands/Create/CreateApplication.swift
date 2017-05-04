@@ -22,10 +22,10 @@ public final class CreateApplication: Command {
     }
     
     public func run(arguments: [String]) throws {
-        try createApplication(with: arguments)
+        _ = try createApplication(with: arguments)
     }
     
-    private func createApplication(with arguments: [String]) throws {
+    func createApplication(with arguments: [String]) throws -> Application {
         let cloud = try cloudFactory.makeAuthedClient(with: console)
         let proj = try cloud.project(for: arguments, using: console)
         
@@ -57,7 +57,7 @@ public final class CreateApplication: Command {
             name: name
         )
         
-        _ = try console.loadingBar(title: "Creating application '\(name)'") {
+        return try console.loadingBar(title: "Creating application '\(name)'") {
             return try cloud.create(app)
         }
     }

@@ -13,7 +13,7 @@ extension AdminApi {
         )
 
         public func create(name: String, with token: Token) throws -> Organization {
-            let request = try Request(method: .post, uri: organizationsEndpoint)
+            let request = Request(method: .post, uri: organizationsEndpoint)
             request.access = token
             request.json = try JSON(node: ["name": name])
 
@@ -22,7 +22,7 @@ extension AdminApi {
         }
 
         public func all(with token: Token) throws -> [Organization] {
-            let request = try Request(method: .get, uri: organizationsEndpoint)
+            let request = Request(method: .get, uri: organizationsEndpoint)
             request.access = token
 
             let response = try client.respond(to: request)
@@ -42,7 +42,7 @@ extension AdminApi {
 
         public func get(id: String, with token: Token) throws -> Organization {
             let endpoint = organizationsEndpoint.finished(with: "/") + id
-            let request = try Request(method: .get, uri: endpoint)
+            let request = Request(method: .get, uri: endpoint)
             request.access = token
 
             let response = try client.respond(to: request)

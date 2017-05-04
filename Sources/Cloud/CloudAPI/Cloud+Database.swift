@@ -1,0 +1,36 @@
+extension ConsoleProtocol {
+    /// Dynamically chooses a hosting service based on
+    /// input arguments and lists from the Cloud API.
+    func database(
+        for env: ModelOrIdentifier<Environment>,
+        on app: ModelOrIdentifier<Application>,
+        for arguments: [String],
+        using cloudFactory: CloudAPIFactory
+    ) throws -> Database {
+        let db: Database
+        do {
+            db = try loadingBar(title: "Loading database service", ephemeral: true) {
+                return try cloudFactory
+                    .makeAuthedClient(with: self)
+                    .database(for: env, on: app)
+            }
+            
+        } catch let error as AbortError where error.status == .notFound {
+            warning("No database service found.")
+            if confirm("Would you like to add a database?") {
+                let create = CreateDatabase(self, cloudFactory)
+                let args = try arguments + [
+                    "--app=\(app.assertIdentifier())",
+                    "--env=\(env.assertIdentifier())"
+                ]
+                db = try create.createDatabase(with: args)
+            } else {
+                detail("Create database", "vapor cloud create db")
+                throw "Hosting required"
+            }
+        }
+        
+        detail("db", "mysql")
+        return db
+    }
+}

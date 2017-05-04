@@ -91,7 +91,8 @@ public final class GitInfo {
         let ahead = result.suffix(while: { $0.isDigit })
 
         guard let b = Int(behind.makeString()), let a = Int(ahead.makeString()) else {
-            throw GeneralError("Unable to get branch position")
+            print("Unable to get branch position")
+            return (0, 0)
         }
 
         return (b, a)

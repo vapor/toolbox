@@ -20,12 +20,12 @@ public final class OpenDatabase: Command {
     
     public func run(arguments: [String]) throws {
         let cloud = try cloudFactory.makeAuthedClient(with: console)
-        let app = try cloud.application(for: arguments, using: console)
+        let app = try console.application(for: arguments, using: cloudFactory)
         let repoName = Identifier(app.repoName)
-        let env = try cloud.environment(
+        let env = try console.environment(
             on: .identifier(repoName),
             for: arguments,
-            using: console
+            using: cloudFactory
         )
         
         guard let token = try cloud.accessTokenFactory?.makeAccessToken() else {
@@ -36,11 +36,17 @@ public final class OpenDatabase: Command {
         
         console.success("Opening database...")
         
+        try console.open(url)
+    }
+}
+
+extension ConsoleProtocol {
+    func open(_ url: String) throws {
         #if os(Linux)
             let open = "xdg-open"
         #else
             let open = "open"
         #endif
-        try console.foregroundExecute(program: "/bin/sh", arguments: ["-c", "\(open) \(url)"])
+        try foregroundExecute(program: "/bin/sh", arguments: ["-c", "\(open) \(url)"])
     }
 }

@@ -29,12 +29,12 @@ public final class CreateEnvironment: Command {
     }
     
     public func run(arguments: [String]) throws {
-        try createEnvironment(with: arguments)
+        _ = try createEnvironment(with: arguments)
     }
     
-    private func createEnvironment(with arguments: [String]) throws {
+    func createEnvironment(with arguments: [String]) throws -> Environment {
         let cloud = try cloudFactory.makeAuthedClient(with: console)
-        let app = try cloud.application(for: arguments, using: console)
+        let app = try console.application(for: arguments, using: cloudFactory)
         
         // verify this app has hosting first
         do {
@@ -78,7 +78,7 @@ public final class CreateEnvironment: Command {
         try console.verifyAboveCorrect()
         
         
-        _ = try console.loadingBar(title: "Creating \(name) environment") { () -> Environment in
+        return try console.loadingBar(title: "Creating \(name) environment") { () -> Environment in
             let cloud = try cloudFactory.makeAuthedClient(with: console)
             
             let env = Environment(

@@ -34,7 +34,7 @@ extension ApplicationApi {
         name: String,
         with token: Token
     ) throws -> Application {
-        let request = try Request(method: .post, uri: ApplicationApi.applicationsEndpoint)
+        let request = Request(method: .post, uri: ApplicationApi.applicationsEndpoint)
         request.access = token
 
         var json = JSON([:])
@@ -63,7 +63,7 @@ extension ApplicationApi {
     public func get(for project: Project, with token: Token) throws -> [Application] {
         let id = try project.uuid().uuidString
         let endpoint = ApplicationApi.applicationsEndpoint + "?projectId=\(id)"
-        let request = try Request(method: .get, uri: endpoint)
+        let request = Request(method: .get, uri: endpoint)
         request.access = token
 
         let response = try client.respond(to: request)
@@ -73,7 +73,7 @@ extension ApplicationApi {
     public func get(forGit git: String, with token: Token) throws -> [Application] {
         let endpoint = ApplicationApi.applicationsEndpoint
             + "?hosting:gitUrl=\(git)"
-        let request = try Request(method: .get, uri: endpoint)
+        let request = Request(method: .get, uri: endpoint)
         request.access = token
         let response = try client.respond(to: request)
         return try [Application](node: response.json?["data"])
@@ -105,7 +105,7 @@ extension ApplicationApi {
                 + "/hosting/environments/"
                 + env
                 + "/database"
-            let req = try Request(method: .post, uri: endpoint)
+            let req = Request(method: .post, uri: endpoint)
             req.access = token
 
             // FIXME: temporarily hardcoding database id
@@ -135,7 +135,7 @@ extension ApplicationApi {
         // TODO: git expects ssh url, ie: git@github.com:vapor/vapor.git
         public func create(forRepo repo: String, git: String, with token: Token) throws -> Hosting {
             let endpoint = applicationsEndpoint.finished(with: "/") + repo + "/hosting"
-            let request = try Request(method: .post, uri: endpoint)
+            let request = Request(method: .post, uri: endpoint)
             request.access = token
 
             var json = JSON([:])
@@ -148,7 +148,7 @@ extension ApplicationApi {
         
         public func get(forRepo repo: String, with token: Token) throws -> Hosting {
             let endpoint = applicationsEndpoint.finished(with: "/") + repo + "/hosting"
-            let request = try Request(method: .get, uri: endpoint)
+            let request = Request(method: .get, uri: endpoint)
             request.access = token
 
             let response = try client.respond(to: request)
@@ -157,7 +157,7 @@ extension ApplicationApi {
 
         public func update(for application: Application, git: String, with token: Token) throws -> Hosting {
             let endpoint = applicationsEndpoint.finished(with: "/") + application.repoName + "/hosting"
-            let request = try Request(method: .patch, uri: endpoint)
+            let request = Request(method: .patch, uri: endpoint)
             request.access = token
 
             var json = JSON([:])
@@ -198,7 +198,7 @@ extension ApplicationApi {
             with token: Token
         ) throws -> Environment {
             let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/") + repo + "/hosting/environments"
-            let request = try Request(method: .post, uri: endpoint)
+            let request = Request(method: .post, uri: endpoint)
             request.access = token
 
             var json = JSON([:])
@@ -216,7 +216,7 @@ extension ApplicationApi {
                 + repo
                 + "/hosting/environments/"
                 + env.name
-            let request = try Request(method: .patch, uri: endpoint)
+            let request = Request(method: .patch, uri: endpoint)
             request.access = token
 
             var json = JSON([:])
@@ -233,7 +233,7 @@ extension ApplicationApi {
 
         public func all(forRepo repo: String, with token: Token) throws -> [Environment] {
             let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/") + repo + "/hosting/environments"
-            let request = try Request(method: .get, uri: endpoint)
+            let request = Request(method: .get, uri: endpoint)
             request.access = token
 
             let response = try client.respond(to: request)
@@ -254,7 +254,7 @@ extension ApplicationApi {
                 + env.finished(with: "/")
                 + "configurations"
 
-            let request = try Request(method: .get, uri: endpoint)
+            let request = Request(method: .get, uri: endpoint)
             request.access = token
 
             let response = try client.respond(to: request)
@@ -273,7 +273,7 @@ extension ApplicationApi {
                 + env.finished(with: "/")
                 + "configurations"
 
-            let request = try Request(method: .patch, uri: endpoint)
+            let request = Request(method: .patch, uri: endpoint)
             request.access = token
             request.json = try JSON(node: configs)
 
@@ -292,7 +292,7 @@ extension ApplicationApi {
                 + "/hosting/environments/"
                 + env.finished(with: "/")
                 + "configurations"
-            let request = try Request(method: .put, uri: endpoint)
+            let request = Request(method: .put, uri: endpoint)
             request.access = token
             request.json = try JSON(node: configs)
 
@@ -311,7 +311,7 @@ extension ApplicationApi {
                 + "/hosting/environments/"
                 + env.finished(with: "/")
                 + "configurations"
-            let request = try Request(method: .delete, uri: endpoint)
+            let request = Request(method: .delete, uri: endpoint)
             request.access = token
             request.json = try JSON(node: keys)
 
@@ -398,7 +398,7 @@ extension ApplicationApi {
                 + repo
                 + "/hosting/environments/"
                 + envName
-            let request = try Request(method: .patch, uri: endpoint)
+            let request = Request(method: .patch, uri: endpoint)
             request.access = token
 
             var json = JSON([:])
@@ -426,7 +426,7 @@ extension ApplicationApi {
                 + repo
                 + "/hosting/environments/"
                 + envName
-            let request = try Request(method: .patch, uri: endpoint)
+            let request = Request(method: .patch, uri: endpoint)
             request.access = token
 
             var json = JSON([:])

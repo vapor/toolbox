@@ -15,7 +15,7 @@ extension AdminApi {
         ) throws -> Project {
             let id = try org.uuid().uuidString
             let projectsUri = organizationsEndpoint.finished(with: "/") + id + "/projects"
-            let request = try Request(method: .post, uri: projectsUri)
+            let request = Request(method: .post, uri: projectsUri)
             request.access = token
 
             var json = JSON()
@@ -34,7 +34,7 @@ extension AdminApi {
                 endpoint += "&name=\(prefix)"
             }
 
-            let request = try Request(method: .get, uri: endpoint)
+            let request = Request(method: .get, uri: endpoint)
             request.access = token
 
             let response = try client.respond(to: request)
@@ -57,7 +57,7 @@ extension AdminApi {
 
         public func get(id: String, with token: Token) throws -> Project {
             let endpoint = projectsEndpoint.finished(with: "/") + id
-            let request = try Request(method: .get, uri: endpoint)
+            let request = Request(method: .get, uri: endpoint)
             request.access = token
 
             let response = try client.respond(to: request)
@@ -74,7 +74,7 @@ extension AdminApi {
         public func update(_ project: Project, name: String?, color: String?, with token: Token) throws -> Project {
             let id = try project.uuid().uuidString
             let endpoint = projectsEndpoint.finished(with: "/") + id
-            let request = try Request(method: .patch, uri: endpoint)
+            let request = Request(method: .patch, uri: endpoint)
             request.access = token
 
             var json = JSON([:])
@@ -88,7 +88,7 @@ extension AdminApi {
 
         public func colors(with token: Token) throws -> [Color] {
             let endpoint = projectsEndpoint.finished(with: "/") + "colors"
-            let request = try Request(method: .get, uri: endpoint)
+            let request = Request(method: .get, uri: endpoint)
             request.access = token
             
             let response = try client.respond(to: request)

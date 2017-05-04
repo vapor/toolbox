@@ -8,9 +8,16 @@ extension ConsoleProtocol {
         guard gitInfo.isGitProject() else { return }
         if try gitInfo.statusIsClean() { return }
         info("You have uncommitted changes!")
-        let goRogue = confirm("Are you sure you'd like to continue?", style: .warning)
-        guard goRogue else { throw "Commit and try again." }
-        print("Rogue mode enabled ...")
+        if confirm("Would you like to commit changes now?") {
+            let message = ask("What commit message?")
+            try foregroundExecute(program: "git", arguments: ["add ."])
+            try foregroundExecute(program: "git", arguments: ["commit -am \"\(message)\""])
+            try foregroundExecute(program: "git", arguments: ["push"])
+        } else {
+            let goRogue = confirm("Are you sure you'd like to continue?", style: .warning)
+            guard goRogue else { throw "Commit and try again." }
+            print("Rogue mode enabled ...")
+        }
     }
 }
 

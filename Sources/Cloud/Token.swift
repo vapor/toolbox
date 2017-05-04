@@ -80,7 +80,7 @@ import Vapor
 extension AdminApi {
     public final class AccessApi {
         public func refresh(_ token: Token) throws {
-            let request = try Request(method: .get, uri: refreshEndpoint)
+            let request = Request(method: .get, uri: refreshEndpoint)
             request.refresh = token
 
             // No refresh middleware on token

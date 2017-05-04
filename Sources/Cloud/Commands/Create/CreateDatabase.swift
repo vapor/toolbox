@@ -23,14 +23,14 @@ public final class CreateDatabase: Command {
     }
     
     public func run(arguments: [String]) throws {
-        try createDatabase(with: arguments)
+        _ = try createDatabase(with: arguments)
     }
     
-    private func createDatabase(with arguments: [String]) throws {
+    func createDatabase(with arguments: [String]) throws -> Database {
         let cloud = try cloudFactory.makeAuthedClient(with: console)
         
-        let app = try cloud.application(for: arguments, using: console)
-        let env = try cloud.environment(on: .model(app), for: arguments, using: console)
+        let app = try console.application(for: arguments, using: cloudFactory)
+        let env = try console.environment(on: .model(app), for: arguments, using: cloudFactory)
         
         let servers = try cloud.databaseServers()
         let server = try console.giveChoice(
@@ -47,7 +47,7 @@ public final class CreateDatabase: Command {
             environment: .model(env)
         )
         
-        _ = try console.loadingBar(title: "Creating database on \(app.repoName):\(env.name)") {
+        return try console.loadingBar(title: "Creating database on \(app.repoName):\(env.name)") {
             return try cloud.create(
                 database,
                 for: .model(app)
