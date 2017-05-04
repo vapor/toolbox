@@ -24,19 +24,24 @@ public final class CreateHosting: Command {
     }
     
     public func run(arguments: [String]) throws {
-        try createHosting(with: arguments)
+        _ = try createHosting(with: arguments)
     }
     
-    private func createHosting(with arguments: [String]) throws {
+    func createHosting(with arguments: [String]) throws -> Hosting {
         let cloud = try cloudFactory.makeAuthedClient(with: console)
-        let app = try cloud.application(for: arguments, using: console)
+        let app = try console.application(for: arguments, using: cloudFactory)
         
         let gitURL: String
         if let n = arguments.option("gitURL") {
             gitURL = n
         } else {
-            console.warning("Git URL's must be in SSH format (git@github.com:...)")
-            gitURL = console.ask("What Git URL should we clone when deploying?")
+            if console.gitInfo.isGitProject() {
+                console.print("Detected Git, to manually choose a URL use the --gitURL option.")
+                gitURL = try console.giveChoice(title: "Which Git URL?", in: console.gitInfo.remoteUrls())
+            } else {
+                console.warning("Git URL's must be in SSH format (git@github.com:...)")
+                gitURL = console.ask("What Git URL should we clone when deploying?")
+            }
             console.clear(lines: 3)
         }
         console.detail("gitURL", gitURL)
@@ -48,7 +53,7 @@ public final class CreateHosting: Command {
             gitURL: gitURL
         )
         
-        _ = try console.loadingBar(title: "Adding hosting service to '\(app.repoName)'") {
+        return try console.loadingBar(title: "Adding hosting service to '\(app.repoName)'") {
             return try cloud.create(hosting)
         }
     }

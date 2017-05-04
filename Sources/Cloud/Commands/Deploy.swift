@@ -47,13 +47,11 @@ public final class DeployCloud: Command {
     }
 
     public func run(arguments: [String]) throws {
-        try console.warnGitClean()
-        
         // get deploy details
-        let cloud = try cloudFactory.makeAuthedClient(with: console)
-        let app = try cloud.application(for: arguments, using: console)
-        let env = try cloud.environment(on: .model(app), for: arguments, using: console)
-        let hosting = try cloud.hosting(on: .model(app), for: arguments, using: console)
+        let app = try console.application(for: arguments, using: cloudFactory)
+        let hosting = try console.hosting(on: .model(app), for: arguments, using: cloudFactory)
+        let env = try console.environment(on: .model(app), for: arguments, using: cloudFactory)
+        let db = try console.database(for: .model(env), on: .model(app), for: arguments, using: cloudFactory)
         let replicas = self.replicas(for: arguments, in: env)
         let replicaSize = try self.replicaSize(for: arguments, in: env)
         let branch = self.branch(for: arguments, in: env)
@@ -61,23 +59,28 @@ public final class DeployCloud: Command {
         
         try console.verifyAboveCorrect()
         
+        
         // verify git
-        if gitInfo.isGitProject(), let matchingRemote = try gitInfo.remote(forUrl: hosting.gitURL) {
-            // verify there's not uncommitted changes
-            try gitInfo.verify(local: branch, remote: matchingRemote)
-        }
+        
+        // temporarily disable for now due to some errors
+//        if gitInfo.isGitProject(), let matchingRemote = try gitInfo.remote(forUrl: hosting.gitURL) {
+//            // verify there's not uncommitted changes
+//            try gitInfo.verify(local: branch, remote: matchingRemote)
+//        }
 
 
         // deploy
         let (environment, deployment) = try console.loadingBar(title: "Creating deployment") {
-            return try cloud.deploy(
-                environment: .model(env),
-                application: .model(app),
-                gitBranch: branch,
-                replicas: replicas,
-                replicaSize: replicaSize,
-                method: Deployment.Method.code(buildType)
-            )
+            return try cloudFactory
+                .makeAuthedClient(with: console)
+                .deploy(
+                    environment: .model(env),
+                    application: .model(app),
+                    gitBranch: branch,
+                    replicas: replicas,
+                    replicaSize: replicaSize,
+                    method: Deployment.Method.code(buildType)
+                )
         }
 
         console.info("Connecting to build logs ...")
@@ -147,12 +150,25 @@ public final class DeployCloud: Command {
     }
     
     private func replicas(for arguments: [String], in env: Environment) -> Int {
-        let replicas: Int
+        var replicas: Int
         if let chosen = arguments.option("replicas")?.int {
             replicas = chosen
         } else {
             replicas = env.replicas
         }
+        
+        if replicas == 0 {
+            if env.replicas == 0 {
+                console.warning("This environment's replica count is currently set to 0.")
+            } else {
+                console.warning("Setting the replica count to 0 will take your application offline")
+            }
+            
+            if console.confirm("Would you like to change the replica count?") {
+                replicas = console.ask("What replica count?").int ?? 0
+            }
+        }
+        
         console.detail("replicas", replicas.description)
         return replicas
     }

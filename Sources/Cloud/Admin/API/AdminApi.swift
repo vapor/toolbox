@@ -55,7 +55,7 @@ extension AdminApi {
         try json.set("organization.name", organizationName)
         try json.set("image", image)
 
-        let request = try Request(method: .post, uri: AdminApi.usersEndpoint)
+        let request = Request(method: .post, uri: AdminApi.usersEndpoint)
         request.json = json
 
         let response = try client.respond(to: request)
@@ -67,7 +67,7 @@ extension AdminApi {
         try json.set("email", email)
         try json.set("password", pass)
 
-        let request = try Request(method: .post, uri: AdminApi.loginEndpoint)
+        let request = Request(method: .post, uri: AdminApi.loginEndpoint)
         request.json = json
         let response = try client.respond(to: request)
         guard

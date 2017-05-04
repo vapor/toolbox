@@ -35,8 +35,8 @@ public final class ConfigModify: Command {
     
     public func run(arguments: [String]) throws {
         let cloud = try cloudFactory.makeAuthedClient(with: console)
-        let app = try cloud.application(for: arguments, using: console)
-        let env = try cloud.environment(on: .model(app), for: arguments, using: console)
+        let app = try console.application(for: arguments, using: cloudFactory)
+        let env = try console.environment(on: .model(app), for: arguments, using: cloudFactory)
         
         let configs: [Configuration] = try arguments.flatMap { arg in
                 return arg.hasPrefix("--") ? nil : arg

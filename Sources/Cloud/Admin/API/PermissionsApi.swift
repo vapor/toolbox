@@ -15,7 +15,7 @@ public final class PermissionsApi<PermissionType: Permission, Model: Stitched> {
     public func get(for model: Model, with token: Token) throws -> [PermissionType] {
         let id = try model.uuid().uuidString
         let endpoint = base.finished(with: "/") + id + "/permissions"
-        let request = try Request(method: .get, uri: endpoint)
+        let request = Request(method: .get, uri: endpoint)
         request.access = token
 
         let response = try client.respond(to: request)
@@ -24,7 +24,7 @@ public final class PermissionsApi<PermissionType: Permission, Model: Stitched> {
 
     public func all(with token: Token) throws -> [PermissionType] {
         let endpoint = base.finished(with: "/") + "permissions"
-        let request = try Request(method: .get, uri: endpoint)
+        let request = Request(method: .get, uri: endpoint)
         request.access = token
 
         let response = try client.respond(to: request)
@@ -34,7 +34,7 @@ public final class PermissionsApi<PermissionType: Permission, Model: Stitched> {
     public func set(_ permissions: [PermissionType], forUser user: UUID, in model: Model, with token: Token) throws -> [PermissionType] {
         let id = try model.uuid().uuidString
         let endpoint = base.finished(with: "/") + id + "/permissions"
-        let request = try Request(method: .put, uri: endpoint)
+        let request = Request(method: .put, uri: endpoint)
         request.access = token
 
         var json = JSON([:])
