@@ -1,3 +1,5 @@
+import HTTP
+
 extension ConsoleProtocol {
     /// Dynamically chooses an application based on
     /// input arguments, git in the working directory,
@@ -22,7 +24,7 @@ extension ConsoleProtocol {
                         .applications()
                 }
                 
-                guard apps.count > 0 else {
+                guard apps.data.count > 0 else {
                     warning("No applications found.")
                     detail("Create application", "vapor cloud create app")
                     if confirm("Would you like to create an application now?") {
@@ -35,7 +37,7 @@ extension ConsoleProtocol {
                 
                 return try giveChoice(
                     title: "Which application?",
-                    in: apps
+                    in: apps.data
                 )
             }
 
@@ -131,8 +133,12 @@ extension Application: CustomStringConvertible {
 extension CloudAPI {
     func applications(gitRemotes: [String], using console: ConsoleProtocol) throws -> [Application] {
         return try gitRemotes.flatMap { url in
-            try console.loadingBar(title: "Loading applications", ephemeral: true) {
-                return try self.applications(gitURL: url)
+            do {
+                return try console.loadingBar(title: "Loading applications", ephemeral: true) {
+                    return try self.applications(withGitURL: url)
+                }
+            } catch let error as AbortError where error.status == .notFound {
+                return nil
             }
         }
     }

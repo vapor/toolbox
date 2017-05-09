@@ -6,10 +6,10 @@ extension CloudAPI {
         using console: ConsoleProtocol
     ) throws -> Project {
         let projs = try console.loadingBar(title: "Loading projects", ephemeral: true) {
-            return try projects()
+            return try projects(size: 999)
         }
         
-        guard projs.count > 0 else {
+        guard projs.data.count > 0 else {
             console.warning("No projects found.")
             console.detail("Create project", "vapor cloud create proj")
             throw "Project required"
@@ -17,7 +17,7 @@ extension CloudAPI {
         
         let proj = try console.giveChoice(
             title: "Which project?",
-            in: projs
+            in: projs.data
         )
         
         console.detail("proj", proj.name)

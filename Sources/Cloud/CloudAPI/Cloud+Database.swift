@@ -8,14 +8,20 @@ extension ConsoleProtocol {
         using cloudFactory: CloudAPIFactory
     ) throws -> Database {
         let db: Database
-        do {
-            db = try loadingBar(title: "Loading database service", ephemeral: true) {
+        
+        let existing: Database? = try loadingBar(title: "Loading database service", ephemeral: true) {
+            do {
                 return try cloudFactory
                     .makeAuthedClient(with: self)
                     .database(for: env, on: app)
+            } catch let error as AbortError where error.status == .notFound {
+                return nil
             }
-            
-        } catch let error as AbortError where error.status == .notFound {
+        }
+        
+        if let e = existing {
+            db = e
+        } else {
             warning("No database service found.")
             if confirm("Would you like to add a database?") {
                 let create = CreateDatabase(self, cloudFactory)

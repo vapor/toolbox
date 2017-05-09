@@ -7,14 +7,20 @@ extension ConsoleProtocol {
         using cloudFactory: CloudAPIFactory
     ) throws -> Hosting {
         let hosting: Hosting
-        do {
-            hosting = try loadingBar(title: "Loading hosting service", ephemeral: true) {
+        
+        let existing: Hosting? = try loadingBar(title: "Loading hosting service", ephemeral: true) {
+            do {
                 return try cloudFactory
                     .makeAuthedClient(with: self)
                     .hosting(for: app)
+            } catch let error as AbortError where error.status == .notFound {
+                return nil
             }
+        }
             
-        } catch let error as AbortError where error.status == .notFound {
+        if let e = existing {
+            hosting = e
+        } else {
             warning("No hosting service found.")
             if confirm("Would you like to add hosting?") {
                 let create = CreateHosting(self, cloudFactory)
