@@ -6,11 +6,21 @@ cat ./Sources/Executable/main.swift | \
     mv .tmp Sources/Executable/main.swift;
 
 swift build -c release -Xswiftc -static-stdlib
-rm -rf ./dist
 mkdir -p ./dist
 cp .build/release/Executable ./dist/macOS-sierra
 cp .build/release/*.dylib ./dist/
 
 echo "Drag and drop macOS-sierra into https://github.com/vapor/toolbox/releases/edit/$TAG"
 
-echo "Make sure to reset git after you are done"
+while true; do
+    read -p "Have you finished uploading?" yn
+    case $yn in
+        [Yy]* ) make install; break;;
+        [Nn]* ) exit;;
+        * ) echo "Please answer yes or no.";;
+    esac
+done
+
+rm -rf ./dist
+git reset --hard HEAD
+git checkout master
