@@ -10,10 +10,10 @@ mkdir -p ./dist
 cp .build/release/Executable ./dist/macOS-sierra
 cp .build/release/*.dylib ./dist/
 
-echo "Drag and drop macOS-sierra into https://github.com/vapor/toolbox/releases/edit/$TAG"
+echo "Drag and drop $PWD/dist/* into https://github.com/vapor-cloud/toolbox/releases/edit/$TAG"
 
 while true; do
-    read -p "Have you finished uploading?" yn
+    read -p "Have you finished uploading? [y/n]" yn
     case $yn in
         [Yy]* ) make install; break;;
         [Nn]* ) exit;;
