@@ -49,6 +49,10 @@ public final class DeployCloud: Command {
     public func run(arguments: [String]) throws {
         // get deploy details
         let app = try console.application(for: arguments, using: cloudFactory)
+        
+        // make sure application is up to date
+        try console.warnGitClean()
+        
         let hosting = try console.hosting(on: .model(app), for: arguments, using: cloudFactory)
         let env = try console.environment(on: .model(app), for: arguments, using: cloudFactory)
         let db = try console.database(for: .model(env), on: .model(app), for: arguments, using: cloudFactory)

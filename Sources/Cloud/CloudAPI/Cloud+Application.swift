@@ -18,10 +18,14 @@ extension ConsoleProtocol {
             // picks an application by choosing
             // a project and then application
             func chooseFromList() throws -> Application {
+                let proj = try cloudFactory
+                        .makeAuthedClient(with: self)
+                        .project(for: arguments, using: self)
+                
                 let apps = try loadingBar(title: "Loading applications", ephemeral: true) {
                     return try cloudFactory
                         .makeAuthedClient(with: self)
-                        .applications()
+                        .applications(projectId: proj.id, size: 999)
                 }
                 
                 guard apps.data.count > 0 else {
@@ -40,20 +44,20 @@ extension ConsoleProtocol {
                     in: apps.data
                 )
             }
-
-            if projectInfo.isVaporProject() {
-                print("Vapor project detected, to manually choose an application use the --app option.")
-                
-                if !gitInfo.isGitProject(){
-                    warning("This Vapor project is not managed by Git.")
-                    print("To deploy to Vapor cloud, you must put this project under version control.")
-                    if confirm("Would you like to initialize git?") {
-                        _ = try backgroundExecute(program: "git", arguments: ["init"])
-                        success("Git initialized")
-                    } else {
-                        throw "Git required"
-                    }
+            
+            if projectInfo.isVaporProject() && !gitInfo.isGitProject() {
+                warning("This Vapor project is not managed by Git.")
+                print("To deploy to Vapor cloud, you must put this project under version control.")
+                if confirm("Would you like to initialize git?") {
+                    _ = try backgroundExecute(program: "git", arguments: ["init"])
+                    success("Git initialized")
+                } else {
+                    throw "Git required"
                 }
+            }
+
+            if gitInfo.isGitProject() {
+                print("Git detected, to manually choose an application use the --app option.")
                 
                 var remotes = try gitInfo.remoteUrls()
                 if remotes.count == 0 {
@@ -78,9 +82,6 @@ extension ConsoleProtocol {
                         throw "Git remote required"
                     }
                 }
-                
-                // make sure application is up to date
-                try warnGitClean()
                 
                 // attempt to find app based on
                 // git information
