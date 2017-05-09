@@ -6,9 +6,10 @@ cat ./Sources/Executable/main.swift | \
     mv .tmp Sources/Executable/main.swift;
 
 swift build -c release -Xswiftc -static-stdlib
+rm -rf ./dist
 mkdir -p ./dist
 cp .build/release/Executable ./dist/macOS-sierra
-cp .build/release/lib* ./dist/
+cp .build/release/*.dylib ./dist/
 
 echo "Drag and drop macOS-sierra into https://github.com/vapor/toolbox/releases/edit/$TAG"
 
