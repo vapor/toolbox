@@ -95,7 +95,7 @@ public final class New: Command {
             gitBar.finish()
         } catch {
             gitBar.fail()
-            console.error("could not initialize git repository")
+            console.error("Could not initialize git repository: \(error)")
         }
 
         console.print()
