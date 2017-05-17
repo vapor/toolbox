@@ -4,7 +4,7 @@ import libc
 public final class New: Command {
     public let id = "new"
 
-    public let defaultTemplate = "https://github.com/vapor/basic-template"
+    public let defaultTemplate = "https://github.com/vapor/api-template"
 
     public let signature: [Argument]
 
@@ -93,9 +93,11 @@ public final class New: Command {
                 arguments: [gitDir, workTree, "commit", "-m", "\"created \(name) from template \(template)\""]
             )
             gitBar.finish()
-        } catch {
+        } catch ConsoleError.backgroundExecute(_, let error, let output) {
             gitBar.fail()
-            console.error("could not initialize git repository")
+            console.warning(output)
+            console.warning(error)
+            console.error("Could not initialize git repository")
         }
 
         console.print()
@@ -129,7 +131,9 @@ public final class New: Command {
     }
 
     private func loadTemplate(arguments: [String]) throws -> String {
-        guard let template = arguments.options["template"]?.string else { return defaultTemplate }
+        guard let template = arguments.options["template"]?.string else {
+            return defaultTemplate
+        }
         return try expand(template: template)
     }
 
