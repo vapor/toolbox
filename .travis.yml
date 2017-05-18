@@ -5,10 +5,17 @@ language: generic
 sudo: required
 dist: trusty
 osx_image: xcode8.3
+before_install:
+    - if [ $TRAVIS_OS_NAME == "osx" ]; then
+            brew tap vapor/tap;
+            brew update;
+            brew install vapor;
+        else
+            eval "$(curl -sL https://apt.vapor.sh)";
+            sudo apt-get install vapor;
+            sudo chmod -R a+rx /usr/;
+        fi
 script:
-  - eval "$(curl -sL https://swift.vapor.sh/ci-3.1)"
-  - if [[ $OS != "macos" ]]; then echo "📚 Installing Swift Dependencies"; sudo apt-get install -y clang libicu-dev uuid-dev;echo "🐦 Installing Swift";SWIFTFILE=swift-3.1-RELEASE-$OS_FILE;wget https://swift.org/builds/swift-3.1-release/$OS/swift-3.1-RELEASE/$SWIFTFILE.tar.gz;tar -zxf $SWIFTFILE.tar.gz;export PATH=$PWD/$SWIFTFILE/usr/bin:"${PATH}";echo "📦  Installing Vapor Dependencies";sudo apt-get install -y openssl libmysqlclient-dev;fi
-
   # run unit tests
   - swift build -Xswiftc -DNO_ANIMATION
   - swift build --configuration release -Xswiftc -DNO_ANIMATION
