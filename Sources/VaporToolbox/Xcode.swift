@@ -18,9 +18,6 @@ public final class Xcode: Command {
     }
 
     public func run(arguments: [String]) throws {
-        let build = Build(console: console)
-        try build.run(arguments: arguments)
-
         let isVerbose = arguments.isVerbose
         let xcodeBar = console.loadingBar(title: "Generating Xcode Project", animated: !isVerbose)
         xcodeBar.start()
