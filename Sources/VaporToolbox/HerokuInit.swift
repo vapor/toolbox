@@ -101,7 +101,7 @@ public final class HerokuInit: Command {
         if console.confirm("Are you using a custom Executable name?") {
             appName = console.ask("Executable Name:")
         } else {
-            appName = "App"
+            appName = "Run"
         }
 
         console.info("Setting procfile...")
