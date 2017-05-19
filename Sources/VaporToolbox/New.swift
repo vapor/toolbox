@@ -13,7 +13,8 @@ public final class New: Command {
         "Creates a new Vapor application from a template.",
         "Use --template=repo/template for github templates",
         "Use --template=full-url-here.git for non github templates",
-        "Use --web to use the web template"
+        "Use --web to use the web template",
+        "If you want to create an API, you can use the --api flag or leave the flags blank",
     ]
 
     public let console: ConsoleProtocol
@@ -37,6 +38,9 @@ public final class New: Command {
             ]),
             Option(name: "web", help: [
                 "Sets the template to the web template: https://github.com/vapor/web-template",
+            ]),
+            Option(name: "api", help: [
+                "Sets the template to the api template: https://github.com/vapor/api-template",
             ])
         ]
     }
