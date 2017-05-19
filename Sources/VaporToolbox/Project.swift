@@ -51,13 +51,17 @@ public final class Project {
         return dependencies
     }
 
-    public func checkouts() throws -> [String] {
+    public func checkouts() throws -> [String]? {
+        guard FileManager.default.fileExists(atPath: "./.build/checkouts/") else {
+            return nil
+        }
+        
         return try FileManager.default
             .contentsOfDirectory(atPath: "./.build/checkouts/")
     }
 
     public func vaporCheckout() throws -> String? {
-        return try checkouts()
+        return try checkouts()?
             .lazy
             .filter { $0.hasPrefix("vapor.git") }
             .first
