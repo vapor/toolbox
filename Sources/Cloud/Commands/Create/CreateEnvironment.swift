@@ -33,12 +33,11 @@ public final class CreateEnvironment: Command {
     }
     
     func createEnvironment(with arguments: [String]) throws -> Environment {
-        let cloud = try cloudFactory.makeAuthedClient(with: console)
         let app = try console.application(for: arguments, using: cloudFactory)
         
         // verify this app has hosting first
         do {
-            _ = try cloud.hosting(for: .model(app))
+            _ = try console.hosting(on: .model(app), for: arguments, using: cloudFactory)
         } catch {
             console.warning("No hosting service found.")
             console.print("Use: vapor cloud create hosting")

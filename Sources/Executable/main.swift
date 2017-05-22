@@ -61,6 +61,9 @@ do {
 } catch ConsoleError.commandNotFound(let id) {
     terminal.error("Error: ", newLine: false)
     terminal.print("Command \"\(id)\" not found.")
+} catch let error as AbortError {
+    terminal.error("API Error (\(error.status)): ", newLine: false)
+    terminal.print(error.reason)
 } catch {
     terminal.error("Error: ", newLine: false)
     terminal.print("\(error)")

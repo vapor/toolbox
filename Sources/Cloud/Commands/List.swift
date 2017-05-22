@@ -8,9 +8,11 @@ public final class List: Command {
     ]
 
     public let console: ConsoleProtocol
+    public let cloudFactory: CloudAPIFactory
 
-    public init(console: ConsoleProtocol) {
+    public init(_ console: ConsoleProtocol, _ cloudFactory: CloudAPIFactory) {
         self.console = console
+        self.cloudFactory = cloudFactory
     }
 
     public func run(arguments: [String]) throws {
@@ -22,6 +24,7 @@ public final class List: Command {
             (id: "Organizations", runner: listOrganizations),
             (id: "Projects", runner: listProjects),
             (id: "Applications", runner: listApplications),
+            (id: "Domains", runner: listDomains),
         ]
 
         let preLoaded = options.lazy
@@ -68,5 +71,22 @@ public final class List: Command {
         }
 
         apps.forEach { console.log($0) }
+    }
+    
+    func listDomains(with token: Token, showIds: Bool) throws {
+        let cloud = try cloudFactory.makeAuthedClient(with: console)
+        let app = try console.application(for: CommandLine.arguments, using: cloudFactory)
+        let env = try console.environment(on: .model(app), for: CommandLine.arguments, using: cloudFactory)
+        let domains = try console.loadingBar(title: "Loading domains") {
+            return try cloud.domains(
+                for: .model(env),
+                on: .model(app)
+            )
+        }
+        
+        console.print("Domains:")
+        domains.forEach { domain in
+            console.info(domain.domain + domain.path)
+        }
     }
 }

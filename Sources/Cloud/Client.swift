@@ -19,8 +19,13 @@ public enum CloudClientError: Error {
 public final class CloudClient<Wrapped: ClientProtocol>: ClientProtocol {
     public let wrapped: Wrapped
 
-    public required init(hostname: String, port: Sockets.Port, _ securityLayer: SecurityLayer) throws {
-        wrapped = try Wrapped(hostname: hostname, port: port, securityLayer)
+    public required init(
+        hostname: String,
+        port: Sockets.Port,
+        securityLayer: SecurityLayer,
+        proxy: Proxy?
+    ) throws {
+        wrapped = try Wrapped(hostname: hostname, port: port, securityLayer: securityLayer)
     }
 
     public func respond(to request: Request) throws -> Response {

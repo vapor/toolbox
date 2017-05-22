@@ -6,8 +6,13 @@ public let adminApi = AdminApi()
 public var client = ClientFactory<CloudClient<EngineClient>>()
 
 import Transport
-extension FoundationClient: ClientProtocol {
-    public convenience init(hostname: String, port: Port, _ securityLayer: SecurityLayer) throws {
+extension HTTP.FoundationClient: ClientProtocol {
+    public convenience init(
+        hostname: String,
+        port: Port,
+        securityLayer: SecurityLayer,
+        proxy: Proxy?
+    ) throws {
         // TODO: Forcing https a tm
         self.init(scheme: "https", hostname: hostname, port: port)
     }

@@ -25,7 +25,7 @@ extension ConsoleProtocol {
                 let apps = try loadingBar(title: "Loading applications", ephemeral: true) {
                     return try cloudFactory
                         .makeAuthedClient(with: self)
-                        .applications(projectId: proj.id, size: 999)
+                        .applications(projectId: proj.assertIdentifier(), size: 999)
                 }
                 
                 guard apps.data.count > 0 else {

@@ -13,10 +13,14 @@ extension ConsoleProtocol {
                 .makeAuthedClient(with: self)
                 .environment(withId: Identifier(envName), for: app)
         } else {
-            let envs = try loadingBar(title: "Loading environments", ephemeral: true) {
-                return try cloudFactory
-                    .makeAuthedClient(with: self)
-                    .environments(for: app)
+            let envs: [Environment] = try loadingBar(title: "Loading environments", ephemeral: true) {
+                do {
+                    return try cloudFactory
+                        .makeAuthedClient(with: self)
+                        .environments(for: app)
+                } catch let error as AbortError where error.status == .notFound {
+                    return []
+                }
             }
             
             if envs.count == 0 {
