@@ -97,7 +97,7 @@ public final class DeployCloud: Command {
         }
         
         var logsBar: LoadingBar?
-        try Redis.subscribeDeployLog(id: id) { update in
+        try CloudRedis.subscribeDeployLog(id: id) { update in
             waitingInQueue.finish()
 
             if update.type == .start {

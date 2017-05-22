@@ -16,7 +16,8 @@ public func group(_ console: ConsoleProtocol) throws -> Group {
         CreateHosting(console, cloudFactory),
         CreateEnvironment(console, cloudFactory),
         CreateDatabase(console, cloudFactory),
-        CreateDomain(console, cloudFactory)
+        CreateDomain(console, cloudFactory),
+        CreateTLS(console, cloudFactory),
     ], help: [
         "Create new instances of Vapor Cloud objects like",
         "applications, envrionments, databases, etc."

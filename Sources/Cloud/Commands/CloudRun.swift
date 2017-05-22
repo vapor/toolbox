@@ -44,7 +44,7 @@ public final class CloudRun: Command {
             env = e.name
         }
 
-        try Redis.runCommand(
+        try CloudRedis.runCommand(
             console: console,
             command: command,
             repo: repo,

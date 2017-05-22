@@ -19,10 +19,10 @@ public final class CreateDomain: Command {
     }
     
     public func run(arguments: [String]) throws {
-        try createProject(with: arguments)
+        _ = try createDomain(with: arguments)
     }
     
-    private func createProject(with arguments: [String]) throws {
+    internal func createDomain(with arguments: [String]) throws -> Domain {
         let app = try console.application(for: arguments, using: cloudFactory)
         let env = try console.environment(on: .model(app), for: arguments, using: cloudFactory)
         
@@ -44,7 +44,7 @@ public final class CreateDomain: Command {
             path: arguments.option("path")
         )
         
-        _ = try console.loadingBar(title: "Creating domain '\(name)'") {
+        return try console.loadingBar(title: "Creating domain '\(name)'") {
             return try cloudFactory
                 .makeAuthedClient(with: console)
                 .create(domain, on: .model(app))

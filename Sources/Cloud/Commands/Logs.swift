@@ -6,7 +6,7 @@ public final class CloudLogs: Command {
     public let signature: [Argument] = []
 
     public let help: [String] = [
-        "Refreshes vapor token."
+        "Displays logs from remote Vapor application."
     ]
 
     public let console: ConsoleProtocol
@@ -35,7 +35,7 @@ public final class CloudLogs: Command {
 
         let since = arguments.option("since") ?? "60s"
 
-        try Redis.tailLogs(
+        try CloudRedis.tailLogs(
             console: console,
             repo: repo,
             envName: env,

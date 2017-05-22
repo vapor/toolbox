@@ -44,7 +44,7 @@ extension Client where StreamType == TCPInternetSocket {
     }
 }
 
-public final class Redis {
+public final class CloudRedis {
     static func subscribeDeployLog(id: String, _ updater: @escaping (Update) throws -> Void) throws {
         _ = try Portal<Bool>.open { portal in
             let client = try TCPClient.cloudRedis()
