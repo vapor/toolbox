@@ -134,12 +134,12 @@ extension Application: CustomStringConvertible {
 extension CloudAPI {
     func applications(gitRemotes: [String], using console: ConsoleProtocol) throws -> [Application] {
         return try gitRemotes.flatMap { url in
-            do {
-                return try console.loadingBar(title: "Loading applications", ephemeral: true) {
+            return try console.loadingBar(title: "Loading applications", ephemeral: true) {
+                do {
                     return try self.applications(withGitURL: url)
+                } catch let error as AbortError where error.status == .notFound {
+                    return nil
                 }
-            } catch let error as AbortError where error.status == .notFound {
-                return nil
             }
         }
     }

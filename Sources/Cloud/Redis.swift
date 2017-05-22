@@ -71,8 +71,7 @@ public final class CloudRedis {
         console: ConsoleProtocol,
         repo: String,
         envName: String,
-        since: String,
-        with token: Token
+        since: String
     ) throws {
 
         // the channel we want logs posted to
@@ -90,7 +89,9 @@ public final class CloudRedis {
          `5h` = 5 hours
          */
         try message.set("since", since)
-        try message.set("token", token.rePack())
+        
+        let cache = try TokenCache.global(with: console)
+        try message.set("token", cache.getAccessToken()?.makeString())
 
         var start = message
         try start.set("status", "start")

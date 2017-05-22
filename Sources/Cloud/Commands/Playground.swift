@@ -11,7 +11,7 @@ extension ConsoleProtocol {
         if confirm("Would you like to commit changes now?") {
             let message = ask("What commit message?")
             try foregroundExecute(program: "git", arguments: ["add", "."])
-            try foregroundExecute(program: "git", arguments: ["commit -am \"\(message)\""])
+            try foregroundExecute(program: "git", arguments: ["commit", "-am", message])
             try foregroundExecute(program: "git", arguments: ["push"])
         } else {
             let goRogue = confirm("Are you sure you'd like to continue?", style: .warning)

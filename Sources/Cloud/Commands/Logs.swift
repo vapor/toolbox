@@ -10,37 +10,28 @@ public final class CloudLogs: Command {
     ]
 
     public let console: ConsoleProtocol
+    public let cloudFactory: CloudAPIFactory
 
-    public init(console: ConsoleProtocol) {
+    public init(_ console: ConsoleProtocol, _ cloudFactory: CloudAPIFactory) {
         self.console = console
+        self.cloudFactory = cloudFactory
     }
 
     public func run(arguments: [String]) throws {
-        let token = try Token.global(with: console)
-        let repo = try getRepo(arguments, console: console, with: token)
-        let env: String
-        if let name = arguments.option("env") {
-            env = name
-        } else {
-            let e = try selectEnvironment(
-                args: arguments,
-                forRepo: repo,
-                queryTitle: "Which Environment?",
-                using: console,
-                with: token
-            )
-
-            env = e.name
-        }
+        let app = try console.application(for: arguments, using: cloudFactory)
+        let env = try console.environment(
+            on: .model(app),
+            for: arguments,
+            using: cloudFactory
+        )
 
         let since = arguments.option("since") ?? "60s"
 
         try CloudRedis.tailLogs(
             console: console,
-            repo: repo,
-            envName: env,
-            since: since,
-            with: token
+            repo: app.repoName,
+            envName: env.name,
+            since: since
         )
     }
 }

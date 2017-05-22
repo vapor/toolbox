@@ -44,7 +44,7 @@ public func group(_ console: ConsoleProtocol) throws -> Group {
             TokenLog(console: console),
             Dump(console: console),
             // App Debugging
-            CloudLogs(console: console),
+            CloudLogs(console, cloudFactory),
             // Info
             List(console, cloudFactory),
             // Deploy

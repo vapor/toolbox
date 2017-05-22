@@ -44,10 +44,12 @@ public final class CreateDomain: Command {
             path: arguments.option("path")
         )
         
-        return try console.loadingBar(title: "Creating domain '\(name)'") {
+        let new = try console.loadingBar(title: "Creating domain '\(name)'") {
             return try cloudFactory
                 .makeAuthedClient(with: console)
                 .create(domain, on: .model(app))
         }
+        console.print("New domains will take effect on the next deploy.")
+        return new
     }
 }
