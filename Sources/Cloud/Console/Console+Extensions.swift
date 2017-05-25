@@ -31,6 +31,11 @@ extension ConsoleProtocol {
         }
     }
     public func verifyAboveCorrect() throws {
+        pushEphemeral()
+        defer {
+            popEphemeral()
+        }
+        
         guard confirm("Is the above information correct?") else {
             throw "Cancelled"
         }

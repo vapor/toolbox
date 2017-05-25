@@ -9,6 +9,8 @@ extension ConsoleProtocol {
     ) throws -> Domain {
         let domain: Domain
         
+        pushEphemeral()
+        
         let domains: [Domain] = try loadingBar(title: "Loading environments", ephemeral: true) {
             do {
                 return try cloudFactory
@@ -37,6 +39,8 @@ extension ConsoleProtocol {
                 in: domains
             )
         }
+        
+        popEphemeral()
         
         detail("domain", domain.domain)
         return domain

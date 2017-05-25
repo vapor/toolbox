@@ -5,6 +5,8 @@ extension CloudAPI {
         for arguments: [String],
         using console: ConsoleProtocol
     ) throws -> Organization {
+        console.pushEphemeral()
+        
         let orgs = try console.loadingBar(title: "Loading organizations", ephemeral: true) {
             return try organizations()
         }
@@ -19,6 +21,8 @@ extension CloudAPI {
             title: "Which organization?",
             in: orgs
         )
+        
+        console.popEphemeral()
         
         console.detail("org", org.name)
         return org

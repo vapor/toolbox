@@ -26,8 +26,9 @@ public final class CreateApplication: Command {
     }
     
     func createApplication(with arguments: [String]) throws -> Application {
-        let cloud = try cloudFactory.makeAuthedClient(with: console)
-        let proj = try cloud.project(for: arguments, using: console)
+        let proj = try cloudFactory
+            .makeAuthedClient(with: console)
+            .project(for: arguments, using: console)
         
         let name: String
         if let n = arguments.option("name") {
@@ -58,7 +59,9 @@ public final class CreateApplication: Command {
         )
         
         return try console.loadingBar(title: "Creating application '\(name)'") {
-            return try cloud.create(app)
+            return try cloudFactory
+                .makeAuthedClient(with: console)
+                .create(app)
         }
     }
 }

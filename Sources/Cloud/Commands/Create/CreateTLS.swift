@@ -43,12 +43,16 @@ public final class CreateTLS: Console.Command {
         
         let channel = "tls_log_\(app.repoName)_\(env.name)_\(domain.domain)"
         
+        let tokenFactory = try cloudFactory
+            .makeAccessTokenFactory(with: console)
+        
         var message = JSON()
         try message.set("channel", channel)
         try message.set("app", app.repoName)
         try message.set("environment", env.name)
         try message.set("domain", domain.domain)
         try message.set("force_tls", arguments.option("force")?.bool ?? false)
+        try message.set("token", tokenFactory.makeAccessToken().makeString())
         
         console.info("Adding TLS...")
         try redis.publish(channel: "letsEncryptRequest", message)

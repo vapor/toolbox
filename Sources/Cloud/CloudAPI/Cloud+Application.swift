@@ -10,6 +10,8 @@ extension ConsoleProtocol {
     ) throws -> Application {
         let app: Application
         
+        pushEphemeral()
+        
         if let repoName = arguments.option("app")?.string {
             app = try cloudFactory
                 .makeAuthedClient(with: self)
@@ -73,7 +75,7 @@ extension ConsoleProtocol {
                         try foregroundExecute(program: "git", arguments: ["remote", "add", "origin", origin])
                         do {
                             try foregroundExecute(program: "git", arguments: ["add", "."])
-                            try foregroundExecute(program: "git", arguments: ["commit", "-am", "\"first commit\""])
+                            try foregroundExecute(program: "git", arguments: ["commit", "-am", "first commit"])
                         } catch {}
                         try foregroundExecute(program: "git", arguments: ["push", "-u", "origin", "master"])
                         success("Added Git origin: \(origin)")
@@ -119,6 +121,8 @@ extension ConsoleProtocol {
                 app = try chooseFromList()
             }    
         }
+        
+        popEphemeral()
         
         detail("app", app.name)
         return app

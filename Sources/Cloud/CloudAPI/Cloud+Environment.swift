@@ -8,6 +8,8 @@ extension ConsoleProtocol {
     ) throws -> Environment {
         let env: Environment
         
+        pushEphemeral()
+        
         if let envName = arguments.option("env")?.string {
             env = try cloudFactory
                 .makeAuthedClient(with: self)
@@ -39,6 +41,8 @@ extension ConsoleProtocol {
                 )
             }
         }
+        
+        popEphemeral()
         
         detail("env", env.name)
         return env

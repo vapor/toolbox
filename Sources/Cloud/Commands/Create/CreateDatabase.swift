@@ -30,6 +30,8 @@ public final class CreateDatabase: Command {
         let app = try console.application(for: arguments, using: cloudFactory)
         let env = try console.environment(on: .model(app), for: arguments, using: cloudFactory)
         
+        console.pushEphemeral()
+        
         let cloud = try cloudFactory
             .makeAuthedClient(with: console)
         let servers = try cloud.databaseServers()
@@ -39,6 +41,9 @@ public final class CreateDatabase: Command {
         ) { server in
             return "\(server.name) (\(server.kind))"
         }
+        
+        console.popEphemeral()
+        
         console.detail("database server", server.name)
         
         let database = try Database(

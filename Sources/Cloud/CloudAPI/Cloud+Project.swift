@@ -5,6 +5,8 @@ extension CloudAPI {
         for arguments: [String],
         using console: ConsoleProtocol
     ) throws -> Project {
+        console.pushEphemeral()
+        
         let projs = try console.loadingBar(title: "Loading projects", ephemeral: true) {
             return try projects(size: 999)
         }
@@ -19,6 +21,8 @@ extension CloudAPI {
             title: "Which project?",
             in: projs.data
         )
+        
+        console.popEphemeral()
         
         console.detail("proj", proj.name)
         return proj
