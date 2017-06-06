@@ -34,6 +34,14 @@ public final class ConfigModify: Command {
     }
     
     public func run(arguments: [String]) throws {
+        var arguments = arguments
+        if let index = arguments.index(of: "-y") {
+            arguments.remove(at: index)
+        }
+        if let index = arguments.index(of: "-n") {
+            arguments.remove(at: index)
+        }
+        
         let cloud = try cloudFactory.makeAuthedClient(with: console)
         let app = try console.application(for: arguments, using: cloudFactory)
         let env = try console.environment(on: .model(app), for: arguments, using: cloudFactory)

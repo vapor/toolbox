@@ -8,6 +8,8 @@ extension ConsoleProtocol {
     ) throws -> Hosting {
         let hosting: Hosting
         
+        pushEphemeral()
+        
         let existing: Hosting? = try loadingBar(title: "Loading hosting service", ephemeral: true) {
             do {
                 return try cloudFactory
@@ -31,7 +33,9 @@ extension ConsoleProtocol {
             }
         }
         
-        detail("git url", hosting.gitURL)
+        popEphemeral()
+        
+        detail("git", hosting.gitURL)
         return hosting
     }
 }

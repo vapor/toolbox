@@ -67,12 +67,17 @@ public final class CreateEnvironment: Command {
         }
         console.detail("default branch", branch)
         
+        console.pushEphemeral()
+        
         let replicaSize: ReplicaSize
         if let size = arguments.option("replicaSize") {
             replicaSize = try ReplicaSize(node: size)
         } else {
             replicaSize = try console.giveChoice(title: "What size replica(s)?", in: ReplicaSize.all)
         }
+        
+        console.popEphemeral()
+        
         console.detail("replica size", "\(replicaSize)")
         try console.verifyAboveCorrect()
         

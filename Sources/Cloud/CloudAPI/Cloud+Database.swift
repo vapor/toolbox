@@ -9,6 +9,8 @@ extension ConsoleProtocol {
     ) throws -> Database {
         let db: Database
         
+        pushEphemeral()
+        
         let existing: Database? = try loadingBar(title: "Loading database service", ephemeral: true) {
             do {
                 return try cloudFactory
@@ -35,6 +37,8 @@ extension ConsoleProtocol {
                 throw "Hosting required"
             }
         }
+        
+        popEphemeral()
         
         detail("db", "mysql")
         return db

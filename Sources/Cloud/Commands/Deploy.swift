@@ -28,9 +28,13 @@ public final class DeployCloud: Command {
         ]),
         Option(name: "replicas", help: [
             "The number of replicas to deploy.",
-            "Note: Increasing the number of replicas will",
-            "result in increased hourly cost based on the environment's",
-            "replica size."
+            "ex: 2",
+            "Hourly cost is based on the replica size and number of replicas."
+        ]),
+        Option(name: "replicaSize", help: [
+            "The size of replicas to deploy.",
+            "ex: small",
+            "Hourly cost is based on the replica size and number of replicas."
         ])
     ]
 
@@ -123,6 +127,9 @@ public final class DeployCloud: Command {
 
     private func buildType(for arguments: [String]) throws -> BuildType {
         let buildType: BuildType
+        
+        console.pushEphemeral()
+        
         if let option = arguments.option("build") {
             guard let chosen = BuildType(rawValue: option) else {
                 console.warning("Unrecognized build type \(option)")
@@ -138,6 +145,9 @@ public final class DeployCloud: Command {
                 in: BuildType.all
             )
         }
+        
+        console.popEphemeral()
+        
         console.detail("build", "\(buildType)")
         return buildType
     }
@@ -161,6 +171,8 @@ public final class DeployCloud: Command {
             replicas = env.replicas
         }
         
+        console.pushEphemeral()
+        
         if replicas == 0 {
             if env.replicas == 0 {
                 console.warning("This environment's replica count is currently set to 0.")
@@ -172,6 +184,8 @@ public final class DeployCloud: Command {
                 replicas = console.ask("What replica count?").int ?? 0
             }
         }
+        
+        console.popEphemeral()
         
         console.detail("replicas", replicas.description)
         return replicas
