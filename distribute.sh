@@ -1,3 +1,5 @@
+swift package update
+
 TAG=$(git describe --tags);
 git checkout $TAG;
 
