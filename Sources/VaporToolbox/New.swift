@@ -5,6 +5,7 @@ public final class New: Command {
     public let id = "new"
 
     public let defaultTemplate = "https://github.com/vapor/api-template"
+    public let authTemplate = "https://github.com/vapor/auth-template"
     public let webTemplate = "https://github.com/vapor/web-template"
 
     public let signature: [Argument]
@@ -14,7 +15,8 @@ public final class New: Command {
         "Use --template=repo/template for github templates",
         "Use --template=full-url-here.git for non github templates",
         "Use --web to create a new web app",
-        "Use --api (default) to create a new API",
+        "Use --auth to create a new authenticated API app",
+        "Use --api (default) to create a new API"
     ]
 
     public let console: ConsoleProtocol
@@ -38,6 +40,9 @@ public final class New: Command {
             ]),
             Option(name: "web", help: [
                 "Sets the template to the web template: https://github.com/vapor/web-template",
+            ]),
+            Option(name: "auth", help: [
+                "Sets the template to the auth template: https://github.com/vapor/auth-template",
             ]),
             Option(name: "api", help: [
                 "(Default) Sets the template to the api template: https://github.com/vapor/api-template",
@@ -143,6 +148,8 @@ public final class New: Command {
         guard let template = arguments.options["template"]?.string else {
             if let _ = arguments.options["web"] {
                 return webTemplate
+            } else if let _ = arguments.options["auth"] {
+                return authTemplate
             } else {
                 return defaultTemplate
             }
