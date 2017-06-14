@@ -66,7 +66,7 @@ public final class HerokuInit: Command {
         }
         
         let region: String
-        if console.confirm("Would you like to deploy to other than US region server?") {
+        if console.confirm("Would you like to deploy to a region other than the US?") {
             region = console.ask("Region code (us/eu):")
         } else {
             region = "us"
