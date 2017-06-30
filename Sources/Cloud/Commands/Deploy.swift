@@ -59,7 +59,7 @@ public final class DeployCloud: Command {
         
         let hosting = try console.hosting(on: .model(app), for: arguments, using: cloudFactory)
         let env = try console.environment(on: .model(app), for: arguments, using: cloudFactory)
-        let db = try console.database(for: .model(env), on: .model(app), for: arguments, using: cloudFactory)
+        _ = try console.database(for: .model(env), on: .model(app), for: arguments, using: cloudFactory)
         let replicas = self.replicas(for: arguments, in: env)
         let replicaSize = try self.replicaSize(for: arguments, in: env)
         let branch = self.branch(for: arguments, in: env)
@@ -176,6 +176,8 @@ public final class DeployCloud: Command {
         if replicas == 0 {
             if env.replicas == 0 {
                 console.warning("This environment's replica count is currently set to 0.")
+                console.print("Set the replica count >= 1 to deploy your app.")
+                console.print("Set the replica count == 0 to take your app offline.")
             } else {
                 console.warning("Setting the replica count to 0 will take your application offline")
             }
