@@ -6,8 +6,8 @@ extension ConsoleProtocol {
         on app: ModelOrIdentifier<Application>,
         for arguments: [String],
         using cloudFactory: CloudAPIFactory
-    ) throws -> Database {
-        let db: Database
+    ) throws -> Database? {
+        let db: Database?
         
         pushEphemeral()
         
@@ -34,13 +34,24 @@ extension ConsoleProtocol {
                 db = try create.createDatabase(with: args)
             } else {
                 detail("Create database", "vapor cloud create db")
-                throw "Hosting required"
+                db = nil
             }
         }
         
         popEphemeral()
         
-        detail("db", "mysql")
+        if let db = db {
+            detail("db", db.databaseServer.getModel()?.kind.description ?? "yes")
+        } else {
+            detail("db", "none")
+        }
+        
         return db
+    }
+}
+
+extension DatabaseServer.Kind: CustomStringConvertible {
+    public var description: String {
+        return "\(self)"
     }
 }
