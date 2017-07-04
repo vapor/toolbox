@@ -50,8 +50,3 @@ extension ConsoleProtocol {
     }
 }
 
-extension DatabaseServer.Kind: CustomStringConvertible {
-    public var description: String {
-        return "\(self)"
-    }
-}
