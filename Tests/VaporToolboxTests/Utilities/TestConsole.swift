@@ -4,12 +4,15 @@ import libc
 @testable import VaporToolbox
 
 final class TestConsole: ConsoleProtocol {
+<<<<<<< HEAD
     /// Returns a string of input read from the console
     /// until a line feed character was found,
     /// hides entry for security
     func secureInput() -> String {
         return ""
     }
+=======
+>>>>>>> 27a903947a00296d776db691a3976081ee6e9d37
 
     var inputBuffer: [String]
     var outputBuffer: [String]
@@ -53,6 +56,10 @@ final class TestConsole: ConsoleProtocol {
         return input
     }
 
+    func secureInput() -> String {
+        return input()
+    }
+
     func clear(_ clear: ConsoleClear) {
         switch clear {
         case .line:
@@ -77,5 +84,10 @@ final class TestConsole: ConsoleProtocol {
 
     private func exec(_ command: String, args: [String]) {
         executeBuffer.append(command + (!args.isEmpty ? " " + args.joined(separator: " ") : ""))
+    }
+
+    /// Upon a console instance being killed for example w/ ctrl+c
+    /// a console should forward the message to kill listeners
+    func registerKillListener(_ listener: @escaping (Int32) -> Void) {
     }
 }

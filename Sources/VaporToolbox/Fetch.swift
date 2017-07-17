@@ -33,7 +33,7 @@ public final class Fetch: Command {
     }
 
     private func fetchWarning() throws {
-        if !project.buildFolderExists() {
+        if !projectInfo.buildFolderExists() {
             console.warning("No .build folder, fetch may take a while...")
         }
     }

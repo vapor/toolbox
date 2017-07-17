@@ -42,11 +42,21 @@ public final class Xcode: Command {
         try openXcode(arguments)
     }
 
+    private func fetch(_ arguments: [String]) throws {
+        let needsFetch = !projectInfo.buildFolderExists()
+        let shouldFetch = arguments.option("fetch")?.bool ?? needsFetch
+        guard shouldFetch else { return }
+
+        let arguments = arguments.removeFlags(["clean", "fetch", "y"])
+        let fetch = Fetch(console: console)
+        try fetch.run(arguments: arguments)
+    }
+
     private func logExecutableInfo() throws {
         // If it's not a Vapor project, don't log warnings
-        guard try project.isVaporProject() else { return }
+        guard projectInfo.isVaporProject() else { return }
 
-        let executables = try project.availableExecutables()
+        let executables = try projectInfo.availableExecutables()
         if executables.isEmpty {
             console.info("No executable found, make sure to create")
             console.info("a target that includes a 'main.swift' file")
@@ -76,10 +86,12 @@ public final class Xcode: Command {
         }
 
         // Setup passthrough
-        buildFlags += arguments
-            .removeFlags(["clean", "run", "debug", "verbose", "fetch", "release"])
+        let clean = arguments
+            .removeFlags(["clean", "run", "debug", "verbose", "fetch", "release", "y"])
+        buildFlags += clean
             .options
             .map { name, value in "--\(name)=\(value)" }
+        buildFlags += clean.values
 
         return buildFlags
     }
