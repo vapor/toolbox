@@ -52,7 +52,7 @@ public func group(_ console: ConsoleProtocol) throws -> Group {
             // Create
             create,
             // Run remote commands
-            CloudRun(console: console),
+            CloudRun(console, cloudFactory),
             config,
             // Temporarily disabling not ready commands
             // Add(console: console),

@@ -5,6 +5,7 @@ import Core
 import Foundation
 import libc
 import Sockets
+import CloudClients
 
 public enum UpdateType: String, NodeInitializable {
     case start, stop
@@ -126,7 +127,7 @@ public final class CloudRedis {
         command: String,
         repo: String,
         envName: String,
-        with token: Token
+        with token: AccessToken
     ) throws {
         let listenChannel = UUID().uuidString
         let replicaController = repo + "-" + envName
