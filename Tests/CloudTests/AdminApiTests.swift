@@ -18,20 +18,6 @@ class ApiTests: XCTestCase {
 //        AdminApi.base = "https://admin-api-staging.vapor.cloud/admin"
 //        ApplicationApi.base = "https://application-api-staging.vapor.cloud/application"
     }
-
-    func testApis() throws {
-        let adminApiTests = AdminApiTests()
-        let (token, user, org, proj) = try! adminApiTests.test()
-
-        let applicationApiTests = ApplicationApiTests(
-            token: token,
-            user: user,
-            org: org,
-            proj: proj
-        )
-
-        try! applicationApiTests.test()
-    }
 }
 
 final class AdminApiTests {

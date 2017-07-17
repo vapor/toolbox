@@ -54,7 +54,7 @@ class ApplicationApiTests {
 
         let hostingTests = HostingTests(token: token, app: app)
         let hosting = try hostingTests.test()
-        try testAppByGit(git: hosting.gitUrl, matches: app)
+        try testAppByGit(git: hosting.gitURL, matches: app)
 
         let envTests = EnvironmentApiTests(token: token, app: app, hosting: hosting)
         let env = try envTests.test()
@@ -78,7 +78,7 @@ class ApplicationApiTests {
 
         XCTAssertEqual(app.repoName, uniqueRepo, "repo on app create doesn't match")
         XCTAssertEqual(app.name, "My App", "name on app create doesn't match")
-        XCTAssertEqual(app.projectId, proj.id, "project id on app create doesn't match")
+        try XCTAssertEqual(app.project.assertIdentifier(), proj.id, "project id on app create doesn't match")
 
         return app
     }
@@ -94,8 +94,8 @@ class ApplicationApiTests {
     func testProjectGet(expectCount: Int, contains: Application) throws {
         let found = try applicationApi.get(for: proj, with: token)
         XCTAssertEqual(found.count, expectCount)
-        found.forEach { app in
-            XCTAssertEqual(app.projectId, proj.id, #line.description)
+        try found.forEach { app in
+            try XCTAssertEqual(app.assertIdentifier(), proj.id, #line.description)
         }
         XCTAssert(found.contains(contains), "\(found) doesn't contain \(contains)")
     }
@@ -133,7 +133,7 @@ final class HostingTests {
         )
 
         XCTAssertEqual(hosting.application.id, app.id, #line.description)
-        XCTAssertEqual(hosting.gitUrl, gitUrl)
+        XCTAssertEqual(hosting.gitURL, gitUrl)
         return hosting
     }
 
@@ -150,14 +150,14 @@ final class HostingTests {
             with: token
         )
 
-        XCTAssertEqual(new.gitUrl, subGit)
+        XCTAssertEqual(new.gitURL, subGit)
         XCTAssertEqual(new.application.id, app.id, #line.description)
         XCTAssertNotEqual(new, input)
 
         // Revert
         let back = try applicationApi.hosting.update(
             for: app,
-            git: input.gitUrl,
+            git: input.gitURL,
             with: token
         )
         XCTAssertEqual(back, input)
@@ -197,6 +197,7 @@ final class EnvironmentApiTests {
             forRepo: app.repoName,
             name: "new-env",
             branch: "master",
+            replicaSize: .free,
             with: token
         )
 
