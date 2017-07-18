@@ -34,12 +34,26 @@ public final class CreateDatabase: Command {
         
         let cloud = try cloudFactory
             .makeAuthedClient(with: console)
-        let servers = try cloud.databaseServers()
+        let servers = try cloud.databaseServers().sorted(by: { a, b in
+            return a.kind == .mysql || b.kind == .mysql
+        })
+
+        console.success("Tip: ", newLine: false)
+        console.print("Vapor and Vapor Cloud work best with MySQL databases.")
+
         let server = try console.giveChoice(
             title: "Which database server?",
             in: servers
         ) { server in
-            return "\(server.name) (\(server.kind))"
+            if let _ = server.organization {
+                return "Private \(server.kind.readable) \(server.name)"
+            } else {
+                if server.kind == .mysql {
+                    return "Shared \(server.kind.readable)"
+                } else {
+                    return "Shared \(server.kind.readable)"
+                }
+            }
         }
         
         console.popEphemeral()
@@ -59,6 +73,21 @@ public final class CreateDatabase: Command {
                     database,
                     for: .model(app)
                 )
+        }
+    }
+}
+
+extension DatabaseServer.Kind {
+    var readable: String {
+        switch self {
+        case .aurora:
+            return "Aurora"
+        case .mongodb:
+            return "MongoDB"
+        case .mysql:
+            return "MySQL"
+        case .postgresql:
+            return "PostgreSQL"
         }
     }
 }
