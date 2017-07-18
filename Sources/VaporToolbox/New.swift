@@ -104,7 +104,7 @@ public final class New: Command {
             _ = try console.execute(
                 verbose: isVerbose,
                 program: "git",
-                arguments: [gitDir, workTree, "commit", "-m", "\"created \(name) from template \(template)\""]
+                arguments: [gitDir, workTree, "commit", "-m", "'created \(name) from template \(template)'"]
             )
             gitBar.finish()
         } catch ConsoleError.backgroundExecute(_, let error, let output) {

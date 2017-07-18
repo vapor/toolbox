@@ -26,7 +26,7 @@ public final class Run: Command {
             let configuredRunFlags = try Config.runFlags()
             let passThrough = arguments + configuredRunFlags
 
-            let packageName = try project.packageName()
+            let packageName = try projectInfo.packageName()
             console.info("Running \(packageName) ...")
 
             try console.foregroundExecute(
@@ -69,7 +69,7 @@ public final class Run: Command {
     }
 
     private func getExecutableToRun() throws -> String {
-        let executables = try project.availableExecutables()
+        let executables = try projectInfo.availableExecutables()
         guard !executables.isEmpty else {
             throw ToolboxError.general("No executables found")
         }
