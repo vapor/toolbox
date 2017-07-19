@@ -1,0 +1,1 @@
+Manual Install Instructions for Vapor Toolbox v3.0.0-beta.12\n\n- Move *.dylib files into /usr/local/lib\n- Move executable vapor-beta into /usr/local/bin\n- Type 'vapor-beta --help' into terminal to verify installation
