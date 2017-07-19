@@ -1,7 +1,7 @@
-echo "Updating Swift packages"
+echo "Updating Swift packages..."
 swift package update
 
-echo "Determining latest Git tag"
+echo "Determining latest Git tag..."
 TAG=$(git describe --tags);
 git checkout $TAG;
 
@@ -24,7 +24,7 @@ fi
 PACKAGE_NAME="vapor-toolbox-$TAG"
 mkdir -p ./$PACKAGE_NAME
 
-echo "Manual Install Instructions for Vapor Toolbox v$TAG\n\n- Move *.dylib files into /usr/local/lib\n- Move executable $EXEC_NAME into /usr/local/bin\n- Type `$EXEC_NAME --help` into terminal to verify installation" >> ./$PACKAGE_NAME/README.txt
+echo "Manual Install Instructions for Vapor Toolbox v$TAG\\n\\n- Move *.dylib files into /usr/local/lib\\n- Move executable $EXEC_NAME into /usr/local/bin\\n- Type '$EXEC_NAME --help' into terminal to verify installation" >> ./$PACKAGE_NAME/README.txt
 
 cp .build/release/Executable ./$PACKAGE_NAME/$EXEC_NAME
 cp .build/release/*.dylib ./$PACKAGE_NAME/
@@ -43,6 +43,7 @@ while true; do
     esac
 done
 
-rm -rf ./dist
+rm -rf macOS-sierra.tar.gz
+rm -rf ./$PACKAGE_NAME
 git reset --hard HEAD
 git checkout master
