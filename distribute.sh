@@ -48,6 +48,6 @@ while true; do
 done
 
 rm -rf macOS-sierra.tar.gz
-rm -rf ./$PACKAGE_NAME
+rm -rf $PACKAGE_NAME
 git reset --hard HEAD
 git checkout master
