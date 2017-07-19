@@ -29,7 +29,7 @@ echo "Manual Install Instructions for Vapor Toolbox v$TAG" > $README
 echo "" >> $README
 echo "- Move *.dylib files into /usr/local/lib" >> $README
 echo "- Move executable $EXEC_NAME into /usr/local/bin" >> $README
-echo "Type '$EXEC_NAME --help' into terminal to verify installation" >> $README
+echo "- Type '$EXEC_NAME --help' into terminal to verify installation" >> $README
 
 cp .build/release/Executable ./$PACKAGE_NAME/$EXEC_NAME
 cp .build/release/*.dylib ./$PACKAGE_NAME/
