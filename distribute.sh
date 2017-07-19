@@ -2,7 +2,7 @@ echo "Updating Swift packages..."
 swift package update
 
 echo "Determining latest Git tag..."
-TAG=$(git describe --tags);
+TAG=$(git describe --abbrev=0 --tags);
 git checkout $TAG;
 
 echo "Updating compiled version to $TAG..."
