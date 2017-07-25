@@ -1,0 +1,18 @@
+// MARK: #(type) - Preparation
+
+import Fluent
+
+extension #(type) { #(type) } {
+    static func prepare(_ database: Database) throws {
+        try database.create(self) { builder in
+            builder.id()
+            #loop(preparations, "preparation") {
+                builder.#(preparation.type)("#(preparation.name)"#if(preparation.custom){, type: "#(preparation.custom)"})
+            }
+        }
+    }
+
+    static func revert(_ database: Database) throws {
+        try database.delete(self)
+    }   
+}
