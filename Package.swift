@@ -22,6 +22,12 @@ let package = Package(
         .Package(url: "https://github.com/vapor/vapor.git", majorVersion: 2),
         
         // Redis
-        .Package(url: "https://github.com/vapor/redis.git", majorVersion: 2)
+        .Package(url: "https://github.com/vapor/redis.git", majorVersion: 2),
+
+        // SourceKit for Bot
+        .Package(url: "https://github.com/tanner0101/sourcekit.git", majorVersion: 0),
+
+        // Leaf
+        .Package(url: "https://github.com/vapor/leaf.git", majorVersion: 2),
     ]
 )
