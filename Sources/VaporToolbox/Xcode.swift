@@ -9,7 +9,11 @@ public final class Xcode: Command {
         "Additionally links commonly used libraries."
     ]
 
-    public let signature: [Argument] = []
+    public let signature: [Argument] = [
+        Option(name: "open", help: [
+            "Open Xcode projects after generation."
+            ]),
+    ]
 
     public let console: ConsoleProtocol
 
@@ -77,7 +81,7 @@ public final class Xcode: Command {
 
         // Setup passthrough
         buildFlags += arguments
-            .removeFlags(["clean", "run", "debug", "verbose", "fetch", "release"])
+            .removeFlags(["clean", "run", "debug", "verbose", "fetch", "release", "open"])
             .options
             .map { name, value in "--\(name)=\(value)" }
 
@@ -85,7 +89,7 @@ public final class Xcode: Command {
     }
 
     private func openXcode(_ arguments: [String]) throws {
-        guard console.confirm("Open Xcode project?") else { return }
+        guard arguments.flag("open") || console.confirm("Open Xcode project?") else { return }
         console.print("Opening Xcode project...")
         _ = try console.execute(verbose: arguments.isVerbose, program: "/bin/sh", arguments: ["-c", "open *.xcodeproj"])
     }
