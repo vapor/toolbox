@@ -36,8 +36,20 @@ public final class ProjectInfo {
 
     public func isVaporProject() -> Bool {
         do {
+            let result = try console.backgroundExecute(program: "cat", arguments: ["./Package.swift"])
+            return result.contains("vapor/vapor.git")
+        } catch {
+            return false
+        }
+
+        // FIXME: we really should be doing it this way, but `swift package ...` got
+        // really slow in 4.x
+
+        /*
+        do {
             return try dependencyURLs().contains("https://github.com/vapor/vapor.git")
         } catch { return false }
+         */
     }
 
     /// Get the name of the current Project
