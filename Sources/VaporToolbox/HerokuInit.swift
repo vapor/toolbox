@@ -84,7 +84,7 @@ public final class HerokuInit: Command {
         if console.confirm("Would you like to provide a custom Heroku buildpack?") {
             buildpack = console.ask("Custom buildpack:")
         } else {
-            buildpack = "https://github.com/vapor/heroku-buildpack"
+            buildpack = "https://github.com/vapor-community/heroku-buildpack"
         }
 
 
@@ -105,7 +105,7 @@ public final class HerokuInit: Command {
         }
 
         console.info("Setting procfile...")
-        let procContents = "web: \(appName) --env=production --workdir=\"./\" --config:servers.default.port=\\$PORT"
+        let procContents = "web: \(appName) --env=production --port=\\$PORT"
         do {
             _ = try console.backgroundExecute(program: "/bin/sh", arguments: ["-c", "echo \"\(procContents)\" >> ./Procfile"])
         } catch ConsoleError.backgroundExecute(_, let message, _) {
