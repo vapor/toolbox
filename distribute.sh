@@ -32,7 +32,7 @@ echo "- Move executable $EXEC_NAME into /usr/local/bin" >> $README
 echo "- Type '$EXEC_NAME --help' into terminal to verify installation" >> $README
 
 cp .build/release/Executable ./$PACKAGE_NAME/$EXEC_NAME
-cp .build/release/*.dylib ./$PACKAGE_NAME/
+# cp .build/release/*.dylib ./$PACKAGE_NAME/
 
 tar -cvzf macOS-sierra.tar.gz ./$PACKAGE_NAME
 
