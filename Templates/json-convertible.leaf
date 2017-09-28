@@ -1,0 +1,23 @@
+// MARK: #(type) - JSON Convertible
+
+import Fluent
+
+extension #(type) { #(type) } {
+    convenience init(json: JSON) throws {
+        try self.init(
+            #loop(properties, "property") {
+                #(property.name): json.get("#(property.name)"),
+            }
+        )
+        id = try json.get(#(type).idKey)
+    }
+
+    func makeJSON() throws -> JSON {
+        var json = JSON()
+        try json.set(#(type).idKey, id)
+        #loop(properties, "property") {
+            try json.set("#(property.name)", #(property.name))
+        }
+        return json
+    }
+}

@@ -29,6 +29,7 @@ do {
         Fetch(console: terminal),
         Update(console: terminal),
         Clean(console: terminal),
+        Bot(terminal),
         Test(console: terminal),
         Xcode(console: terminal),
         Version(console: terminal, version: version),

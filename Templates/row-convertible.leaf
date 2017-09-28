@@ -1,0 +1,23 @@
+// MARK: #(type) - Row Convertible
+
+import Fluent
+
+extension #(type) { #(type) } {
+    convenience init(row: Row) throws {
+        try self.init(
+            #loop(properties, "property") {
+                #(property.name): row.get("#(property.name)"),
+            }
+        )
+        id = try row.get(#(type).idKey)
+    }
+
+    func makeRow() throws -> Row {
+        var row = Row()
+        try row.set(#(type).idKey, id)
+        #loop(properties, "property") {
+            try row.set("#(property.name)", #(property.name))
+        }
+        return row
+    }
+}
