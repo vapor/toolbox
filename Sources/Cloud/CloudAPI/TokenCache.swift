@@ -13,7 +13,9 @@ final class TokenCache {
         let cache = try TokenCache()
         
         guard try cache.getRefreshToken() != nil else {
-            console.info("No user currently logged in.")
+            console.info("Welcome to Vapor Cloud!")
+            console.print("You need to be logged in to deploy your project.")
+            console.print("If you don't already have an account, you can sign up for free.")
             console.detail("Login", "vapor cloud login")
             console.detail("Sign up", "vapor cloud signup")
             throw "Login required"
@@ -29,7 +31,7 @@ final class TokenCache {
                 let bytes = try DataFile.read(at: tokenPath)
                 return try JSON(bytes: bytes)
             } catch {
-                print("Could not load tokens: \(error)")
+                // no session read
                 return JSON()
             }
         }
@@ -38,7 +40,7 @@ final class TokenCache {
                 let bytes = try newValue.serialize()
                 try DataFile.write(bytes, to: tokenPath)
             } catch {
-                print("Could not save tokens: \(error)")
+                // could not save session
             }
         }
     }

@@ -29,7 +29,7 @@ public final class Login: Command {
         } catch {
             loginBar.fail()
             console.warning("Failed to login user")
-            console.warning("User 'vapor cloud signup' if you don't have an account")
+            console.detail("Signup", "vapor cloud signup")
             throw "Error: \(error)"
         }
     }

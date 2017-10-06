@@ -28,6 +28,13 @@ public final class CreateHosting: Command {
     }
     
     func createHosting(with arguments: [String]) throws -> Hosting {
+        console.pushEphemeral()
+
+        console.info("Hosting service")
+        console.print("The hosting service allows you to deploy code to Vapor Cloud.")
+        console.print("You can add additional addons to the hosting service, like")
+        console.print("private or shared databases and Redis caches.")
+
         let app = try console.application(for: arguments, using: cloudFactory)
         
         console.pushEphemeral()
@@ -56,7 +63,9 @@ public final class CreateHosting: Command {
             application: .model(app),
             gitURL: gitURL
         )
-        
+
+        console.popEphemeral()
+
         return try console.loadingBar(title: "Adding hosting service to '\(app.repoName)'") {
             return try cloudFactory
                 .makeAuthedClient(with: console)
