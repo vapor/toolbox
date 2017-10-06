@@ -20,9 +20,7 @@ extension ConsoleProtocol {
             // picks an application by choosing
             // a project and then application
             func chooseFromList() throws -> Application {
-                let proj = try cloudFactory
-                        .makeAuthedClient(with: self)
-                        .project(for: arguments, using: self)
+                let proj = try project(for: arguments, using: cloudFactory)
                 
                 let apps = try loadingBar(title: "Loading applications", ephemeral: true) {
                     return try cloudFactory

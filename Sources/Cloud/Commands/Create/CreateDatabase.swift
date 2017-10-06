@@ -49,9 +49,9 @@ public final class CreateDatabase: Command {
                 return "Private \(server.kind.readable) \(server.name)"
             } else {
                 if server.kind == .mysql {
-                    return "Shared \(server.kind.readable)"
+                    return "Shared \(server.kind.readable) ($7/month)"
                 } else {
-                    return "Shared \(server.kind.readable)"
+                    return "Shared \(server.kind.readable) ($7/month)"
                 }
             }
         }

@@ -143,7 +143,16 @@ public final class DeployCloud: Command {
             buildType = try console.giveChoice(
                 title: "Which build type?",
                 in: BuildType.all
-            )
+            ) { type in
+                switch type {
+                case .incremental:
+                    return "incremental (fastest: just compile the code)"
+                case .update:
+                    return "update (normal: update dependencies before compiling)"
+                case .clean:
+                    return "clean (slowest: clear cached dependencies and build data before compiling)"
+                }
+            }
         }
         
         console.popEphemeral()
@@ -164,26 +173,22 @@ public final class DeployCloud: Command {
     }
     
     private func replicas(for arguments: [String], in env: Environment) -> Int {
+        console.pushEphemeral()
         var replicas: Int
         if let chosen = arguments.option("replicas")?.int {
             replicas = chosen
+
+            if replicas == 0 && env.replicas > 0 {
+                console.warning("Setting the replica count to 0 will take your application offline")
+
+                if console.confirm("Would you like to change the replica count?") {
+                    replicas = console.ask("What replica count?").int ?? 0
+                }
+            }
         } else {
             replicas = env.replicas
-        }
-        
-        console.pushEphemeral()
-        
-        if replicas == 0 {
-            if env.replicas == 0 {
-                console.warning("This environment's replica count is currently set to 0.")
-                console.print("Set the replica count >= 1 to deploy your app.")
-                console.print("Set the replica count == 0 to take your app offline.")
-            } else {
-                console.warning("Setting the replica count to 0 will take your application offline")
-            }
-            
-            if console.confirm("Would you like to change the replica count?") {
-                replicas = console.ask("What replica count?").int ?? 0
+            if replicas == 0 {
+                replicas = 1
             }
         }
         

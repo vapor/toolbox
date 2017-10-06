@@ -26,10 +26,23 @@ public final class CreateApplication: Command {
     }
     
     func createApplication(with arguments: [String]) throws -> Application {
-        let proj = try cloudFactory
-            .makeAuthedClient(with: console)
-            .project(for: arguments, using: console)
-        
+
+
+        console.pushEphemeral()
+
+        console.info("Creating an application")
+        console.print("You will normally create one application for each Vapor project.")
+        console.print("You can then add services to this application such as hosting.")
+
+        console.info("Choosing a project")
+        console.print("If paid services are added to this application,")
+        console.print("they will be billed to the project's organization.")
+
+        let proj = try console
+            .project(for: arguments, using: cloudFactory)
+
+        console.popEphemeral()
+
         let name: String
         if let n = arguments.option("name") {
             name = n

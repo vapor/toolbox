@@ -18,12 +18,25 @@ public final class CreateProject: Command {
     }
     
     public func run(arguments: [String]) throws {
-        try createProject(with: arguments)
+        _ = try createProject(with: arguments)
     }
     
-    private func createProject(with arguments: [String]) throws {
+    func createProject(with arguments: [String]) throws -> Project {
         let cloud = try cloudFactory.makeAuthedClient(with: console)
+
+        console.pushEphemeral()
+
+        console.info("Creating a project")
+        console.print("Projects are a way to group applications together.")
+        console.print("If you are an app developer, you might create a new project")
+        console.print("for each client to keep things organized.")
+
+        console.info("Choosing an organization")
+        console.print("If paid services are added to applications in this project,")
+        console.print("they will be billed to the project's organization.")
         let org = try cloud.organization(for: arguments, using: console)
+
+        console.popEphemeral()
         
         let name: String
         if let n = arguments.option("name") {
@@ -41,8 +54,10 @@ public final class CreateProject: Command {
             color: "72ABC3",
             organization: .model(org)
         )
+
+
         
-        _ = try console.loadingBar(title: "Creating project '\(name)'") {
+        return try console.loadingBar(title: "Creating project '\(name)'") {
             return try cloud.create(proj)
         }
     }

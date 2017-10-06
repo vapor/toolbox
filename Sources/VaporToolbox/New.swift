@@ -136,6 +136,7 @@ public final class New: Command {
         for line in [
             "Project \"\(name)\" has been created.",
             "Type `cd \(name)` to enter the project directory.",
+            "Use `vapor cloud deploy` to host your project for free!",
             "Enjoy!"
         ] {
             console.output(console.center(line))
