@@ -11,7 +11,7 @@ cat ./Sources/Executable/main.swift | \
     mv .tmp Sources/Executable/main.swift;
 
 echo "📦  Building..."
-swift build -c release --static-swift-stdlib
+swift build -c release -Xswiftc -static-stdlib # --static-swift-stdlib
 
 echo "📦  Creating package..."
 EXEC_NAME="vapor"
