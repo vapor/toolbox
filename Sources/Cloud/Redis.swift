@@ -35,10 +35,29 @@ public struct Update: NodeInitializable {
     }
 }
 
+public struct DatabaseInfo: NodeInitializable {
+    public let hostname: String
+    public let port: String
+    public let environmentId: String
+    public let username: String
+    public let password: String
+    public let ended: Bool
+    
+    public init(node: Node) throws {
+        hostname = try node.get("hostname") ?? ""
+        port = try node.get("port") ?? ""
+        environmentId = try node.get("environmentId") ?? ""
+        username = try node.get("username") ?? ""
+        password = try node.get("password") ?? ""
+        ended = try node.get("ended") ?? false
+    }
+}
+
 extension Client where StreamType == TCPInternetSocket {
     static func cloudRedis() throws -> TCPClient {
         return try .init(
-            hostname: "redis.eu.vapor.cloud",
+            //hostname: "redis.eu.vapor.cloud",
+            hostname: "127.0.0.1",
             port: 6379,
             password: nil
         )
@@ -122,6 +141,91 @@ public final class CloudRedis {
         }
     }
 
+    static func createDBServer(
+        console: ConsoleProtocol,
+        name: String,
+        size: String,
+        engine: String,
+        engineVersion: String,
+        environments: [String]
+    ) throws {
+        let listenChannel = UUID().uuidString
+        
+        var message = JSON([:])
+        try message.set("channel", listenChannel)
+        try message.set("name", name)
+        try message.set("size", size)
+        try message.set("engine", engine)
+        try message.set("engineVersion", engineVersion)
+        try message.set("environments", environments)
+        
+        // Publish start and kill exit
+        let pubClient = try TCPClient(hostname: "127.0.0.1", port: 6379, password: nil)
+        try pubClient.publish(channel: "createDatabaseServer", message)
+        
+        let listenClient = try TCPClient(hostname: "127.0.0.1", port: 6379, password: nil)
+        try listenClient.subscribe(channel: listenChannel) { ( data) in
+            guard
+                let log = data?
+                    .array?
+                    .flatMap({ $0?.bytes })
+                    .last?
+                    .makeString()
+                else { return }
+            
+            guard log != "EXIT!" else {
+                do {
+                    exit(0)
+                } catch {
+                    exit(1)
+                }
+            }
+            
+            console.print(log)
+        }
+    }
+    
+    static func getDatabaseInfo(
+        console: ConsoleProtocol,
+        cloudFactory: CloudAPIFactory,
+        environment: String? = "",
+        environmentArr: [String?] = [],
+        application: String? = ""
+    ) throws {
+        let listenChannel = UUID().uuidString
+        
+        var message = JSON([:])
+        try message.set("environment", environment ?? "")
+        try message.set("environmentArr", environmentArr)
+        try message.set("channel", listenChannel)
+        
+        // Publish start and kill exit
+        let pubClient = try TCPClient(hostname: "127.0.0.1", port: 6379, password: nil)
+        try pubClient.publish(channel: "getDatabaseInfo", message)
+        
+        let listenClient = try TCPClient(hostname: "127.0.0.1", port: 6379, password: nil)
+        try listenClient.subscribe(channel: listenChannel) { data in
+            do {
+                guard let data = data else { return }
+                let json = data.array?
+                    .flatMap { $0?.bytes }
+                    .last
+                    .flatMap { try? JSON(bytes: $0) }
+                
+                let dbInfo = try DatabaseInfo(node: json)
+                
+                if (environment == "") {
+                    _ = try ShowDatabaseInfo(console, cloudFactory)
+                        .showInfo(dbInfo: dbInfo, application: application)
+                } else {
+                    try ShowDatabaseInfo(console, cloudFactory).login(dbInfo: dbInfo)
+                }
+            } catch {
+                
+            }
+        }
+    }
+    
     static func runCommand(
         console: ConsoleProtocol,
         command: String,
