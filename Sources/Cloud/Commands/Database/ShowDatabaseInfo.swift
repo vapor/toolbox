@@ -8,18 +8,36 @@ public final class ShowDatabaseInfo {
     }
     
     public func login(dbInfo: DatabaseInfo) throws {
-        _ = try console.foregroundExecute(
-            program: "mysql",
-            arguments: [
-                "-u",
-                "\(dbInfo.username)",
-                "-p\(dbInfo.password)",
-                "-h",
-                "\(dbInfo.hostname)",
-                "-P",
-                "\(dbInfo.port)",
-                "\(dbInfo.username)"
-            ])
+        if (dbInfo.type == "postgresql") {
+            _ = try console.foregroundExecute(
+                program: "psql",
+                arguments: [
+                    "postgresql://\(dbInfo.username):\(dbInfo.password)@\(dbInfo.hostname):\(dbInfo.port)/\(dbInfo.username)",
+                ])
+        } else if (dbInfo.type == "mongodb") {
+            _ = try console.foregroundExecute(
+                program: "mongo",
+                arguments: [
+                    "\(dbInfo.hostname):\(dbInfo.port)/\(dbInfo.username)",
+                    "-u",
+                    "\(dbInfo.username)",
+                    "-p",
+                    "\(dbInfo.password)",
+                ])
+        } else {
+            _ = try console.foregroundExecute(
+                program: "mysql",
+                arguments: [
+                    "-u",
+                    "\(dbInfo.username)",
+                    "-p\(dbInfo.password)",
+                    "-h",
+                    "\(dbInfo.hostname)",
+                    "-P",
+                    "\(dbInfo.port)",
+                    "\(dbInfo.username)"
+                ])
+        }
         
         exit(0)
     }

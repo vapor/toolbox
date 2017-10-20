@@ -42,6 +42,7 @@ public struct DatabaseInfo: NodeInitializable {
     public let username: String
     public let password: String
     public let ended: Bool
+    public let type: String
     
     public init(node: Node) throws {
         hostname = try node.get("hostname") ?? ""
@@ -49,6 +50,7 @@ public struct DatabaseInfo: NodeInitializable {
         environmentId = try node.get("environmentId") ?? ""
         username = try node.get("username") ?? ""
         password = try node.get("password") ?? ""
+        type = try node.get("type") ?? ""
         ended = try node.get("ended") ?? false
     }
 }
@@ -183,6 +185,56 @@ public final class CloudRedis {
             
             console.print(log)
         }
+    }
+    
+    static func dbServerLog(
+        console: ConsoleProtocol,
+        name: String
+        ) throws {
+        let listenChannel = UUID().uuidString
+        
+        var message = JSON([:])
+        try message.set("channel", listenChannel)
+        try message.set("name", name)
+        
+        // Publish start and kill exit
+        let pubClient = try TCPClient(hostname: "127.0.0.1", port: 6379, password: nil)
+        try pubClient.publish(channel: "databaseLog", message)
+        
+        let listenClient = try TCPClient(hostname: "127.0.0.1", port: 6379, password: nil)
+        try listenClient.subscribe(channel: listenChannel) { ( data) in
+            guard
+                let log = data?
+                    .array?
+                    .flatMap({ $0?.bytes })
+                    .last?
+                    .makeString()
+                else { return }
+            
+            guard log != "EXIT!" else {
+                do {
+                    exit(0)
+                } catch {
+                    exit(1)
+                }
+            }
+            
+            console.print(log)
+        }
+    }
+    
+    static func shutdownDBServer(
+        console: ConsoleProtocol,
+        name: String
+    ) throws {
+        let listenChannel = UUID().uuidString
+        
+        var message = JSON([:])
+        try message.set("name", name)
+        
+        // Publish start and kill exit
+        let pubClient = try TCPClient(hostname: "127.0.0.1", port: 6379, password: nil)
+        try pubClient.publish(channel: "shutdownDatabaseServer", message)
     }
     
     static func getDatabaseInfo(

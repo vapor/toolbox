@@ -34,7 +34,11 @@ public func group(_ console: ConsoleProtocol) throws -> Group {
     let database = Group(id: "database", commands: [
         DatabaseCreate(console, cloudFactory),
         DatabaseLogin(console, cloudFactory),
-        DatabaseInspect(console, cloudFactory)
+        DatabaseInspect(console, cloudFactory),
+        DatabaseRestart(console, cloudFactory),
+        DatabaseLog(console, cloudFactory),
+        DatabaseScale(console, cloudFactory),
+        DatabaseShutdown(console, cloudFactory)
         ], help: [
             "Manage database servers, and databases"
         ])
