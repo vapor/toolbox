@@ -16,6 +16,11 @@ public final class DatabaseLogin: Command {
             "The name of the environment to deploy to.",
             "This will always be required to deploy, however",
             "omitting the flag will result in a selection menu."
+            ]),
+        Option(name: "token", help: [
+            "Token of the database server.",
+            "This is the variable you use to connect to the server",
+            "e.g.: DB_MYSQL_<NAME>"
             ])
     ]
     
@@ -32,11 +37,29 @@ public final class DatabaseLogin: Command {
         
         let app = try console.application(for: arguments, using: cloudFactory)
         let env = try console.environment(on: .model(app), for: arguments, using: cloudFactory)
+        let db_token = try self.token(for: arguments)
+        
+        let token = try Token.global(with: console)
+        let user = try adminApi.user.get(with: token)
         
         try CloudRedis.getDatabaseInfo(
             console: self.console,
             cloudFactory: self.cloudFactory,
-            environment: "\(env.id ?? "")"
+            environment: "\(env.id ?? "")",
+            token: db_token,
+            email: user.email
         )
+    }
+    
+    private func token(for arguments: [String]) -> String {
+        let token: String
+        if let chosen = arguments.option("token") {
+            token = chosen
+        } else {
+            console.error("Please define server token")
+            exit(1)
+        }
+        console.detail("token", token)
+        return token
     }
 }

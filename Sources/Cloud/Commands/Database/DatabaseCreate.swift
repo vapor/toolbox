@@ -26,6 +26,7 @@ public final class DatabaseCreate: Command {
         console.info("Create new database")
         
         let token = try Token.global(with: console)
+        let user = try adminApi.user.get(with: token)
         
         let app = try console.application(for: arguments, using: cloudFactory)
         
@@ -43,18 +44,33 @@ public final class DatabaseCreate: Command {
         }
         console.info("")
         
-        let name = app.repoName
+        let name = console.ask("What name for this database server? [a-zA-Z0-9]")
+        console.detail("name", name)
         let size = try self.size(for: arguments)
         let type = try self.type(for: arguments)
-        let version = console.ask("Version: ")
+        var version: String = ""
+        // TODO: Switch to API based versions, for more flexibility
+        switch type {
+        case .mysql:
+            version = try self.MySQLVersions(for: arguments)
+        case .postgresql:
+            version = try self.PostgresVersions(for: arguments)
+        case .mongodb:
+            version = try self.MongoDBVersions(for: arguments)
+        }
+        let access = token.access        
         
         try CloudRedis.createDBServer(
             console: console,
+            cloudFactory: cloudFactory,
+            application: app.repoName,
             name: name,
             size: "\(size)",
             engine: "\(type)",
             engineVersion: version,
-            environments: envArray
+            environments: envArray,
+            userToken: access,
+            email: user.email
         )
     }
     
@@ -69,9 +85,9 @@ public final class DatabaseCreate: Command {
         ) { type in
             switch type {
             case .free:
-                return "Free $0/month - (Details not finalized)"
-            case .hobby:
-                return "Hobby $9/month - (Details not finalized)"
+                return "Free $0/month - (128mb memory, 256mb storage, no memory cache, 20 connections, no backups)"
+            //case .hobby:
+            //    return "Hobby $9/month - (Details not finalized)"
             }
         }
     
@@ -106,9 +122,45 @@ public final class DatabaseCreate: Command {
         return type
     }
     
+    private func MySQLVersions(for arguments: [String]) throws -> String {
+        let version: String
+        version = try console.giveChoice(
+            title: "Which version?",
+            in: ["5.7", "5.6", "5.5"]
+        )
+        
+        console.detail("version", "\(version)")
+        
+        return version
+    }
+    
+    private func PostgresVersions(for arguments: [String]) throws -> String {
+        let version: String
+        version = try console.giveChoice(
+            title: "Which version?",
+            in: ["10.0", "9.6", "9.5", "9.4", "9.3"]
+        )
+        
+        console.detail("version", "\(version)")
+        
+        return version
+    }
+    
+    private func MongoDBVersions(for arguments: [String]) throws -> String {
+        let version: String
+        version = try console.giveChoice(
+            title: "Which version?",
+            in: ["3.5", "3.4", "3.2", "3.0"]
+        )
+        
+        console.detail("version", "\(version)")
+        
+        return version
+    }
+    
     public enum Sizes {
         case free
-        case hobby
+        //case hobby
     }
     
     public enum Types {
@@ -121,13 +173,13 @@ public final class DatabaseCreate: Command {
 public typealias Size = DatabaseCreate.Sizes
 
 extension Size {
-    static let all: [Size] = [.free, .hobby]
+    static let all: [Size] = [.free]
     public var rawValue: String {
         switch self {
         case .free:
             return "free"
-        case .hobby:
-            return "hobby"
+        //case .hobby:
+        //    return "hobby"
         }
     }
     
@@ -135,8 +187,8 @@ extension Size {
         switch rawValue {
         case "free":
             self = .free
-        case "hobby":
-            self = .hobby
+        //case "hobby":
+        //    self = .hobby
         default:
             return nil
         }

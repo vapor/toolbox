@@ -43,6 +43,7 @@ public struct DatabaseInfo: NodeInitializable {
     public let password: String
     public let ended: Bool
     public let type: String
+    public let token: String
     
     public init(node: Node) throws {
         hostname = try node.get("hostname") ?? ""
@@ -51,6 +52,31 @@ public struct DatabaseInfo: NodeInitializable {
         username = try node.get("username") ?? ""
         password = try node.get("password") ?? ""
         type = try node.get("type") ?? ""
+        token = try node.get("token") ?? ""
+        ended = try node.get("ended") ?? false
+    }
+}
+
+public struct DatabaseListObj: NodeInitializable {
+    public let name: String
+    public let port: String
+    public let status: String
+    public let type: String
+    public let version: String
+    public let host: String
+    public let token: String
+    public let size: String
+    public let ended: Bool
+    
+    public init(node: Node) throws {
+        name = try node.get("name") ?? ""
+        port = try node.get("port") ?? ""
+        status = try node.get("status") ?? ""
+        type = try node.get("type") ?? ""
+        version = try node.get("version") ?? ""
+        host = try node.get("host") ?? ""
+        token = try node.get("token") ?? ""
+        size = try node.get("size") ?? ""
         ended = try node.get("ended") ?? false
     }
 }
@@ -68,8 +94,7 @@ public struct FeedbackInfo: NodeInitializable {
 extension Client where StreamType == TCPInternetSocket {
     static func cloudRedis() throws -> TCPClient {
         return try .init(
-            //hostname: "redis.eu.vapor.cloud",
-            hostname: "127.0.0.1",
+            hostname: "redis.eu.vapor.cloud",
             port: 6379,
             password: nil
         )
@@ -153,29 +178,23 @@ public final class CloudRedis {
         }
     }
 
-    static func createDBServer(
+    static func betaQueue(
         console: ConsoleProtocol,
-        name: String,
-        size: String,
-        engine: String,
-        engineVersion: String,
-        environments: [String]
-    ) throws {
+        email: String,
+        motivation: String
+        ) throws {
         let listenChannel = UUID().uuidString
         
         var message = JSON([:])
         try message.set("channel", listenChannel)
-        try message.set("name", name)
-        try message.set("size", size)
-        try message.set("engine", engine)
-        try message.set("engineVersion", engineVersion)
-        try message.set("environments", environments)
+        try message.set("email", email)
+        try message.set("motivation", motivation)
         
         // Publish start and kill exit
-        let pubClient = try TCPClient(hostname: "127.0.0.1", port: 6379, password: nil)
-        try pubClient.publish(channel: "createDatabaseServer", message)
+        let pubClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+        try pubClient.publish(channel: "betaQueue", message)
         
-        let listenClient = try TCPClient(hostname: "127.0.0.1", port: 6379, password: nil)
+        let listenClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
         try listenClient.subscribe(channel: listenChannel) { data in
             do {
                 guard let data = data else { return }
@@ -185,6 +204,81 @@ public final class CloudRedis {
                     .flatMap { try? JSON(bytes: $0) }
                 
                 let info = try FeedbackInfo(node: json)
+
+                DatabaseFeedbackFormat(console, info)
+                
+            } catch {
+                
+            }
+        }
+    }
+    
+    static func createDBServer(
+        console: ConsoleProtocol,
+        cloudFactory: CloudAPIFactory,
+        application: String,
+        name: String,
+        size: String,
+        engine: String,
+        engineVersion: String,
+        environments: [String],
+        userToken: String,
+        email: String
+    ) throws {
+        let listenChannel = UUID().uuidString
+        
+        var message = JSON([:])
+        try message.set("channel", listenChannel)
+        try message.set("application", application)
+        try message.set("name", name)
+        try message.set("size", size)
+        try message.set("engine", engine)
+        try message.set("engineVersion", engineVersion)
+        try message.set("environments", environments)
+        try message.set("userToken", userToken)
+        try message.set("email", email)
+        
+        // Publish start and kill exit
+        let pubClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+        try pubClient.publish(channel: "createDatabaseServer", message)
+        
+        let listenClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+        try listenClient.subscribe(channel: listenChannel) { data in
+            do {
+                guard let data = data else { return }
+                let json = data.array?
+                    .flatMap { $0?.bytes }
+                    .last
+                    .flatMap { try? JSON(bytes: $0) }
+                
+                let info = try FeedbackInfo(node: json)
+                
+                if (info.status == "successExit") {
+                    let listenInfoClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+                    try listenInfoClient.subscribe(channel: listenChannel + "_Info") { data in
+                        do {
+                            console.info("")
+                            console.info("Creating config variables")
+                            
+                            guard let data = data else { return }
+                            let json = data.array?
+                                .flatMap { $0?.bytes }
+                                .last
+                                .flatMap { try? JSON(bytes: $0) }
+                            
+                            let dbInfo = try DatabaseInfo(node: json)
+                            
+                            _ = try ShowDatabaseInfo(console, cloudFactory)
+                                .createConfig(dbInfo: dbInfo, application: application)
+                        } catch {
+                            
+                        }
+                    }
+                }
+                
+                if (info.status == "failedExit") {
+                    exit(0)
+                }
                 
                 DatabaseFeedbackFormat(console, info)
                 
@@ -205,10 +299,10 @@ public final class CloudRedis {
         try message.set("name", name)
         
         // Publish start and kill exit
-        let pubClient = try TCPClient(hostname: "127.0.0.1", port: 6379, password: nil)
+        let pubClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
         try pubClient.publish(channel: "databaseLog", message)
         
-        let listenClient = try TCPClient(hostname: "127.0.0.1", port: 6379, password: nil)
+        let listenClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
         try listenClient.subscribe(channel: listenChannel) { ( data) in
             guard
                 let log = data?
@@ -232,33 +326,60 @@ public final class CloudRedis {
     
     static func shutdownDBServer(
         console: ConsoleProtocol,
-        name: String
+        application: String,
+        token: String,
+        email: String
     ) throws {
         let listenChannel = UUID().uuidString
         
         var message = JSON([:])
-        try message.set("name", name)
+        try message.set("channel", listenChannel)
+        try message.set("application", application)
+        try message.set("token", token)
+        try message.set("email", email)
         
         // Publish start and kill exit
-        let pubClient = try TCPClient(hostname: "127.0.0.1", port: 6379, password: nil)
+        let pubClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
         try pubClient.publish(channel: "shutdownDatabaseServer", message)
+        
+        let listenClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+        try listenClient.subscribe(channel: listenChannel) { data in
+            do {
+                guard let data = data else { return }
+                let json = data.array?
+                    .flatMap { $0?.bytes }
+                    .last
+                    .flatMap { try? JSON(bytes: $0) }
+                
+                let info = try FeedbackInfo(node: json)
+                
+                DatabaseFeedbackFormat(console, info)
+                
+            } catch {
+                
+            }
+        }
     }
     
     static func deleteDBServer(
         console: ConsoleProtocol,
-        name: String
+        application: String,
+        token: String,
+        email: String
         ) throws {
         let listenChannel = UUID().uuidString
         
         var message = JSON([:])
         try message.set("channel", listenChannel)
-        try message.set("name", name)
+        try message.set("application", application)
+        try message.set("token", token)
+        try message.set("email", email)
         
         // Publish start and kill exit
-        let pubClient = try TCPClient(hostname: "127.0.0.1", port: 6379, password: nil)
+        let pubClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
         try pubClient.publish(channel: "DeleteDatabaseServer", message)
         
-        let listenClient = try TCPClient(hostname: "127.0.0.1", port: 6379, password: nil)
+        let listenClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
         try listenClient.subscribe(channel: listenChannel) { data in
             do {
                 guard let data = data else { return }
@@ -279,19 +400,23 @@ public final class CloudRedis {
     
     static func restartDBServer(
         console: ConsoleProtocol,
-        name: String
+        application: String,
+        token: String,
+        email: String
         ) throws {
         let listenChannel = UUID().uuidString
         
         var message = JSON([:])
         try message.set("channel", listenChannel)
-        try message.set("name", name)
+        try message.set("application", application)
+        try message.set("token", token)
+        try message.set("email", email)
         
         // Publish start and kill exit
-        let pubClient = try TCPClient(hostname: "127.0.0.1", port: 6379, password: nil)
+        let pubClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
         try pubClient.publish(channel: "RestartDatabaseServer", message)
         
-        let listenClient = try TCPClient(hostname: "127.0.0.1", port: 6379, password: nil)
+        let listenClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
         try listenClient.subscribe(channel: listenChannel) { data in
             do {
                 guard let data = data else { return }
@@ -315,20 +440,24 @@ public final class CloudRedis {
         cloudFactory: CloudAPIFactory,
         environment: String? = "",
         environmentArr: [String?] = [],
-        application: String? = ""
+        application: String? = "",
+        token: String,
+        email: String
     ) throws {
         let listenChannel = UUID().uuidString
         
         var message = JSON([:])
         try message.set("environment", environment ?? "")
         try message.set("environmentArr", environmentArr)
+        try message.set("token", token)
         try message.set("channel", listenChannel)
+        try message.set("email", email)
         
         // Publish start and kill exit
-        let pubClient = try TCPClient(hostname: "127.0.0.1", port: 6379, password: nil)
+        let pubClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
         try pubClient.publish(channel: "getDatabaseInfo", message)
         
-        let listenClient = try TCPClient(hostname: "127.0.0.1", port: 6379, password: nil)
+        let listenClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
         try listenClient.subscribe(channel: listenChannel) { data in
             do {
                 guard let data = data else { return }
@@ -345,6 +474,42 @@ public final class CloudRedis {
                 } else {
                     try ShowDatabaseInfo(console, cloudFactory).login(dbInfo: dbInfo)
                 }
+            } catch {
+                
+            }
+        }
+    }
+    
+    static func getDatabaseList(
+        console: ConsoleProtocol,
+        cloudFactory: CloudAPIFactory,
+        application: String,
+        email: String
+        ) throws {
+        let listenChannel = UUID().uuidString
+        
+        var message = JSON([:])
+        try message.set("application", application)
+        try message.set("channel", listenChannel)
+        try message.set("email", email)
+        
+        // Publish start and kill exit
+        let pubClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+        try pubClient.publish(channel: "getDatabaseList", message)
+        
+        let listenClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+        try listenClient.subscribe(channel: listenChannel) { data in
+            do {
+                guard let data = data else { return }
+                let json = data.array?
+                    .flatMap { $0?.bytes }
+                    .last
+                    .flatMap { try? JSON(bytes: $0) }
+                
+                let dbInfo = try DatabaseListObj(node: json)
+                
+                    _ = try ShowDatabaseInfo(console, cloudFactory)
+                        .listServers(dbInfo: dbInfo, application: application)
             } catch {
                 
             }

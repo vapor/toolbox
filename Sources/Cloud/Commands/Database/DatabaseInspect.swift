@@ -11,6 +11,11 @@ public final class DatabaseInspect: Command {
             "This will be automatically detected if your are",
             "in a Git controlled folder with a remote matching",
             "the application's hosting Git URL."
+            ]),
+        Option(name: "token", help: [
+            "Token of the database server.",
+            "This is the variable you use to connect to the server",
+            "e.g.: DB_MYSQL_<NAME>"
             ])
     ]
     
@@ -26,8 +31,11 @@ public final class DatabaseInspect: Command {
         console.info("Inspect database")
         
         let token = try Token.global(with: console)
+        let user = try adminApi.user.get(with: token)
+        
         let app = try console.application(for: arguments, using: cloudFactory)
         let environments = try applicationApi.environments.all(for: app, with: token)
+        let db_token = try self.token(for: arguments)
         
         var envArray: [String] = []
         
@@ -35,14 +43,27 @@ public final class DatabaseInspect: Command {
             envArray.append("\(val.id ?? "")")
         }
         
-        
-        
         try CloudRedis.getDatabaseInfo(
             console: self.console,
             cloudFactory: self.cloudFactory,
             environmentArr: envArray,
-            application: app.repoName
+            application: app.repoName,
+            token: db_token,
+            email: user.email
         )
     }
+    
+    private func token(for arguments: [String]) -> String {
+        let token: String
+        if let chosen = arguments.option("token") {
+            token = chosen
+        } else {
+            console.error("Please define server token")
+            exit(1)
+        }
+        console.detail("token", token)
+        return token
+    }
 }
+
 
