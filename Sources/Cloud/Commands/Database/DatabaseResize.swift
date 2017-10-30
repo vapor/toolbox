@@ -37,7 +37,7 @@ public final class DatabaseResize: Command {
         let token = try Token.global(with: console)
         let user = try adminApi.user.get(with: token)
         
-        guard console.confirm("This will restart your database server, and will cause downtime, are you sure you want to continue?") else {
+        guard console.confirm("Do you want to resize your database server now?") else {
             throw "Cancelled"
         }
         
