@@ -48,7 +48,7 @@ public final class DatabaseCreate: Command {
         }
         console.info("")
         
-        let name = console.ask("What name for this database server? [a-zA-Z0-9]")
+        let name = console.ask("What name for this database server? [A-Z0-9]")
         console.detail("name", name)
         let size = try self.size(for: arguments)
         let type = try self.type(for: arguments)
@@ -89,9 +89,9 @@ public final class DatabaseCreate: Command {
         ) { type in
             switch type {
             case .free:
-                return "(Dev) Free $0/month - (256mb memory - 10,000 records - 20 connections - no backups)"
+                return "(Dev) Free $0/month - (256MB memory / 10k rows / 20 connections)"
             case .hobby:
-                return "(Dev) Hobby $9/month - (256mb memory - 5,000,000 records - 20 connections - no backups)"
+                return "(Dev) Hobby $9/month - (256MB memory / 5m rows / 20 connections)"
             }
         }
     
