@@ -25,6 +25,10 @@ public final class DatabaseCreate: Command {
     public func run(arguments: [String]) throws {
         console.info("Create new database")
         
+        console.info("")
+        console.warning("Be aware, this feature is still in beta!, use with caution")
+        console.info("")
+        
         let token = try Token.global(with: console)
         let user = try adminApi.user.get(with: token)
         

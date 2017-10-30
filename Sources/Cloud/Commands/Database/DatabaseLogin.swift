@@ -35,6 +35,10 @@ public final class DatabaseLogin: Command {
     public func run(arguments: [String]) throws {
         console.info("Login to database server CLI interface.")
         
+        console.info("")
+        console.warning("Be aware, this feature is still in beta!, use with caution")
+        console.info("")
+        
         let app = try console.application(for: arguments, using: cloudFactory)
         let env = try console.environment(on: .model(app), for: arguments, using: cloudFactory)
         let db_token = try self.token(for: arguments)

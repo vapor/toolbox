@@ -29,6 +29,11 @@ public final class DatabaseDelete: Command {
     
     public func run(arguments: [String]) throws {
         console.info("Delete database")
+        
+        console.info("")
+        console.warning("Be aware, this feature is still in beta!, use with caution")
+        console.info("")
+        
         console.warning("WARNING: 24 hours after running this command, your data will be deleted!. Proceed with care.")
         
         let app = try console.application(for: arguments, using: cloudFactory)

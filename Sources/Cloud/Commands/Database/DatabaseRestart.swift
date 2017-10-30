@@ -30,6 +30,10 @@ public final class DatabaseRestart: Command {
     public func run(arguments: [String]) throws {
         console.info("Restart database")
         
+        console.info("")
+        console.warning("Be aware, this feature is still in beta!, use with caution")
+        console.info("")
+        
         let app = try console.application(for: arguments, using: cloudFactory)
         let db_token = try self.token(for: arguments)
         

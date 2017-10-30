@@ -43,7 +43,7 @@ public func group(_ console: ConsoleProtocol) throws -> Group {
         DatabaseDelete(console, cloudFactory),
         DatabaseList(console, cloudFactory)
         ], help: [
-            "Manage database servers, and databases"
+            "Manage database servers, and databases, warning: this feature is still in beta, use with caution."
         ])
     
     return Group(
