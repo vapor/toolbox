@@ -20,7 +20,7 @@ public func group(_ console: ConsoleProtocol) throws -> Group {
         CreateTLS(console, cloudFactory),
     ], help: [
         "Create new instances of Vapor Cloud objects like",
-        "applications, envrionments, databases, etc."
+        "applications, environments, databases, etc."
     ])
     
     let config = Group(id: "config", commands: [
