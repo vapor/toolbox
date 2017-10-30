@@ -89,9 +89,9 @@ public final class DatabaseCreate: Command {
         ) { type in
             switch type {
             case .free:
-                return "(Dev) Free $0/month - (256MB memory / 10k rows / 20 connections)"
+                return "(Dev) Free $0/month - (256MB memory / 10K rows / 20 connections)"
             case .hobby:
-                return "(Dev) Hobby $9/month - (256MB memory / 5m rows / 20 connections)"
+                return "(Dev) Hobby $9/month - (256MB memory / 5M rows / 20 connections)"
             }
         }
     
