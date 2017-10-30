@@ -94,7 +94,7 @@ public struct FeedbackInfo: NodeInitializable {
 extension Client where StreamType == TCPInternetSocket {
     static func cloudRedis() throws -> TCPClient {
         return try .init(
-            hostname: "redis.eu.vapor.cloud",
+            hostname: "redis.eu.vapor.cloud"
             port: 6379,
             password: nil
         )
@@ -191,10 +191,10 @@ public final class CloudRedis {
         try message.set("motivation", motivation)
         
         // Publish start and kill exit
-        let pubClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+        let pubClient = try TCPClient.cloudRedis()
         try pubClient.publish(channel: "betaQueue", message)
         
-        let listenClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+        let listenClient = try TCPClient.cloudRedis()
         try listenClient.subscribe(channel: listenChannel) { data in
             do {
                 guard let data = data else { return }
@@ -239,10 +239,10 @@ public final class CloudRedis {
         try message.set("email", email)
         
         // Publish start and kill exit
-        let pubClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+        let pubClient = try TCPClient.cloudRedis()
         try pubClient.publish(channel: "createDatabaseServer", message)
         
-        let listenClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+        let listenClient = try TCPClient.cloudRedis()
         try listenClient.subscribe(channel: listenChannel) { data in
             do {
                 guard let data = data else { return }
@@ -254,7 +254,7 @@ public final class CloudRedis {
                 let info = try FeedbackInfo(node: json)
                 
                 if (info.status == "successExit") {
-                    let listenInfoClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+                    let listenInfoClient = try TCPClient.cloudRedis()
                     try listenInfoClient.subscribe(channel: listenChannel + "_Info") { data in
                         do {
                             console.info("")
@@ -299,10 +299,10 @@ public final class CloudRedis {
         try message.set("name", name)
         
         // Publish start and kill exit
-        let pubClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+        let pubClient = try TCPClient.cloudRedis()
         try pubClient.publish(channel: "databaseLog", message)
         
-        let listenClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+        let listenClient = try TCPClient.cloudRedis()
         try listenClient.subscribe(channel: listenChannel) { ( data) in
             guard
                 let log = data?
@@ -339,10 +339,49 @@ public final class CloudRedis {
         try message.set("email", email)
         
         // Publish start and kill exit
-        let pubClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+        let pubClient = try TCPClient.cloudRedis()
         try pubClient.publish(channel: "shutdownDatabaseServer", message)
         
-        let listenClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+        let listenClient = try TCPClient.cloudRedis()
+        try listenClient.subscribe(channel: listenChannel) { data in
+            do {
+                guard let data = data else { return }
+                let json = data.array?
+                    .flatMap { $0?.bytes }
+                    .last
+                    .flatMap { try? JSON(bytes: $0) }
+                
+                let info = try FeedbackInfo(node: json)
+                
+                DatabaseFeedbackFormat(console, info)
+                
+            } catch {
+                
+            }
+        }
+    }
+    
+    static func resizeDBServer(
+        console: ConsoleProtocol,
+        application: String,
+        token: String,
+        email: String,
+        newSize: String
+        ) throws {
+        let listenChannel = UUID().uuidString
+        
+        var message = JSON([:])
+        try message.set("channel", listenChannel)
+        try message.set("application", application)
+        try message.set("token", token)
+        try message.set("email", email)
+        try message.set("newSize", newSize)
+        
+        // Publish start and kill exit
+        let pubClient = try TCPClient.cloudRedis()
+        try pubClient.publish(channel: "resizeDatabaseServer", message)
+        
+        let listenClient = try TCPClient.cloudRedis()
         try listenClient.subscribe(channel: listenChannel) { data in
             do {
                 guard let data = data else { return }
@@ -376,10 +415,10 @@ public final class CloudRedis {
         try message.set("email", email)
         
         // Publish start and kill exit
-        let pubClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+        let pubClient = try TCPClient.cloudRedis()
         try pubClient.publish(channel: "DeleteDatabaseServer", message)
         
-        let listenClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+        let listenClient = try TCPClient.cloudRedis()
         try listenClient.subscribe(channel: listenChannel) { data in
             do {
                 guard let data = data else { return }
@@ -413,10 +452,10 @@ public final class CloudRedis {
         try message.set("email", email)
         
         // Publish start and kill exit
-        let pubClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+        let pubClient = try TCPClient.cloudRedis()
         try pubClient.publish(channel: "RestartDatabaseServer", message)
         
-        let listenClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+        let listenClient = try TCPClient.cloudRedis()
         try listenClient.subscribe(channel: listenChannel) { data in
             do {
                 guard let data = data else { return }
@@ -454,10 +493,10 @@ public final class CloudRedis {
         try message.set("email", email)
         
         // Publish start and kill exit
-        let pubClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+        let pubClient = try TCPClient.cloudRedis()
         try pubClient.publish(channel: "getDatabaseInfo", message)
         
-        let listenClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+        let listenClient = try TCPClient.cloudRedis()
         try listenClient.subscribe(channel: listenChannel) { data in
             do {
                 guard let data = data else { return }
@@ -494,10 +533,10 @@ public final class CloudRedis {
         try message.set("email", email)
         
         // Publish start and kill exit
-        let pubClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+        let pubClient = try TCPClient.cloudRedis()
         try pubClient.publish(channel: "getDatabaseList", message)
         
-        let listenClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+        let listenClient = try TCPClient.cloudRedis()
         try listenClient.subscribe(channel: listenChannel) { data in
             do {
                 guard let data = data else { return }

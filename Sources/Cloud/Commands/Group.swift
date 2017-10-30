@@ -38,7 +38,7 @@ public func group(_ console: ConsoleProtocol) throws -> Group {
         DatabaseInspect(console, cloudFactory),
         DatabaseRestart(console, cloudFactory),
         //DatabaseLog(console, cloudFactory),
-        //DatabaseScale(console, cloudFactory),
+        DatabaseResize(console, cloudFactory),
         DatabaseShutdown(console, cloudFactory),
         DatabaseDelete(console, cloudFactory),
         DatabaseList(console, cloudFactory)

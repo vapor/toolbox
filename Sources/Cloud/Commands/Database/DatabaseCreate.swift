@@ -160,7 +160,7 @@ public final class DatabaseCreate: Command {
     
     public enum Sizes {
         case free
-        //case hobby
+        case hobby
     }
     
     public enum Types {
@@ -173,13 +173,13 @@ public final class DatabaseCreate: Command {
 public typealias Size = DatabaseCreate.Sizes
 
 extension Size {
-    static let all: [Size] = [.free]
+    static let all: [Size] = [.free, .hobby]
     public var rawValue: String {
         switch self {
         case .free:
             return "free"
-        //case .hobby:
-        //    return "hobby"
+        case .hobby:
+            return "hobby"
         }
     }
     
@@ -187,8 +187,8 @@ extension Size {
         switch rawValue {
         case "free":
             self = .free
-        //case "hobby":
-        //    self = .hobby
+        case "hobby":
+            self = .hobby
         default:
             return nil
         }

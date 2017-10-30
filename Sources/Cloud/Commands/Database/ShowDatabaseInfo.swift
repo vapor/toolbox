@@ -83,7 +83,7 @@ public final class ShowDatabaseInfo {
         switch dbInfo.type {
         case "mysql":
             connectUrl = "http://"
-        case "postgres":
+        case "postgresql":
             connectUrl = "postgresql://"
         case "mongodb":
             connectUrl = "mongodb://"
