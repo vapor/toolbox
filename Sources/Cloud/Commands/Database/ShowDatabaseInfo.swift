@@ -49,6 +49,22 @@ public final class ShowDatabaseInfo {
         
         let app = application ?? ""
         
+        var connectUrl = ""
+        
+        switch dbInfo.type {
+        case "mysql":
+            connectUrl = "http://"
+        case "postgresql":
+            connectUrl = "postgresql://"
+        case "mongodb":
+            connectUrl = "mongodb://"
+        default:
+            console.error("Could not find type")
+            exit(1)
+        }
+        
+        connectUrl += "\(dbInfo.username):\(dbInfo.password)@\(dbInfo.hostname):\(dbInfo.port)/\(dbInfo.username)"
+        
         let token = try Token.global(with: console)
         //let environments = try applicationApi.environments.all(for: app, with: token)
         let environment = try applicationApi.environments.get(forRepo: app, forEnvironment: dbInfo.environmentId, with: token)
@@ -59,6 +75,7 @@ public final class ShowDatabaseInfo {
         console.detail("Port", "\(dbInfo.port)")
         console.detail("Username", "\(dbInfo.username)")
         console.detail("Password", "\(dbInfo.password)")
+        console.detail("Connect URL", "\(connectUrl)")
         
         
         
