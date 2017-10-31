@@ -38,7 +38,8 @@ public final class CreateOrganization: Command {
             credits: 0,
             wallet: nil,
             refillThreshold: nil,
-            refillCredits: nil
+            refillCredits: nil,
+            billingEmail: nil
         )
         
         let cloud = try cloudFactory.makeAuthedClient(with: console)
