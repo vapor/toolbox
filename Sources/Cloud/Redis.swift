@@ -95,8 +95,7 @@ public struct FeedbackInfo: NodeInitializable {
 extension Client where StreamType == TCPInternetSocket {
     static func cloudRedis() throws -> TCPClient {
         return try .init(
-            //hostname: "redis.eu.vapor.cloud",
-            hostname: "127.0.0.1",
+            hostname: "redis.eu.vapor.cloud"
             port: 6379,
             password: nil
         )
@@ -365,6 +364,23 @@ public final class CloudRedis {
         }
     }
     
+    static func dbServerTokens(
+        console: ConsoleProtocol,
+        application: String,
+        channel: String
+        ) throws {
+        
+        var message = JSON([:])
+        try message.set("channel", channel)
+        try message.set("application", application)
+        
+        // Publish start and kill exit
+        let pubClient = try TCPClient.cloudRedis()
+        try pubClient.publish(channel: "getTokenList", message)
+        
+        //try  DatabaseLogSubscribe(console).subscribe(channel: listenChannel)
+    }
+    
     static func deleteDBServer(
         console: ConsoleProtocol,
         application: String,
@@ -558,5 +574,69 @@ extension Token {
         try json.set("access", access)
         try json.set("refresh", refresh)
         return try json.makeBytes().makeString()
+    }
+}
+
+class ServerTokens {
+    
+    public let console: ConsoleProtocol
+    
+    init(_ console: ConsoleProtocol) {
+        self.console = console
+    }
+    
+    public func token(for arguments: [String], repoName: String) throws -> String {
+        var token: String = ""
+        
+        if let chosen = arguments.option("token") {
+            token = chosen
+        } else {
+            let logsBar = console.loadingBar(title: "Getting server tokens")
+            logsBar.start()
+            let listenChannel = UUID().uuidString
+            try CloudRedis.dbServerTokens(console: self.console, application: repoName, channel: listenChannel)
+            
+            _ = try Portal<Bool>.open { portal in
+                let client = try TCPClient.cloudRedis()
+                try client.subscribe(channel: listenChannel) { data in
+                    do {
+                        logsBar.finish()
+                        
+                        guard let data = data else { return }
+                        let json = data.array?
+                            .flatMap { $0?.bytes }
+                            .last
+                            .flatMap { try? JSON(bytes: $0) }
+                        
+                        let list = try TokenListObject(node: json)
+                        
+                        self.console.pushEphemeral()
+                        
+                        token = try self.console.giveChoice(
+                            title: "Select server",
+                            in: list.tokens
+                        )
+                        
+                        self.console.popEphemeral()
+                        
+                        portal.close(with: true)
+                    } catch {
+                        portal.close(with: error)
+                    }
+                }
+            }
+        }
+
+        console.detail("token", token)
+        
+        return token
+    }
+}
+
+public struct TokenListObject: NodeInitializable {
+    public let tokens: [String]
+    
+    public init(node: Node) throws {
+        tokens = try node.get("tokens")
     }
 }

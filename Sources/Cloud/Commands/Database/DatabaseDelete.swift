@@ -37,7 +37,7 @@ public final class DatabaseDelete: Command {
         console.warning("WARNING: 24 hours after running this command, your data will be deleted!. Proceed with care.")
         
         let app = try console.application(for: arguments, using: cloudFactory)
-        let db_token = try self.token(for: arguments)
+        let db_token = try ServerTokens(console).token(for: arguments, repoName: app.repoName)
         
         let token = try Token.global(with: console)
         let user = try adminApi.user.get(with: token)

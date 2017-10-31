@@ -39,7 +39,7 @@ public final class DatabaseInspect: Command {
         
         let app = try console.application(for: arguments, using: cloudFactory)
         let environments = try applicationApi.environments.all(for: app, with: token)
-        let db_token = try self.token(for: arguments)
+        let db_token = try ServerTokens(console).token(for: arguments, repoName: app.repoName)
         
         var envArray: [String] = []
         
@@ -55,18 +55,6 @@ public final class DatabaseInspect: Command {
             token: db_token,
             email: user.email
         )
-    }
-    
-    private func token(for arguments: [String]) -> String {
-        let token: String
-        if let chosen = arguments.option("token") {
-            token = chosen
-        } else {
-            console.error("Please define server token")
-            exit(1)
-        }
-        console.detail("token", token)
-        return token
     }
 }
 
