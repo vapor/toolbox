@@ -1,8 +1,8 @@
 public final class DatabaseInspect: Command {
-    public let id = "inspect"
+    public let id = "credentials"
     
     public let help: [String] = [
-        "Get information about databases linked to an application"
+        "Get database credentials for a specific application."
     ]
     
     public let signature: [Argument] = [
@@ -28,7 +28,7 @@ public final class DatabaseInspect: Command {
     }
     
     public func run(arguments: [String]) throws {
-        console.info("Inspect database")
+        console.info("Database credentials")
         
         console.info("")
         console.warning("Be aware, this feature is still in beta!, use with caution")
