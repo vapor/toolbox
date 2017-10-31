@@ -76,18 +76,6 @@ public final class DatabaseResize: Command {
         console.detail("size", "\(size)")
         return size
     }
-    
-    private func token(for arguments: [String]) -> String {
-        let token: String
-        if let chosen = arguments.option("token") {
-            token = chosen
-        } else {
-            console.error("Please define server token")
-            exit(1)
-        }
-        console.detail("token", token)
-        return token
-    }
 }
 
 
