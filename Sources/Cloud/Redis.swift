@@ -84,17 +84,19 @@ public struct DatabaseListObj: NodeInitializable {
 public struct FeedbackInfo: NodeInitializable {
     public let status: String
     public let message: String
+    public let finished: Bool
     
     public init(node: Node) throws {
         status = try node.get("status")
         message = try node.get("message")
+        finished = try node.get("finished") ?? false
     }
 }
-
 extension Client where StreamType == TCPInternetSocket {
     static func cloudRedis() throws -> TCPClient {
         return try .init(
-            hostname: "redis.eu.vapor.cloud",
+            //hostname: "redis.eu.vapor.cloud",
+            hostname: "127.0.0.1",
             port: 6379,
             password: nil
         )
@@ -193,24 +195,11 @@ public final class CloudRedis {
         // Publish start and kill exit
         let pubClient = try TCPClient.cloudRedis()
         try pubClient.publish(channel: "betaQueue", message)
-        
-        let listenClient = try TCPClient.cloudRedis()
-        try listenClient.subscribe(channel: listenChannel) { data in
-            do {
-                guard let data = data else { return }
-                let json = data.array?
-                    .flatMap { $0?.bytes }
-                    .last
-                    .flatMap { try? JSON(bytes: $0) }
-                
-                let info = try FeedbackInfo(node: json)
 
-                DatabaseFeedbackFormat(console, info)
-                
-            } catch {
-                
-            }
-        }
+        try  DatabaseLogSubscribe(console).subscribe(channel: listenChannel)
+        
+        console.info("")
+        console.success("You are now in the Beta queue. You will receive an Email once your are approved.")
     }
     
     static func createDBServer(
@@ -242,46 +231,32 @@ public final class CloudRedis {
         let pubClient = try TCPClient.cloudRedis()
         try pubClient.publish(channel: "createDatabaseServer", message)
         
-        let listenClient = try TCPClient.cloudRedis()
-        try listenClient.subscribe(channel: listenChannel) { data in
+        try  DatabaseLogSubscribe(console).subscribe(channel: listenChannel)
+        
+        let logsBar = console.loadingBar(title: "Creating configuration variables")
+        logsBar.start()
+        
+        let listenInfoClient = try TCPClient.cloudRedis()
+        try listenInfoClient.subscribe(channel: listenChannel + "_Info") { data in
             do {
                 guard let data = data else { return }
                 let json = data.array?
                     .flatMap { $0?.bytes }
                     .last
                     .flatMap { try? JSON(bytes: $0) }
+        
+                let dbInfo = try DatabaseInfo(node: json)
                 
-                let info = try FeedbackInfo(node: json)
-                
-                if (info.status == "successExit") {
-                    let listenInfoClient = try TCPClient.cloudRedis()
-                    try listenInfoClient.subscribe(channel: listenChannel + "_Info") { data in
-                        do {
-                            console.info("")
-                            console.info("Creating config variables")
-                            
-                            guard let data = data else { return }
-                            let json = data.array?
-                                .flatMap { $0?.bytes }
-                                .last
-                                .flatMap { try? JSON(bytes: $0) }
-                            
-                            let dbInfo = try DatabaseInfo(node: json)
-                            
-                            _ = try ShowDatabaseInfo(console, cloudFactory)
-                                .createConfig(dbInfo: dbInfo, application: application)
-                        } catch {
-                            
-                        }
-                    }
+                if (dbInfo.ended) {
+                    logsBar.finish()
+                    
+                    console.info("")
+                    console.success("Make sure to setup \"$\(dbInfo.token)\" in your database config file")
+                    console.warning("For now you need to redeploy your application, for it to use the new database server")
                 }
                 
-                if (info.status == "failedExit") {
-                    exit(0)
-                }
-                
-                DatabaseFeedbackFormat(console, info)
-                
+                _ = try ShowDatabaseInfo(console, cloudFactory)
+                    .createConfig(dbInfo: dbInfo, application: application)
             } catch {
                 
             }
@@ -341,24 +316,8 @@ public final class CloudRedis {
         // Publish start and kill exit
         let pubClient = try TCPClient.cloudRedis()
         try pubClient.publish(channel: "shutdownDatabaseServer", message)
-        
-        let listenClient = try TCPClient.cloudRedis()
-        try listenClient.subscribe(channel: listenChannel) { data in
-            do {
-                guard let data = data else { return }
-                let json = data.array?
-                    .flatMap { $0?.bytes }
-                    .last
-                    .flatMap { try? JSON(bytes: $0) }
-                
-                let info = try FeedbackInfo(node: json)
-                
-                DatabaseFeedbackFormat(console, info)
-                
-            } catch {
-                
-            }
-        }
+
+        try  DatabaseLogSubscribe(console).subscribe(channel: listenChannel)
     }
     
     static func resizeDBServer(
@@ -381,21 +340,27 @@ public final class CloudRedis {
         let pubClient = try TCPClient.cloudRedis()
         try pubClient.publish(channel: "resizeDatabaseServer", message)
         
-        let listenClient = try TCPClient.cloudRedis()
-        try listenClient.subscribe(channel: listenChannel) { data in
-            do {
-                guard let data = data else { return }
-                let json = data.array?
-                    .flatMap { $0?.bytes }
-                    .last
-                    .flatMap { try? JSON(bytes: $0) }
-                
-                let info = try FeedbackInfo(node: json)
-                
-                DatabaseFeedbackFormat(console, info)
-                
-            } catch {
-                
+       try  DatabaseLogSubscribe(console).subscribe(channel: listenChannel)
+    }
+    
+    static func subscribeLog(channel: String, _ feedback: @escaping (FeedbackInfo) throws -> Void) throws {
+        _ = try Portal<Bool>.open { portal in
+            let client = try TCPClient.cloudRedis()
+            try client.subscribe(channel: channel) { data in
+                do {
+                    guard let data = data else { return }
+                    let json = data.array?
+                        .flatMap { $0?.bytes }
+                        .last
+                        .flatMap { try? JSON(bytes: $0) }
+                    let log = try FeedbackInfo(node: json)
+                    try feedback(log)
+
+                    guard log.finished else { return }
+                    portal.close(with: true)
+                } catch {
+                    portal.close(with: error)
+                }
             }
         }
     }
@@ -417,24 +382,8 @@ public final class CloudRedis {
         // Publish start and kill exit
         let pubClient = try TCPClient.cloudRedis()
         try pubClient.publish(channel: "DeleteDatabaseServer", message)
-        
-        let listenClient = try TCPClient.cloudRedis()
-        try listenClient.subscribe(channel: listenChannel) { data in
-            do {
-                guard let data = data else { return }
-                let json = data.array?
-                    .flatMap { $0?.bytes }
-                    .last
-                    .flatMap { try? JSON(bytes: $0) }
-                
-                let info = try FeedbackInfo(node: json)
-                
-                DatabaseFeedbackFormat(console, info)
-                
-            } catch {
-                
-            }
-        }
+
+        try  DatabaseLogSubscribe(console).subscribe(channel: listenChannel)
     }
     
     static func restartDBServer(
@@ -454,24 +403,8 @@ public final class CloudRedis {
         // Publish start and kill exit
         let pubClient = try TCPClient.cloudRedis()
         try pubClient.publish(channel: "RestartDatabaseServer", message)
-        
-        let listenClient = try TCPClient.cloudRedis()
-        try listenClient.subscribe(channel: listenChannel) { data in
-            do {
-                guard let data = data else { return }
-                let json = data.array?
-                    .flatMap { $0?.bytes }
-                    .last
-                    .flatMap { try? JSON(bytes: $0) }
-                
-                let info = try FeedbackInfo(node: json)
-                
-                DatabaseFeedbackFormat(console, info)
-                
-            } catch {
-                
-            }
-        }
+
+        try  DatabaseLogSubscribe(console).subscribe(channel: listenChannel)
     }
     
     static func getDatabaseInfo(
@@ -496,9 +429,13 @@ public final class CloudRedis {
         let pubClient = try TCPClient.cloudRedis()
         try pubClient.publish(channel: "getDatabaseInfo", message)
         
+        let logsBar = console.loadingBar(title: "Contacting Database Master")
+        logsBar.start()
+        
         let listenClient = try TCPClient.cloudRedis()
         try listenClient.subscribe(channel: listenChannel) { data in
             do {
+                logsBar.finish()
                 guard let data = data else { return }
                 let json = data.array?
                     .flatMap { $0?.bytes }
@@ -535,10 +472,15 @@ public final class CloudRedis {
         // Publish start and kill exit
         let pubClient = try TCPClient.cloudRedis()
         try pubClient.publish(channel: "getDatabaseList", message)
+       
+        let logsBar = console.loadingBar(title: "Contacting Database Master")
+        logsBar.start()
         
         let listenClient = try TCPClient.cloudRedis()
         try listenClient.subscribe(channel: listenChannel) { data in
             do {
+                logsBar.finish()
+
                 guard let data = data else { return }
                 let json = data.array?
                     .flatMap { $0?.bytes }
@@ -554,7 +496,7 @@ public final class CloudRedis {
             }
         }
     }
-    
+
     static func runCommand(
         console: ConsoleProtocol,
         command: String,

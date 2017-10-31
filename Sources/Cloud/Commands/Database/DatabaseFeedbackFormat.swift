@@ -20,6 +20,5 @@ public final class DatabaseFeedbackFormat {
             console.info("[ Info ] " + info.message)
         }
     }
-    
 }
 

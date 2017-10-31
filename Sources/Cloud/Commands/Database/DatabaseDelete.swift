@@ -41,6 +41,10 @@ public final class DatabaseDelete: Command {
         
         let token = try Token.global(with: console)
         let user = try adminApi.user.get(with: token)
+       
+        guard console.confirm("Do you want to delete your database server now?") else {
+            throw "Cancelled"
+        }
         
         try CloudRedis.deleteDBServer(
             console: self.console,

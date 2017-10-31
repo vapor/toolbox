@@ -39,6 +39,10 @@ public final class DatabaseShutdown: Command {
         
         let token = try Token.global(with: console)
         let user = try adminApi.user.get(with: token)
+
+        guard console.confirm("Do you want to shutdown your database server now?") else {
+            throw "Cancelled"
+        }
         
         try CloudRedis.shutdownDBServer(
             console: self.console,
