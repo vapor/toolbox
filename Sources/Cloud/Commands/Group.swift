@@ -31,6 +31,21 @@ public func group(_ console: ConsoleProtocol) throws -> Group {
         "View, create, modify, and delete environment configs"
     ])
     
+    let database = Group(id: "db", commands: [
+        DatabaseQueue(console, cloudFactory),
+        DatabaseCreate(console, cloudFactory),
+        DatabaseLogin(console, cloudFactory),
+        DatabaseInspect(console, cloudFactory),
+        DatabaseRestart(console, cloudFactory),
+        //DatabaseLog(console, cloudFactory),
+        DatabaseResize(console, cloudFactory),
+        DatabaseShutdown(console, cloudFactory),
+        DatabaseDelete(console, cloudFactory),
+        DatabaseList(console, cloudFactory)
+        ], help: [
+            "Manage database servers, and databases, warning: this feature is still in beta, use with caution."
+        ])
+    
     return Group(
         id: "cloud",
         commands: [
@@ -54,6 +69,7 @@ public func group(_ console: ConsoleProtocol) throws -> Group {
             // Run remote commands
             CloudRun(console, cloudFactory),
             config,
+            database,
             // Temporarily disabling not ready commands
             // Add(console: console),
             // CloudSetup(console: console),

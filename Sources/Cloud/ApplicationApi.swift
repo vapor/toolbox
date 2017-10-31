@@ -239,6 +239,19 @@ extension ApplicationApi {
             let response = try client.respond(to: request)
             return try [Environment](node: response.json)
         }
+        
+        public func get(
+            forRepo repo: String,
+            forEnvironment environment: String,
+            with token: Token
+        ) throws -> Environment {
+            let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/") + repo + "/hosting/environments/" + environment
+            let request = Request(method: .get, uri: endpoint)
+            request.access = token
+            
+            let response = try client.respond(to: request)
+            return try Environment(node: response.json)
+        }
     }
 }
 
