@@ -31,7 +31,7 @@ public func group(_ console: ConsoleProtocol) throws -> Group {
         "View, create, modify, and delete environment configs"
     ])
     
-    let database = Group(id: "database", commands: [
+    let database = Group(id: "db", commands: [
         DatabaseQueue(console, cloudFactory),
         DatabaseCreate(console, cloudFactory),
         DatabaseLogin(console, cloudFactory),
@@ -74,7 +74,7 @@ public func group(_ console: ConsoleProtocol) throws -> Group {
             // Add(console: console),
             // CloudSetup(console: console),
             // CloudInit(console: console)
-            //OpenDatabase(console, cloudFactory)
+            OpenDatabase(console, cloudFactory)
         ],
         help: [
             "Commands for interacting with Vapor Cloud."
