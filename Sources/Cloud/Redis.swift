@@ -95,7 +95,7 @@ public struct FeedbackInfo: NodeInitializable {
 extension Client where StreamType == TCPInternetSocket {
     static func cloudRedis() throws -> TCPClient {
         return try .init(
-            hostname: "redis.eu.vapor.cloud"
+            hostname: "redis.eu.vapor.cloud",
             port: 6379,
             password: nil
         )
