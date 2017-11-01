@@ -35,7 +35,7 @@ public final class DatabaseResize: Command {
         console.info("")
         
         let app = try console.application(for: arguments, using: cloudFactory)
-        let db_token = try self.token(for: arguments)
+        let db_token = try ServerTokens(console).token(for: arguments, repoName: app.repoName)
         let size = try self.size(for: arguments)
         
         let token = try Token.global(with: console)
@@ -75,18 +75,6 @@ public final class DatabaseResize: Command {
         
         console.detail("size", "\(size)")
         return size
-    }
-    
-    private func token(for arguments: [String]) -> String {
-        let token: String
-        if let chosen = arguments.option("token") {
-            token = chosen
-        } else {
-            console.error("Please define server token")
-            exit(1)
-        }
-        console.detail("token", token)
-        return token
     }
 }
 

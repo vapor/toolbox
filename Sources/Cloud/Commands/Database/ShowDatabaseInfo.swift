@@ -92,9 +92,7 @@ public final class ShowDatabaseInfo {
         let token = try Token.global(with: console)
         //let environments = try applicationApi.environments.all(for: app, with: token)
         let environment = try applicationApi.environments.get(forRepo: app, forEnvironment: dbInfo.environmentId, with: token)
-        
-        console.detail("Environment", "\(environment.name)")
-        
+   
         var connectUrl = ""
         
         switch dbInfo.type {
@@ -112,10 +110,10 @@ public final class ShowDatabaseInfo {
         connectUrl += "\(dbInfo.username):\(dbInfo.password)@\(dbInfo.hostname):\(dbInfo.port)/\(dbInfo.username)"
         
         //console.detail("DB_\(dbInfo.type.uppercased())", connectUrl)
+
+        //console.info("")
         
-        console.info("")
-        
-        _ = try console.foregroundExecute(
+        _ = try console.backgroundExecute(
             program: "vapor",
             arguments: [
                 "cloud",
@@ -126,8 +124,6 @@ public final class ShowDatabaseInfo {
                 "--env=\(environment)",
                 "\(dbInfo.token)=\(connectUrl)"
             ])
-        
-        console.success("Add \(dbInfo.token) to your database config file, and redeploy your application.")
         
         return true
     }

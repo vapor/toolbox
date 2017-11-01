@@ -35,10 +35,14 @@ public final class DatabaseRestart: Command {
         console.info("")
         
         let app = try console.application(for: arguments, using: cloudFactory)
-        let db_token = try self.token(for: arguments)
+        let db_token = try ServerTokens(console).token(for: arguments, repoName: app.repoName)
         
         let token = try Token.global(with: console)
         let user = try adminApi.user.get(with: token)
+        
+        guard console.confirm("Do you want to restart your database server now?") else {
+            throw "Cancelled"
+        }
         
         try CloudRedis.restartDBServer(
             console: self.console,
@@ -46,18 +50,6 @@ public final class DatabaseRestart: Command {
             token: db_token,
             email: user.email
         )
-    }
-    
-    private func token(for arguments: [String]) -> String {
-        let token: String
-        if let chosen = arguments.option("token") {
-            token = chosen
-        } else {
-            console.error("Please define server token")
-            exit(1)
-        }
-        console.detail("token", token)
-        return token
     }
 }
 
