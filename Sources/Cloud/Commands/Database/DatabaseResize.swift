@@ -65,9 +65,9 @@ public final class DatabaseResize: Command {
         ) { type in
             switch type {
             case .free:
-                return "(Dev) Free $0/month - (256mb memory - 10,000 records - 20 connections - no backups)"
+                return "(Dev) Free $0/month - (256MB memory / 10K rows / 20 connections)"
             case .hobby:
-                return "(Dev) Hobby $9/month - (256mb memory - 5,000,000 records - 20 connections - no backups)"
+                return "(Dev) Hobby $9/month - (256MB memory / 5M rows / 20 connections)"
             }
         }
         

@@ -61,6 +61,8 @@ public final class DatabaseCreate: Command {
             version = try self.PostgresVersions(for: arguments)
         case .mongodb:
             version = try self.MongoDBVersions(for: arguments)
+        case .mariadb:
+            version = try self.MariaDBVersions(for: arguments)
         }
         let access = token.access        
         
@@ -117,6 +119,8 @@ public final class DatabaseCreate: Command {
                 return "PostgreSQL"
             case .mongodb:
                 return "MongoDB"
+            case .mariadb:
+                return "MariaDB"
             }
         }
         
@@ -131,6 +135,18 @@ public final class DatabaseCreate: Command {
         version = try console.giveChoice(
             title: "Which version?",
             in: ["5.7", "5.6", "5.5"]
+        )
+        
+        console.detail("version", "\(version)")
+        
+        return version
+    }
+    
+    private func MariaDBVersions(for arguments: [String]) throws -> String {
+        let version: String
+        version = try console.giveChoice(
+            title: "Which version?",
+            in: ["10.3", "10.2", "10.1"]
         )
         
         console.detail("version", "\(version)")
@@ -171,6 +187,7 @@ public final class DatabaseCreate: Command {
         case mysql
         case postgresql
         case mongodb
+        case mariadb
     }
 }
 
@@ -202,7 +219,7 @@ extension Size {
 public typealias Type = DatabaseCreate.Types
 
 extension Type {
-    static let all: [Type] = [.mysql, .postgresql, .mongodb]
+    static let all: [Type] = [.mysql, .postgresql, .mongodb, .mariadb]
     public var rawValue: String {
         switch self {
         case .mysql:
@@ -211,6 +228,8 @@ extension Type {
             return "postgresql"
         case .mongodb:
             return "mongodb"
+        case .mariadb:
+            return "mariadb"
         }
     }
     
@@ -222,6 +241,8 @@ extension Type {
             self = .postgresql
         case "mongodb":
             self = .mongodb
+        case "mariadb":
+            self = .mariadb
         default:
             return nil
         }

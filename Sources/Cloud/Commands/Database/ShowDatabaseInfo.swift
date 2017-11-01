@@ -54,6 +54,8 @@ public final class ShowDatabaseInfo {
         switch dbInfo.type {
         case "mysql":
             connectUrl = "http://"
+        case "mariadb":
+            connectUrl = "http://"
         case "postgresql":
             connectUrl = "postgresql://"
         case "mongodb":
@@ -97,6 +99,8 @@ public final class ShowDatabaseInfo {
         
         switch dbInfo.type {
         case "mysql":
+            connectUrl = "http://"
+        case "mariadb":
             connectUrl = "http://"
         case "postgresql":
             connectUrl = "postgresql://"
