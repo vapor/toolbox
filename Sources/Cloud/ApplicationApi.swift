@@ -449,6 +449,7 @@ extension ApplicationApi {
             var json = JSON([:])
             try json.set("replicas", replicas)
             try json.set("type", "scale")
+            try json.set("serverVersion", "1.5")
             request.json = json
             
             let response = try client.respond(to: request)
@@ -472,6 +473,7 @@ extension ApplicationApi {
             var json = JSON([:])
             try json.set("replicaSize", replicaSize)
             try json.set("type", "resize")
+            try json.set("serverVersion", "1.5")
             request.json = json
             
             let response = try client.respond(to: request)

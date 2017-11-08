@@ -8,7 +8,7 @@ public final class DatabaseLogSubscribe {
     
     public func subscribe(channel: String) throws {
         
-        var waitingInQueue = console.loadingBar(title: "Contacting Database Master")
+        var waitingInQueue = console.loadingBar(title: "Contacting cluster")
         defer { waitingInQueue.fail() }
         waitingInQueue.start()
         

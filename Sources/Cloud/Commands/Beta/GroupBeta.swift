@@ -17,8 +17,8 @@ public func groupBeta(_ console: ConsoleProtocol) throws -> Group {
     
     let replicas = Group(id: "replicas", commands: [
         Resize(console, cloudFactory),
-        Scale(console, cloudFactory)/*,
-        Restart(console, cloudFactory)*/
+        Scale(console, cloudFactory),
+        Restart(console, cloudFactory)
         ], help: [
             "Manage your replicas (Resize, Scale etc.)"
         ])

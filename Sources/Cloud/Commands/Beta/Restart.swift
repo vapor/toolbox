@@ -32,7 +32,12 @@ public final class Restart: Command {
         let env = try console.environment(on: .model(app), for: arguments, using: cloudFactory)
         let token = try Token.global(with: console)
         
-        
+        try CloudRedis.restartReplicas(
+            console: console,
+            repoName: app.repoName,
+            environmentName: env.name,
+            token: token.access
+        )
     }
     
 }
