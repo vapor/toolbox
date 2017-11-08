@@ -32,6 +32,10 @@ public final class Restart: Command {
         let env = try console.environment(on: .model(app), for: arguments, using: cloudFactory)
         let token = try Token.global(with: console)
         
+        guard console.confirm("Are your sure you want to restart your replicas?") else {
+            throw "Cancelled"
+        }
+        
         try CloudRedis.restartReplicas(
             console: console,
             repoName: app.repoName,

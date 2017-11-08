@@ -34,6 +34,10 @@ public final class Resize: Command {
         
         let replicaSize = try self.size(for: arguments)
         
+        guard console.confirm("Are you sure you want to resize your replicas?") else {
+            throw "Cancelled"
+        }
+        
         let resize = try applicationApi.deploy.resize(
             repo: app.repoName,
             envName: env.name,

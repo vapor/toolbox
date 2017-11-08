@@ -35,6 +35,10 @@ public final class Scale: Command {
         let replicas = console.ask("Number of replicas").int ?? 0
         console.detail("replicas", "\(replicas)")
         
+        guard console.confirm("Are you sure you want to scale your application?") else {
+            throw "Cancelled"
+        }
+        
         let scale = try applicationApi.deploy.scale(
             repo: app.repoName,
             envName: env.name,
