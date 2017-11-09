@@ -359,6 +359,10 @@ extension Deployment.Method {
         guard case .scale = self else { return false }
         return true
     }
+    public var isResizeDeploy: Bool {
+        guard case .resize = self else { return false }
+        return true
+    }
     public var isCodeDeploy: Bool {
         guard case .code = self else { return false }
         return true
@@ -434,7 +438,7 @@ extension ApplicationApi {
             return try DeployInfo(node: response.json)
         }
 
-        public func scale(repo: String, envName: String, replicas: Int, with token: Token) throws {
+        public func scale(repo: String, envName: String, replicas: Int, with token: Token) throws -> DeployInfo {
             let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/")
                 + repo
                 + "/hosting/environments/"
@@ -444,7 +448,42 @@ extension ApplicationApi {
 
             var json = JSON([:])
             try json.set("replicas", replicas)
+            try json.set("type", "scale")
+            try json.set("serverVersion", "1.5")
             request.json = json
+            
+            let response = try client.respond(to: request)
+            if
+                response.status == .badRequest,
+                response.json?["reason"]?.string == "No hosting exists for this application." {
+                throw DeployError.noHosting(for: nil)
+            }
+            
+            return try DeployInfo(node: response.json)
+        }
+        
+        public func resize(repo: String, envName: String, replicaSize: String, with token: Token) throws -> DeployInfo {
+            let endpoint = ApplicationApi.applicationsEndpoint.finished(with: "/")
+                + repo
+                + "/hosting/environments/"
+                + envName
+            let request = Request(method: .patch, uri: endpoint)
+            request.access = token
+            
+            var json = JSON([:])
+            try json.set("replicaSize", replicaSize)
+            try json.set("type", "resize")
+            try json.set("serverVersion", "1.5")
+            request.json = json
+            
+            let response = try client.respond(to: request)
+            if
+                response.status == .badRequest,
+                response.json?["reason"]?.string == "No hosting exists for this application." {
+                throw DeployError.noHosting(for: nil)
+            }
+            
+            return try DeployInfo(node: response.json)
         }
     }
 }

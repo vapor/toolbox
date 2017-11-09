@@ -342,6 +342,27 @@ public final class CloudRedis {
        try  DatabaseLogSubscribe(console).subscribe(channel: listenChannel)
     }
     
+    static func restartReplicas(
+        console: ConsoleProtocol,
+        repoName: String,
+        environmentName: String,
+        token: String
+        ) throws {
+        let listenChannel = UUID().uuidString
+        
+        var message = JSON([:])
+        try message.set("channel", listenChannel)
+        try message.set("repoName", repoName)
+        try message.set("environmentName", environmentName)
+        try message.set("token", token)
+        
+        // Publish start and kill exit
+        let pubClient = try TCPClient.cloudRedis()
+        try pubClient.publish(channel: "restartReplicas", message)
+        
+        try  DatabaseLogSubscribe(console).subscribe(channel: listenChannel)
+    }
+    
     static func subscribeLog(channel: String, _ feedback: @escaping (FeedbackInfo) throws -> Void) throws {
         _ = try Portal<Bool>.open { portal in
             let client = try TCPClient.cloudRedis()
