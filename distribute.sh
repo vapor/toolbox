@@ -47,7 +47,27 @@ while true; do
     esac
 done
 
+echo "📦 Generating Ruby script\n\n\n"
+HASH=$(shasum -a 256 macOS-sierra.tar.gz | cut -d " " -f 1)
+curl -sO https://raw.githubusercontent.com/vapor/homebrew-tap/master/vapor.rb
+
+cat vapor.rb | awk -v tag="$TAG" -v hash="$HASH" '/version "*"/ { printf " version \"%s\"\n", tag; next }/sha256/ { printf " sha256 \"%s\"\n", hash; next } 1' > .tmp && \
+mv .tmp vapor.rb
+cat vapor.rb
+
+echo "\n\n\n📦 Copy and paste the Ruby script above into https://github.com/vapor/homebrew-tap/edit/master/vapor.rb
+
+while true; do
+    read -p "Have you opened a pull request? [y/n]" yn
+    case $yn in
+        [Yy]* ) make install; break;;
+        [Nn]* ) exit;;
+        * ) echo "Please answer yes or no.";;
+    esac
+done
+
 rm -rf macOS-sierra.tar.gz
 rm -rf $PACKAGE_NAME
+rm vapor.rb
 git reset --hard HEAD
 git checkout master
