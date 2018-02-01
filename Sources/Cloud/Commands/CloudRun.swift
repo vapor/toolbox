@@ -17,7 +17,6 @@ public final class CloudRun: Command {
 
     public func run(arguments: [String]) throws {
         // drop 'run'
-        let arguments = arguments.dropFirst().array
         guard arguments.count >= 1 else {
             console.warning("No command passed to 'vapor cloud run'")
             throw "Expected command, ie 'vapor cloud run prepare'"
