@@ -23,7 +23,7 @@ public final class Xcode: Command {
         xcodeBar.start()
 
         let buildFlags = try loadBuildFlags(arguments)
-        let argsArray = ["package"] + buildFlags + ["--enable-prefetching", "generate-xcodeproj"]
+        let argsArray = ["package"] + buildFlags + ["generate-xcodeproj"]
 
         do {
             _ = try console.execute(verbose: isVerbose, program: "swift", arguments: argsArray)

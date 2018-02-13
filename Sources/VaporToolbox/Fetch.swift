@@ -47,7 +47,7 @@ public final class Fetch: Command {
         try console.execute(
             verbose: isVerbose,
             program: "swift",
-            arguments: ["package", "--enable-prefetching", "fetch"] + pass
+            arguments: ["package", "fetch"] + pass
         )
         depBar.finish()
     }

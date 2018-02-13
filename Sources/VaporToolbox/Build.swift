@@ -60,7 +60,7 @@ public final class Build: Command {
         let buildBar = console.loadingBar(title: "Building Project", animated: !isVerbose)
         buildBar.start()
 
-        let command =  ["build", "--enable-prefetching"] + buildFlags
+        let command =  ["build"] + buildFlags
         do {
             try console.execute(verbose: isVerbose, program: "swift", arguments: command)
             buildBar.finish()
