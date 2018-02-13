@@ -55,7 +55,7 @@ cat vapor.rb | awk -v tag="$TAG" -v hash="$HASH" '/version "*"/ { printf " versi
 mv .tmp vapor.rb
 cat vapor.rb
 
-echo "\n\n\n📦 Copy and paste the Ruby script above into https://github.com/vapor/homebrew-tap/edit/master/vapor.rb
+echo "\n\n\n📦 Copy and paste the Ruby script above into https://github.com/vapor/homebrew-tap/edit/master/vapor.rb"
 
 while true; do
     read -p "Have you opened a pull request? [y/n]" yn
