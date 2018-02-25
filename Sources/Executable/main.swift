@@ -7,6 +7,10 @@ import Cloud
 let version = "master"
 var arguments = CommandLine.arguments
 
+if arguments.count <= 0 {
+    arguments.insert("help", at: 1)
+}
+
 if arguments.contains("--version") {
     arguments.insert("version", at: 1)
 }
