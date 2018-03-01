@@ -105,7 +105,7 @@ public final class HerokuInit: Command {
         }
 
         console.info("Setting procfile...")
-        let procContents = "web: \(appName) --env=production --port=\\$PORT"
+        let procContents = "web: \(appName) --env production --hostname 0.0.0.0 --port \\$PORT"
         do {
             _ = try console.backgroundExecute(program: "/bin/sh", arguments: ["-c", "echo \"\(procContents)\" >> ./Procfile"])
         } catch ConsoleError.backgroundExecute(_, let message, _) {
