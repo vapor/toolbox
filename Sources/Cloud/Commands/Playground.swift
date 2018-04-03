@@ -588,7 +588,7 @@ extension FileManager {
     func createVaporConfigFolderIfNecessary() throws {
         var isDirectory: ObjCBool = false
         _ = fileExists(atPath: vaporConfigDir, isDirectory: &isDirectory)
-        #if os(Linux)
+        #if os(Linux) && !swift(>=4.1)
             guard !isDirectory else { return }
         #else
             guard !isDirectory.boolValue else { return }
