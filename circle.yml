@@ -26,7 +26,7 @@ jobs:
       - run:
           name: Run Vapor commands
           command: |
-            sudo mv .build/release/Executable /usr/local/bin/vapor
+            mv .build/release/Executable /usr/local/bin/vapor
             vapor --help
             vapor version
 
@@ -35,4 +35,4 @@ workflows:
   tests:
     jobs:
       - linux
-      # - macos
+      - macos
