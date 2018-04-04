@@ -109,7 +109,7 @@ public final class HerokuInit: Command {
             let procContents: String
             let majorVersion = try projectInfo.vaporMajorVersion()
             if majorVersion >= 3 {
-                procContents = "web: \(appName) --env production --hostname 0.0.0.0 --port \\$PORT"
+                procContents = "web: \(appName) serve --env production --port \\$PORT --hostname 0.0.0.0"
             } else {
                 procContents = "web: \(appName) --env=production --port=\\$PORT"
             }
