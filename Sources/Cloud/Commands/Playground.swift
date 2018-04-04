@@ -584,11 +584,26 @@ extension Node {
     }
 }
 
+
+extension ObjCBool {
+    var compatBoolValue: Bool {
+#if swift(>=4.1)
+        return boolValue
+#else
+    #if os(Linux)
+        return self
+    #else
+        return boolValue
+    #endif
+#endif
+    }
+}
+
 extension FileManager {
     func createVaporConfigFolderIfNecessary() throws {
         var isDirectory = ObjCBool(false)
         _ = fileExists(atPath: vaporConfigDir, isDirectory: &isDirectory)
-        guard !isDirectory.boolValue else { return }
+        guard !isDirectory.compatBoolValue else { return }
         try createDirectory(atPath: vaporConfigDir, withIntermediateDirectories: true)
     }
 }

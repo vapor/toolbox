@@ -87,11 +87,21 @@ extension FileManager {
     private func isDirectory(path: String) -> Bool {
         var isDirectory: ObjCBool = false
         _ = fileExists(atPath: path, isDirectory: &isDirectory)
-        #if os(Linux)
-            return isDirectory
-        #else
-            return isDirectory.boolValue
-        #endif
+        return isDirectory.compatBoolValue
+    }
+}
+
+extension ObjCBool {
+    var compatBoolValue: Bool {
+#if swift(>=4.1)
+        return boolValue
+#else
+    #if os(Linux)
+        return self
+    #else
+        return boolValue
+    #endif
+#endif
     }
 }
 
