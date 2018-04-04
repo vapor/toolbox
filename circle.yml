@@ -16,13 +16,19 @@ jobs:
       - checkout
       - run: 
           name: Compile code
-          command: swift build
+          command: swift build -Xswiftc -DNO_ANIMATION
       - run: 
           name: Run unit tests
           command: swift test
       - run: 
           name: Compile code with optimizations
-          command: swift build -c release
+          command: swift build -c release -Xswiftc -DNO_ANIMATION
+      - run:
+          name: Run Vapor commands
+          command: |
+            sudo mv .build/release/Executable /usr/local/bin/vapor
+            vapor --help
+            vapor version
 
 workflows:
   version: 2
