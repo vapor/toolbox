@@ -20,7 +20,6 @@ guard let executable = iterator.next() else {
 }
 
 let cloud = try Cloud.group(terminal)
-let cloudBeta = try Cloud.groupBeta(terminal)
 
 do {
     try terminal.run(executable: executable, commands: [
@@ -34,7 +33,6 @@ do {
         Xcode(console: terminal),
         Version(console: terminal, version: version),
         cloud,
-        cloudBeta,
         Group(id: "heroku", commands: [
             HerokuInit(console: terminal),
             HerokuPush(console: terminal),
