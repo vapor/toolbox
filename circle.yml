@@ -30,8 +30,3 @@ workflows:
     jobs:
       - linux
       # - macos
-                
-    jobs:
-      - linux
-      # - macos
-      
