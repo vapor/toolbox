@@ -6,6 +6,7 @@ jobs:
       xcode: "9.3.0"
     steps:
       - checkout
+      - run: brew install vapor/tap/vapor
       - run: swift build
       - run: swift test
 
