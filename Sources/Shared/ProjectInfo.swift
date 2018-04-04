@@ -101,6 +101,13 @@ public final class ProjectInfo {
         )
         return version.trim()
     }
+    
+    public func vaporMajorVersion() throws -> Int {
+        guard let majorVersion = try Int(vaporVersion().prefix(1)) else {
+            throw GeneralError("Failed to get Vapor major version")
+        }
+        return majorVersion
+    }
 
     public func availableExecutables() throws -> [String] {
         let executables = try console.backgroundExecute(
