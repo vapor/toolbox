@@ -27,7 +27,7 @@ class GitUrlTests: XCTestCase {
         let four = git.convertToSSHUrl("https://www.github.com/vapor/api-template/")
 
         let expectation = "git@github.com:vapor/api-template.git"
-        [one, two, three, four].forEach { XCTAssertEqual($0, expectation) }
+        [one, two, three, four].forEach { XCTAssert($0 == expectation) }
     }
 }
 

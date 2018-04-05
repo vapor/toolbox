@@ -105,8 +105,14 @@ public final class HerokuInit: Command {
         }
 
         console.info("Setting procfile...")
-        let procContents = "web: \(appName) --env=production --port=\\$PORT"
         do {
+            let procContents: String
+            let majorVersion = try projectInfo.vaporMajorVersion()
+            if majorVersion >= 3 {
+                procContents = "web: \(appName) serve --env production --port \\$PORT --hostname 0.0.0.0"
+            } else {
+                procContents = "web: \(appName) --env=production --port=\\$PORT"
+            }
             _ = try console.backgroundExecute(program: "/bin/sh", arguments: ["-c", "echo \"\(procContents)\" >> ./Procfile"])
         } catch ConsoleError.backgroundExecute(_, let message, _) {
             throw ToolboxError.general("Unable to make Procfile: \(message)")
