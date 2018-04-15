@@ -68,6 +68,7 @@ public func group(_ console: ConsoleProtocol) throws -> Group {
             create,
             // Run remote commands
             CloudRun(console, cloudFactory),
+            CloudGitHash(console, cloudFactory),
             config,
             database,
             // Temporarily disabling not ready commands
