@@ -587,6 +587,58 @@ public final class CloudRedis {
             console.print(log)
         }
     }
+    
+    static func gitHash(
+        console: ConsoleProtocol,
+        repo: String,
+        envName: String,
+        with token: AccessToken
+        ) throws {
+        let listenChannel = UUID().uuidString
+        let replicaController = repo + "-" + envName
+        
+        var message = JSON([:])
+        try message.set("channel", listenChannel)
+        try message.set("rc", replicaController)
+        try message.set("environment", envName)
+        
+        var start = message
+        try start.set("status", "start")
+        
+        var stop = message
+        try stop.set("status", "exit")
+        
+        // Publish start and kill exit
+        let pubClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+        try pubClient.publish(channel: "gitHash", start)
+        console.registerKillListener { _ in
+            _ = try? pubClient.publish(channel: "gitHash", stop)
+        }
+        
+        let listenClient = try TCPClient(hostname: "redis.eu.vapor.cloud", port: 6379, password: nil)
+        try listenClient.subscribe(channel: listenChannel) { ( data) in
+            guard
+                let log = data?
+                    .array?
+                    .flatMap({ $0?.bytes })
+                    .last?
+                    .split(separator: .space, maxSplits: 0)
+                    .last?
+                    .makeString()
+                else { return }
+            
+            guard log != "EXIT!" else {
+                do {
+                    _ = try pubClient.publish(channel: "gitHash", stop)
+                    exit(0)
+                } catch {
+                    exit(1)
+                }
+            }
+            
+            console.print(log)
+        }
+    }
 }
 
 extension Token {
