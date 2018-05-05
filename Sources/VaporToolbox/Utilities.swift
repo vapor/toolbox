@@ -1,7 +1,10 @@
-public func +=(lhs: inout [String], rhs: String) {
-    lhs.append(rhs)
-}
+import Basic
 
-public func +=(lhs: inout ArraySlice<String>, rhs: String) {
-    lhs.append(rhs)
+// nothing here yet...
+
+extension AbsolutePath: ExpressibleByStringLiteral {
+    /// See `ExpressibleByStringLiteral`.
+    public init(stringLiteral value: String) {
+        self.init(value)
+    }
 }

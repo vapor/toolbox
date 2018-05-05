@@ -1,27 +1,20 @@
+// swift-tools-version:4.0
 import PackageDescription
 
 let package = Package(
     name: "VaporToolbox",
-    targets: [
-        Target(name: "VaporToolbox", dependencies: ["Cloud", "Shared"]),
-        Target(name: "Executable", dependencies: ["VaporToolbox"]),
-        Target(name: "Cloud", dependencies: ["Shared"]),
-        Target(name: "Shared"),
-    ],
     dependencies: [
-        // Vapor Cloud clients.
-        .Package(url: "git@github.com:vapor-cloud/clients.git", majorVersion: 0),
-        
-        // Core console protocol.
-        .Package(url: "https://github.com/vapor/console.git", majorVersion: 2),
-        
-        // JSON parsing / serializing.
-        .Package(url: "https://github.com/vapor/json.git", majorVersion: 2),
-        
-        // Vapor web framework.
-        .Package(url: "https://github.com/vapor/vapor.git", majorVersion: 2),
-        
-        // Redis
-        .Package(url: "https://github.com/vapor/redis.git", majorVersion: 2)
+        // The Package Manager for the Swift Programming Language
+        .package(url: "https://github.com/apple/swift-package-manager", .branch("master")),
+
+        // 💧 A server-side Swift web framework.
+        .package(url: "https://github.com/vapor/vapor.git", from: "3.0.0"),
+    ],
+    targets: [
+        // All of the commands and logic that powers the Vapor toolbox
+        .target(name: "VaporToolbox", dependencies: ["SwiftPM", "Vapor"]),
+
+        // Runnable module, executes the main command group.
+        .target(name: "Executable", dependencies: ["VaporToolbox"]),
     ]
 )
