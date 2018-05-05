@@ -45,8 +45,8 @@ do {
             "Commands to help manage providers."
         ]),
     ], arguments: Array(iterator), help: [
-        "Join our Slack if you have questions, need help,",
-        "or want to contribute: http://vapor.team"
+        "Join our Discord if you have questions, need help,",
+        "or want to contribute: http://discord.gg/BnXmVGA"
     ])
 } catch ToolboxError.general(let message) {
     terminal.error("Error: ", newLine: false)
