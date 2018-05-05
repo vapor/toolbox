@@ -45,7 +45,7 @@ do {
             "Commands to help manage providers."
         ]),
     ], arguments: Array(iterator), help: [
-        "Join our Slack if you have questions, need help,",
+        "Join our team chat if you have questions, need help,",
         "or want to contribute: http://vapor.team"
     ])
 } catch ToolboxError.general(let message) {
