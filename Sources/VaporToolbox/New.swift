@@ -101,10 +101,11 @@ public final class New: Command {
         do {
             _ = try console.execute(verbose: isVerbose, program: "git", arguments: [gitDir, "init"])
             _ = try console.execute(verbose: isVerbose, program: "git", arguments: [gitDir, workTree, "add", "."])
+            let msg = "created \(name) from template \(template)"
             _ = try console.execute(
                 verbose: isVerbose,
                 program: "git",
-                arguments: [gitDir, workTree, "commit", "-m", "'created \(name) from template \(template)'"]
+                arguments: [gitDir, workTree, "commit", "-m", "'\(msg)'"]
             )
             gitBar.finish()
         } catch ConsoleError.backgroundExecute(_, let error, let output) {
