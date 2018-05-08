@@ -55,6 +55,7 @@ public final class New: Command {
         let name = try value("name", from: arguments)
         let gitDir = "--git-dir=./\(name)/.git"
         let workTree = "--work-tree=./\(name)"
+        var commitHash: String?
 
         let isVerbose = arguments.isVerbose
         let cloneBar = console.loadingBar(title: "Cloning Template", animated: !isVerbose)
@@ -70,6 +71,11 @@ public final class New: Command {
                     arguments: [gitDir, workTree, "checkout", checkout]
                 )
             }
+            commitHash = try console.backgroundExecute(
+                program: "git",
+                arguments: [gitDir, "rev-parse", "HEAD"]
+            )
+            commitHash = commitHash?.trim()
 
             _ = try console.backgroundExecute(program: "rm", arguments: ["-rf", "\(name)/.git"])
 
@@ -101,7 +107,11 @@ public final class New: Command {
         do {
             _ = try console.execute(verbose: isVerbose, program: "git", arguments: [gitDir, "init"])
             _ = try console.execute(verbose: isVerbose, program: "git", arguments: [gitDir, workTree, "add", "."])
-            let msg = "created \(name) from template \(template)"
+            var msg = "created \(name) from template \(template)"
+            commitHash = nil
+            if let commitHash = commitHash {
+                msg.append("/tree/\(commitHash)")
+            }
             _ = try console.execute(
                 verbose: isVerbose,
                 program: "git",
