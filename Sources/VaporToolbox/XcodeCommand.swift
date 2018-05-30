@@ -23,8 +23,8 @@ struct XcodeCommand: Command {
         let rootPath = currentWorkingDirectory
         let manifestLoader = ManifestLoader(
             resources: BasicManifestResourceProvider(
-                swiftCompiler: "/Library/Developer/CommandLineTools/usr/bin/swiftc",
-                libDir: "/Library/Developer/CommandLineTools/usr/lib/swift/pm"
+                swiftCompiler: "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+                libDir: "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/pm"
             )
         )
         let provider = GitRepositoryProvider(processSet: ProcessSet())
