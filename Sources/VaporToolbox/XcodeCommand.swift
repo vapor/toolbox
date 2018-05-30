@@ -23,8 +23,8 @@ struct XcodeCommand: Command {
         let rootPath = currentWorkingDirectory
         let manifestLoader = ManifestLoader(
             resources: BasicManifestResourceProvider(
-                swiftCompiler: "/Library/Developer/Toolchains/swift-latest.xctoolchain/usr/bin/swiftc",
-                libDir: "/Library/Developer/Toolchains/swift-latest.xctoolchain/usr/lib/swift/pm"
+                swiftCompiler: "/Library/Developer/CommandLineTools/usr/bin/swiftc",
+                libDir: "/Library/Developer/CommandLineTools/usr/lib/swift/pm"
             )
         )
         let provider = GitRepositoryProvider(processSet: ProcessSet())
@@ -44,14 +44,19 @@ struct XcodeCommand: Command {
         let graph = workspace.loadPackageGraph(root: rootInput, diagnostics: engine)
         let options = XcodeprojOptions()
 
+        guard !graph.rootPackages.isEmpty else {
+            engine.diagnostics.forEach { ctx.console.diagnostic($0) }
+            throw VaporError(identifier: "noRootPackage", reason: "No root package found.")
+        }
         let name = graph.rootPackages[0].name
+        let xcodeprojPath = rootPath.appending(component: name + ".xcodeproj")
         ctx.console.output("Generating Xcode project for " + name.consoleText(.info) + "...")
-        let outpath = try generate(outputDir: rootPath, projectName: name, graph: graph, options: options)
-        let prettyPath = outpath.prettyPath(cwd: rootPath)
+        try generate(projectName: name, xcodeprojPath: xcodeprojPath, graph: graph, options: options)
+        let prettyPath = xcodeprojPath.prettyPath(cwd: rootPath)
 
         engine.diagnostics.forEach { ctx.console.diagnostic($0) }
         if ctx.console.confirm("Open " + prettyPath.consoleText(color: .magenta) + "?") {
-            _ = try Process.execute("open", outpath.asString)
+            _ = try Process.execute("open", xcodeprojPath.asString)
         }
         return .done(on: ctx.container)
     }
