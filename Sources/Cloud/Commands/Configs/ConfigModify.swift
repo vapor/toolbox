@@ -48,7 +48,7 @@ public final class ConfigModify: Command {
         
         let configs: [Configuration] = try arguments.flatMap { arg in
                 return arg.hasPrefix("--") ? nil : arg
-        }.dropFirst(2).array.map { config in
+        }.array.map { config in
             let parts = config.characters.split(separator: "=", maxSplits: 1)
             guard parts.count == 2 else {
                 throw "Invalid config '\(config)'. Format must be KEY=VALUE."
