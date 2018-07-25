@@ -4,7 +4,7 @@ public final class CloudGitHash: Command {
     public let signature: [Argument] = []
 
     public let help: [String] = [
-        "Get the Git has deployed live"
+        "Get the Git hash deployed live"
     ]
 
     public let console: ConsoleProtocol
