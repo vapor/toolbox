@@ -187,6 +187,7 @@ public final class New: Command {
                     "-o",
                     "/dev/null",
                     "--silent",
+                    "--location",
                     "--head",
                     "--write-out",
                     "'%{http_code}\\n'",
