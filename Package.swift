@@ -5,7 +5,7 @@ let package = Package(
     name: "VaporToolbox",
     dependencies: [
         // The Package Manager for the Swift Programming Language
-        .package(url: "https://github.com/apple/swift-package-manager", .branch("master")),
+        .package(url: "https://github.com/apple/swift-package-manager", from: "0.1.0"),
 
         // 💧 A server-side Swift web framework.
         .package(url: "https://github.com/vapor/vapor.git", from: "3.0.0"),
