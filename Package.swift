@@ -10,8 +10,8 @@ let package = Package(
     ],
     dependencies: [
         // Vapor Cloud clients.
-        .Package(url: "git@github.com:vapor-cloud/clients.git", majorVersion: 0),
-        
+	.Package(url: "git@github.com:vapor-cloud/clients.git", majorVersion: 0, minor: 22),
+
         // Core console protocol.
         .Package(url: "https://github.com/vapor/console.git", majorVersion: 2),
         
