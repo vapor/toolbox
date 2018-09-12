@@ -40,7 +40,7 @@ public final class ConfigDump: Command {
         
         if configs.isEmpty {
             console.warning("No configs")
-            console.detail("Create configs", "vapor cloud config create")
+            console.detail("Create configs", "vapor cloud config modify")
         }
         
         for config in configs {
