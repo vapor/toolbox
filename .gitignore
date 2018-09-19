@@ -1,4 +1,5 @@
 /.build
+/.bootstrap
 /Packages
 *.xcodeproj
 .DS_Store
