@@ -8,3 +8,10 @@ extension AbsolutePath: ExpressibleByStringLiteral {
         self.init(value)
     }
 }
+
+struct ToolboxError: Error {
+    let reason: String
+    init(_ reason: String) {
+        self.reason = reason
+    }
+}

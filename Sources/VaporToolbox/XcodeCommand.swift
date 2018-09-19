@@ -20,12 +20,15 @@ struct XcodeCommand: Command {
     /// See `Command`.
     func run(using ctx: CommandContext) throws -> Future<Void> {
         ctx.console.output("Loading package graph...")
-        let rootPath = currentWorkingDirectory
+        guard let rootPath = localFileSystem.currentWorkingDirectory else {
+            throw ToolboxError("Unknown current working directory")
+        }
         let manifestLoader = ManifestLoader(
             resources: BasicManifestResourceProvider(
                 swiftCompiler: "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
                 libDir: "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/pm"
-            )
+            ),
+            isManifestCachingEnabled: true
         )
         let provider = GitRepositoryProvider(processSet: ProcessSet())
         let workspace = Workspace(
@@ -51,7 +54,7 @@ struct XcodeCommand: Command {
         let name = graph.rootPackages[0].name
         let xcodeprojPath = rootPath.appending(component: name + ".xcodeproj")
         ctx.console.output("Generating Xcode project for " + name.consoleText(.info) + "...")
-        try generate(projectName: name, xcodeprojPath: xcodeprojPath, graph: graph, options: options)
+        try generate(projectName: name, xcodeprojPath: xcodeprojPath, graph: graph, options: options, diagnostics: engine)
         let prettyPath = xcodeprojPath.prettyPath(cwd: rootPath)
 
         engine.diagnostics.forEach { ctx.console.diagnostic($0) }

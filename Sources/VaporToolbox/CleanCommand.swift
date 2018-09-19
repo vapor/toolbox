@@ -21,7 +21,9 @@ struct CleanCommand: Command {
     func run(using ctx: CommandContext) throws -> Future<Void> {
         var cleaned = false
 
-        let cwd = currentWorkingDirectory
+        guard let cwd = localFileSystem.currentWorkingDirectory else {
+            throw ToolboxError("Unknown current working directory")
+        }
         let files = try Process.execute("/bin/sh", "-c", "ls -lah")
         #if os(macOS)
         if files.contains(".xcodeproj") {
