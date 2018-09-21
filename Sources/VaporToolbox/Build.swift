@@ -124,7 +124,7 @@ public final class Build: Command {
         console.print()
 
         console.info("Help:")
-        console.print("Join our Slack where hundreds of contributors")
+        console.print("Join our team chat where hundreds of contributors")
         console.print("are waiting to help: http://vapor.team")
         console.print()
 
