@@ -1,4 +1,3 @@
-import Basic
 import Vapor
 
 /// Cleans temporary files created by Xcode and SPM.
@@ -21,17 +20,20 @@ struct CleanCommand: Command {
     func run(using ctx: CommandContext) throws -> Future<Void> {
         var cleaned = false
 
-        guard let cwd = localFileSystem.currentWorkingDirectory else {
-            throw ToolboxError("Unknown current working directory")
-        }
+        // TODO: !
+        let cwd = "/Users/loganwright/Desktop/test"
+//        guard let cwd = "/Users/loganwright/Desktop/test" else {
+//            throw ToolboxError("Unknown current working directory")
+//        }
         let files = try Process.execute("/bin/sh", "-c", "ls -lah")
         #if os(macOS)
         if files.contains(".xcodeproj") {
             _ = try Process.execute("/bin/sh", "-c", "rm -rf *.xcodeproj")
             ctx.console.output("cleaned: ".consoleText(.success) + ".xcodeproj")
             cleaned = true
-            let derivedData = cwd.appending(component: "DerivedData")
-            if !FileManager.default.fileExists(atPath: derivedData.asString) {
+            let derivedData = cwd.finished(with: "/").appending("DerivedData")
+//            let derivedData = cwd.appending(component: "DerivedData")
+            if !FileManager.default.fileExists(atPath: derivedData) {
                 ctx.console.output("warning: ".consoleText(.warning) + "no ./DerivedData folder detected")
                 ctx.console.output("         enable relative derived data in Xcode > Preferences > Locations")
             } else {
