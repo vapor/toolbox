@@ -8,14 +8,21 @@
 import SwiftSyntax
 
 public func syntaxTesting() throws {
-    let file = "/"
-
+    let file = "/Users/loganwright/Desktop/test/Tests/AppTests/AppTests.swift"
+    let url = URL(fileURLWithPath: file)
+    let sourceFile = try SyntaxTreeParser.parse(url)
+    print(sourceFile.statements)
+    Visitor().visit(sourceFile)
+    TestFunctionLoader().visit(sourceFile)
+    print(sourceFile)
+    print("")
 }
 
 func incrementor() throws {
     let file = "/Users/loganwright/Desktop/foo/Test.swift"
     let url = URL(fileURLWithPath: file)
     let sourceFile = try SyntaxTreeParser.parse(url)
+    print(sourceFile.statements)
     let incremented = AddOneToIntegerLiterals().visit(sourceFile)
     print(incremented)
     print("")
@@ -43,5 +50,28 @@ class AddOneToIntegerLiterals: SyntaxRewriter {
 
         // Return a new integer literal token with `int + 1` as its text.
         return token.withKind(.integerLiteral("\(int + 1)"))
+    }
+}
+
+class Visitor: SyntaxVisitor {
+    override func visit(_ node: FunctionDeclSyntax) {
+        print("**\(#line): \(node)")
+        print(node.identifier)
+        print(node.signature)
+        print("")
+    }
+    override func visit(_ node: FunctionSignatureSyntax) {
+        print("**\(#line): \(node)")
+    }
+}
+
+class TestFunctionLoader: SyntaxRewriter {
+    var functions: [String] = []
+    
+    override func visit(_ token: TokenSyntax) -> Syntax {
+        print("Got token: \(token)")
+        print("Got type : \(token.tokenKind)")
+        return token
+
     }
 }
