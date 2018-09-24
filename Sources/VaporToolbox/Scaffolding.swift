@@ -11,9 +11,12 @@ public func syntaxTesting() throws {
     let file = "/Users/loganwright/Desktop/test/Tests/AppTests/AppTests.swift"
     let url = URL(fileURLWithPath: file)
     let sourceFile = try SyntaxTreeParser.parse(url)
-    print(sourceFile.statements)
-    Visitor().visit(sourceFile)
-    TestFunctionLoader().visit(sourceFile)
+//    print(sourceFile.statements)
+    let gatherer = TestFunctionGatherer()
+    gatherer.visit(sourceFile)
+    print(gatherer.testFunctions)
+//    Visitor().visit(sourceFile)
+//    TestFunctionLoader().visit(sourceFile)
     print(sourceFile)
     print("")
 }
@@ -65,6 +68,15 @@ extension FunctionDeclSyntax {
             signature.output == nil
             else { return false }
         return true
+    }
+}
+
+class TestFunctionGatherer: SyntaxVisitor {
+    var testFunctions: [String] = []
+
+    override func visit(_ node: FunctionDeclSyntax) {
+        guard node.isTestFunction else { return }
+        testFunctions.append(node.identifier.text)
     }
 }
 
