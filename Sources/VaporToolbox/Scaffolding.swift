@@ -53,15 +53,53 @@ class AddOneToIntegerLiterals: SyntaxRewriter {
     }
 }
 
+
+extension FunctionDeclSyntax {
+    var isTestFunction: Bool {
+        guard
+            // all tests MUST begin w/ 'test' as prefix
+            identifier.text.hasPrefix("test"),
+            // all tests MUST take NO arguments
+            signature.input.parameterList.count == 0,
+            // all tests MUST have no output
+            signature.output == nil
+            else { return false }
+        return true
+    }
+}
+
 class Visitor: SyntaxVisitor {
     override func visit(_ node: FunctionDeclSyntax) {
-        print("**\(#line): \(node)")
+//        print("**\(#line): \(node)")
         print(node.identifier)
         print(node.signature)
+        let sig = node.signature
+        print(sig.input)
+        print(sig.input.parameterList.count)
+        print(sig.output)
+        print(sig.throwsOrRethrowsKeyword)
+//        print(node.attributes)
+//        print(node.funcKeyword)
+//        print(node.)
         print("")
     }
+
+    override func visit(_ node: FunctionParameterListSyntax) {
+        print(node)
+        print("")
+    }
+
+//    override func visit(_ node: FunctionCallArgumentListSyntax) {
+//        print(node)
+//        print("")
+//    }
+//    override func visit(_ node: FunctionCallArgumentSyntax) {
+//        print(node)
+//        print("")
+//    }
+
     override func visit(_ node: FunctionSignatureSyntax) {
-        print("**\(#line): \(node)")
+//        print("**\(#line): \(node)")
     }
 }
 
@@ -69,8 +107,8 @@ class TestFunctionLoader: SyntaxRewriter {
     var functions: [String] = []
     
     override func visit(_ token: TokenSyntax) -> Syntax {
-        print("Got token: \(token)")
-        print("Got type : \(token.tokenKind)")
+//        print("Got token: \(token)")
+//        print("Got type : \(token.tokenKind)")
         return token
 
     }
