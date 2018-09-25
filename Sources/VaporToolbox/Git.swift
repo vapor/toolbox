@@ -1,7 +1,5 @@
 import Vapor
 
-extension String: Error {}
-
 //func gitIsClean(log: Bool = true) throws {
 //            do {
 //                let status = try console.backgroundExecute(program: "git", arguments: ["status", "--porcelain"])

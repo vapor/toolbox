@@ -21,24 +21,21 @@ struct CleanCommand: Command {
         var cleaned = false
 
         // TODO: !
-        let cwd = "/Users/loganwright/Desktop/test"
-//        guard let cwd = "/Users/loganwright/Desktop/test" else {
-//            throw ToolboxError("Unknown current working directory")
-//        }
-        let files = try Process.execute("/bin/sh", "-c", "ls -lah")
+        let cwd = try Shell.cwd()
+        let files = try Shell.allFiles(in: cwd)
         #if os(macOS)
         if files.contains(".xcodeproj") {
-            _ = try Process.execute("/bin/sh", "-c", "rm -rf *.xcodeproj")
+            try Shell.delete("*.xcodeproj")
             ctx.console.output("cleaned: ".consoleText(.success) + ".xcodeproj")
             cleaned = true
             let derivedData = cwd.finished(with: "/").appending("DerivedData")
-//            let derivedData = cwd.appending(component: "DerivedData")
             if !FileManager.default.fileExists(atPath: derivedData) {
                 ctx.console.output("warning: ".consoleText(.warning) + "no ./DerivedData folder detected")
                 ctx.console.output("         enable relative derived data in Xcode > Preferences > Locations")
             } else {
                 do {
-                    _ = try Process.execute("/bin/sh", "-c", "rm -rf DerivedData")
+                    // TODO: Check gitignore for DerivedData
+                    try Shell.delete("DerivedData")
                     ctx.console.output("cleaned: ".consoleText(.success) + "DerivedData")
                 } catch {
                     ctx.console.output("error: ".consoleText(.error) + "could not clean DerivedData")
@@ -47,14 +44,15 @@ struct CleanCommand: Command {
             }
         }
         #endif
+
         if files.contains(".build") {
-            _ = try Process.execute("/bin/sh", "-c", "rm -rf .build")
+            try Shell.delete(".build")
             ctx.console.output("cleaned: ".consoleText(.success) + ".build")
             cleaned = true
         }
         if files.contains("Package.resolved") {
             if ctx.options["update"]?.bool == true {
-                _ = try Process.execute("/bin/sh", "-c", "rm -rf Package.resolved")
+                try Shell.delete("Package.resolved")
                 ctx.console.output("cleaned: ".consoleText(.success) + "Package.resolved")
                 cleaned = true
             } else {

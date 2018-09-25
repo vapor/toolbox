@@ -1,15 +1,31 @@
-// nothing here yet...
+import Vapor
 
-//extension AbsolutePath: ExpressibleByStringLiteral {
-//    /// See `ExpressibleByStringLiteral`.
-//    public init(stringLiteral value: String) {
-//        self.init(value)
-//    }
-//}
+extension String: Error {}
 
-struct ToolboxError: Error {
-    let reason: String
-    init(_ reason: String) {
-        self.reason = reason
+struct Shell {
+    @discardableResult
+    static func bash(_ input: String) throws -> String {
+        return try Process.execute("/bin/sh", "-c", input)
+    }
+
+    static func delete(_ path: String) throws {
+        try bash("rm -rf \(path)")
+    }
+
+    static func cwd() throws -> String {
+        return try Environment.get("TEST_DIRECTORY") ?? bash("dirs -l")
+    }
+
+    static func allFiles(in dir: String? = nil) throws -> String {
+        var command = "ls"
+        if let dir = dir {
+            command += " \(dir)"
+        }
+        command += "-lah"
+        return try Shell.bash(command)
+    }
+
+    static func readFile(path: String) throws -> String {
+        return try bash("cat \(path)").trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

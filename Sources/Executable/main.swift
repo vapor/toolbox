@@ -1,5 +1,3 @@
 import VaporToolbox
 
-try testGit()
-//try syntaxTesting()
-//try boot().wait().run()
+try boot().wait().run()
