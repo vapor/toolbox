@@ -28,6 +28,11 @@ struct Git {
             .isEmpty
     }
 
+    static func commitChanges(msg: String) throws {
+        try run("commit", "-m", msg)
+    }
+
+    @discardableResult
     private static func run(_ args: String...) throws -> String {
         return try Process.execute("git", args)
     }
