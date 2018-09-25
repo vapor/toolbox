@@ -7,7 +7,7 @@ public func boot() -> Future<Application> {
     var commands = CommandConfig()
 //    commands.use(XcodeCommand(), as: "xcode")
     commands.use(CleanCommand(), as: "clean")
-    commands.use(CleanCommand(), as: "alt-clean")
+    commands.use(AltCleanCommand(), as: "alt-clean")
     services.register(commands)
 
     return Application.asyncBoot(services: services)

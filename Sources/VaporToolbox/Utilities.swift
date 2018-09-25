@@ -17,11 +17,10 @@ struct Shell {
     }
 
     static func allFiles(in dir: String? = nil) throws -> String {
-        var command = "ls"
+        var command = "ls -lah"
         if let dir = dir {
             command += " \(dir)"
         }
-        command += "-lah"
         return try Shell.bash(command)
     }
 

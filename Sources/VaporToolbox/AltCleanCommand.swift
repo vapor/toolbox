@@ -76,7 +76,7 @@ class Cleaner {
             try Shell.delete("Package.resolved")
             return .success
         } else {
-            return .ignored("      use [--update,-u] flag to remove this file during clean")
+            return .ignored("use [--update,-u] flag to remove this file during clean")
         }
     }
 

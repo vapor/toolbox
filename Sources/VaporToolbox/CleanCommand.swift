@@ -18,11 +18,6 @@ struct CleanCommand: Command {
 
     /// See `Command`.
     func run(using ctx: CommandContext) throws -> Future<Void> {
-        drawTable(with: ctx)
-        return .done(on: ctx.container)
-    }
-
-    func _run(using ctx: CommandContext) throws -> Future<Void> {
 
         var cleaned = false
 
