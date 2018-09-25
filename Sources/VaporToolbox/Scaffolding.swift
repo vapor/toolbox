@@ -147,8 +147,6 @@ class TestFunctionGatherer: SyntaxVisitor {
     }
 
     override func visit(_ node: FunctionDeclSyntax) {
-        print("IN CLASSSSSS: \(inClass)")
-        print("IN EXTENSION: \(inExtension)")
         guard node.isTestFunction else { return }
         testFunctions.append(node.identifier.text)
     }
