@@ -1,4 +1,4 @@
-FROM swift:4.1
+FROM swift:4.2
 COPY Sources/ Sources/
 COPY Tests/ Tests/
 COPY Package.swift Package.swift
