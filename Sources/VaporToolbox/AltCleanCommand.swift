@@ -47,27 +47,40 @@ class Cleaner {
         ops[".build"] = cleanBuildFolder
         ops["Package.resolved"] = cleanPackageResolved
 
-        var rows: [[ConsoleText]] = []
         for (name, op) in ops {
             do {
                 let result = try op()
-                rows.append([
-                    result.symbol,
-                    name.consoleText(),
-                    result.report
-                ])
+                let text = name.consoleText(result.style) + ": " + result.report
+                ctx.console.output(text)
             } catch {
-                rows.append([
-                    CleanResult.failure.symbol,
-                    name.consoleText(),
-                    error.localizedDescription.consoleText()
-                ])
+                let text = name.consoleText(CleanResult.failure.style)
+                    + ": "
+                    + error.localizedDescription.consoleText()
+                ctx.console.output(text)
             }
         }
 
-        let drawer = TableDrawer(rows: rows)
-        let table = drawer.drawTable()
-        ctx.console.output(table)
+//        var rows: [[ConsoleText]] = []
+//        for (name, op) in ops {
+//            do {
+//                let result = try op()
+//                rows.append([
+//                    result.symbol,
+//                    name.consoleText(),
+//                    result.report
+//                ])
+//            } catch {
+//                rows.append([
+//                    CleanResult.failure.symbol,
+//                    name.consoleText(),
+//                    error.localizedDescription.consoleText()
+//                ])
+//            }
+//        }
+//
+//        let drawer = TableDrawer(rows: rows)
+//        let table = drawer.drawTable()
+//        ctx.console.output(table)
     }
 
     private func cleanPackageResolved() throws -> CleanResult {
@@ -99,7 +112,8 @@ class Cleaner {
             try Shell.delete(derivedData)
             return .success
         } else {
-            try informDerivedData()
+            // TODO: Figure this out
+            //            try informDerivedData()
             return .notNecessary
         }
     }
@@ -132,6 +146,18 @@ class Cleaner {
 enum CleanResult {
     case failure, success, notNecessary, ignored(String)
 
+    var style: ConsoleStyle {
+        switch self {
+        case .failure:
+            return .init(color: .red)
+        case .success:
+            return .init(color: .green)
+        case .notNecessary:
+            return .init(color: .cyan)
+        case .ignored(_):
+            return .init(color: .yellow)
+        }
+    }
     var symbol: ConsoleText {
         switch self {
         case .failure:
