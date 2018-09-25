@@ -1,9 +1,12 @@
-//
-//  Scaffolding.swift
-//  VaporToolbox
-//
-//  Created by Logan Wright on 9/21/18.
-//
+/*
+ EDGE CASE
+ - inherit from class that inherits from xctest
+ - test cases declared in an extension
+ - test functions declared in non xctest class
+
+ NICE TO HAVE
+ - remove existing allTests if it exists
+ */
 
 import SwiftSyntax
 
@@ -11,7 +14,7 @@ public func syntaxTesting() throws {
     let file = "/Users/loganwright/Desktop/test/Tests/AppTests/AppTests.swift"
     let url = URL(fileURLWithPath: file)
     let sourceFile = try SyntaxTreeParser.parse(url)
-//    print(sourceFile.statements)
+//    Visitor().visit(sourceFile)
     let gatherer = TestFunctionGatherer()
     gatherer.visit(sourceFile)
     print(gatherer.testFunctions)
@@ -25,7 +28,7 @@ func incrementor() throws {
     let file = "/Users/loganwright/Desktop/foo/Test.swift"
     let url = URL(fileURLWithPath: file)
     let sourceFile = try SyntaxTreeParser.parse(url)
-    print(sourceFile.statements)
+//    print(sourceFile.statements)
     let incremented = AddOneToIntegerLiterals().visit(sourceFile)
     print(incremented)
     print("")
@@ -59,6 +62,18 @@ class AddOneToIntegerLiterals: SyntaxRewriter {
 
 extension FunctionDeclSyntax {
     var isTestFunction: Bool {
+        print(self.identifier.text)
+        // SwiftSyntax.SourceFileSyntax -- use to discount top level functions
+        // SwiftSyntax.ExtensionDeclSyntax -- declared in extension, OK
+        // SwiftSyntax.ClassDeclSyntax -- declared in class, OK
+        print("nno. of parents: \(self.countParents())")
+        print("tree: ")
+        let yes = self.tree().contains(where: { $0 is ExtensionDeclSyntax || $0 is ClassDeclSyntax})
+        print("SHOULD INCLUDE: \(yes)")
+//        let tree = inheritanceTree().map { "\($0)" }.joined(separator: "\n")
+//        print(tree)
+//        print(self.parent)
+        print("")
         guard
             // all tests MUST begin w/ 'test' as prefix
             identifier.text.hasPrefix("test"),
@@ -71,10 +86,69 @@ extension FunctionDeclSyntax {
     }
 }
 
+extension Syntax {
+    func tree() -> [Syntax] {
+        guard let parent = parent else { return [self] }
+        return [self] + parent.tree()
+    }
+
+    func countParents() -> Int {
+        guard let parent = self.parent else { return 0 }
+        return parent.countParents() + 1
+    }
+
+    func inheritanceTree() -> [Syntax.Type] {
+        guard let parent = self.parent else { return [type(of: self)] }
+        return [type(of: parent)] + parent.inheritanceTree()
+    }
+}
+/*
+ TEST RESULTS
+ - class name
+ - inheritance class
+    • if XCTestCase – good to go
+    • if class that inherits XCTest – good to go
+ */
+
+struct Object {
+    let name: String
+    let inheritance: String?
+}
+
 class TestFunctionGatherer: SyntaxVisitor {
+
     var testFunctions: [String] = []
 
+    private var inClass = false
+    private var inExtension = false
+
+    override func visit(_ node: ClassDeclSyntax) {
+        inClass = true
+        defer { inClass = false }
+        super.visit(node)
+//        let inheritance = node.inheritanceClause!
+//        let collection = inheritance.inheritedTypeCollection
+//        var iterator = collection.makeIterator()
+//        while let next = iterator.next() {
+//            print(next.typeName)
+//            print("")
+//        }
+//        print(inheritance.inheritedTypeCollection)
+//
+//        print(node.inheritanceClause)
+//        print(node)
+//        print("")
+    }
+
+    override func visit(_ node: ExtensionDeclSyntax) {
+        inExtension = true
+        defer { inExtension = false }
+        super.visit(node)
+    }
+
     override func visit(_ node: FunctionDeclSyntax) {
+        print("IN CLASSSSSS: \(inClass)")
+        print("IN EXTENSION: \(inExtension)")
         guard node.isTestFunction else { return }
         testFunctions.append(node.identifier.text)
     }

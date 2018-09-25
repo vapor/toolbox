@@ -1,3 +1,4 @@
 import VaporToolbox
 
-try boot().wait().run()
+try syntaxTesting()
+//try boot().wait().run()
