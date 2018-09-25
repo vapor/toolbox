@@ -139,9 +139,9 @@ enum CleanResult {
         case .success:
             return "✓".consoleText(.init(color: .green))
         case .notNecessary:
-            return "•".consoleText(.init(color: .green))
+            return "*".consoleText(.init(color: .green))
         case .ignored(_):
-            return "o".consoleText(.init(color: .yellow))
+            return "•".consoleText(.init(color: .yellow))
         }
     }
 
