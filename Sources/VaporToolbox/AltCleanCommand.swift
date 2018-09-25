@@ -10,7 +10,7 @@ struct AltCleanCommand: Command {
         .flag(name: "update", short: "u", help: [
             "Cleans the Package.resolved file if it exists",
             "This is equivalent to doing `swift package update`"
-            ])
+        ])
     ]
 
     /// See `Command`.
@@ -18,56 +18,8 @@ struct AltCleanCommand: Command {
 
     /// See `Command`.
     func run(using ctx: CommandContext) throws -> Future<Void> {
-        var cleaned = false
-
-        // TODO: !
-        let cwd = try Shell.cwd()
-        let files = try Shell.allFiles(in: cwd)
-        var _cleaned: [String: Bool] = [:]
-        if files.contains(".xcodeproj") {
-
-        }
-        #if os(macOS)
-        if files.contains(".xcodeproj") {
-            try Shell.delete("*.xcodeproj")
-            ctx.console.output("cleaned: ".consoleText(.success) + ".xcodeproj")
-            cleaned = true
-            let derivedData = cwd.finished(with: "/").appending("DerivedData")
-            if !FileManager.default.fileExists(atPath: derivedData) {
-                ctx.console.output("warning: ".consoleText(.warning) + "no ./DerivedData folder detected")
-                ctx.console.output("         enable relative derived data in Xcode > Preferences > Locations")
-            } else {
-                do {
-                    // TODO: Check gitignore for DerivedData
-                    try Shell.delete("DerivedData")
-                    ctx.console.output("cleaned: ".consoleText(.success) + "DerivedData")
-                } catch {
-                    ctx.console.output("error: ".consoleText(.error) + "could not clean DerivedData")
-                    ctx.console.output("       make sure Xcode is closed before running clean")
-                }
-            }
-        }
-        #endif
-
-        if files.contains(".build") {
-            try Shell.delete(".build")
-            ctx.console.output("cleaned: ".consoleText(.success) + ".build")
-            cleaned = true
-        }
-        if files.contains("Package.resolved") {
-            if ctx.options["update"]?.bool == true {
-                try Shell.delete("Package.resolved")
-                ctx.console.output("cleaned: ".consoleText(.success) + "Package.resolved")
-                cleaned = true
-            } else {
-                ctx.console.output("info: ".consoleText(.info) + "Package.resolved file detected")
-                ctx.console.output("      use [--update,-u] flag to remove this file during clean")
-            }
-        }
-
-        if !cleaned {
-            ctx.console.output("info: ".consoleText(.info) + "nothing to clean")
-        }
+        let cleaner = try Cleaner(ctx: ctx)
+        try cleaner.run()
         return .done(on: ctx.container)
     }
 }
@@ -95,13 +47,27 @@ class Cleaner {
         ops[".build"] = cleanBuildFolder
         ops["Package.resolved"] = cleanPackageResolved
 
-        var results: [(ConsoleText, String)] = []
+        var rows: [[ConsoleText]] = []
         for (name, op) in ops {
             do {
+                let result = try op()
+                rows.append([
+                    result.symbol,
+                    name.consoleText(),
+                    result.report
+                ])
             } catch {
-
+                rows.append([
+                    CleanResult.failure.symbol,
+                    name.consoleText(),
+                    error.localizedDescription.consoleText()
+                ])
             }
         }
+
+        let drawer = TableDrawer(rows: rows)
+        let table = drawer.drawTable()
+        ctx.console.output(table)
     }
 
     private func cleanPackageResolved() throws -> CleanResult {
@@ -176,6 +142,19 @@ enum CleanResult {
             return "•".consoleText(.init(color: .green))
         case .ignored(_):
             return "o".consoleText(.init(color: .yellow))
+        }
+    }
+
+    var report: ConsoleText {
+        switch self {
+        case .failure:
+            return "something went wrong"
+        case .success:
+            return "cleaned file"
+        case .notNecessary:
+            return "nothing to clean"
+        case .ignored(let msg):
+            return msg.consoleText()
         }
     }
 }
