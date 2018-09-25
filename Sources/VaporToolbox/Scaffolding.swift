@@ -3,6 +3,7 @@
  - inherit from class that inherits from xctest
  - test cases declared in an extension
  - test functions declared in non xctest class
+ - test declared in extension of class that isn't valid xctestcase
 
  NICE TO HAVE
  - remove existing allTests if it exists
@@ -68,7 +69,7 @@ extension FunctionDeclSyntax {
         // SwiftSyntax.ClassDeclSyntax -- declared in class, OK
         print("nno. of parents: \(self.countParents())")
         print("tree: ")
-        let yes = self.tree().contains(where: { $0 is ExtensionDeclSyntax || $0 is ClassDeclSyntax})
+        let yes = self.inheritanceTree().contains(where: { $0 is ExtensionDeclSyntax || $0 is ClassDeclSyntax})
         print("SHOULD INCLUDE: \(yes)")
 //        let tree = inheritanceTree().map { "\($0)" }.joined(separator: "\n")
 //        print(tree)
@@ -80,16 +81,25 @@ extension FunctionDeclSyntax {
             // all tests MUST take NO arguments
             signature.input.parameterList.count == 0,
             // all tests MUST have no output
-            signature.output == nil
+            signature.output == nil,
+            // all tests MUST be declared w/in a class,
+            // or an extension
+            inheritanceTree().containsClassOrExtension
             else { return false }
         return true
     }
 }
 
+extension Array where Element == Syntax {
+    var containsClassOrExtension: Bool {
+        return contains { $0 is ExtensionDeclSyntax || $0 is ClassDeclSyntax}
+    }
+}
+
 extension Syntax {
-    func tree() -> [Syntax] {
+    func inheritanceTree() -> [Syntax] {
         guard let parent = parent else { return [self] }
-        return [self] + parent.tree()
+        return [self] + parent.inheritanceTree()
     }
 
     func countParents() -> Int {
@@ -97,9 +107,9 @@ extension Syntax {
         return parent.countParents() + 1
     }
 
-    func inheritanceTree() -> [Syntax.Type] {
+    func typedTree() -> [Syntax.Type] {
         guard let parent = self.parent else { return [type(of: self)] }
-        return [type(of: parent)] + parent.inheritanceTree()
+        return [type(of: parent)] + parent.typedTree()
     }
 }
 /*
