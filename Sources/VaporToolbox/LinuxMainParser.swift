@@ -17,21 +17,25 @@ import Foundation
 
 public func syntaxTesting() throws {
     try testGathering()
-    try testSimple()
-    let file = "/Users/loganwright/Desktop/test/Tests/AppTests/TestCases.swift"
-    let url = URL(fileURLWithPath: file)
-    let sourceFile = try SyntaxTreeParser.parse(url)
-    let gatherer = TestFunctionGatherer()
-    gatherer.visit(sourceFile)
-    print(gatherer.testFunctions)
-    //    Visitor().visit(sourceFile)
-    //    TestFunctionLoader().visit(sourceFile)
-    print(sourceFile)
-    print("")
+    try testFunctionGathering()
+    try testClassGathering()
+
+//    try testGathering()
+//    try testSimple()
+//    let file = "/Users/loganwright/Desktop/test/Tests/AppTests/TestCases.swift"
+//    let url = URL(fileURLWithPath: file)
+//    let sourceFile = try SyntaxTreeParser.parse(url)
+//    let gatherer = TestFunctionGatherer()
+//    gatherer.visit(sourceFile)
+//    print(gatherer.testFunctions)
+//    //    Visitor().visit(sourceFile)
+//    //    TestFunctionLoader().visit(sourceFile)
+//    print(sourceFile)
+//    print("")
 }
 
 func testSimple() throws {
-    let file = "/Users/loganwright/Desktop/test/Tests/AppTests/ClassTests.swift"
+    let file = "/Users/loganwright/Desktop/test/Tests/AppTests/NestedClassTests.swift"
     let url = URL(fileURLWithPath: file)
     let sourceFile = try SyntaxTreeParser.parse(url)
     let gatherer = ClassGatherer()
@@ -40,7 +44,44 @@ func testSimple() throws {
 }
 
 func testGathering() throws {
-    let file = "/Users/loganwright/Desktop/test/Tests/AppTests/ClassTests.swift"
+    let file = "/Users/loganwright/Desktop/test/Tests/AppTests/NestedClassTests.swift"
+    let url = URL(fileURLWithPath: file)
+    let sourceFile = try SyntaxTreeParser.parse(url)
+    let gatherer = Gatherer()
+    gatherer.visit(sourceFile)
+    print("Found classes: ")
+    print(try gatherer.classes.filter { $0.inheritsDirectlyFromXCTestCase }.map { try $0.flattenedName() }.joined(separator: "\n"))
+    print("Found potential tests: ")
+    print(gatherer.potentialTestFunctions.map { $0.identifier.text }.joined(separator: "\n"))
+    print("")
+}
+
+// TODO: Temporary
+
+func XCTAssert(_ bool: Bool, msg: String) {
+    if bool { return }
+    print(" [ERRROROROREOREOREOREORE] \(msg)")
+}
+
+func testClassGathering() throws {
+    let file = "/Users/loganwright/Desktop/test/Tests/AppTests/NestedClassTests.swift"
+    let url = URL(fileURLWithPath: file)
+    let sourceFile = try SyntaxTreeParser.parse(url)
+    let gatherer = Gatherer()
+    gatherer.visit(sourceFile)
+    let foundClasses = try gatherer.classes.map { try $0.flattenedName() }
+    let expectation = [
+        "A",
+        "A.B",
+        "A.C",
+        "A.B.C",
+        "D.C"
+    ]
+    XCTAssert(foundClasses == expectation, msg: "Parsing nested classes didn't work as expected.")
+}
+
+func testFunctionGathering() throws {
+    let file = "/Users/loganwright/Desktop/test/Tests/AppTests/FunctionTestCases.swift"
     let url = URL(fileURLWithPath: file)
     let sourceFile = try SyntaxTreeParser.parse(url)
     let gatherer = Gatherer()
@@ -52,10 +93,10 @@ func testGathering() throws {
     print("")
 }
 
-enum FunctionParent {
-    case `class`(ClassDeclSyntax)
-    case `extension`(ExtensionDeclSyntax)
+func parseModule() {
+
 }
+
 
 /*
  ALL FUNCTIONS
@@ -79,6 +120,26 @@ enum FunctionParent {
 //    let parentClass: String
 //    let functionName: String
 //}
+
+struct Class {
+    let decl: ClassDeclSyntax
+    let inheritanceTree: [ClassDeclSyntax]
+}
+
+extension ClassDeclSyntax {
+    var inheritsDirectlyFromXCTestCase: Bool {
+        var iterator = inheritanceClause?.inheritedTypeCollection.makeIterator()
+        while let next = iterator?.next() {
+            let trimmed = next.typeName.description.trimmingCharacters(in: .whitespacesAndNewlines)
+            if trimmed == "XCTestCase" { return true }
+        }
+        return false
+    }
+}
+
+func buildInheritanceTree() {
+
+}
 
 extension FunctionDeclSyntax {
     var looksLikeTestFunction: Bool {
@@ -198,7 +259,7 @@ extension DeclSyntax where Self: TypeDeclSyntax {
         }
         if isNestedInExtension {
             guard let outer = outerExtensionDecl() else { throw "unable to find outer class" }
-            return outer.extendedType.description.trimmingCharacters(in: .whitespaces) + "." + identifier.text
+            return outer.extendedType.description.trimmingCharacters(in: .whitespacesAndNewlines) + "." + identifier.text
         }
         return identifier.text
     }
