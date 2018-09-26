@@ -52,9 +52,9 @@ func testGathering() throws {
     let gatherer = Gatherer()
     gatherer.visit(sourceFile)
     print("Found classes: ")
-    print(try gatherer.classes.filter { $0.inheritsDirectlyFromXCTestCase }.map { try $0.flattenedName() }.joined(separator: "\n"))
+    print(try gatherer.testCases.filter { $0.inheritsDirectlyFromXCTestCase }.map { try $0.flattenedName() }.joined(separator: "\n"))
     print("Found potential tests: ")
-    print(gatherer.potentialTestFunctions.map { $0.identifier.text }.joined(separator: "\n"))
+//    print(gatherer.potentialTestFunctions.map { $0.identifier.text }.joined(separator: "\n"))
     print("")
 }
 
@@ -80,7 +80,7 @@ func testClassGathering() throws {
     let sourceFile = try SyntaxTreeParser.parse(url)
     let gatherer = Gatherer()
     gatherer.visit(sourceFile)
-    let foundClasses = try gatherer.classes.map { try $0.flattenedName() }
+    let foundClasses = try gatherer.testCases.map { try $0.flattenedName() }
     let expectation = [
         "A",
         "A.B",
@@ -98,9 +98,9 @@ func testFunctionGathering() throws {
     let gatherer = Gatherer()
     gatherer.visit(sourceFile)
     print("Found classes: ")
-    print(try gatherer.classes.map { try $0.flattenedName() }.joined(separator: "\n"))
+    print(try gatherer.testCases.map { try $0.flattenedName() }.joined(separator: "\n"))
     print("Found potential tests: ")
-    print(gatherer.potentialTestFunctions.map { $0.identifier.text }.joined(separator: "\n"))
+//    print(gatherer.potentialTestFunctions.map { $0.identifier.text }.joined(separator: "\n"))
     print("")
 }
 
@@ -181,49 +181,35 @@ extension Array where Element == ClassDeclSyntax {
 }
 
 func buildInheritanceTree(with gatherer: Gatherer) throws {
-    let testCases = try gatherer.classes.filter { try $0.inheritsXCTestCase(using: gatherer.classes) }
-
-    try gatherer.potentialTestFunctions.forEach { f in
-        print(f.identifier)
-        if f.isNestedInClass {
-            guard let outer = f.outerClassDecl() else { throw "unable to find expected outer type decl" }
-            if testCases.contains(outer) {
-                print("True, isTestCase")
-            } else {
-                print("Is NOT test case")
-            }
-        }
-        if f.isNestedInExtension {
-            guard let outer = f.outerExtensionDecl() else { throw "unable to find outer ext" }
-            print("Outer: \(outer.extendedTypeName)")
-            let matched = try gatherer.classes.classMatching(outer)
-            if let matched = matched, testCases.contains(matched) {
-                print("True, isTestCase")
-            } else {
-                print("Is NOT test case")
-            }
-        }
-        print("")
-//        let t = f.outerTypeDecl()
-//        if let t = t as? ClassDeclSyntax {
-//            let cont = testCases.contains(t)
-//            print("\(cont), is test case")
-//            print()
+    let testCases = try gatherer.testCases.filter { try $0.inheritsXCTestCase(using: gatherer.testCases) }
+    let foundCases = try testCases.map { try $0.flattenedName() } .joined(separator: "\n")
+    print("Cases: ")
+    print(foundCases)
+    
+//    try gatherer.potentialTestFunctions.forEach { f in
+//        print(f.identifier)
+//        if f.isNestedInClass {
+//            guard let outer = f.outerClassDecl() else { throw "unable to find expected outer type decl" }
+//            if testCases.contains(outer) {
+//                print("True, isTestCase")
+//            } else {
+//                print("Is NOT test case")
+//            }
 //        }
-//        if let t = t as? ExtensionDeclSyntax {
-//            let matched = try gatherer.classes.classMatching(t)
-//            print("In extension: \(t.extendedTypeName)")
-//            print("Found class: \(matched)")
-//            let cont = matched.flatMap(testCases.contains)
-//            print("\(cont), is test case")
-//            print()
+//        if f.isNestedInExtension {
+//            guard let outer = f.outerExtensionDecl() else { throw "unable to find outer ext" }
+//            print("Outer: \(outer.extendedTypeName)")
+//            let matched = try gatherer.classes.classMatching(outer)
+//            if let matched = matched, testCases.contains(matched) {
+//                print("True, isTestCase")
+//            } else {
+//                print("Is NOT test case")
+//            }
 //        }
-//        print(t?.identifier)
-//        print("")
-    }
-
-    print("Tests: \(gatherer.potentialTestFunctions)")
-    let tests = gatherer.potentialTestFunctions[0]
+//    }
+//
+//    print("Tests: \(gatherer.potentialTestFunctions)")
+//    let tests = gatherer.potentialTestFunctions[0]
     print("")
 }
 
@@ -330,11 +316,23 @@ class ClassGatherer: SyntaxVisitor {
 }
 
 class Gatherer: SyntaxVisitor {
-    var classes: [ClassDeclSyntax] = []
-    var potentialTestFunctions: [FunctionDeclSyntax] = []
+    private(set) var testCases: [ClassDeclSyntax] = []
+    func testFunctions() throws -> [FunctionDeclSyntax] {
+        return try potentialTestFunctions.filter { f in
+            if let cd = f.outerClassDecl() {
+                return testCases.contains(cd)
+            } else if let ext = f.outerExtensionDecl(), let cd = try testCases.classMatching(ext) {
+                return testCases.contains(cd)
+            } else {
+                return false
+            }
+        }
+    }
+
+    private var potentialTestFunctions: [FunctionDeclSyntax] = []
 
     override func visit(_ node: ClassDeclSyntax) {
-        classes.append(node)
+        testCases.append(node)
         super.visit(node)
     }
 
