@@ -16,6 +16,7 @@ import SwiftSyntax
 import Foundation
 
 public func syntaxTesting() throws {
+    try testGathering()
     try testSimple()
     let file = "/Users/loganwright/Desktop/test/Tests/AppTests/TestCases.swift"
     let url = URL(fileURLWithPath: file)
@@ -35,6 +36,19 @@ func testSimple() throws {
     let sourceFile = try SyntaxTreeParser.parse(url)
     let gatherer = ClassGatherer()
     gatherer.visit(sourceFile)
+    print("")
+}
+
+func testGathering() throws {
+    let file = "/Users/loganwright/Desktop/test/Tests/AppTests/ClassTests.swift"
+    let url = URL(fileURLWithPath: file)
+    let sourceFile = try SyntaxTreeParser.parse(url)
+    let gatherer = Gatherer()
+    gatherer.visit(sourceFile)
+    print("Found classes: ")
+    print(try gatherer.classes.map { try $0.flattenedName() }.joined(separator: "\n"))
+    print("Found potential tests: ")
+    print(gatherer.potentialTestFunctions.map { $0.identifier.text }.joined(separator: "\n"))
     print("")
 }
 
@@ -67,7 +81,7 @@ enum FunctionParent {
 //}
 
 extension FunctionDeclSyntax {
-    var isTestFunction: Bool {
+    var looksLikeTestFunction: Bool {
         guard
             // all tests MUST begin w/ 'test' as prefix
             identifier.text.hasPrefix("test"),
@@ -76,7 +90,7 @@ extension FunctionDeclSyntax {
             // all tests MUST have no output
             signature.output == nil,
             // all tests MUST be declared w/in a class,
-            // or an extension
+            // or an extension of a class
             nestedTree().containsClassOrExtension
             else { return false }
         return true
@@ -142,7 +156,6 @@ class ClassGatherer: SyntaxVisitor {
     var classes: [ClassDeclSyntax] = []
     override func visit(_ node: ClassDeclSyntax) {
         print(node.identifier.text)
-
         let flattened = try! node.flattenedName()
         print(flattened)
         print("")
@@ -150,11 +163,26 @@ class ClassGatherer: SyntaxVisitor {
     }
 
     override func visit(_ node: FunctionDeclSyntax) {
-        guard node.isTestFunction else { return }
+        guard node.looksLikeTestFunction else { return }
         testFunctions.append(node.identifier.text)
     }
 }
 
+class Gatherer: SyntaxVisitor {
+    var classes: [ClassDeclSyntax] = []
+    var potentialTestFunctions: [FunctionDeclSyntax] = []
+
+    override func visit(_ node: ClassDeclSyntax) {
+        classes.append(node)
+        super.visit(node)
+    }
+
+    override func visit(_ node: FunctionDeclSyntax) {
+        defer { super.visit(node) }
+        guard node.looksLikeTestFunction else { return }
+        potentialTestFunctions.append(node)
+    }
+}
 
 protocol TypeDeclSyntax {
     var identifier: TokenSyntax { get }
@@ -242,7 +270,7 @@ class TestFunctionGatherer: SyntaxVisitor {
     }
 
     override func visit(_ node: FunctionDeclSyntax) {
-        guard node.isTestFunction else { return }
+        guard node.looksLikeTestFunction else { return }
         testFunctions.append(node.identifier.text)
     }
 }
