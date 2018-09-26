@@ -137,7 +137,19 @@ extension ClassDeclSyntax {
 }
 
 func buildInheritanceTree() {
-
+    let classes: [ClassDeclSyntax] = []
+    let directTestCases = classes.filter { $0.inheritsDirectlyFromXCTestCase }
+    let directTestCaseNames =
+    // TODO: Inherited class could also be nested, make sure to be aware
+    /*
+     class A {
+        class B: XCTestCase {
+        }
+        // INHERITS FROM B, BUT B WILL FLATTEN AS `A.B`, BUT IS VALID
+        class C: B {
+        }
+     }
+     */
 }
 
 extension FunctionDeclSyntax {
@@ -388,3 +400,4 @@ class TestFunctionLoader: SyntaxRewriter {
 
     }
 }
+
