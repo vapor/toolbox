@@ -16,6 +16,8 @@ import SwiftSyntax
 import Foundation
 
 public func syntaxTesting() throws {
+    let classes = try gatherClasses()
+    try buildInheritanceTree(with: classes)
     try testGathering()
     try testFunctionGathering()
     try testClassGathering()
@@ -61,6 +63,15 @@ func testGathering() throws {
 func XCTAssert(_ bool: Bool, msg: String) {
     if bool { return }
     print(" [ERRROROROREOREOREOREORE] \(msg)")
+}
+
+func gatherClasses() throws -> [ClassDeclSyntax] {
+    let file = "/Users/loganwright/Desktop/test/Tests/AppTests/NestedClassTests.swift"
+    let url = URL(fileURLWithPath: file)
+    let sourceFile = try SyntaxTreeParser.parse(url)
+    let gatherer = Gatherer()
+    gatherer.visit(sourceFile)
+    return gatherer.classes
 }
 
 func testClassGathering() throws {
@@ -134,12 +145,68 @@ extension ClassDeclSyntax {
     var inheritsDirectlyFromXCTestCase: Bool {
         return firstInheritance == "XCTestCase"
     }
+
+    func inheritsXCTestCase(using list: [ClassDeclSyntax]) throws -> Bool {
+        if inheritsDirectlyFromXCTestCase { return true }
+        guard let inheritance = try findDeclaredInheritance(using: list) else { return false }
+        return try inheritance.inheritsXCTestCase(using: list)
+    }
+
+    func findDeclaredInheritance(using list: [ClassDeclSyntax]) throws -> ClassDeclSyntax? {
+        guard let first = firstInheritance else { return nil }
+        // .dropLast() == removeSelf
+        let tree = try declarationTree()
+        let nestingsMinusSelf = tree.dropLast()
+        let potentiallyNestedInheritance = Array(nestingsMinusSelf + [first])
+
+        let nestedResult = try list.first { cds in
+            try potentiallyNestedInheritance == cds.declarationTree()
+        }
+        if let nestedResult = nestedResult { return nestedResult }
+        else {
+            return try list.first { cds in
+                try cds.flattenedName() == first
+            }
+        }
+    }
 }
 
-func buildInheritanceTree() {
-    let classes: [ClassDeclSyntax] = []
-    let directTestCases = classes.filter { $0.inheritsDirectlyFromXCTestCase }
-    let directTestCaseNames =
+extension Array {
+    func divide(passing: (Element) throws -> Bool) rethrows -> (passing: [Element], failing: [Element]) {
+        var passed: [Element] = []
+        var failed: [Element] = []
+        try forEach { element in
+            if try passing(element) {
+                passed.append(element)
+            } else {
+                failed.append(element)
+            }
+        }
+
+        return (passed, failed)
+    }
+}
+
+func buildInheritanceTree(with classes: [ClassDeclSyntax]) throws {
+    let testCases = try classes.filter { try $0.inheritsXCTestCase(using: classes) } .map { try $0.flattenedName() } .joined(separator: "\n")
+    print("TestCases: \(testCases)")
+    print("")
+//    let (directTestCases, possibleCases) = classes.divide { $0.inheritsDirectlyFromXCTestCase }
+//
+//    let directTestCaseNames = try directTestCases.map { try $0.flattenedName() }
+//
+//    // if there's no inheritance, they're definitely not a test case
+//    let cases = try possibleCases.filter { possibleCase in
+//        guard
+//            let inheritance = try possibleCase.findDeclaredInheritance(using: classes)
+//            else { return false }
+//
+//    }
+
+//    let _ = possibleCases.map { try! $0.findDeclaredInheritance(using: classes)?.flattenedName() }
+//    let c: ClassDeclSyntax! = nil
+//    let first = c.firstInheritance!
+//    let name = try c.flattenedName()
     // TODO: Inherited class could also be nested, make sure to be aware
     /*
      class A {
@@ -272,15 +339,22 @@ extension EnumDeclSyntax: TypeDeclSyntax {}
 extension StructDeclSyntax: TypeDeclSyntax {}
 extension DeclSyntax where Self: TypeDeclSyntax {
     func flattenedName() throws -> String {
+        return try declarationTree().joined(separator: ".")
+    }
+
+    func declarationTree() throws -> [String] {
         if isNestedInTypeDecl {
             guard let outer = outerTypeDecl() else { throw "unable to find expected outer type decl" }
-            return try outer.flattenedName() + "." + identifier.text
+            return try outer.declarationTree() + [identifier.text]
         }
         if isNestedInExtension {
             guard let outer = outerExtensionDecl() else { throw "unable to find outer class" }
-            return outer.extendedType.description.trimmingCharacters(in: .whitespacesAndNewlines) + "." + identifier.text
+            return [
+                outer.extendedType.description.trimmingCharacters(in: .whitespacesAndNewlines),
+                identifier.text
+            ]
         }
-        return identifier.text
+        return [identifier.text]
     }
 }
 
