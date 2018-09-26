@@ -16,8 +16,8 @@ import SwiftSyntax
 import Foundation
 
 public func syntaxTesting() throws {
-    let classes = try gatherClasses()
-    try buildInheritanceTree(with: classes)
+    let gatherer = try makeGatherer()
+    try buildInheritanceTree(with: gatherer)
     try testGathering()
     try testFunctionGathering()
     try testClassGathering()
@@ -65,13 +65,13 @@ func XCTAssert(_ bool: Bool, msg: String) {
     print(" [ERRROROROREOREOREOREORE] \(msg)")
 }
 
-func gatherClasses() throws -> [ClassDeclSyntax] {
+func makeGatherer() throws -> Gatherer {
     let file = "/Users/loganwright/Desktop/test/Tests/AppTests/NestedClassTests.swift"
     let url = URL(fileURLWithPath: file)
     let sourceFile = try SyntaxTreeParser.parse(url)
     let gatherer = Gatherer()
     gatherer.visit(sourceFile)
-    return gatherer.classes
+    return gatherer
 }
 
 func testClassGathering() throws {
@@ -171,52 +171,60 @@ extension ClassDeclSyntax {
     }
 }
 
-extension Array {
-    func divide(passing: (Element) throws -> Bool) rethrows -> (passing: [Element], failing: [Element]) {
-        var passed: [Element] = []
-        var failed: [Element] = []
-        try forEach { element in
-            if try passing(element) {
-                passed.append(element)
-            } else {
-                failed.append(element)
-            }
+extension Array where Element == ClassDeclSyntax {
+    func classMatching(_ exten: ExtensionDeclSyntax) throws -> ClassDeclSyntax? {
+        return try first { cds in
+            let name = try cds.flattenedName()
+            return name == exten.extendedTypeName
         }
-
-        return (passed, failed)
     }
 }
 
-func buildInheritanceTree(with classes: [ClassDeclSyntax]) throws {
-    let testCases = try classes.filter { try $0.inheritsXCTestCase(using: classes) } .map { try $0.flattenedName() } .joined(separator: "\n")
-    print("TestCases: \(testCases)")
-    print("")
-//    let (directTestCases, possibleCases) = classes.divide { $0.inheritsDirectlyFromXCTestCase }
-//
-//    let directTestCaseNames = try directTestCases.map { try $0.flattenedName() }
-//
-//    // if there's no inheritance, they're definitely not a test case
-//    let cases = try possibleCases.filter { possibleCase in
-//        guard
-//            let inheritance = try possibleCase.findDeclaredInheritance(using: classes)
-//            else { return false }
-//
-//    }
+func buildInheritanceTree(with gatherer: Gatherer) throws {
+    let testCases = try gatherer.classes.filter { try $0.inheritsXCTestCase(using: gatherer.classes) }
 
-//    let _ = possibleCases.map { try! $0.findDeclaredInheritance(using: classes)?.flattenedName() }
-//    let c: ClassDeclSyntax! = nil
-//    let first = c.firstInheritance!
-//    let name = try c.flattenedName()
-    // TODO: Inherited class could also be nested, make sure to be aware
-    /*
-     class A {
-        class B: XCTestCase {
+    try gatherer.potentialTestFunctions.forEach { f in
+        print(f.identifier)
+        if f.isNestedInClass {
+            guard let outer = f.outerClassDecl() else { throw "unable to find expected outer type decl" }
+            if testCases.contains(outer) {
+                print("True, isTestCase")
+            } else {
+                print("Is NOT test case")
+            }
         }
-        // INHERITS FROM B, BUT B WILL FLATTEN AS `A.B`, BUT IS VALID
-        class C: B {
+        if f.isNestedInExtension {
+            guard let outer = f.outerExtensionDecl() else { throw "unable to find outer ext" }
+            print("Outer: \(outer.extendedTypeName)")
+            let matched = try gatherer.classes.classMatching(outer)
+            if let matched = matched, testCases.contains(matched) {
+                print("True, isTestCase")
+            } else {
+                print("Is NOT test case")
+            }
         }
-     }
-     */
+        print("")
+//        let t = f.outerTypeDecl()
+//        if let t = t as? ClassDeclSyntax {
+//            let cont = testCases.contains(t)
+//            print("\(cont), is test case")
+//            print()
+//        }
+//        if let t = t as? ExtensionDeclSyntax {
+//            let matched = try gatherer.classes.classMatching(t)
+//            print("In extension: \(t.extendedTypeName)")
+//            print("Found class: \(matched)")
+//            let cont = matched.flatMap(testCases.contains)
+//            print("\(cont), is test case")
+//            print()
+//        }
+//        print(t?.identifier)
+//        print("")
+    }
+
+    print("Tests: \(gatherer.potentialTestFunctions)")
+    let tests = gatherer.potentialTestFunctions[0]
+    print("")
 }
 
 extension FunctionDeclSyntax {
@@ -233,6 +241,20 @@ extension FunctionDeclSyntax {
             nestedTree().containsClassOrExtension
             else { return false }
         return true
+    }
+
+    func validateIsTestFunction(usingValidTestCases cases: [ClassDeclSyntax]) throws -> String? {
+        guard looksLikeTestFunction else { throw "shouldn't have ever called this on a function that wasn't" }
+//        if parentTreeContains(<#T##cds: ClassDeclSyntax##ClassDeclSyntax#>)
+        throw "here"
+    }
+}
+
+extension Syntax {
+    fileprivate func parentTreeContains(_ cds: ClassDeclSyntax) -> Bool {
+        guard let parent = parent else { return false }
+        if let parent = parent as? ClassDeclSyntax, parent == cds { return true }
+        else { return parent.parentTreeContains(cds) }
     }
 }
 
@@ -350,7 +372,7 @@ extension DeclSyntax where Self: TypeDeclSyntax {
         if isNestedInExtension {
             guard let outer = outerExtensionDecl() else { throw "unable to find outer class" }
             return [
-                outer.extendedType.description.trimmingCharacters(in: .whitespacesAndNewlines),
+                outer.extendedTypeName,
                 identifier.text
             ]
         }
@@ -358,6 +380,11 @@ extension DeclSyntax where Self: TypeDeclSyntax {
     }
 }
 
+extension ExtensionDeclSyntax {
+    var extendedTypeName: String {
+        return extendedType.description.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}
 extension DeclSyntax {
     var isNestedInExtension: Bool {
         return nestedTree().dropFirst().contains { $0 is ExtensionDeclSyntax }
