@@ -121,19 +121,18 @@ func parseModule() {
 //    let functionName: String
 //}
 
-struct Class {
-    let decl: ClassDeclSyntax
-    let inheritanceTree: [ClassDeclSyntax]
-}
-
 extension ClassDeclSyntax {
+    var firstInheritance: String? {
+        return inheritanceClause?
+            .inheritedTypeCollection
+            .first?
+            .typeName
+            .description
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     var inheritsDirectlyFromXCTestCase: Bool {
-        var iterator = inheritanceClause?.inheritedTypeCollection.makeIterator()
-        while let next = iterator?.next() {
-            let trimmed = next.typeName.description.trimmingCharacters(in: .whitespacesAndNewlines)
-            if trimmed == "XCTestCase" { return true }
-        }
-        return false
+        return firstInheritance == "XCTestCase"
     }
 }
 
@@ -242,6 +241,14 @@ class Gatherer: SyntaxVisitor {
         defer { super.visit(node) }
         guard node.looksLikeTestFunction else { return }
         potentialTestFunctions.append(node)
+    }
+}
+
+extension Gatherer {
+    // WARN: Need to use strings, not ClassDeclSyntax objects
+    // because in other files, they are not directly linked
+    func directXCTestInheritors() -> [ClassDeclSyntax] {
+        fatalError("")
     }
 }
 
