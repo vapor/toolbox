@@ -77,7 +77,7 @@ extension FunctionDeclSyntax {
             signature.output == nil,
             // all tests MUST be declared w/in a class,
             // or an extension
-            inheritanceTree().containsClassOrExtension
+            nestedTree().containsClassOrExtension
             else { return false }
         return true
     }
@@ -90,9 +90,9 @@ extension Array where Element == Syntax {
 }
 
 extension Syntax {
-    func inheritanceTree() -> [Syntax] {
+    func nestedTree() -> [Syntax] {
         guard let parent = parent else { return [self] }
-        return [self] + parent.inheritanceTree()
+        return [self] + parent.nestedTree()
     }
 
     func countParents() -> Int {
@@ -126,6 +126,12 @@ extension Syntax {
  • if class that inherits XCTest – good to go
  */
 
+/*
+ Is a class a testcase?
+ - is it a class?
+ - does it inherit XCTestCase
+ */
+
 struct Object {
     let name: String
     let inheritance: String?
@@ -136,6 +142,7 @@ class ClassGatherer: SyntaxVisitor {
     var classes: [ClassDeclSyntax] = []
     override func visit(_ node: ClassDeclSyntax) {
         print(node.identifier.text)
+
         let flattened = try! node.flattenedName()
         print(flattened)
         print("")
@@ -161,65 +168,53 @@ extension DeclSyntax where Self: TypeDeclSyntax {
             guard let outer = outerTypeDecl() else { throw "unable to find expected outer type decl" }
             return try outer.flattenedName() + "." + identifier.text
         }
-//        if isNestedInClass {
-//            guard let outer = outerClassDecl() else { throw "unable to find outer class" }
-//            return try outer.flattenedName() + "." + identifier.text
-//        }
         if isNestedInExtension {
             guard let outer = outerExtensionDecl() else { throw "unable to find outer class" }
             return outer.extendedType.description.trimmingCharacters(in: .whitespaces) + "." + identifier.text
         }
-//        if isNestedInStruct {
-//            guard let outer = outerStructDecl() else { throw "unable to find outer struct" }
-//            return try outer.flattenedName() + "." + identifier.text
-//        }
-//        if isNestedInEnum {
-//            guard let outer = outerEnumDecl() else { throw "unable to find outer struct" }
-//            return try outer.flattenedName() + "." + identifier.text
-//        }
         return identifier.text
     }
 }
 
 extension DeclSyntax {
     var isNestedInExtension: Bool {
-        return inheritanceTree().dropFirst().contains { $0 is ExtensionDeclSyntax }
+        return nestedTree().dropFirst().contains { $0 is ExtensionDeclSyntax }
     }
 
     var isNestedInClass: Bool {
-        return inheritanceTree().dropFirst().contains { $0 is ClassDeclSyntax }
+        return nestedTree().dropFirst().contains { $0 is ClassDeclSyntax }
     }
 
     var isNestedInStruct: Bool {
-        return inheritanceTree().dropFirst().contains { $0 is StructDeclSyntax }
+        return nestedTree().dropFirst().contains { $0 is StructDeclSyntax }
     }
 
     var isNestedInEnum: Bool {
-        return inheritanceTree().dropFirst().contains { $0 is EnumDeclSyntax }
+        return nestedTree().dropFirst().contains { $0 is EnumDeclSyntax }
     }
 
     var isNestedInTypeDecl: Bool {
-        return inheritanceTree().dropFirst().contains { $0 is (DeclSyntax & TypeDeclSyntax) }
+        return nestedTree().dropFirst().contains { $0 is (DeclSyntax & TypeDeclSyntax) }
     }
 
     func outerClassDecl() -> ClassDeclSyntax? {
-        return inheritanceTree().dropFirst().compactMap { $0 as? ClassDeclSyntax } .first
+        return nestedTree().dropFirst().compactMap { $0 as? ClassDeclSyntax } .first
     }
 
     func outerStructDecl() -> StructDeclSyntax? {
-        return inheritanceTree().dropFirst().compactMap { $0 as? StructDeclSyntax } .first
+        return nestedTree().dropFirst().compactMap { $0 as? StructDeclSyntax } .first
     }
 
     func outerExtensionDecl() -> ExtensionDeclSyntax? {
-        return inheritanceTree().dropFirst().compactMap { $0 as? ExtensionDeclSyntax } .first
+        return nestedTree().dropFirst().compactMap { $0 as? ExtensionDeclSyntax } .first
     }
 
     func outerEnumDecl() -> EnumDeclSyntax? {
-        return inheritanceTree().dropFirst().compactMap { $0 as? EnumDeclSyntax } .first
+        return nestedTree().dropFirst().compactMap { $0 as? EnumDeclSyntax } .first
     }
 
     func outerTypeDecl() -> (DeclSyntax & TypeDeclSyntax)? {
-        return inheritanceTree().dropFirst().compactMap { $0 as? (DeclSyntax & TypeDeclSyntax) } .first
+        return nestedTree().dropFirst().compactMap { $0 as? (DeclSyntax & TypeDeclSyntax) } .first
     }
 }
 
