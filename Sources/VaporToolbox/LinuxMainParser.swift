@@ -14,13 +14,15 @@
  */
 
 /*
- - Parse Package.swift and locate valid test targets
+ - Find Test Targets in Tests/ Folder
  - Parse test targets into files:
  {
  - Module: String
  - TestSuite: [ClassDeclSyntax: [[FunctionDeclSyntax]]
  }
  - Generate LinuxMain
+ - Run Swift Test
+ - Run Docker
  */
 import SwiftSyntax
 import Foundation
