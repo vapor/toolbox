@@ -16,6 +16,7 @@ import SwiftSyntax
 import Foundation
 
 public func syntaxTesting() throws {
+    try testWriter()
     let gatherer = try makeGatherer()
     try buildInheritanceTree(with: gatherer)
     try testGathering()
@@ -181,40 +182,23 @@ extension Array where Element == ClassDeclSyntax {
 }
 
 func buildInheritanceTree(with gatherer: Gatherer) throws {
-    let foundCases = try gatherer.testCases()
-    print("Cases: ")
-    print(try foundCases.map { try $0.flattenedName() } .joined(separator: "\n"))
-    let foundTests = try gatherer.testFunctions()
-    print("Tests: ")
-    print(foundTests.map { $0.identifier.description } .joined(separator: "\n"))
-    print("")
+//    let foundCases = try gatherer.testCases()
+//    print("Cases: ")
+//    print(try foundCases.map { try $0.flattenedName() } .joined(separator: "\n"))
+//    let foundTests = try gatherer.tests()
+//    print("Tests: ")
+//    print(foundTests.map { $0.identifier.description } .joined(separator: "\n"))
+//    print("")
 
-    
-//    try gatherer.potentialTestFunctions.forEach { f in
-//        print(f.identifier)
-//        if f.isNestedInClass {
-//            guard let outer = f.outerClassDecl() else { throw "unable to find expected outer type decl" }
-//            if testCases.contains(outer) {
-//                print("True, isTestCase")
-//            } else {
-//                print("Is NOT test case")
-//            }
-//        }
-//        if f.isNestedInExtension {
-//            guard let outer = f.outerExtensionDecl() else { throw "unable to find outer ext" }
-//            print("Outer: \(outer.extendedTypeName)")
-//            let matched = try gatherer.classes.classMatching(outer)
-//            if let matched = matched, testCases.contains(matched) {
-//                print("True, isTestCase")
-//            } else {
-//                print("Is NOT test case")
-//            }
-//        }
-//    }
-//
-//    print("Tests: \(gatherer.potentialTestFunctions)")
-//    let tests = gatherer.potentialTestFunctions[0]
+    let testSuite = try gatherer.makeTestSuite()
+    print("Got testSuite: \n\(testSuite)")
     print("")
+}
+
+func asdf() {
+    let ex = ExtensionDeclSyntax { (builder) in
+
+    }
 }
 
 extension FunctionDeclSyntax {
@@ -348,16 +332,37 @@ extension Gatherer {
             try cd.inheritsXCTestCase(using: potentialTestCases)
         }
     }
-    func testFunctions() throws -> [FunctionDeclSyntax] {
+    func tests() throws -> [FunctionDeclSyntax] {
         let validCases = try testCases()
         return try potentialTestFunctions.filter { f in
-            if let cd = f.outerClassDecl() {
-                return validCases.contains(cd)
-            } else if let ext = f.outerExtensionDecl(), let _ = try validCases.classMatching(ext) {
-                return true
-            } else {
-                return false
-            }
+            return try f.testCase(from: validCases) != nil
+        }
+    }
+
+    func makeTestSuite() throws -> [ClassDeclSyntax: [FunctionDeclSyntax]] {
+        var testSuite: [ClassDeclSyntax: [FunctionDeclSyntax]] = [:]
+        let validTests = try tests()
+        let validCases = try testCases()
+        for test in validTests {
+            guard
+                let testCase = try test.testCase(from: validCases)
+                else { throw "unable to find test case for: \(test.identifier)" }
+            var existing = testSuite[testCase] ?? []
+            existing.append(test)
+            testSuite[testCase] = existing
+        }
+        return testSuite
+    }
+}
+
+extension FunctionDeclSyntax {
+    func testCase(from cases: [ClassDeclSyntax]) throws -> ClassDeclSyntax? {
+        if let cd = outerClassDecl(), cases.contains(cd) {
+            return cd
+        } else if let ext = outerExtensionDecl(), let matched = try cases.classMatching(ext) {
+            return matched
+        } else {
+            return nil
         }
     }
 }
@@ -503,11 +508,64 @@ class Visitor: SyntaxVisitor {
 class TestFunctionLoader: SyntaxRewriter {
     var functions: [String] = []
 
+    override func visitPre(_ node: Syntax) {
+        print("Got node: \(node)")
+        super.visitPre(node)
+    }
     override func visit(_ token: TokenSyntax) -> Syntax {
-        //        print("Got token: \(token)")
-        //        print("Got type : \(token.tokenKind)")
-        return token
 
+        return token
+    }
+}
+
+func testWriter() throws {
+    return
+    let file = "/Users/loganwright/Desktop/test/Tests/AppTests/Empty.swift"
+    let url = URL(fileURLWithPath: file)
+    let sourceFile = try SyntaxTreeParser.parse(url)
+    print(sourceFile)
+    let writer = Writer()
+    let foo = writer.visit(sourceFile)
+    print(foo)
+    print("")
+}
+
+class Writer: SyntaxRewriter {
+//    override func visitAny(_ node: Syntax) -> Syntax? {
+//        print("Found:\(node)")
+//        return super.visitAny(node)
+//    }
+
+    override func visit(_ token: TokenSyntax) -> Syntax {
+        print("Visited: \(token)")
+        print("Kind: \(token.tokenKind)")
+        if case .eof = token.tokenKind {
+            return ExtensionDeclSyntax.init { (builder) in
+                //builder.useExtendedType()
+                builder.useExtensionKeyword(token.withKind(.extensionKeyword))
+//                builder.useExtendedType()
+//                let tat = AttributeSyntax.init({ (attBuilder) in
+//                    attBuilder.addToken(token.withKind(.extensionKeyword))
+//                    attBuilder.addToken(token.withKind(.identifier("Foo")))
+//                    attBuilder.addToken(token.withKind(.leftBrace))
+//                    attBuilder.addToken(token.withKind(.rightBrace))
+//                })
+//                builder.addAttribute(tat)
+            }
+//            return token.withKind(.extensionKeyword)
+        }
+        // Only transform integer literals.
+        guard case .integerLiteral(let text) = token.tokenKind else {
+            return token
+        }
+
+        // Remove underscores from the original text.
+        let integerText = String(text.filter { ("0"..."9").contains($0) })
+
+        // Parse out the integer.
+        let int = Int(integerText)!
+        // Return a new integer literal token with `int + 1` as its text.
+        return token.withKind(.integerLiteral("\(int + 1)"))
     }
 }
 
