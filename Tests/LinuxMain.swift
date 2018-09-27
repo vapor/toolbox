@@ -15,4 +15,9 @@ public func __allTests() -> [XCTestCaseEntry] {
         testCase(VaporToolboxTests.__allTests),
     ]
 }
+
+var tests = [XCTestCaseEntry]()
+tests += __allTests()
+
+XCTMain(tests)
 #endif
