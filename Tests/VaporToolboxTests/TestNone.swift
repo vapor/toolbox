@@ -10,3 +10,7 @@ final class VaporToolboxTests: XCTestCase {
         XCTAssert(false)
     }
 }
+
+var tests = [XCTestCaseEntry]()
+tests += VaporToolboxTests.__allTests()
+XCTMain(tests)

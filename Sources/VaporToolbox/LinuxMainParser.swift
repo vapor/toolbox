@@ -5,17 +5,50 @@
  - test cases declared in an extension
  - test functions declared in non xctest class
  - test declared in extension of class that isn't valid xctestcase
-
  - Nested Class/Struct/Extension Needs to Have `Nested.Class` for example
 
+ - Technically, we can't generate the source code we need to from here
+ - private keyword must discount tests
  NICE TO HAVE
  - remove existing allTests if it exists
  */
 
+/*
+ - Parse Package.swift and locate valid test targets
+ - Parse test targets into files:
+ {
+ - Module: String
+ - TestSuite: [ClassDeclSyntax: [[FunctionDeclSyntax]]
+ }
+ - Generate LinuxMain
+ */
 import SwiftSyntax
 import Foundation
 
+class ManifestParser: SyntaxVisitor {
+    override func visitPre(_ node: Syntax) {
+        defer { super.visitPre(node) }
+//        guard let argumentSyntax = node as? FunctionCallArgumentSyntax else { return }
+        print("Visited: \(type(of: node))")
+        print("Found:\n\(node)")
+        print("")
+    }
+
+    override func visit(_ node: FunctionCallArgumentSyntax) {
+        defer { super.visit(node) }
+        print("")
+    }
+}
+
+func testManifestParser() throws {
+    let file = "/Users/loganwright/Desktop/test/Package.swift"
+    let url = URL(fileURLWithPath: file)
+    let sourceFile = try SyntaxTreeParser.parse(url)
+    ManifestParser().visit(sourceFile)
+}
+
 public func syntaxTesting() throws {
+    try testManifestParser()
     try testWriter()
     let gatherer = try makeGatherer()
     try buildInheritanceTree(with: gatherer)
@@ -36,6 +69,7 @@ public func syntaxTesting() throws {
 //    print(sourceFile)
 //    print("")
 }
+
 
 func testSimple() throws {
     let file = "/Users/loganwright/Desktop/test/Tests/AppTests/NestedClassTests.swift"
@@ -191,7 +225,9 @@ func buildInheritanceTree(with gatherer: Gatherer) throws {
 //    print("")
 
     let testSuite = try gatherer.makeTestSuite()
-    print("Got testSuite: \n\(testSuite)")
+//    print("Got testSuite: \n\(testSuite)")
+    let writer = Writer(suite: testSuite)
+    writer.write()
     print("")
 }
 
@@ -203,6 +239,8 @@ func asdf() {
 
 extension FunctionDeclSyntax {
     var looksLikeTestFunction: Bool {
+        print(signature)
+        print("")
         guard
             // all tests MUST begin w/ 'test' as prefix
             identifier.text.hasPrefix("test"),
@@ -520,52 +558,42 @@ class TestFunctionLoader: SyntaxRewriter {
 
 func testWriter() throws {
     return
-    let file = "/Users/loganwright/Desktop/test/Tests/AppTests/Empty.swift"
-    let url = URL(fileURLWithPath: file)
-    let sourceFile = try SyntaxTreeParser.parse(url)
-    print(sourceFile)
-    let writer = Writer()
-    let foo = writer.visit(sourceFile)
-    print(foo)
-    print("")
+//    let file = "/Users/loganwright/Desktop/test/Tests/AppTests/Empty.swift"
+//    let url = URL(fileURLWithPath: file)
+//    let sourceFile = try SyntaxTreeParser.parse(url)
+//    print(sourceFile)
+//    let writer = Writer()
+//    let foo = writer.visit(sourceFile)
+//    print(foo)
+//    print("")
 }
 
-class Writer: SyntaxRewriter {
-//    override func visitAny(_ node: Syntax) -> Syntax? {
-//        print("Found:\(node)")
-//        return super.visitAny(node)
-//    }
+typealias TestSuite =  [ClassDeclSyntax: [FunctionDeclSyntax]]
+class Writer {
+    let suite: TestSuite
 
-    override func visit(_ token: TokenSyntax) -> Syntax {
-        print("Visited: \(token)")
-        print("Kind: \(token.tokenKind)")
-        if case .eof = token.tokenKind {
-            return ExtensionDeclSyntax.init { (builder) in
-                //builder.useExtendedType()
-                builder.useExtensionKeyword(token.withKind(.extensionKeyword))
-//                builder.useExtendedType()
-//                let tat = AttributeSyntax.init({ (attBuilder) in
-//                    attBuilder.addToken(token.withKind(.extensionKeyword))
-//                    attBuilder.addToken(token.withKind(.identifier("Foo")))
-//                    attBuilder.addToken(token.withKind(.leftBrace))
-//                    attBuilder.addToken(token.withKind(.rightBrace))
-//                })
-//                builder.addAttribute(tat)
-            }
-//            return token.withKind(.extensionKeyword)
+    init(suite: [ClassDeclSyntax: [FunctionDeclSyntax]]) {
+        self.suite = suite
+    }
+
+    func write() {
+        let (testCase, functions) = suite.first!
+        let syntax = testCase.classKeyword
+        let extensionKeyword = testCase.classKeyword.withKind(.extensionKeyword)
+//        extensionKeyword.withTrailingTrivia(Trivia.)
+        let ext = ExtensionDeclSyntax { builder in
+            builder.useExtensionKeyword(extensionKeyword)
+//            builder.useExtendedType(testCase)//syntax.withKind(.identifier("")))
+//            builder.useMembers(testCase.members)
+//            builder.useExtensionKeyword()
+//            builder.useExtensionKeyword(testCase.classKeyword.withKind(.identifier(try! testCase.flattenedName())))
         }
-        // Only transform integer literals.
-        guard case .integerLiteral(let text) = token.tokenKind else {
-            return token
+        print(ext)
+        print("")
+        let member = MemberDeclBlockSyntax.init { (builder) in
+            builder.addDecl(ext)
         }
-
-        // Remove underscores from the original text.
-        let integerText = String(text.filter { ("0"..."9").contains($0) })
-
-        // Parse out the integer.
-        let int = Int(integerText)!
-        // Return a new integer literal token with `int + 1` as its text.
-        return token.withKind(.integerLiteral("\(int + 1)"))
+        print(member)
+        print("")
     }
 }
-
