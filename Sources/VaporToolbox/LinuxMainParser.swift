@@ -37,25 +37,3 @@
  Look for and delete these older files
  */
 
-import SwiftSyntax
-import Foundation
-
-public func syntaxTesting() throws {
-    let linuxMain = try LinuxMain(testsDirectory: "/Users/loganwright/Desktop/test/Tests")
-//    let modules = try loadModules(in: "/Users/loganwright/Desktop/toolbox/Tests")
-    try linuxMain.write()
-    print("LinuxMain:")
-    print("\n\n************")
-    print(linuxMain)
-    print("n************")
-}
-
-extension Module: CustomStringConvertible {
-    var description: String {
-        var desc = "\n"
-        desc += "MODULE:\n\(name)\n"
-        desc += "SUITE:\n"
-        desc += simplified.description
-        return desc
-    }
-}
