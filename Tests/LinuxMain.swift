@@ -2,22 +2,22 @@ import XCTest
 
 @testable import VaporToolboxTests
 
-extension VaporToolboxTests {
+// MARK: VaporToolboxTests
+
+extension VaporToolboxTests.VaporToolboxTests0 {
     static let __allTests = [
         ("testNothing", testNothing),
         ("testFail", testFail),
-    ]
+        ]
 }
 
 #if !os(macOS)
 public func __allTests() -> [XCTestCaseEntry] {
     return [
-        testCase(VaporToolboxTests.__allTests),
+        testCase(VaporToolboxTests.VaporToolboxTests0.__allTests),
     ]
 }
 
-var tests = [XCTestCaseEntry]()
-tests += __allTests()
-
+let tests = __allTests()
 XCTMain(tests)
 #endif

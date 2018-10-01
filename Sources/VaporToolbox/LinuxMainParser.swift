@@ -24,163 +24,166 @@
  - Run Swift Test
  - Run Docker
  */
+
+/*
+ // TODO:
+ - allow declared TestClass Inheritors (for situations where a base TestClass is imported from another module)
+ -
+ */
 import SwiftSyntax
 import Foundation
 
 public func syntaxTesting() throws {
-    let gatherer = try makeGatherer()
-    try buildInheritanceTree(with: gatherer)
-}
-
-
-//func testSimple() throws {
-//    let file = "/Users/loganwright/Desktop/test/Tests/AppTests/NestedClassTests.swift"
-//    let url = URL(fileURLWithPath: file)
-//    let sourceFile = try SyntaxTreeParser.parse(url)
-//    let gatherer = ClassGatherer()
-//    gatherer.visit(sourceFile)
+//    try testModuleParsing(in: "/Users/loganwright/Desktop/test/Tests")
+//    let modules = try loadModules(in: "/Users/loganwright/Desktop/test/Tests")
+    let modules = try loadModules(in: "/Users/loganwright/Desktop/toolbox/Tests")
+    print("LinuxMain:")
+    print("\n\n")
+    print(try modules.generateLinuxMain())
+    print("")
+//    let testSuite = try loadTestSuite(in: "/Users/loganwright/Desktop/test/Tests/AppTests")
+//    let gatherer = try makeGatherer()
+//    let testSuite = try gatherer.makeTestSuite()
+//    logSuite(testSuite)
+//    print(testSuite)
 //    print("")
-//}
-
-//func testGathering() throws {
-//    let file = "/Users/loganwright/Desktop/test/Tests/AppTests/NestedClassTests.swift"
-//    let url = URL(fileURLWithPath: file)
-//    let sourceFile = try SyntaxTreeParser.parse(url)
-//    let gatherer = Gatherer()
-//    gatherer.visit(sourceFile)
-//    print("Found classes: ")
-//    print(try gatherer.potentialTestCases.filter { $0.inheritsDirectlyFromXCTestCase }.map { try $0.flattenedName() }.joined(separator: "\n"))
-//    print("Found potential tests: ")
-////    print(gatherer.potentialTestFunctions.map { $0.identifier.text }.joined(separator: "\n"))
-//    print("")
-//}
-
-// TODO: Temporary
-
-func XCTAssert(_ bool: Bool, msg: String) {
-    if bool { return }
-    print(" [ERRROROROREOREOREOREORE] \(msg)")
 }
 
 func makeGatherer() throws -> Gatherer {
     let file = "/Users/loganwright/Desktop/test/Tests/AppTests/NestedClassTests.swift"
-    let url = URL(fileURLWithPath: file)
-    let sourceFile = try SyntaxTreeParser.parse(url)
-    let gatherer = Gatherer()
-    gatherer.visit(sourceFile)
-    return gatherer
-}
-
-//func testClassGathering() throws {
-//    let file = "/Users/loganwright/Desktop/test/Tests/AppTests/NestedClassTests.swift"
+    return try Gatherer.processFile(at: file)
 //    let url = URL(fileURLWithPath: file)
 //    let sourceFile = try SyntaxTreeParser.parse(url)
 //    let gatherer = Gatherer()
 //    gatherer.visit(sourceFile)
-//    let foundClasses = try gatherer.potentialTestCases.map { try $0.flattenedName() }
-//    let expectation = [
-//        "A",
-//        "A.B",
-//        "A.C",
-//        "A.B.C",
-//        "D.C"
-//    ]
-//    XCTAssert(foundClasses == expectation, msg: "Parsing nested classes didn't work as expected.")
-//}
-
-//func testFunctionGathering() throws {
-//    let file = "/Users/loganwright/Desktop/test/Tests/AppTests/FunctionTestCases.swift"
-//    let url = URL(fileURLWithPath: file)
-//    let sourceFile = try SyntaxTreeParser.parse(url)
-//    let gatherer = Gatherer()
-//    gatherer.visit(sourceFile)
-//    print("Found classes: ")
-//    print(try gatherer.potentialTestCases.map { try $0.flattenedName() }.joined(separator: "\n"))
-//    print("Found potential tests: ")
-////    print(gatherer.potentialTestFunctions.map { $0.identifier.text }.joined(separator: "\n"))
-//    print("")
-//}
-
-func parseModule() {
-
+//    return gatherer
 }
 
+struct Module {
+    let name: String
+    let suite: TestSuite
+
+    func simpleSuite() throws -> [(testCase: String, tests: [String])] {
+        var simple: [(testCase: String, tests: [String])] = []
+
+        // simplify
+        try suite.forEach { testCase, tests in
+            let tests = tests.map { $0.identifier.description }
+            let testCase = try testCase.flattenedName()
+
+            // Can't have `extension Module.Module {` where testCase
+            // and Module name are the same or compiler crashes
+            let validTestCaseName: String
+            if testCase == name {
+                validTestCaseName = testCase
+            } else {
+                validTestCaseName = name + "." + testCase
+            }
+            simple.append((validTestCaseName, tests))
+        }
+
+        // alphabetical for consistency
+        return simple.sorted { $0.testCase < $1.testCase }
+    }
+}
 
 /*
- ALL FUNCTIONS
- - FUNCTION NAME
- - PARENT NAME
+ import XCTest
 
- ALL CLASSES
- - NAME
- - INHERITANCE NAME
- // if XCTestCase.. ok, if not, see if class exists in our tree
+ @testable import VaporToolboxTests
+
+ extension VaporToolboxTests {
+ static let __allTests = [
+ ("testNothing", testNothing),
+ ("testFail", testFail),
+ ]
+ }
+
+ #if !os(macOS)
+ public func __allTests() -> [XCTestCaseEntry] {
+ return [
+ testCase(VaporToolboxTests.__allTests),
+ ]
+ }
+
+ var tests = [XCTestCaseEntry]()
+ tests += __allTests()
+
+ XCTMain(tests)
+ #endif
  */
 
-/*
 
- */
+func loadModules(in testDirectory: String) throws -> [Module] {
+    let testDirectory = testDirectory.finished(with: "/")
+    guard isDirectory(in: testDirectory) else { throw "no test directory found" }
+    let testModules = try findTestModules(in: testDirectory)
+    return try testModules.map { moduleName in
+        let moduleDirectory = testDirectory + moduleName
+        let suite = try loadTestSuite(in: moduleDirectory)
+        return Module(name: moduleName, suite: suite)
+    }
+}
 
-//struct TestClass {
-//    let parentClass: String
-//}
-//struct TestFunction {
-//    let parentClass: String
-//    let functionName: String
-//}
+func testModuleParsing(in testDirectory: String) throws {
+    let testDirectory = testDirectory.finished(with: "/")
+    guard isDirectory(in: testDirectory) else { throw "no test directory found" }
+    let files = try findTestModules(in: testDirectory)
 
-func buildInheritanceTree(with gatherer: Gatherer) throws {
-//    let foundCases = try gatherer.testCases()
-//    print("Cases: ")
-//    print(try foundCases.map { try $0.flattenedName() } .joined(separator: "\n"))
-//    let foundTests = try gatherer.tests()
-//    print("Tests: ")
-//    print(foundTests.map { $0.identifier.description } .joined(separator: "\n"))
-//    print("")
-
-    let testSuite = try gatherer.makeTestSuite()
-//    print("Got testSuite: \n\(testSuite)")
-//    let writer = Writer(suite: testSuite)
-//    writer.write()
+    print("Found subdirectories: \(files)")
     print("")
 }
 
-func asdf() {
-    let ex = ExtensionDeclSyntax { (builder) in
+func isDirectory(in parentDirectory: String) -> Bool {
+    let parentDirectory = parentDirectory.finished(with: "/")
+    var isDir: ObjCBool = false
+    let _ = FileManager.default.fileExists(atPath: parentDirectory, isDirectory: &isDir)
+    return isDir.boolValue
+}
 
+func findTestModules(in directory: String) throws -> [String] {
+    let directory = directory.finished(with: "/")
+    return try FileManager.default
+        .contentsOfDirectory(atPath: directory)
+        .filter { isDirectory(in: directory + $0) }
+        .filter { $0.hasSuffix("Tests") }
+}
+
+func loadTestSuite(in directory: String) throws -> TestSuite {
+    let directory = directory.finished(with: "/")
+    return try FileManager.default
+        .contentsOfDirectory(atPath: directory)
+        .filter { $0.hasSuffix(".swift") }
+        .map { directory + $0 }
+        .map(Gatherer.processFile)
+        .merge()
+        .makeTestSuite()
+}
+
+extension Module: CustomStringConvertible {
+    var description: String {
+        var desc = "\n"
+        desc += "MODULE:\n\(name)\n"
+        desc += "SUITE:\n"
+        desc += suite.description
+        return desc
     }
 }
 
-extension Array where Element == Syntax {
-    var containsClassOrExtension: Bool {
-        return contains { $0 is ExtensionDeclSyntax || $0 is ClassDeclSyntax}
+extension Dictionary: CustomStringConvertible where Key == ClassDeclSyntax, Value == Array<FunctionDeclSyntax> {
+    var description: String {
+        var desc = ""
+        forEach { testCase, tests in
+            let flattened = try? testCase.flattenedName()
+            desc += "\(flattened ?? "<unable to flatten>")\n"
+            tests.forEach { test in
+                desc += "\t\(test.identifier)\n"
+            }
+        }
+        return desc
     }
 }
 
-/*
- FILE PARSE RESULTS
- CLASS:
-    - Name
-    - InheritedFrom
-    - ValidTestCases: [FUNCTION]
- FUNCTION:
-    - Name
-    - DeclaredWithin (Extension, Class)
-
- */
-
-/*
- TEST RESULTS
- - class name
- - inheritance class
- • if XCTestCase – good to go
- • if class that inherits XCTest – good to go
- */
-
-/*
- Is a class a testcase?
- - is it a class?
- - does it inherit XCTestCase
- */
-
-
+func logSuite(_ suite: TestSuite) {
+    print(suite)
+}

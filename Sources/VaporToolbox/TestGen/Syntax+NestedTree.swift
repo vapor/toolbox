@@ -14,3 +14,9 @@ extension Syntax {
         else { return parent.parentTreeContains(cds) }
     }
 }
+
+extension Array where Element == Syntax {
+    var containsClassOrExtension: Bool {
+        return contains { $0 is ExtensionDeclSyntax || $0 is ClassDeclSyntax}
+    }
+}

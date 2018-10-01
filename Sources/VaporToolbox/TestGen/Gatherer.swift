@@ -1,20 +1,47 @@
+import Foundation
 import SwiftSyntax
 
-public typealias TestSuite = [ClassDeclSyntax: [FunctionDeclSyntax]]
+typealias TestSuite = [ClassDeclSyntax: [FunctionDeclSyntax]]
 
-public class Gatherer: SyntaxVisitor {
-    private var potentialTestCases: [ClassDeclSyntax] = []
-    private var potentialTestFunctions: [FunctionDeclSyntax] = []
+class Gatherer: SyntaxVisitor {
+    fileprivate private(set) var potentialTestCases: [ClassDeclSyntax] = []
+    fileprivate private(set) var potentialTestFunctions: [FunctionDeclSyntax] = []
 
-    public override func visit(_ node: ClassDeclSyntax) {
+    override func visit(_ node: ClassDeclSyntax) {
         defer { super.visit(node) }
         potentialTestCases.append(node)
     }
 
-    public override func visit(_ node: FunctionDeclSyntax) {
+    override func visit(_ node: FunctionDeclSyntax) {
         defer { super.visit(node) }
         guard node.looksLikeTestFunction else { return }
         potentialTestFunctions.append(node)
+    }
+}
+
+extension Gatherer {
+    static func processFile(at url: String) throws -> Gatherer {
+        let url = URL(fileURLWithPath: url)
+        let sourceFile = try SyntaxTreeParser.parse(url)
+        let gatherer = Gatherer()
+        gatherer.visit(sourceFile)
+        return gatherer
+    }
+}
+
+extension Gatherer {
+    fileprivate convenience init(potentialTestFunctions: [FunctionDeclSyntax], potentialTestCases: [ClassDeclSyntax]) {
+        self.init()
+        self.potentialTestFunctions = potentialTestFunctions
+        self.potentialTestCases = potentialTestCases
+    }
+}
+
+extension Array where Element == Gatherer {
+    func merge() -> Gatherer {
+        let potentialTestFunctions = self.reduce([]) { val, next in val + next.potentialTestFunctions }
+        let potentialTestCases = self.reduce([]) { val, next in val + next.potentialTestCases }
+        return Gatherer(potentialTestFunctions: potentialTestFunctions, potentialTestCases: potentialTestCases)
     }
 }
 
@@ -32,7 +59,7 @@ extension Gatherer {
         }
     }
 
-    public func makeTestSuite() throws -> TestSuite {
+    func makeTestSuite() throws -> TestSuite {
         struct Holder {
             static var testSuite: TestSuite? = nil
         }
