@@ -27,60 +27,20 @@
 import SwiftSyntax
 import Foundation
 
-class ManifestParser: SyntaxVisitor {
-    override func visitPre(_ node: Syntax) {
-        defer { super.visitPre(node) }
-//        guard let argumentSyntax = node as? FunctionCallArgumentSyntax else { return }
-        print("Visited: \(type(of: node))")
-        print("Found:\n\(node)")
-        print("")
-    }
-
-    override func visit(_ node: FunctionCallArgumentSyntax) {
-        defer { super.visit(node) }
-        print("")
-    }
-}
-
-func testManifestParser() throws {
-    let file = "/Users/loganwright/Desktop/test/Package.swift"
-    let url = URL(fileURLWithPath: file)
-    let sourceFile = try SyntaxTreeParser.parse(url)
-    ManifestParser().visit(sourceFile)
-}
-
 public func syntaxTesting() throws {
-    try testManifestParser()
-    try testWriter()
     let gatherer = try makeGatherer()
     try buildInheritanceTree(with: gatherer)
-//    try testGathering()
-//    try testFunctionGathering()
-//    try testClassGathering()
+}
 
-//    try testGathering()
-//    try testSimple()
-//    let file = "/Users/loganwright/Desktop/test/Tests/AppTests/TestCases.swift"
+
+//func testSimple() throws {
+//    let file = "/Users/loganwright/Desktop/test/Tests/AppTests/NestedClassTests.swift"
 //    let url = URL(fileURLWithPath: file)
 //    let sourceFile = try SyntaxTreeParser.parse(url)
-//    let gatherer = TestFunctionGatherer()
+//    let gatherer = ClassGatherer()
 //    gatherer.visit(sourceFile)
-//    print(gatherer.testFunctions)
-//    //    Visitor().visit(sourceFile)
-//    //    TestFunctionLoader().visit(sourceFile)
-//    print(sourceFile)
 //    print("")
-}
-
-
-func testSimple() throws {
-    let file = "/Users/loganwright/Desktop/test/Tests/AppTests/NestedClassTests.swift"
-    let url = URL(fileURLWithPath: file)
-    let sourceFile = try SyntaxTreeParser.parse(url)
-    let gatherer = ClassGatherer()
-    gatherer.visit(sourceFile)
-    print("")
-}
+//}
 
 //func testGathering() throws {
 //    let file = "/Users/loganwright/Desktop/test/Tests/AppTests/NestedClassTests.swift"
@@ -180,22 +140,14 @@ func buildInheritanceTree(with gatherer: Gatherer) throws {
 
     let testSuite = try gatherer.makeTestSuite()
 //    print("Got testSuite: \n\(testSuite)")
-    let writer = Writer(suite: testSuite)
-    writer.write()
+//    let writer = Writer(suite: testSuite)
+//    writer.write()
     print("")
 }
 
 func asdf() {
     let ex = ExtensionDeclSyntax { (builder) in
 
-    }
-}
-
-extension Syntax {
-    fileprivate func parentTreeContains(_ cds: ClassDeclSyntax) -> Bool {
-        guard let parent = parent else { return false }
-        if let parent = parent as? ClassDeclSyntax, parent == cds { return true }
-        else { return parent.parentTreeContains(cds) }
     }
 }
 
@@ -231,129 +183,4 @@ extension Array where Element == Syntax {
  - does it inherit XCTestCase
  */
 
-struct Object {
-    let name: String
-    let inheritance: String?
-}
 
-class ClassGatherer: SyntaxVisitor {
-    var testFunctions: [String] = []
-    var classes: [ClassDeclSyntax] = []
-    override func visit(_ node: ClassDeclSyntax) {
-        print(node.identifier.text)
-        let flattened = try! node.flattenedName()
-        print(flattened)
-        print("")
-        super.visit(node)
-    }
-
-    override func visit(_ node: FunctionDeclSyntax) {
-        guard node.looksLikeTestFunction else { return }
-        testFunctions.append(node.identifier.text)
-    }
-}
-
-extension Gatherer {
-    // WARN: Need to use strings, not ClassDeclSyntax objects
-    // because in other files, they are not directly linked
-    func directXCTestInheritors() -> [ClassDeclSyntax] {
-        fatalError("")
-    }
-}
-
-extension ExtensionDeclSyntax {
-    var extendedTypeName: String {
-        return extendedType.description.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-}
-
-class TestFunctionGatherer: SyntaxVisitor {
-
-    var testFunctions: [String] = []
-
-    override func visit(_ node: ClassDeclSyntax) {
-        print(node.identifier.text)
-        print("")
-        let inheritance = node.inheritanceClause
-        print(inheritance)
-        let collection = inheritance?.inheritedTypeCollection
-        var iterator = collection?.makeIterator()
-        while let next = iterator?.next() {
-            print(next.typeName)
-            print("")
-        }
-        print(inheritance?.inheritedTypeCollection)
-
-        print(node.inheritanceClause)
-        print(node)
-        print("")
-        super.visit(node)
-    }
-
-    override func visit(_ node: FunctionDeclSyntax) {
-        guard node.looksLikeTestFunction else { return }
-        testFunctions.append(node.identifier.text)
-    }
-}
-
-class Visitor: SyntaxVisitor {
-    override func visit(_ node: FunctionDeclSyntax) {
-        //        print("**\(#line): \(node)")
-        print(node.identifier)
-        print(node.signature)
-        let sig = node.signature
-        print(sig.input)
-        print(sig.input.parameterList.count)
-        print(sig.output)
-        print(sig.throwsOrRethrowsKeyword)
-        //        print(node.attributes)
-        //        print(node.funcKeyword)
-        //        print(node.)
-        print("")
-    }
-
-    override func visit(_ node: FunctionParameterListSyntax) {
-        print(node)
-        print("")
-    }
-
-    //    override func visit(_ node: FunctionCallArgumentListSyntax) {
-    //        print(node)
-    //        print("")
-    //    }
-    //    override func visit(_ node: FunctionCallArgumentSyntax) {
-    //        print(node)
-    //        print("")
-    //    }
-
-    override func visit(_ node: FunctionSignatureSyntax) {
-        //        print("**\(#line): \(node)")
-    }
-}
-
-class TestFunctionLoader: SyntaxRewriter {
-    var functions: [String] = []
-
-    override func visitPre(_ node: Syntax) {
-        print("Got node: \(node)")
-        super.visitPre(node)
-    }
-    override func visit(_ token: TokenSyntax) -> Syntax {
-
-        return token
-    }
-}
-
-func testWriter() throws {
-    return
-//    let file = "/Users/loganwright/Desktop/test/Tests/AppTests/Empty.swift"
-//    let url = URL(fileURLWithPath: file)
-//    let sourceFile = try SyntaxTreeParser.parse(url)
-//    print(sourceFile)
-//    let writer = Writer()
-//    let foo = writer.visit(sourceFile)
-//    print(foo)
-//    print("")
-}
-
-typealias TestSuite = [ClassDeclSyntax: [FunctionDeclSyntax]]

@@ -1,15 +1,17 @@
 import SwiftSyntax
 
-class Gatherer: SyntaxVisitor {
+public typealias TestSuite = [ClassDeclSyntax: [FunctionDeclSyntax]]
+
+public class Gatherer: SyntaxVisitor {
     private var potentialTestCases: [ClassDeclSyntax] = []
     private var potentialTestFunctions: [FunctionDeclSyntax] = []
 
-    override func visit(_ node: ClassDeclSyntax) {
+    public override func visit(_ node: ClassDeclSyntax) {
         defer { super.visit(node) }
         potentialTestCases.append(node)
     }
 
-    override func visit(_ node: FunctionDeclSyntax) {
+    public override func visit(_ node: FunctionDeclSyntax) {
         defer { super.visit(node) }
         guard node.looksLikeTestFunction else { return }
         potentialTestFunctions.append(node)
@@ -30,8 +32,14 @@ extension Gatherer {
         }
     }
 
-    func makeTestSuite() throws -> [ClassDeclSyntax: [FunctionDeclSyntax]] {
-        var testSuite: [ClassDeclSyntax: [FunctionDeclSyntax]] = [:]
+    public func makeTestSuite() throws -> TestSuite {
+        struct Holder {
+            static var testSuite: TestSuite? = nil
+        }
+        if let suite = Holder.testSuite { return suite }
+
+        // make if necessary
+        var testSuite: TestSuite = [:]
         let validTests = try tests()
         let validCases = try testCases()
         for test in validTests {
@@ -42,6 +50,9 @@ extension Gatherer {
             existing.append(test)
             testSuite[testCase] = existing
         }
+
+        // set to holder to keep prevent duplicate processing
+        Holder.testSuite = testSuite
         return testSuite
     }
 }
