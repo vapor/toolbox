@@ -6,7 +6,8 @@ typealias TestSuite = [ClassDeclSyntax: [FunctionDeclSyntax]]
 class Gatherer: SyntaxVisitor {
     fileprivate private(set) var potentialTestCases: [ClassDeclSyntax] = []
     fileprivate private(set) var potentialTestFunctions: [FunctionDeclSyntax] = []
-
+    fileprivate var _testSuite: TestSuite? = nil
+    
     override func visit(_ node: ClassDeclSyntax) {
         defer { super.visit(node) }
         potentialTestCases.append(node)
@@ -60,10 +61,7 @@ extension Gatherer {
     }
 
     func makeTestSuite() throws -> TestSuite {
-        struct Holder {
-            static var testSuite: TestSuite? = nil
-        }
-        if let suite = Holder.testSuite { return suite }
+        if let suite = _testSuite { return suite }
 
         // make if necessary
         var testSuite: TestSuite = [:]
@@ -79,7 +77,7 @@ extension Gatherer {
         }
 
         // set to holder to keep prevent duplicate processing
-        Holder.testSuite = testSuite
+        _testSuite = testSuite
         return testSuite
     }
 }

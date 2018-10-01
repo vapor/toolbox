@@ -35,8 +35,8 @@ import Foundation
 
 public func syntaxTesting() throws {
 //    try testModuleParsing(in: "/Users/loganwright/Desktop/test/Tests")
-//    let modules = try loadModules(in: "/Users/loganwright/Desktop/test/Tests")
-    let modules = try loadModules(in: "/Users/loganwright/Desktop/toolbox/Tests")
+    let modules = try loadModules(in: "/Users/loganwright/Desktop/test/Tests")
+//    let modules = try loadModules(in: "/Users/loganwright/Desktop/toolbox/Tests")
     print("LinuxMain:")
     print("\n\n")
     print(try modules.generateLinuxMain())
@@ -57,42 +57,6 @@ func makeGatherer() throws -> Gatherer {
 //    let gatherer = Gatherer()
 //    gatherer.visit(sourceFile)
 //    return gatherer
-}
-
-struct Module {
-    let name: String
-    // TODO: Protect Privately?
-    let suite: TestSuite
-
-    func simpleSuite() throws -> [(testCase: String, tests: [String])] {
-        struct Holder {
-            static var val: [(testCase: String, tests: [String])]? = nil
-        }
-        if let val = Holder.val { return val }
-
-        var simple: [(testCase: String, tests: [String])] = []
-
-        // simplify
-        try suite.forEach { testCase, tests in
-            let tests = tests.map { $0.identifier.description }
-            let testCase = try testCase.flattenedName()
-
-            // Can't have `extension Module.Module {` where testCase
-            // and Module name are the same or compiler crashes
-            let validTestCaseName: String
-            if testCase == name {
-                validTestCaseName = testCase
-            } else {
-                validTestCaseName = name + "." + testCase
-            }
-            simple.append((validTestCaseName, tests))
-        }
-
-        // alphabetical for consistency
-        let val = simple.sorted { $0.testCase < $1.testCase }
-        Holder.val = val
-        return val
-    }
 }
 
 /*

@@ -24,15 +24,7 @@ extension Array where Element == Module {
         block += "public func __allTests() -> [XCTestCaseEntry] {\n"
         block += "\treturn [\n"
         try forEach { module in
-            try module.simpleSuite().forEach { (testCase, _) in
-//                let testCase = try testCase.flattenedName()
-//                // If class name is same as module name, you can't use `extension Name.Name` or compiler will fail
-//                let extensionName: String
-//                if testCase == module.name {
-//                    extensionName = testCase
-//                } else {
-//                    extensionName = module.name + "." + testCase
-//                }
+            try module.simplifiedSuite().forEach { (testCase, _) in
                 block += "\t\ttestCase(\(testCase).__allTests),\n"
             }
         }
@@ -45,10 +37,9 @@ extension Array where Element == Module {
     }
 }
 
-import SwiftSyntax
 extension Module {
     func generateAllTestsVariableCodeBlock() throws -> String {
-        return try simpleSuite().map(generateBlockFor).joined(separator: "\n\n")
+        return try simplifiedSuite().map(generateBlockFor).joined(separator: "\n\n")
     }
 
     private func generateBlockFor(testCase: String, tests: [String]) throws -> String {
