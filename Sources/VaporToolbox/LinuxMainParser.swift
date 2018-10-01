@@ -37,9 +37,9 @@ public func syntaxTesting() throws {
     let modules = try loadModules(in: "/Users/loganwright/Desktop/test/Tests")
 //    let modules = try loadModules(in: "/Users/loganwright/Desktop/toolbox/Tests")
     print("LinuxMain:")
-    print("\n\n")
+    print("\n\n************")
     print(modules.generateLinuxMain())
-    print("")
+    print("n************")
 }
 
 func loadModules(in testDirectory: String) throws -> [Module] {
@@ -93,7 +93,7 @@ extension Module: CustomStringConvertible {
         var desc = "\n"
         desc += "MODULE:\n\(name)\n"
         desc += "SUITE:\n"
-        desc += simplifiedSuite().description
+        desc += simplified.description
         return desc
     }
 }

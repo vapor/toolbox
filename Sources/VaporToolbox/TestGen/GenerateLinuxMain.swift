@@ -1,31 +1,56 @@
+struct LinuxMain {
+    // TODO:
+    // - ignorable directories
+    static func generate(fromTestsDirectory testsDirectory: String) throws -> String {
+        fatalError()
+    }
+}
+
 extension Array where Element == Module {
     func generateLinuxMain() -> String {
-        var linuxMain = "import XCTest\n\n"
+        var linuxMain = ""
 
         // build imports
-        linuxMain += map { "@testable import \($0.name)" } .joined(separator: "\n")
-        linuxMain += "\n\n"
+        linuxMain += imports()
 
-        // extension imports
-        forEach { module in
-            linuxMain += "// MARK: \(module.name)\n\n"
-            linuxMain += module.generateAllTestsVariableCodeBlock()
-            linuxMain += "\n\n"
-        }
+        // extensions
+        linuxMain += extensions()
 
-        linuxMain += generateLinuxTestImports()
-        linuxMain += "\n\n"
+        // test runner
+        linuxMain += testRunner()
+
         // return
         return linuxMain
     }
 
-    private func generateLinuxTestImports() -> String {
-        var block = "#if !os(macOS)\n"
+    private func imports() -> String {
+        var imports = ""
+        imports += "import XCTest\n\n"
+        forEach { module in
+            imports += "@testable import \(module.name)\n"
+        }
+        imports += "\n"
+        return imports
+    }
+
+    private func extensions() -> String {
+        var extens = ""
+        forEach { module in
+            extens += "// MARK: \(module.name)\n\n"
+            extens += module.generateExtensions()
+            extens += "\n\n"
+        }
+        return extens
+    }
+
+    private func testRunner() -> String {
+        var block = "// MARK: Test Runner"
+        block += "#if !os(macOS)\n"
         block += "public func __allTests() -> [XCTestCaseEntry] {\n"
         block += "\treturn [\n"
         forEach { module in
             block += "\t\t// \(module.name)\n"
-            module.simplifiedSuite().forEach { (testCase, _) in
+            module.simplified.forEach { testCase in
                 block += "\t\ttestCase(\(testCase).__allTests),\n"
             }
         }
@@ -39,12 +64,14 @@ extension Array where Element == Module {
 }
 
 extension Module {
-    func generateAllTestsVariableCodeBlock() -> String {
-        return simplifiedSuite().map(generateBlockFor).joined(separator: "\n\n")
+    func generateExtensions() -> String {
+        return simplified.map { $0.generateExtension() } .joined(separator: "\n\n")
     }
+}
 
-    private func generateBlockFor(testCase: String, tests: [String]) -> String {
-        var block = "extension \(testCase) {\n"
+extension SimpleTestCase {
+    fileprivate func generateExtension() -> String {
+        var block = "extension \(name) {\n"
         block += "\t"
         block += "static let __allTests = [\n"
         tests.forEach {
@@ -55,3 +82,4 @@ extension Module {
         return block
     }
 }
+

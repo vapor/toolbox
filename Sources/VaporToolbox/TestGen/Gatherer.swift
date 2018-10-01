@@ -3,6 +3,12 @@ import SwiftSyntax
 
 typealias TestSuite = [ClassDeclSyntax: [FunctionDeclSyntax]]
 
+struct SimpleTestCase {
+    let name: String
+    let tests: [String]
+}
+typealias SimplifiedTestSuite = [SimpleTestCase]
+
 class Gatherer: SyntaxVisitor {
     fileprivate private(set) var potentialTestCases: [ClassDeclSyntax] = []
     fileprivate private(set) var potentialTestFunctions: [FunctionDeclSyntax] = []

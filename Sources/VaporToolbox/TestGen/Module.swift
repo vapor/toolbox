@@ -3,38 +3,37 @@ import SwiftSyntax
 final class Module {
     let name: String
     let suite: TestSuite
-
-    fileprivate var _simplifiedSuite: [(testCase: String, tests: [String])]? = nil
+    let simplified: SimplifiedTestSuite
 
     init(name: String, suite: TestSuite) {
         self.name = name
         self.suite = suite
+        self.simplified = suite.simplified(withModuleName: name)
     }
+}
 
-    func simplifiedSuite() -> [(testCase: String, tests: [String])] {
-        if let val = _simplifiedSuite { return val }
-
-        var simple: [(testCase: String, tests: [String])] = []
+extension Dictionary where Key == ClassDeclSyntax, Value == [FunctionDeclSyntax] {
+    func simplified(withModuleName moduleName: String) -> SimplifiedTestSuite {
+        var simple: SimplifiedTestSuite = []
 
         // simplify
-        suite.forEach { testCase, tests in
+        forEach { testCase, tests in
             let tests = tests.map { $0.identifier.description }
             let testCase = testCase.flattenedName()
 
             // Can't have `extension Module.Module {` where testCase
             // and Module name are the same or compiler crashes
             let validTestCaseName: String
-            if testCase == name {
+            if testCase == moduleName {
                 validTestCaseName = testCase
             } else {
-                validTestCaseName = name + "." + testCase
+                validTestCaseName = moduleName + "." + testCase
             }
-            simple.append((validTestCaseName, tests))
+
+            simple.append(.init(name: validTestCaseName, tests: tests))
         }
 
         // alphabetical for consistency
-        let val = simple.sorted { $0.testCase < $1.testCase }
-        _simplifiedSuite = val
-        return val
+        return simple.sorted { $0.name < $1.name }
     }
 }
