@@ -24,6 +24,7 @@ extension Array where Element == Module {
         block += "public func __allTests() -> [XCTestCaseEntry] {\n"
         block += "\treturn [\n"
         try forEach { module in
+            block += "\t\t// \(module.name)\n"
             try module.simplifiedSuite().forEach { (testCase, _) in
                 block += "\t\ttestCase(\(testCase).__allTests),\n"
             }

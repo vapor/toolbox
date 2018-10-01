@@ -34,57 +34,13 @@ import SwiftSyntax
 import Foundation
 
 public func syntaxTesting() throws {
-//    try testModuleParsing(in: "/Users/loganwright/Desktop/test/Tests")
     let modules = try loadModules(in: "/Users/loganwright/Desktop/test/Tests")
 //    let modules = try loadModules(in: "/Users/loganwright/Desktop/toolbox/Tests")
     print("LinuxMain:")
     print("\n\n")
     print(try modules.generateLinuxMain())
     print("")
-//    let testSuite = try loadTestSuite(in: "/Users/loganwright/Desktop/test/Tests/AppTests")
-//    let gatherer = try makeGatherer()
-//    let testSuite = try gatherer.makeTestSuite()
-//    logSuite(testSuite)
-//    print(testSuite)
-//    print("")
 }
-
-func makeGatherer() throws -> Gatherer {
-    let file = "/Users/loganwright/Desktop/test/Tests/AppTests/NestedClassTests.swift"
-    return try Gatherer.processFile(at: file)
-//    let url = URL(fileURLWithPath: file)
-//    let sourceFile = try SyntaxTreeParser.parse(url)
-//    let gatherer = Gatherer()
-//    gatherer.visit(sourceFile)
-//    return gatherer
-}
-
-/*
- import XCTest
-
- @testable import VaporToolboxTests
-
- extension VaporToolboxTests {
- static let __allTests = [
- ("testNothing", testNothing),
- ("testFail", testFail),
- ]
- }
-
- #if !os(macOS)
- public func __allTests() -> [XCTestCaseEntry] {
- return [
- testCase(VaporToolboxTests.__allTests),
- ]
- }
-
- var tests = [XCTestCaseEntry]()
- tests += __allTests()
-
- XCTMain(tests)
- #endif
- */
-
 
 func loadModules(in testDirectory: String) throws -> [Module] {
     let testDirectory = testDirectory.finished(with: "/")
@@ -137,25 +93,8 @@ extension Module: CustomStringConvertible {
         var desc = "\n"
         desc += "MODULE:\n\(name)\n"
         desc += "SUITE:\n"
-        desc += suite.description
+        let suite = try? simplifiedSuite().description
+        desc += suite ?? "<suite parsing failed>"
         return desc
     }
-}
-
-extension Dictionary: CustomStringConvertible where Key == ClassDeclSyntax, Value == Array<FunctionDeclSyntax> {
-    var description: String {
-        var desc = ""
-        forEach { testCase, tests in
-            let flattened = try? testCase.flattenedName()
-            desc += "\(flattened ?? "<unable to flatten>")\n"
-            tests.forEach { test in
-                desc += "\t\(test.identifier)\n"
-            }
-        }
-        return desc
-    }
-}
-
-func logSuite(_ suite: TestSuite) {
-    print(suite)
 }

@@ -2,7 +2,6 @@ import SwiftSyntax
 
 final class Module {
     let name: String
-    // TODO: Protect Privately?
     let suite: TestSuite
     fileprivate var _simplifiedSuite: [(testCase: String, tests: [String])]? = nil
 
