@@ -42,7 +42,7 @@ extension SimpleTestCase {
     // unique test function names for each
     fileprivate var testsVariableName: String {
         let stripped = name.components(separatedBy: ".").joined()
-        return "__allTests\(stripped)"
+        return "__all\(stripped)Tests"
     }
 }
 
