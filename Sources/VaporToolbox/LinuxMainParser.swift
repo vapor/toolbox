@@ -61,9 +61,15 @@ func makeGatherer() throws -> Gatherer {
 
 struct Module {
     let name: String
+    // TODO: Protect Privately?
     let suite: TestSuite
 
     func simpleSuite() throws -> [(testCase: String, tests: [String])] {
+        struct Holder {
+            static var val: [(testCase: String, tests: [String])]? = nil
+        }
+        if let val = Holder.val { return val }
+
         var simple: [(testCase: String, tests: [String])] = []
 
         // simplify
@@ -83,7 +89,9 @@ struct Module {
         }
 
         // alphabetical for consistency
-        return simple.sorted { $0.testCase < $1.testCase }
+        let val = simple.sorted { $0.testCase < $1.testCase }
+        Holder.val = val
+        return val
     }
 }
 

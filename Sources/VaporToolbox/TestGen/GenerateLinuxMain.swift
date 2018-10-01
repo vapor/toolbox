@@ -24,16 +24,16 @@ extension Array where Element == Module {
         block += "public func __allTests() -> [XCTestCaseEntry] {\n"
         block += "\treturn [\n"
         try forEach { module in
-            try module.suite.keys.forEach { testCase in
-                let testCase = try testCase.flattenedName()
-                // If class name is same as module name, you can't use `extension Name.Name` or compiler will fail
-                let extensionName: String
-                if testCase == module.name {
-                    extensionName = testCase
-                } else {
-                    extensionName = module.name + "." + testCase
-                }
-                block += "\t\ttestCase(\(extensionName).__allTests),\n"
+            try module.simpleSuite().forEach { (testCase, _) in
+//                let testCase = try testCase.flattenedName()
+//                // If class name is same as module name, you can't use `extension Name.Name` or compiler will fail
+//                let extensionName: String
+//                if testCase == module.name {
+//                    extensionName = testCase
+//                } else {
+//                    extensionName = module.name + "." + testCase
+//                }
+                block += "\t\ttestCase(\(testCase).__allTests),\n"
             }
         }
         block += "\t]\n"
@@ -48,24 +48,15 @@ extension Array where Element == Module {
 import SwiftSyntax
 extension Module {
     func generateAllTestsVariableCodeBlock() throws -> String {
-        return try suite.map(generateBlockFor).joined(separator: "\n\n")
+        return try simpleSuite().map(generateBlockFor).joined(separator: "\n\n")
     }
 
-    private func generateBlockFor(testCase: ClassDeclSyntax, tests: [FunctionDeclSyntax]) throws -> String {
-        let testCase = try testCase.flattenedName()
-
-        // If class name is same as module name, you can't use `extension Name.Name` or compiler will fail
-        let extensionName: String
-        if testCase == name {
-            extensionName = testCase
-        } else {
-            extensionName = name + "." + testCase
-        }
-        var block = "extension \(extensionName) {\n"
+    private func generateBlockFor(testCase: String, tests: [String]) throws -> String {
+        var block = "extension \(testCase) {\n"
         block += "\t"
         block += "static let __allTests = [\n"
-        tests.map { "(\"\($0.identifier)\", \($0.identifier))" }.forEach { test in
-            block += "\t\t\(test),\n"
+        tests.forEach {
+            block += "\t\t(\"\($0)\", \($0)),\n"
         }
         block += "\t]\n"
         block += "}"
