@@ -38,7 +38,7 @@ public func syntaxTesting() throws {
 //    let modules = try loadModules(in: "/Users/loganwright/Desktop/toolbox/Tests")
     print("LinuxMain:")
     print("\n\n")
-    print(try modules.generateLinuxMain())
+    print(modules.generateLinuxMain())
     print("")
 }
 
@@ -93,8 +93,7 @@ extension Module: CustomStringConvertible {
         var desc = "\n"
         desc += "MODULE:\n\(name)\n"
         desc += "SUITE:\n"
-        let suite = try? simplifiedSuite().description
-        desc += suite ?? "<suite parsing failed>"
+        desc += simplifiedSuite().description
         return desc
     }
 }

@@ -14,35 +14,35 @@ extension ClassDeclSyntax {
         return firstInheritance == "XCTestCase"
     }
 
-    func inheritsXCTestCase(using list: [ClassDeclSyntax]) throws -> Bool {
+    func inheritsXCTestCase(using list: [ClassDeclSyntax]) -> Bool {
         if inheritsDirectlyFromXCTestCase { return true }
-        guard let inheritance = try findDeclaredInheritance(using: list) else { return false }
-        return try inheritance.inheritsXCTestCase(using: list)
+        guard let inheritance = findDeclaredInheritance(using: list) else { return false }
+        return inheritance.inheritsXCTestCase(using: list)
     }
 
-    func findDeclaredInheritance(using list: [ClassDeclSyntax]) throws -> ClassDeclSyntax? {
+    func findDeclaredInheritance(using list: [ClassDeclSyntax]) -> ClassDeclSyntax? {
         guard let first = firstInheritance else { return nil }
-        let tree = try declarationTree()
+        let tree = declarationTree()
         // .dropLast() == removeSelf
         let nestingsMinusSelf = tree.dropLast()
         let potentiallyNestedInheritance = Array(nestingsMinusSelf + [first])
 
-        let nestedResult = try list.first { cds in
-            try potentiallyNestedInheritance == cds.declarationTree()
+        let nestedResult = list.first { cds in
+            potentiallyNestedInheritance == cds.declarationTree()
         }
         if let nestedResult = nestedResult { return nestedResult }
         else {
-            return try list.first { cds in
-                try cds.flattenedName() == first
+            return list.first { cds in
+                cds.flattenedName() == first
             }
         }
     }
 }
 
 extension Array where Element == ClassDeclSyntax {
-    func classMatching(_ exten: ExtensionDeclSyntax) throws -> ClassDeclSyntax? {
-        return try first { cds in
-            let name = try cds.flattenedName()
+    func classMatching(_ exten: ExtensionDeclSyntax) -> ClassDeclSyntax? {
+        return first { cds in
+            let name = cds.flattenedName()
             return name == exten.extendedTypeName
         }
     }

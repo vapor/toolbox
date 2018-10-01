@@ -47,16 +47,16 @@ extension Array where Element == Gatherer {
 }
 
 extension Gatherer {
-    private func testCases() throws -> [ClassDeclSyntax] {
-        return try potentialTestCases.filter { cd in
-            try cd.inheritsXCTestCase(using: potentialTestCases)
+    private func testCases() -> [ClassDeclSyntax] {
+        return potentialTestCases.filter { cd in
+            cd.inheritsXCTestCase(using: potentialTestCases)
         }
     }
 
-    private func tests() throws -> [FunctionDeclSyntax] {
-        let validCases = try testCases()
-        return try potentialTestFunctions.filter { f in
-            return try f.testCase(from: validCases) != nil
+    private func tests() -> [FunctionDeclSyntax] {
+        let validCases = testCases()
+        return potentialTestFunctions.filter { f in
+            return f.testCase(from: validCases) != nil
         }
     }
 
@@ -65,11 +65,11 @@ extension Gatherer {
 
         // make if necessary
         var testSuite: TestSuite = [:]
-        let validTests = try tests()
-        let validCases = try testCases()
+        let validTests = tests()
+        let validCases = testCases()
         for test in validTests {
             guard
-                let testCase = try test.testCase(from: validCases)
+                let testCase = test.testCase(from: validCases)
                 else { throw "unable to find test case for: \(test.identifier)" }
             var existing = testSuite[testCase] ?? []
             existing.append(test)

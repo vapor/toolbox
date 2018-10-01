@@ -7,22 +7,22 @@ extension ClassDeclSyntax: TypeDeclSyntax {}
 extension EnumDeclSyntax: TypeDeclSyntax {}
 extension StructDeclSyntax: TypeDeclSyntax {}
 extension DeclSyntax where Self: TypeDeclSyntax {
-    func flattenedName() throws -> String {
-        return try declarationTree().joined(separator: ".")
+    func flattenedName() -> String {
+        return declarationTree().joined(separator: ".")
     }
 
-    func declarationTree() throws -> [String] {
-        if isNestedInTypeDecl {
-            guard let outer = outerTypeDecl() else { throw "unable to find expected outer type decl" }
-            return try outer.declarationTree() + [identifier.text]
+    func declarationTree() -> [String] {
+        if let outerType = outerTypeDecl() {
+            return outerType.declarationTree() + [identifier.text]
         }
-        if isNestedInExtension {
-            guard let outer = outerExtensionDecl() else { throw "unable to find outer class" }
+
+        if let ext = outerExtensionDecl() {
             return [
-                outer.extendedTypeName,
+                ext.extendedTypeName,
                 identifier.text
             ]
         }
+
         return [identifier.text]
     }
 }

@@ -18,10 +18,10 @@ extension FunctionDeclSyntax {
 }
 
 extension FunctionDeclSyntax {
-    func testCase(from cases: [ClassDeclSyntax]) throws -> ClassDeclSyntax? {
+    func testCase(from cases: [ClassDeclSyntax]) -> ClassDeclSyntax? {
         if let cd = outerClassDecl(), cases.contains(cd) {
             return cd
-        } else if let ext = outerExtensionDecl(), let matched = try cases.classMatching(ext) {
+        } else if let ext = outerExtensionDecl(), let matched = cases.classMatching(ext) {
             return matched
         } else {
             return nil

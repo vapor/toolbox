@@ -1,5 +1,5 @@
 extension Array where Element == Module {
-    func generateLinuxMain() throws -> String {
+    func generateLinuxMain() -> String {
         var linuxMain = "import XCTest\n\n"
 
         // build imports
@@ -7,25 +7,25 @@ extension Array where Element == Module {
         linuxMain += "\n\n"
 
         // extension imports
-        try forEach { module in
+        forEach { module in
             linuxMain += "// MARK: \(module.name)\n\n"
-            linuxMain += try module.generateAllTestsVariableCodeBlock()
+            linuxMain += module.generateAllTestsVariableCodeBlock()
             linuxMain += "\n\n"
         }
 
-        linuxMain += try generateLinuxTestImports()
+        linuxMain += generateLinuxTestImports()
         linuxMain += "\n\n"
         // return
         return linuxMain
     }
 
-    private func generateLinuxTestImports() throws -> String {
+    private func generateLinuxTestImports() -> String {
         var block = "#if !os(macOS)\n"
         block += "public func __allTests() -> [XCTestCaseEntry] {\n"
         block += "\treturn [\n"
-        try forEach { module in
+        forEach { module in
             block += "\t\t// \(module.name)\n"
-            try module.simplifiedSuite().forEach { (testCase, _) in
+            module.simplifiedSuite().forEach { (testCase, _) in
                 block += "\t\ttestCase(\(testCase).__allTests),\n"
             }
         }
@@ -39,11 +39,11 @@ extension Array where Element == Module {
 }
 
 extension Module {
-    func generateAllTestsVariableCodeBlock() throws -> String {
-        return try simplifiedSuite().map(generateBlockFor).joined(separator: "\n\n")
+    func generateAllTestsVariableCodeBlock() -> String {
+        return simplifiedSuite().map(generateBlockFor).joined(separator: "\n\n")
     }
 
-    private func generateBlockFor(testCase: String, tests: [String]) throws -> String {
+    private func generateBlockFor(testCase: String, tests: [String]) -> String {
         var block = "extension \(testCase) {\n"
         block += "\t"
         block += "static let __allTests = [\n"
