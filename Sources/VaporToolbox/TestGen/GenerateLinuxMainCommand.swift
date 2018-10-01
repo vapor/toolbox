@@ -15,10 +15,8 @@ struct GenerateLinuxMain: Command {
     func run(using ctx: CommandContext) throws -> Future<Void> {
         let cwd = try Shell.cwd()
         let testsDirectory = cwd.finished(with: "/") + "Tests"
-        print("test dir: \(testsDirectory)")
         let linuxMain = try LinuxMain(testsDirectory: testsDirectory)
-        print("Got linux main: \(linuxMain)")
-//        try linuxMain.write()
+        try linuxMain.write()
         return .done(on: ctx.container)
     }
 }

@@ -70,7 +70,7 @@ extension Array where Element == Module {
     fileprivate func testRunner() -> String {
         var block = "// MARK: Test Runner\n\n"
         block += "#if !os(macOS)\n"
-        block += "public func __testEntryBuilder() -> [XCTestCaseEntry] {\n"
+        block += "public func __buildTestEntries() -> [XCTestCaseEntry] {\n"
         block += "\treturn [\n"
         forEach { module in
             block += "\t\t// \(module.name)\n"
@@ -80,7 +80,7 @@ extension Array where Element == Module {
         }
         block += "\t]\n"
         block += "}\n\n"
-        block += "let tests = __testEntryBuilder()\n"
+        block += "let tests = __buildTestEntries()\n"
         block += "XCTMain(tests)\n"
         block += "#endif\n\n"
         return block
