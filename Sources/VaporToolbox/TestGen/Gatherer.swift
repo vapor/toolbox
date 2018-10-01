@@ -7,6 +7,7 @@ struct SimpleTestCase {
     let name: String
     let tests: [String]
 }
+
 typealias SimplifiedTestSuite = [SimpleTestCase]
 
 class Gatherer: SyntaxVisitor {

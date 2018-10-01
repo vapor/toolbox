@@ -1,6 +1,5 @@
 import Foundation
 
-private let allTestsFunctionName = "___allTests"
 struct LinuxMain {
     let imports: String
     let extensions: String
@@ -37,6 +36,16 @@ extension LinuxMain: CustomStringConvertible {
     }
 }
 
+extension SimpleTestCase {
+    // overridden classes require property overrides
+    // it gets complicated unnecessarily, so we generate
+    // unique test function names for each
+    fileprivate var testsVariableName: String {
+        let stripped = name.components(separatedBy: ".").joined()
+        return "__allTests\(stripped)"
+    }
+}
+
 extension Array where Element == Module {
     fileprivate func imports() -> String {
         var imports = ""
@@ -61,17 +70,17 @@ extension Array where Element == Module {
     fileprivate func testRunner() -> String {
         var block = "// MARK: Test Runner\n\n"
         block += "#if !os(macOS)\n"
-        block += "public func \(allTestsFunctionName)() -> [XCTestCaseEntry] {\n"
+        block += "public func __testEntryBuilder() -> [XCTestCaseEntry] {\n"
         block += "\treturn [\n"
         forEach { module in
             block += "\t\t// \(module.name)\n"
             module.simplified.forEach { testCase in
-                block += "\t\ttestCase(\(testCase.name).\(allTestsFunctionName)),\n"
+                block += "\t\ttestCase(\(testCase.name).\(testCase.testsVariableName)),\n"
             }
         }
         block += "\t]\n"
         block += "}\n\n"
-        block += "let tests = \(allTestsFunctionName)()\n"
+        block += "let tests = __testEntryBuilder()\n"
         block += "XCTMain(tests)\n"
         block += "#endif\n\n"
         return block
@@ -88,7 +97,7 @@ extension SimpleTestCase {
     fileprivate func generateExtension() -> String {
         var block = "extension \(name) {\n"
         block += "\t"
-        block += "static let \(allTestsFunctionName) = [\n"
+        block += "static let \(testsVariableName) = [\n"
         tests.forEach {
             block += "\t\t(\"\($0)\", \($0)),\n"
         }
