@@ -356,32 +356,4 @@ func testWriter() throws {
 //    print("")
 }
 
-typealias TestSuite =  [ClassDeclSyntax: [FunctionDeclSyntax]]
-class Writer {
-    let suite: TestSuite
-
-    init(suite: [ClassDeclSyntax: [FunctionDeclSyntax]]) {
-        self.suite = suite
-    }
-
-    func write() {
-        let (testCase, functions) = suite.first!
-        let syntax = testCase.classKeyword
-        let extensionKeyword = testCase.classKeyword.withKind(.extensionKeyword)
-//        extensionKeyword.withTrailingTrivia(Trivia.)
-        let ext = ExtensionDeclSyntax { builder in
-            builder.useExtensionKeyword(extensionKeyword)
-//            builder.useExtendedType(testCase)//syntax.withKind(.identifier("")))
-//            builder.useMembers(testCase.members)
-//            builder.useExtensionKeyword()
-//            builder.useExtensionKeyword(testCase.classKeyword.withKind(.identifier(try! testCase.flattenedName())))
-        }
-        print(ext)
-        print("")
-        let member = MemberDeclBlockSyntax.init { (builder) in
-            builder.addDecl(ext)
-        }
-        print(member)
-        print("")
-    }
-}
+typealias TestSuite = [ClassDeclSyntax: [FunctionDeclSyntax]]
