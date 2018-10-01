@@ -1,29 +1,44 @@
+import Foundation
+
+private let allTestsFunctionName = "___allTests"
 struct LinuxMain {
+    let imports: String
+    let extensions: String
+    let testRunner: String
+
+    let testsDirectory: String
+
+    var fileName: String {
+        return testsDirectory + "LinuxMain.swift"
+    }
+    var fileContents: String {
+        return imports + extensions + testRunner
+    }
+
     // TODO:
     // - ignorable directories
-    static func generate(fromTestsDirectory testsDirectory: String) throws -> String {
-        fatalError()
+    init(testsDirectory: String) throws {
+        let modules = try loadModules(in: testsDirectory)
+        self.imports = modules.imports()
+        self.extensions = modules.extensions()
+        self.testRunner = modules.testRunner()
+
+        self.testsDirectory = testsDirectory.finished(with: "/")
+    }
+
+    func write() throws {
+        try fileContents.write(toFile: fileName, atomically: true, encoding: .utf8)
+    }
+}
+
+extension LinuxMain: CustomStringConvertible {
+    var description: String {
+        return fileContents
     }
 }
 
 extension Array where Element == Module {
-    func generateLinuxMain() -> String {
-        var linuxMain = ""
-
-        // build imports
-        linuxMain += imports()
-
-        // extensions
-        linuxMain += extensions()
-
-        // test runner
-        linuxMain += testRunner()
-
-        // return
-        return linuxMain
-    }
-
-    private func imports() -> String {
+    fileprivate func imports() -> String {
         var imports = ""
         imports += "import XCTest\n\n"
         forEach { module in
@@ -33,7 +48,7 @@ extension Array where Element == Module {
         return imports
     }
 
-    private func extensions() -> String {
+    fileprivate func extensions() -> String {
         var extens = ""
         forEach { module in
             extens += "// MARK: \(module.name)\n\n"
@@ -43,20 +58,20 @@ extension Array where Element == Module {
         return extens
     }
 
-    private func testRunner() -> String {
-        var block = "// MARK: Test Runner"
+    fileprivate func testRunner() -> String {
+        var block = "// MARK: Test Runner\n\n"
         block += "#if !os(macOS)\n"
-        block += "public func __allTests() -> [XCTestCaseEntry] {\n"
+        block += "public func \(allTestsFunctionName)() -> [XCTestCaseEntry] {\n"
         block += "\treturn [\n"
         forEach { module in
             block += "\t\t// \(module.name)\n"
             module.simplified.forEach { testCase in
-                block += "\t\ttestCase(\(testCase).__allTests),\n"
+                block += "\t\ttestCase(\(testCase.name).\(allTestsFunctionName)),\n"
             }
         }
         block += "\t]\n"
         block += "}\n\n"
-        block += "let tests = __allTests()\n"
+        block += "let tests = \(allTestsFunctionName)()\n"
         block += "XCTMain(tests)\n"
         block += "#endif\n\n"
         return block
@@ -64,7 +79,7 @@ extension Array where Element == Module {
 }
 
 extension Module {
-    func generateExtensions() -> String {
+    fileprivate func generateExtensions() -> String {
         return simplified.map { $0.generateExtension() } .joined(separator: "\n\n")
     }
 }
@@ -73,7 +88,7 @@ extension SimpleTestCase {
     fileprivate func generateExtension() -> String {
         var block = "extension \(name) {\n"
         block += "\t"
-        block += "static let __allTests = [\n"
+        block += "static let \(allTestsFunctionName) = [\n"
         tests.forEach {
             block += "\t\t(\"\($0)\", \($0)),\n"
         }
@@ -83,3 +98,48 @@ extension SimpleTestCase {
     }
 }
 
+private func loadModules(in testDirectory: String) throws -> [Module] {
+    let testDirectory = testDirectory.finished(with: "/")
+    guard isDirectory(in: testDirectory) else { throw "no test directory found" }
+    let testModules = try findTestModules(in: testDirectory)
+    return try testModules.map { moduleName in
+        let moduleDirectory = testDirectory + moduleName
+        let suite = try loadTestSuite(in: moduleDirectory)
+        return Module(name: moduleName, suite: suite)
+    }
+}
+
+private func testModuleParsing(in testDirectory: String) throws {
+    let testDirectory = testDirectory.finished(with: "/")
+    guard isDirectory(in: testDirectory) else { throw "no test directory found" }
+    let files = try findTestModules(in: testDirectory)
+
+    print("Found subdirectories: \(files)")
+    print("")
+}
+
+private func isDirectory(in parentDirectory: String) -> Bool {
+    let parentDirectory = parentDirectory.finished(with: "/")
+    var isDir: ObjCBool = false
+    let _ = FileManager.default.fileExists(atPath: parentDirectory, isDirectory: &isDir)
+    return isDir.boolValue
+}
+
+private func findTestModules(in directory: String) throws -> [String] {
+    let directory = directory.finished(with: "/")
+    return try FileManager.default
+        .contentsOfDirectory(atPath: directory)
+        .filter { isDirectory(in: directory + $0) }
+        .filter { $0.hasSuffix("Tests") }
+}
+
+private func loadTestSuite(in directory: String) throws -> TestSuite {
+    let directory = directory.finished(with: "/")
+    return try FileManager.default
+        .contentsOfDirectory(atPath: directory)
+        .filter { $0.hasSuffix(".swift") }
+        .map { directory + $0 }
+        .map(Gatherer.processFile)
+        .merge()
+        .makeTestSuite()
+}
