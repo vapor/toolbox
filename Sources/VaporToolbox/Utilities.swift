@@ -15,7 +15,7 @@ struct Shell {
     static func cwd() throws -> String {
         return try Environment.get("TEST_DIRECTORY") ?? bash("dirs -l")
     }
-
+    
     static func allFiles(in dir: String? = nil) throws -> String {
         var command = "ls -lah"
         if let dir = dir {
@@ -26,5 +26,9 @@ struct Shell {
 
     static func readFile(path: String) throws -> String {
         return try bash("cat \(path)").trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    static func homeDirectory() throws -> String {
+        return try bash("echo $HOME").trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
