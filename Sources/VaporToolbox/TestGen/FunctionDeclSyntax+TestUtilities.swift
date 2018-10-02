@@ -1,6 +1,11 @@
 import SwiftSyntax
 
 extension FunctionDeclSyntax {
+    /// During gathering, we will do a soft filter
+    /// for functions that look like they could be
+    /// test functions. After that, we will process
+    /// whether their declarations are within
+    /// a test case
     var looksLikeTestFunction: Bool {
         guard
             // all tests MUST begin w/ 'test' as prefix
@@ -18,6 +23,7 @@ extension FunctionDeclSyntax {
 }
 
 extension FunctionDeclSyntax {
+    /// Find the test case in which this function is declared
     func testCase(from cases: [ClassDeclSyntax]) -> ClassDeclSyntax? {
         if let cd = outerClassDecl(), cases.contains(cd) {
             return cd

@@ -37,3 +37,15 @@
  Look for and delete these older files
  */
 
+/*
+ EDGE CASE
+ - inherit from class that inherits from xctest
+ - test cases declared in an extension
+ - test functions declared in non xctest class
+ - test declared in extension of class that isn't valid xctestcase
+
+ - Nested Class/Struct/Extension Needs to Have `Nested.Class` for example
+
+ NICE TO HAVE
+ - remove existing allTests if it exists
+ */

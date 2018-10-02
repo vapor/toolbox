@@ -1,5 +1,7 @@
 import SwiftSyntax
 
+/// After a module has been compiled, this is
+/// used to model the found behavior
 final class Module {
     let name: String
     let suite: TestSuite
@@ -13,7 +15,10 @@ final class Module {
 }
 
 extension Dictionary where Key == ClassDeclSyntax, Value == [FunctionDeclSyntax] {
-    func simplified(withModuleName moduleName: String) -> SimplifiedTestSuite {
+    /// Most of the generation code doesn't need all the metadata associated
+    /// with the complex types, so we convert the dictionary toa  simple
+    /// (String,[String]) format
+    fileprivate func simplified(withModuleName moduleName: String) -> SimplifiedTestSuite {
         var simple: SimplifiedTestSuite = []
 
         // simplify

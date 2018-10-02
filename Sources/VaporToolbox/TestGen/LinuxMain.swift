@@ -1,11 +1,13 @@
 import Foundation
 
+/// A simple structure to model out the LinuxMain
 struct LinuxMain {
     let imports: String
     let extensions: String
     let testRunner: String
 
     let testsDirectory: String
+    let ignoredDirectories: [String]
 
     var fileName: String {
         return testsDirectory + "LinuxMain.swift"
@@ -14,15 +16,14 @@ struct LinuxMain {
         return imports + extensions + testRunner
     }
 
-    // TODO:
-    // - ignorable directories
-    init(testsDirectory: String) throws {
-        let modules = try loadModules(in: testsDirectory)
+    init(testsDirectory: String, ignoring ignoredDirectories: [String] = []) throws {
+        let modules = try loadModules(in: testsDirectory, ignoring: ignoredDirectories)
         self.imports = modules.imports()
         self.extensions = modules.extensions()
         self.testRunner = modules.testRunner()
 
         self.testsDirectory = testsDirectory.finished(with: "/")
+        self.ignoredDirectories = ignoredDirectories
     }
 
     func write() throws {
@@ -107,10 +108,11 @@ extension SimpleTestCase {
     }
 }
 
-private func loadModules(in testDirectory: String) throws -> [Module] {
+private func loadModules(in testDirectory: String, ignoring: [String]) throws -> [Module] {
     let testDirectory = testDirectory.finished(with: "/")
     guard isDirectory(in: testDirectory) else { throw "no test directory found" }
     let testModules = try findTestModules(in: testDirectory)
+        .filter { !ignoring.contains($0) }
     return try testModules.map { moduleName in
         let moduleDirectory = testDirectory + moduleName
         let suite = try loadTestSuite(in: moduleDirectory)

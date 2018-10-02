@@ -10,6 +10,10 @@ struct SimpleTestCase {
 
 typealias SimplifiedTestSuite = [SimpleTestCase]
 
+/// To properly generate the file, we can't simply process
+/// a single file, but rather need to process the
+/// module (and ideally dependencies) in its entirety to
+/// understand the file
 class Gatherer: SyntaxVisitor {
     fileprivate private(set) var potentialTestCases: [ClassDeclSyntax] = []
     fileprivate private(set) var potentialTestFunctions: [FunctionDeclSyntax] = []
