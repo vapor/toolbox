@@ -37,16 +37,6 @@ extension LinuxMain: CustomStringConvertible {
     }
 }
 
-extension SimpleTestCase {
-    // overridden classes require property overrides
-    // it gets complicated unnecessarily, so we generate
-    // unique test function names for each
-    fileprivate var testsVariableName: String {
-        let stripped = name.components(separatedBy: ".").joined()
-        return "__all\(stripped)Tests"
-    }
-}
-
 extension Array where Element == Module {
     fileprivate func imports() -> String {
         var imports = ""

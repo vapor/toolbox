@@ -4,8 +4,29 @@ import SwiftSyntax
 typealias TestSuite = [ClassDeclSyntax: [FunctionDeclSyntax]]
 
 struct SimpleTestCase {
+    let module: String
     let name: String
     let tests: [String]
+
+    var extensionName: String {
+        // Can't have `extension Module.Module {` where testCase
+        // and Module name are the same or compiler crashes
+        let validExtensionName: String
+        if name == module {
+            validExtensionName = name
+        } else {
+            validExtensionName = module + "." + name
+        }
+        return validExtensionName
+    }
+
+    // overridden classes require property overrides
+    // it gets complicated unnecessarily, so we generate
+    // unique test function names for each
+    var testsVariableName: String {
+        let stripped = name.components(separatedBy: ".").joined()
+        return "__all\(stripped)Tests"
+    }
 }
 
 typealias SimplifiedTestSuite = [SimpleTestCase]

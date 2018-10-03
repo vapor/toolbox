@@ -20,7 +20,7 @@ struct GenerateLinuxMain: Command {
         let linuxMain = try LinuxMain(testsDirectory: testsDirectory)
         ctx.console.output("Writing Tests/LinuxMain.swift..")
         try linuxMain.write()
-        ctx.console.success("Generated Tests/LinuxMain.swift..")
+        ctx.console.success("Generated Tests/LinuxMain.swift.")
         return .done(on: ctx.container)
     }
 }
