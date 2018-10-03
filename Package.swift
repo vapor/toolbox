@@ -17,8 +17,8 @@ let package = Package(
         .target(name: "LinuxTestsGeneration", dependencies: [
             "SwiftSyntax",
         ]),
-        .testTarget(name: "VaporToolboxTests", dependencies: [
-            "VaporToolbox"
+        .testTarget(name: "LinuxTestsGenerationTests", dependencies: [
+            "LinuxTestsGeneration",
         ]),
         // Runnable module, executes the main command group.
         .target(name: "Executable", dependencies: ["VaporToolbox"]),
