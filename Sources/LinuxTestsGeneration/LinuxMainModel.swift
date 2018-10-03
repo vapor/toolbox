@@ -1,22 +1,22 @@
 import Foundation
 
 /// A simple structure to model out the LinuxMain
-struct LinuxMain {
-    let imports: String
-    let extensions: String
-    let testRunner: String
+public struct LinuxMain {
+    public let imports: String
+    public let extensions: String
+    public let testRunner: String
 
     let testsDirectory: String
     let ignoredDirectories: [String]
 
-    var fileName: String {
+    public var filePath: String {
         return testsDirectory + "LinuxMain.swift"
     }
     var fileContents: String {
         return imports + extensions + testRunner
     }
 
-    init(testsDirectory: String, ignoring ignoredDirectories: [String] = []) throws {
+    public init(testsDirectory: String, ignoring ignoredDirectories: [String] = []) throws {
         let modules = try loadModules(in: testsDirectory, ignoring: ignoredDirectories)
         self.imports = modules.imports()
         self.extensions = modules.extensions()
@@ -26,13 +26,13 @@ struct LinuxMain {
         self.ignoredDirectories = ignoredDirectories
     }
 
-    func write() throws {
-        try fileContents.write(toFile: fileName, atomically: true, encoding: .utf8)
+    public func write() throws {
+        try fileContents.write(toFile: filePath, atomically: true, encoding: .utf8)
     }
 }
 
 extension LinuxMain: CustomStringConvertible {
-    var description: String {
+    public var description: String {
         return fileContents
     }
 }
