@@ -5,19 +5,23 @@ import XCTest
 // MARK: VaporToolboxTests
 
 extension VaporToolboxTests.VaporToolboxTests0 {
-    static let __allTests = [
-        ("testNothing", testNothing),
-        ("testFail", testFail),
-        ]
+	static let __allVaporToolboxTests0Tests = [
+		("testNothing", testNothing),
+		("testFail", testFail),
+	]
 }
+
+// MARK: Test Runner
 
 #if !os(macOS)
-public func __allTests() -> [XCTestCaseEntry] {
-    return [
-        testCase(VaporToolboxTests.VaporToolboxTests0.__allTests),
-    ]
+public func __buildTestEntries() -> [XCTestCaseEntry] {
+	return [
+		// VaporToolboxTests
+		testCase(VaporToolboxTests0.__allVaporToolboxTests0Tests),
+	]
 }
 
-let tests = __allTests()
+let tests = __buildTestEntries()
 XCTMain(tests)
 #endif
+
