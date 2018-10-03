@@ -86,7 +86,7 @@ extension Module {
 
 extension SimpleTestCase {
     fileprivate func generateExtension() -> String {
-        var block = "extension \(name) {\n"
+        var block = "extension \(extensionName) {\n"
         block += "\t"
         block += "static let \(testsVariableName) = [\n"
         tests.forEach {
