@@ -1,6 +1,6 @@
 import Vapor
 
-extension String: Error {}
+//extension String: Error {}
 
 struct Shell {
     @discardableResult
