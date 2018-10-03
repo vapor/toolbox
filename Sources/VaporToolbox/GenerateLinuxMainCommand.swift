@@ -16,8 +16,11 @@ struct GenerateLinuxMain: Command {
     func run(using ctx: CommandContext) throws -> Future<Void> {
         let cwd = try Shell.cwd()
         let testsDirectory = cwd.finished(with: "/") + "Tests"
+        ctx.console.output("Building Tests/LinuxMain.swift..")
         let linuxMain = try LinuxMain(testsDirectory: testsDirectory)
+        ctx.console.output("Writing Tests/LinuxMain.swift..")
         try linuxMain.write()
+        ctx.console.success("Generated Tests/LinuxMain.swift..")
         return .done(on: ctx.container)
     }
 }
