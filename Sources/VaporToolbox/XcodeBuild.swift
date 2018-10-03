@@ -15,11 +15,13 @@ struct XcodeBuild {
         }
 
         var derivedDataPath = "/"
-        config.components(separatedBy: "/").forEach { comp in
-            guard !derivedDataPath.hasSuffix("DerivedData/") else { return }
-            derivedDataPath += comp + "/"
+        for component in config.components(separatedBy: "/") {
+            if component == "DerivedData" {
+                derivedDataPath.append("DerivedData")
+                break
+            }
+            derivedDataPath.append(component + "/")
         }
-
         return derivedDataPath
     }
 }
