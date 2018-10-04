@@ -4,7 +4,8 @@ import XCTest
 final class VaporToolboxTests0: XCTestCase {
     func testNothing() throws {
         let directory = testsDirectory()
-        let linuxMain = try LinuxMain(testsDirectory: directory, ignoring: ["LinuxTestsGenerationTests"])
+        var linuxMain: LinuxMain! = nil
+        linuxMain = try LinuxMain(testsDirectory: directory, ignoring: ["LinuxTestsGenerationTests"])
         XCTAssertEqual(linuxMain.imports, expectedImports)
         XCTAssertEqual(linuxMain.extensions, expectedExtensions)
         XCTAssertEqual(linuxMain.testRunner, expectedTestRunner)
