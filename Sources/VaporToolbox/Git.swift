@@ -1,10 +1,5 @@
 import Vapor
 
-public func testGit() throws {
-    let clean = try Git.isClean()
-    print("Is clean: \(clean)")
-}
-
 struct Git {
     static func isClean() throws -> Bool {
         return try run("status", "--porcelain")
