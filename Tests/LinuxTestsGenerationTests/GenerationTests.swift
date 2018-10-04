@@ -1,7 +1,7 @@
 import XCTest
 @testable import LinuxTestsGeneration
 
-final class VaporToolboxTests0: XCTestCase {
+final class GenerationTests: XCTestCase {
     func testNothing() throws {
         let directory = testsDirectory()
         var linuxMain: LinuxMain! = nil
