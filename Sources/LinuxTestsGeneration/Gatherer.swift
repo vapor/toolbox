@@ -41,13 +41,11 @@ class Gatherer: SyntaxVisitor {
     fileprivate var _testSuite: TestSuite? = nil
     
     override func visit(_ node: ClassDeclSyntax) {
-        print("Visiting: \(node.flattenedName())")
         defer { super.visit(node) }
         potentialTestCases.append(node)
     }
 
     override func visit(_ node: FunctionDeclSyntax) {
-        print("Visiting: \(node.identifier)")
         defer { super.visit(node) }
         guard node.looksLikeTestFunction else { return }
         potentialTestFunctions.append(node)
@@ -56,14 +54,10 @@ class Gatherer: SyntaxVisitor {
 
 extension Gatherer {
     static func processFile(at url: String) throws -> Gatherer {
-        print("Processing file: \(url)")
         let url = URL(fileURLWithPath: url)
         let sourceFile = try SyntaxTreeParser.parse(url)
-        print("Got source")
         let gatherer = Gatherer()
-        print("Made gatherer")
         gatherer.visit(sourceFile)
-        print("Gathered sourceFile: \(url.path)")
         return gatherer
     }
 }

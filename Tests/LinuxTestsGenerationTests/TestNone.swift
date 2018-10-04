@@ -1,16 +1,10 @@
-import LinuxTestsGeneration
 import XCTest
+@testable import LinuxTestsGeneration
 
 final class VaporToolboxTests0: XCTestCase {
     func testNothing() throws {
-        let comps = #file.components(separatedBy: "/")
-        var testsDirectory = ""
-        for comp in comps {
-            testsDirectory += "/" + comp
-            if comp == "Tests" { break }
-        }
-
-        let linuxMain = try LinuxMain(testsDirectory: testsDirectory, ignoring: ["LinuxTestsGenerationTests"])
+        let directory = testsDirectory()
+        let linuxMain = try LinuxMain(testsDirectory: directory, ignoring: ["LinuxTestsGenerationTests"])
         XCTAssertEqual(linuxMain.imports, expectedImports)
         XCTAssertEqual(linuxMain.extensions, expectedExtensions)
         XCTAssertEqual(linuxMain.testRunner, expectedTestRunner)

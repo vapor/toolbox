@@ -17,9 +17,7 @@ public struct LinuxMain {
     }
 
     public init(testsDirectory: String, ignoring ignoredDirectories: [String] = []) throws {
-        print("Loading modules")
         let modules = try loadModules(in: testsDirectory, ignoring: ignoredDirectories)
-        print("Got modules: \(modules)")
         self.imports = modules.imports()
         self.extensions = modules.extensions()
         self.testRunner = modules.testRunner()
@@ -105,23 +103,11 @@ private func loadModules(in testDirectory: String, ignoring: [String]) throws ->
     guard isDirectory(in: testDirectory) else { throw "no test directory found" }
     let testModules = try findTestModules(in: testDirectory)
         .filter { !ignoring.contains($0) }
-    print("Found test modules: \(testModules)")
     return try testModules.map { moduleName in
         let moduleDirectory = testDirectory + moduleName
-        print("Loading suite: \(moduleName)")
         let suite = try loadTestSuite(in: moduleDirectory)
-        print("Loaded suite: \(suite)")
         return Module(name: moduleName, suite: suite)
     }
-}
-
-private func testModuleParsing(in testDirectory: String) throws {
-    let testDirectory = testDirectory.finished(with: "/")
-    guard isDirectory(in: testDirectory) else { throw "no test directory found" }
-    let files = try findTestModules(in: testDirectory)
-
-    print("Found subdirectories: \(files)")
-    print("")
 }
 
 private func isDirectory(in parentDirectory: String) -> Bool {
