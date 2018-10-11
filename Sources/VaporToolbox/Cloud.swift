@@ -75,7 +75,7 @@ struct UserApi {
 
         let client = try makeClient()
         let response = client.send(.POST, to: userUrl) { try $0.content.encode(content) }
-        return try response.wait().content.decode(CloudUser.self).wait()
+        return try response.become(CloudUser.self)
     }
 
     static func login(
@@ -91,15 +91,14 @@ struct UserApi {
         ]
         let client = try makeClient()
         let response = client.send(.POST, headers: headers, to: loginUrl)
-        return try response.wait().content.decode(Token.self).wait()
+        return try response.become(Token.self)
     }
 
     static func me(token: Token) throws -> CloudUser {
         let client = try makeClient()
         let headers = token.headers
         let response = client.send(.GET, headers: headers, to: meUrl)
-        let resp = try response.wait()
-        return try resp.content.decode(CloudUser.self).wait()
+        return try response.become(CloudUser.self)
     }
 }
 
@@ -118,6 +117,10 @@ struct SSHKey: Content {
 }
 
 extension API {
+    var basicAuthHeaders: HTTPHeaders {
+        return token.headers
+    }
+
     var contentHeaders: HTTPHeaders {
         var head = token.headers
         head.add(name: "Content-Type", value: "application/json")
@@ -125,17 +128,38 @@ extension API {
     }
 }
 
+struct ResponseError: Content, Error {
+    let error: Bool
+    let reason: String
+}
+
+extension Response {
+    func throwIfError() throws -> Response {
+        if let error = try? content.decode(ResponseError.self).wait() {
+            throw error
+        } else {
+            return self
+        }
+    }
+}
+
+extension Future where T == Response {
+    func become<C: Content>(_ type: C.Type) throws -> C {
+        return try wait().throwIfError().content.decode(C.self).wait()
+    }
+}
+
 struct SSHKeyApi: API {
     let token: Token
 
-    func push(name: String, path: String) throws {
+    func push(name: String, path: String) throws -> SSHKey {
         guard FileManager.default.fileExists(atPath: path) else { throw "no rsa key found at \(path)" }
         guard let file = FileManager.default.contents(atPath: path) else { throw "unable to load rsa key" }
         guard let key = String(data: file, encoding: .utf8) else { throw "no string found in data" }
-        try push(name: name, key: key)
+        return try push(name: name, key: key)
     }
 
-    func push(name: String, key: String) throws {
+    func push(name: String, key: String) throws -> SSHKey {
         struct Package: Content {
             let name: String
             let key: String
@@ -143,14 +167,13 @@ struct SSHKeyApi: API {
         let package = Package(name: name, key: key)
         let client = try makeClient()
         let response = client.send(.POST, headers: contentHeaders, to: gitSSHKeysUrl) { try $0.content.encode(package) }
-        let resp = try response.wait()
-        print(resp)
-        print("")
-//        return try resp.content.decode(CloudUser.self).wait()
+        return try response.become(SSHKey.self)
     }
 
-    static func list() throws {
-
+    func list() throws -> [SSHKey] {
+        let client = try makeClient()
+        let response = client.send(.GET, headers: basicAuthHeaders, to: gitSSHKeysUrl)
+        return try response.wait().content.decode([SSHKey].self).wait()
     }
 }
 
@@ -188,7 +211,10 @@ func signup() throws {
     print("")
 
     let sshApi = SSHKeyApi(token: token)
-    try sshApi.push(name: "my-key", key: "this is not a real key, it's pretend")
+    let key = try sshApi.push(name: "my-key", key: "this is not a real key, it's pretend \(Date().timeIntervalSince1970)")
+    print("Made key: \(key)")
+    let allKeys = try sshApi.list()
+    print("Fetched Keys: \(allKeys)")
     print("")
 //    let response = try client.post(signUpUrl, headers: HTTPHeaders(), content: new).wait()
 //    print(response)
