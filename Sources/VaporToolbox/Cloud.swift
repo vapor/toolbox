@@ -173,7 +173,14 @@ struct SSHKeyApi: API {
     func list() throws -> [SSHKey] {
         let client = try makeClient()
         let response = client.send(.GET, headers: basicAuthHeaders, to: gitSSHKeysUrl)
-        return try response.wait().content.decode([SSHKey].self).wait()
+        return try response.become([SSHKey].self)
+    }
+
+    func delete(_ key: SSHKey) throws {
+        let client = try makeClient()
+        let url = gitSSHKeysUrl.finished(with: "/") + key.id.uuidString
+        let response = client.send(.DELETE, headers: basicAuthHeaders, to: url)
+        let _ = try response.wait().throwIfError()
     }
 }
 
@@ -215,10 +222,13 @@ func signup() throws {
     print("Made key: \(key)")
     let allKeys = try sshApi.list()
     print("Fetched Keys: \(allKeys)")
+    try sshApi.delete(key)
+
+    let afterDelete = try sshApi.list()
+    print("Fetched Keys (After Delete): \(afterDelete)")
+
+
     print("")
-//    let response = try client.post(signUpUrl, headers: HTTPHeaders(), content: new).wait()
-//    print(response)
-//    print("")
 }
 
 func makeClient() throws -> Client {
