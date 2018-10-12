@@ -229,15 +229,40 @@ func testSSHKey(with token: Token) throws {
     print("")
 }
 
+extension Token {
+    static func filePath() throws -> URL {
+        let home = try Shell.homeDirectory()
+        let vaporDir = home.finished(with: "/") + ".vapor/token"
+        guard let url = URL(string: vaporDir) else { throw "unable to make file path" }
+        return url
+    }
+
+    static func load() throws -> Token {
+        let path = try filePath()
+        let data = try Data(contentsOf: path)
+        return try JSONDecoder().decode(Token.self, from: data)
+    }
+
+    func save() throws {
+        let path = try Token.filePath()
+        let data = try JSONEncoder().encode(self)
+        try data.write(to: path)
+    }
+}
 let testEmail = "logan.william.wright+test.account@gmail.com"
 let testPassword = "12ThreeFour!"
 
 func signup() throws {
+    let home = try Shell.homeDirectory()
+    let vaporDir = home.finished(with: "/") + ".vapor"
+    let exists = FileManager.default.fileExists(atPath: vaporDir)
+    print("Exists: \(exists)")
+    print("")
     let token = try UserApi.login(email: testEmail, password: testPassword)
     print("Got tokenn: \(token)")
     print("")
     try testSSHKey(with: token)
-    print
+//    print
 //
 //    let sshApi = SSHKeyApi(token: token)
 //    let key = try sshApi.push(name: "my-key", key: "this is not a real key, it's pretend \(Date().timeIntervalSince1970)")
