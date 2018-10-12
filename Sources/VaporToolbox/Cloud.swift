@@ -184,7 +184,7 @@ struct SSHKeyApi: API {
     }
 }
 
-struct Token: Content {
+struct Token: Content, Hashable {
     let expiresAt: Date
     let id: UUID
     let userID: UUID
@@ -230,38 +230,51 @@ func testSSHKey(with token: Token) throws {
 }
 
 extension Token {
-    static func filePath() throws -> URL {
+    static func filePath() throws -> String {
         let home = try Shell.homeDirectory()
-        let vaporDir = home.finished(with: "/") + ".vapor/token"
-        guard let url = URL(string: vaporDir) else { throw "unable to make file path" }
-        return url
+        return home.finished(with: "/") + ".vapor/token"
     }
 
-    static func load() throws -> Token {
+    static func load() throws -> Token? {
         let path = try filePath()
-        let data = try Data(contentsOf: path)
-        return try JSONDecoder().decode(Token.self, from: data)
+        let exists = FileManager
+            .default
+            .fileExists(atPath: path)
+        guard exists else { return nil }
+        return try FileManager.default.contents(atPath: path).flatMap {
+            try JSONDecoder().decode(Token.self, from: $0)
+        }
     }
 
     func save() throws {
         let path = try Token.filePath()
         let data = try JSONEncoder().encode(self)
-        try data.write(to: path)
+        let create = FileManager.default.createFile(atPath: path, contents: data, attributes: nil)
+        guard create else { throw "there was a problem svaing token" }
     }
 }
+
 let testEmail = "logan.william.wright+test.account@gmail.com"
 let testPassword = "12ThreeFour!"
 
 func signup() throws {
-    let home = try Shell.homeDirectory()
-    let vaporDir = home.finished(with: "/") + ".vapor"
-    let exists = FileManager.default.fileExists(atPath: vaporDir)
-    print("Exists: \(exists)")
-    print("")
     let token = try UserApi.login(email: testEmail, password: testPassword)
     print("Got tokenn: \(token)")
+    do {
+        print("Testing load not exist")
+        let no = try Token.load()
+        print("Exists? \(no != nil)")
+        print("")
+    } catch {
+        print("caught Error: \(error)")
+        print("")
+    }
+    try token.save()
+    let loaded = try Token.load()
+    print("loaded: \(loaded)")
+    print("equal: \(loaded == token)")
     print("")
-    try testSSHKey(with: token)
+//    try testSSHKey(with: token)
 //    print
 //
 //    let sshApi = SSHKeyApi(token: token)
