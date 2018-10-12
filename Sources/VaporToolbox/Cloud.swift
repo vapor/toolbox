@@ -199,10 +199,9 @@ extension Token {
     }
 }
 
-
-func signup() throws {
-    let email = "logan+\(Date().timeIntervalSince1970)@gmail.com"
-    let pwd = "12Three!"
+func testUserSignupFlow() throws {
+    let email = "test.not.real+\(Date().timeIntervalSince1970)@fake.com"
+    let pwd = "12ThreeFour!"
     let new = try UserApi.signup(
         email: email,
         firstName: "Test",
@@ -210,22 +209,45 @@ func signup() throws {
         organizationName: "TestOrg",
         password: pwd
     )
-    print("new: \(new)")
+
+    // attempt login new user
     let token = try UserApi.login(email: email, password: pwd)
-    print(token)
+
     let me = try UserApi.me(token: token)
-    print(me)
+    guard
+        new.email == me.email,
+        new.firstName == me.firstName,
+        new.lastName == me.lastName,
+        new.id == me.id
+        else { throw "failed user signup flow" }
+}
+
+func testSSHKey(with token: Token) throws {
+    let ssh = SSHKeyApi(token: token)
+    let key = try ssh.push(name: "my-key", path: "/Users/loganwright/Desktop/TestKey/id_rsa.pub")
+    print(key)
     print("")
+}
 
-    let sshApi = SSHKeyApi(token: token)
-    let key = try sshApi.push(name: "my-key", key: "this is not a real key, it's pretend \(Date().timeIntervalSince1970)")
-    print("Made key: \(key)")
-    let allKeys = try sshApi.list()
-    print("Fetched Keys: \(allKeys)")
-    try sshApi.delete(key)
+let testEmail = "logan.william.wright+test.account@gmail.com"
+let testPassword = "12ThreeFour!"
 
-    let afterDelete = try sshApi.list()
-    print("Fetched Keys (After Delete): \(afterDelete)")
+func signup() throws {
+    let token = try UserApi.login(email: testEmail, password: testPassword)
+    print("Got tokenn: \(token)")
+    print("")
+    try testSSHKey(with: token)
+    print
+//
+//    let sshApi = SSHKeyApi(token: token)
+//    let key = try sshApi.push(name: "my-key", key: "this is not a real key, it's pretend \(Date().timeIntervalSince1970)")
+//    print("Made key: \(key)")
+//    let allKeys = try sshApi.list()
+//    print("Fetched Keys: \(allKeys)")
+//    try sshApi.delete(key)
+//
+//    let afterDelete = try sshApi.list()
+//    print("Fetched Keys (After Delete): \(afterDelete)")
 
 
     print("")
