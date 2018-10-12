@@ -9,6 +9,7 @@ public func boot() -> Future<Application> {
     commands.use(CleanCommand(), as: "clean")
     commands.use(GenerateLinuxMain(), as: "linux-main")
     commands.use(Test(), as: "test")
+    commands.use(CloudGroup(), as: "cloud")
     services.register(commands)
 
     return Application.asyncBoot(services: services)
