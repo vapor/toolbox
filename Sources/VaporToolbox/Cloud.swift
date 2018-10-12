@@ -147,6 +147,12 @@ extension Future where T == Response {
     func become<C: Content>(_ type: C.Type) throws -> C {
         return try wait().throwIfError().content.decode(C.self).wait()
     }
+
+    func validate() throws {
+        let resp = try wait().throwIfError()
+        print(resp)
+        print("")
+    }
 }
 
 struct SSHKeyApi: API {
@@ -180,7 +186,12 @@ struct SSHKeyApi: API {
         let client = try makeClient()
         let url = gitSSHKeysUrl.finished(with: "/") + key.id.uuidString
         let response = client.send(.DELETE, headers: basicAuthHeaders, to: url)
-        let _ = try response.wait().throwIfError()
+        try response.validate()
+    }
+
+    internal func clear() throws {
+        let allKeys = try list()
+        try allKeys.forEach(delete)
     }
 }
 
@@ -258,6 +269,47 @@ let testEmail = "logan.william.wright+test.account@gmail.com"
 let testPassword = "12ThreeFour!"
 
 func signup() throws {
+    guard let token = try Token.load() else { throw "where's a token, yo" }
+    guard token.isValid else { throw "token is no longer valid" }
+    let sshApi = SSHKeyApi(token: token)
+    print("will clear")
+    try sshApi.clear()
+    print("cleared")
+    print("")
+
+    let chosenPath = try getPublicKeyPath()
+    print("Chose: \(chosenPath)")
+    let key = try sshApi.push(name: "some-name", path: chosenPath)
+    print("key: \(key)")
+    print("")
+}
+
+func getPublicKeyPath() throws -> String {
+    let allKeys = try Shell.bash("ls  ~/.ssh/*.pub")
+    let separated = allKeys.split(separator: "\n").map(String.init)
+    let term = Terminal()
+    return term.choose("Which key would you like to push?", from: separated)
+}
+
+extension Console {
+//    func select(from list: [String]) throws -> Int {
+//        list.enumerated().forEach { (idx, item) in
+//            output("\(idx): \(item)")
+//        }
+//        self.choose("Wh", from: <#T##[CustomStringConvertible]#>)
+//    }
+}
+
+extension Token {
+    var isValid: Bool {
+        return !isExpired
+    }
+    var isExpired: Bool {
+        return expiresAt < Date()
+    }
+}
+
+func asdf() throws {
     let token = try UserApi.login(email: testEmail, password: testPassword)
     print("Got tokenn: \(token)")
     do {
