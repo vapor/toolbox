@@ -193,9 +193,13 @@ extension API {
     }
 }
 
-struct ResponseError: Content, Error {
+struct ResponseError: Content, Error, CustomStringConvertible {
     let error: Bool
     let reason: String
+
+    var description: String {
+        return reason
+    }
 }
 
 extension Response {
