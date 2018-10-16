@@ -13,7 +13,9 @@ struct CloudGroup: CommandGroup {
     }
 
     /// See `CommandGroup`.
-    var help: [String] = []
+    var help: [String] = [
+        "Interact with Vapor Cloud."
+    ]
 
     /// See `CommandGroup`.
     func run(using context: CommandContext) throws -> EventLoopFuture<Void> {

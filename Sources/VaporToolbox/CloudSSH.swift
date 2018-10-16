@@ -13,7 +13,9 @@ struct CloudSSHGroup: CommandGroup {
     }
 
     /// See `CommandGroup`.
-    var help: [String] = []
+    var help: [String] = [
+        "Use this to interact with, list, push, and delete SSH keys on Vapor Cloud"
+    ]
 
     /// See `CommandGroup`.
     func run(using context: CommandContext) throws -> EventLoopFuture<Void> {
@@ -93,11 +95,11 @@ struct CloudSSHList: MyCommand {
 
     /// See `Command`.
     var options: [CommandOption] = [
-        .value(name: "long", short: "l", default: nil, help: ["Include the full key in list"])
+        .value(name: "long", short: "l", default: nil, help: ["Include the full key in logout"])
     ]
 
     /// See `Command`.
-    var help: [String] = ["Logs into Vapor Cloud"]
+    var help: [String] = ["Lists the SSH keys that you have pushed to cloud"]
 
     /// See `Command`.
     func trigger(with ctx: CommandContext) throws {
