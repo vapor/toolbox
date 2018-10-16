@@ -31,8 +31,8 @@ struct CloudSSHPush: MyCommand {
 
     /// See `Command`.
     var options: [CommandOption] = [
-        .value(name: "path", short: "p", default: nil, help: ["a custom path to they public key that should be pushed"]),
         .value(name: "name", short: "n", default: nil, help: ["the readable name to give your key"]),
+        .value(name: "path", short: "p", default: nil, help: ["a custom path to they public key that should be pushed"]),
         .value(name: "key", short: "k", default: nil, help: ["use this to pass the contents of your public key directly"])
     ]
 
