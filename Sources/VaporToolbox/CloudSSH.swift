@@ -5,6 +5,7 @@ struct CloudSSHGroup: CommandGroup {
     var commands: Commands = [
         "push" : CloudSSHPush(),
         "list": CloudSSHList(),
+        "delete": CloudSSHDelete(),
     ]
 
     /// See `CommandGroup`.
@@ -142,5 +143,42 @@ struct CloudSSHListRunner {
             console.output("Key:")
             console.output(key.key.consoleText())
         }
+    }
+}
+
+struct CloudSSHDelete: MyCommand {
+    /// See `Command`.
+    var arguments: [CommandArgument] = []
+
+    /// See `Command`.
+    var options: [CommandOption] = []
+
+    /// See `Command`.
+    var help: [String] = ["Lists the SSH keys that you have pushed to cloud"]
+
+    /// See `Command`.
+    func trigger(with ctx: CommandContext) throws {
+        let runner = try CloudSSHDeleteRunner(ctx: ctx)
+        try runner.run()
+    }
+}
+
+struct CloudSSHDeleteRunner {
+    let ctx: CommandContext
+    let token: Token
+    let api: SSHKeyApi
+
+    init(ctx: CommandContext) throws {
+        self.token = try Token.load()
+        self.api = SSHKeyApi(token: token)
+        self.ctx = ctx
+    }
+
+    func run() throws {
+        let list = try api.list()
+        let choice = ctx.console.choose("Which Key?", from: list) { key in
+            return "\(key.name) : \(key.createdAt)".consoleText()
+        }
+        try api.delete(choice)
     }
 }
