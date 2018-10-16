@@ -19,14 +19,7 @@ import Vapor
 //    }
 //}
 
-class Test: BaseCommand {
-    override func trigger() throws {
-        throw "bar"
-    }
-}
-
-class BaseCommand: Command {
-    /// See `Command`.
+struct Test: MyCommand {
     var arguments: [CommandArgument] = []
 
     /// See `Command`.
@@ -34,22 +27,9 @@ class BaseCommand: Command {
 
     /// See `Command`.
     var help: [String] = ["Quick tests."]
+    
+    func trigger(with ctx: CommandContext) throws {
 
-    private(set) var ctx: CommandContext! = nil
-
-    /// See `Command`.
-    func run(using ctx: CommandContext) throws -> Future<Void> {
-        self.ctx = ctx
-        do {
-            try trigger()
-        } catch {
-            ctx.console.output("Error:", style: .error)
-            ctx.console.output("\(error)".consoleText())
-        }
-        return .done(on: ctx.container)
-    }
-
-    open func trigger() throws {
-        throw "throwing up this errrrr"
+        throw "bar"
     }
 }

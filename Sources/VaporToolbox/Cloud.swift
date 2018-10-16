@@ -21,49 +21,21 @@ struct CloudGroup: CommandGroup {
     }
 }
 
-struct CloudLogin: Command {
-    /// See `Command`.
-    var arguments: [CommandArgument] = []
+protocol MyCommand: Command {
+    func trigger(with ctx: CommandContext) throws
+}
 
-    /// See `Command`.
-    var options: [CommandOption] = [
-        .value(name: "email", short: "e", default: nil, help: ["the email to use when logging in"]),
-        .value(name: "password", short: "p", default: nil, help: ["the password to use when logging in"])
-    ]
-
-    /// See `Command`.
-    var help: [String] = ["Logs into Vapor Cloud"]
-
-    /// See `Command`.
-    func run(using ctx: CommandContext) throws -> Future<Void> {
-        let runner = CloudLoginRunner(ctx: ctx)
-        try runner.run()
+extension MyCommand {
+    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
+        do {
+            try trigger(with: ctx)
+        } catch {
+            ctx.console.output("Error:", style: .error)
+            ctx.console.output("\(error)".consoleText())
+        }
         return .done(on: ctx.container)
     }
 }
-
-struct CloudLoginRunner {
-    let ctx: CommandContext
-
-    func run() throws {
-        let e = email()
-        let p = password()
-        let token = try UserApi.login(email: e, password: p)
-        try token.save()
-        ctx.console.output("Welcome to Cloud".consoleText(.info))
-    }
-
-    func email() -> String {
-        if let email = ctx.options["email"] { return email }
-        return ctx.console.ask("email")
-    }
-
-    func password() -> String {
-        if let pass = ctx.options["password"] { return pass }
-        return ctx.console.ask("password", isSecure: true)
-    }
-}
-    
 
 /**
 
@@ -227,13 +199,6 @@ extension Future where T == Response {
 struct SSHKeyApi: API {
     let token: Token
 
-    func push(name: String, path: String) throws -> SSHKey {
-        guard FileManager.default.fileExists(atPath: path) else { throw "no rsa key found at \(path)" }
-        guard let file = FileManager.default.contents(atPath: path) else { throw "unable to load rsa key" }
-        guard let key = String(data: file, encoding: .utf8) else { throw "no string found in data" }
-        return try push(name: name, key: key)
-    }
-
     func push(name: String, key: String) throws -> SSHKey {
         struct Package: Content {
             let name: String
@@ -303,10 +268,10 @@ func testUserSignupFlow() throws {
 }
 
 func testSSHKey(with token: Token) throws {
-    let ssh = SSHKeyApi(token: token)
-    let key = try ssh.push(name: "my-key", path: "/Users/loganwright/Desktop/TestKey/id_rsa.pub")
-    print(key)
-    print("")
+//    let ssh = SSHKeyApi(token: token)
+//    let key = try ssh.push(name: "my-key", path: "/Users/loganwright/Desktop/TestKey/id_rsa.pub")
+//    print(key)
+//    print("")
 }
 
 extension Token {
@@ -346,11 +311,11 @@ func signup() throws {
     print("cleared")
     print("")
 
-    let chosenPath = try getPublicKeyPath()
-    print("Chose: \(chosenPath)")
-    let key = try sshApi.push(name: "some-name", path: chosenPath)
-    print("key: \(key)")
-    print("")
+//    let chosenPath = try getPublicKeyPath()
+//    print("Chose: \(chosenPath)")
+//    let key = try sshApi.push(name: "some-name", path: chosenPath)
+//    print("key: \(key)")
+//    print("")
 }
 
 func getPublicKeyPath() throws -> String {
@@ -358,15 +323,6 @@ func getPublicKeyPath() throws -> String {
     let separated = allKeys.split(separator: "\n").map(String.init)
     let term = Terminal()
     return term.choose("Which key would you like to push?", from: separated)
-}
-
-extension Console {
-//    func select(from list: [String]) throws -> Int {
-//        list.enumerated().forEach { (idx, item) in
-//            output("\(idx): \(item)")
-//        }
-//        self.choose("Wh", from: <#T##[CustomStringConvertible]#>)
-//    }
 }
 
 extension Token {
