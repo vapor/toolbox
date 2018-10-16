@@ -3,7 +3,8 @@ import Vapor
 struct CloudGroup: CommandGroup {
     /// See `CommandGroup`.
     var commands: Commands = [
-        "login" : CloudLogin()
+        "login" : CloudLogin(),
+        "ssh": CloudSSHGroup(),
     ]
 
     /// See `CommandGroup`.
@@ -280,15 +281,18 @@ extension Token {
         return home.finished(with: "/") + ".vapor/token"
     }
 
-    static func load() throws -> Token? {
+    static func load() throws -> Token {
         let path = try filePath()
         let exists = FileManager
             .default
             .fileExists(atPath: path)
-        guard exists else { return nil }
-        return try FileManager.default.contents(atPath: path).flatMap {
+        guard exists else { throw "not logged in, use 'vapor cloud login', and try again." }
+        let loaded = try FileManager.default.contents(atPath: path).flatMap {
             try JSONDecoder().decode(Token.self, from: $0)
         }
+        guard let token = loaded else { throw "error, use 'vapor cloud login', and try again." }
+        guard token.isValid else { throw "expired credentials, use 'vapor cloud login', and try again." }
+        return token
     }
 
     func save() throws {
@@ -303,13 +307,13 @@ let testEmail = "logan.william.wright+test.account@gmail.com"
 let testPassword = "12ThreeFour!"
 
 func signup() throws {
-    guard let token = try Token.load() else { throw "where's a token, yo" }
-    guard token.isValid else { throw "token is no longer valid" }
-    let sshApi = SSHKeyApi(token: token)
-    print("will clear")
-    try sshApi.clear()
-    print("cleared")
-    print("")
+//    guard let token = try Token.load() else { throw "where's a token, yo" }
+//    guard token.isValid else { throw "token is no longer valid" }
+//    let sshApi = SSHKeyApi(token: token)
+//    print("will clear")
+//    try sshApi.clear()
+//    print("cleared")
+//    print("")
 
 //    let chosenPath = try getPublicKeyPath()
 //    print("Chose: \(chosenPath)")

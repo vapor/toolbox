@@ -1,5 +1,27 @@
 import Vapor
 
+struct CloudSSHGroup: CommandGroup {
+    /// See `CommandGroup`.
+    var commands: Commands = [
+        "push" : CloudSSHPush(),
+        "list": CloudSSHList(),
+    ]
+
+    /// See `CommandGroup`.
+    var options: [CommandOption] {
+        return []
+    }
+
+    /// See `CommandGroup`.
+    var help: [String] = []
+
+    /// See `CommandGroup`.
+    func run(using context: CommandContext) throws -> EventLoopFuture<Void> {
+        // should never run
+        throw "should not run"
+    }
+}
+
 struct CloudSSHPush: MyCommand {
     /// See `Command`.
     var arguments: [CommandArgument] = []
@@ -27,11 +49,7 @@ struct CloudSSHPushRunner {
     let api: SSHKeyApi
 
     init(ctx: CommandContext) throws {
-        guard let token = try Token.load() else {
-            throw "not logged in, use 'vapor cloud login', and try again."
-        }
-
-        self.token = token
+        self.token = try Token.load()
         self.api = SSHKeyApi(token: token)
         self.ctx = ctx
     }
@@ -66,5 +84,61 @@ struct CloudSSHPushRunner {
         let separated = allKeys.split(separator: "\n").map(String.init)
         let term = Terminal()
         return term.choose("Which key would you like to push?", from: separated)
+    }
+}
+
+struct CloudSSHList: MyCommand {
+    /// See `Command`.
+    var arguments: [CommandArgument] = []
+
+    /// See `Command`.
+    var options: [CommandOption] = [
+        .value(name: "long", short: "l", default: nil, help: ["Include the full key in list"])
+    ]
+
+    /// See `Command`.
+    var help: [String] = ["Logs into Vapor Cloud"]
+
+    /// See `Command`.
+    func trigger(with ctx: CommandContext) throws {
+        let runner = try CloudSSHListRunner(ctx: ctx)
+        try runner.run()
+    }
+
+
+}
+
+struct CloudSSHListRunner {
+    let ctx: CommandContext
+    let token: Token
+    let api: SSHKeyApi
+
+    init(ctx: CommandContext) throws {
+        self.token = try Token.load()
+        self.api = SSHKeyApi(token: token)
+        self.ctx = ctx
+    }
+
+    func run() throws {
+        let list = try api.list()
+        log(list)
+    }
+
+    func log(_ list: [SSHKey]) {
+        let long = ctx.options["long"]?.bool == true
+        let console = ctx.console
+        list.forEach { key in
+            // Insert line of space for each key
+            defer { console.output("") }
+            console.output("Name:")
+            console.output(key.name.consoleText())
+            console.output("Created At:")
+            // TODO: Format to local timezone
+            console.output(key.createdAt.description.consoleText())
+
+            guard long else { return }
+            console.output("Key:")
+            console.output(key.key.consoleText())
+        }
     }
 }
