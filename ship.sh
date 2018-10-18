@@ -16,12 +16,13 @@ if [[ $TAG == *"beta"* ]]; then
 fi
 
 PACKAGE_NAME="vapor-toolbox-$TAG"
-mkdir -p ./$PACKAGE_NAME
 
-rm -rf ./.ship
-SHIP_DIR="./.ship/$PACKAGE_NAME"
+SHIP_DIR="./.ship"
+rm -rf $SHIP_DIR
+PACKAGE_DIR="$SHIP_DIR/$PACKAGE_NAME"
+mkdir -p $PACKAGE_DIR
 
-README="$SHIP_DIR/README.txt"
+README="$PACKAGE_DIR/README.txt"
 
 echo "Manual Install Instructions for Vapor Toolbox v$TAG" > $README
 echo "" >> $README
@@ -29,14 +30,15 @@ echo "- Move *.dylib files into /usr/local/lib" >> $README
 echo "- Move executable $EXEC_NAME into /usr/local/bin" >> $README
 echo "- Type '$EXEC_NAME --help' into terminal to verify installation" >> $README
 
-cp .build/release/Executable $SHIP_DIR/$EXEC_NAME
-cp .build/release/*.dylib $SHIP_DIR/
+cp .build/release/Executable $PACKAGE_DIR/$EXEC_NAME
+cp .build/release/*.dylib $PACKAGE_DIR/
 
-tar -cvzf macOS-sierra.tar.gz $SHIP_DIR
+tar -cvzf $SHIP_DIR/macOS-sierra.tar.gz $PACKAGE_DIR
 
-echo "📦  Drag and drop $PWD/macOS-sierra.tar.gz into https://github.com/vapor/toolbox/releases/edit/$TAG"
+echo "➡️  Drag and drop $SHIP_DIR/macOS-sierra.tar.gz into https://github.com/vapor/toolbox/releases/edit/$TAG"
 
-open ../
+open https://github.com/vapor/toolbox/releases/edit/$TAG
+open $SHIP_DIR
 
 while true; do
     read -p "Have you finished uploading? [y/n]" yn
@@ -51,9 +53,12 @@ done
 echo "📦 Generating Ruby script\n\n\n"
 HASH=$(shasum -a 256 macOS-sierra.tar.gz | cut -d " " -f 1)
 echo "    New checksum is:"
-echo "\n    $HASH\n"
+echo ""
+echo "    $HASH"
+echo""
+echo "➡️  Copy and paste this into https://github.com/vapor/homebrew-tap/edit/master/vapor.rb"
 
-echo "Copy and paste this into https://github.com/vapor/homebrew-tap/edit/master/vapor.rb"
+open https://github.com/vapor/homebrew-tap/edit/master/$EXEC_NAME.rb
 
 while true; do
     read -p "Have you opened a pull request? [y/n]" yn
