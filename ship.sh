@@ -1,4 +1,4 @@
-CURR_BRANCH=`git branch | grep \* | cut -d ' ' -f2`
+ORIG_BRANCH=`git branch | grep \* | cut -d ' ' -f2`
 
 TAG=$1
 echo "📦  Checking out tag $TAG..."
@@ -75,4 +75,4 @@ while true; do
     esac
 done
 
-git checkout $CURR_BRANCH;
+git checkout $ORIG_BRANCH;
