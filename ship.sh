@@ -33,10 +33,12 @@ tar -cvzf macOS-sierra.tar.gz ./$PACKAGE_NAME
 
 echo "📦  Drag and drop $PWD/macOS-sierra.tar.gz into https://github.com/vapor/toolbox/releases/edit/$TAG"
 
+open ../
+
 while true; do
     read -p "Have you finished uploading? [y/n]" yn
     case $yn in
-        [Yy]* ) make install; break;;
+        [Yy]* ) break;;
         [Nn]* ) exit;;
         * ) echo "Please answer yes or no.";;
     esac
@@ -52,7 +54,7 @@ echo "Copy and paste this into https://github.com/vapor/homebrew-tap/edit/master
 while true; do
     read -p "Have you opened a pull request? [y/n]" yn
     case $yn in
-        [Yy]* ) make install; break;;
+        [Yy]* ) break;;
         [Nn]* ) exit;;
         * ) echo "Please answer yes or no.";;
     esac

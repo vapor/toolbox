@@ -1,6 +1,7 @@
 /.build
 /.bootstrap
 /Packages
+/.ship
 *.xcodeproj
 .DS_Store
 Package.pins
