@@ -41,7 +41,7 @@ open https://github.com/vapor/toolbox/releases/edit/$TAG
 open $SHIP_DIR
 
 while true; do
-    read -p "Have you finished uploading? [y/n]" yn
+    read -p "Have you finished uploading? [y/n] " yn
     case $yn in
         [Yy]* ) break;;
         [Nn]* ) exit;;
@@ -55,13 +55,13 @@ HASH=$(shasum -a 256 macOS-sierra.tar.gz | cut -d " " -f 1)
 echo "    New checksum is:"
 echo ""
 echo "    $HASH"
-echo""
+echo ""
 echo "➡️  Copy and paste this into https://github.com/vapor/homebrew-tap/edit/master/vapor.rb"
 
 open https://github.com/vapor/homebrew-tap/edit/master/$EXEC_NAME.rb
 
 while true; do
-    read -p "Have you opened a pull request? [y/n]" yn
+    read -p "Have you opened a pull request? [y/n] " yn
     case $yn in
         [Yy]* ) break;;
         [Nn]* ) exit;;
