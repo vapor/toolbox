@@ -28,7 +28,7 @@ struct CloudLoginRunner {
         let p = password()
         let token = try UserApi.login(email: e, password: p)
         try token.save()
-        ctx.console.output("Welcome to Cloud".consoleText(.info))
+        ctx.console.output("Cloud is Ready".consoleText(.info))
     }
 
     func email() -> String {
@@ -74,7 +74,7 @@ struct CloudSignupRunner {
         let l = lastName()
         let o = organization()
         let e = email()
-        let p = password()
+        let p = try password()
         let _ = try UserApi.signup(
             email: e,
             firstName: f,
@@ -82,7 +82,6 @@ struct CloudSignupRunner {
             organizationName: o,
             password: p
         )
-        ctx.console.output("Use `vapor cloud login` to login.")
         ctx.console.output("Welcome to Cloud".consoleText(.info))
     }
 
@@ -91,9 +90,12 @@ struct CloudSignupRunner {
         return ctx.console.ask("Email")
     }
 
-    func password() -> String {
+    func password() throws -> String {
         if let pass = ctx.options["password"] { return pass }
-        return ctx.console.ask("Password", isSecure: true)
+        let one = ctx.console.ask("Password", isSecure: true)
+        let two = ctx.console.ask("Confirm Password", isSecure: true)
+        guard one == two else { throw "Passwords did not match." }
+        return one
     }
 
     func firstName() -> String {
