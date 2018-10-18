@@ -1,17 +1,14 @@
 import Vapor
 
 struct CloudGroup: CommandGroup {
-    /// See `CommandGroup`.
-    var commands: Commands = [
+    let commands: Commands = [
         "login" : CloudLogin(),
         "signup": CloudSignup(),
         "ssh": CloudSSHGroup(),
     ]
 
     /// See `CommandGroup`.
-    var options: [CommandOption] {
-        return []
-    }
+    let options: [CommandOption] = []
 
     /// See `CommandGroup`.
     var help: [String] = [
@@ -30,6 +27,12 @@ protocol MyCommand: Command {
 }
 
 extension MyCommand {
+    /// Throwing errors here logs a bunch of information
+    /// about how to use the command, but it clutters
+    /// the terminal and isn't relavant to the issue
+    ///
+    /// Here we eat and print any errors but don't throw from here to avoid
+    /// this until a more permanent fix can be found
     func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
         do {
             try trigger(with: ctx)

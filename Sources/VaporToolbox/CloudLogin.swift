@@ -32,12 +32,12 @@ struct CloudLoginRunner {
     }
 
     func email() -> String {
-        if let email = ctx.options["email"] { return email }
+        if let email = ctx.options["Email"] { return email }
         return ctx.console.ask("email")
     }
 
     func password() -> String {
-        if let pass = ctx.options["password"] { return pass }
+        if let pass = ctx.options["Password"] { return pass }
         return ctx.console.ask("password", isSecure: true)
     }
 }
@@ -113,3 +113,4 @@ struct CloudSignupRunner {
         return ctx.console.ask("Organization (i.e. My Org)")
     }
 }
+

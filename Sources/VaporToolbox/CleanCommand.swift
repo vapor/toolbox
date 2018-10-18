@@ -10,7 +10,7 @@ struct CleanCommand: Command {
         .flag(name: "update", short: "u", help: [
             "Cleans the Package.resolved file if it exists",
             "This is equivalent to doing `swift package update`"
-            ])
+        ])
     ]
 
     /// See `Command`.
