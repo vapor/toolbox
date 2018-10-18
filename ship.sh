@@ -18,7 +18,10 @@ fi
 PACKAGE_NAME="vapor-toolbox-$TAG"
 mkdir -p ./$PACKAGE_NAME
 
-README="./$PACKAGE_NAME/README.txt"
+rm -rf ./.ship
+SHIP_DIR="./.ship/$PACKAGE_NAME"
+
+README="$SHIP_DIR/README.txt"
 
 echo "Manual Install Instructions for Vapor Toolbox v$TAG" > $README
 echo "" >> $README
@@ -26,10 +29,10 @@ echo "- Move *.dylib files into /usr/local/lib" >> $README
 echo "- Move executable $EXEC_NAME into /usr/local/bin" >> $README
 echo "- Type '$EXEC_NAME --help' into terminal to verify installation" >> $README
 
-cp .build/release/Executable ./$PACKAGE_NAME/$EXEC_NAME
-cp .build/release/*.dylib ./$PACKAGE_NAME/
+cp .build/release/Executable $SHIP_DIR/$EXEC_NAME
+cp .build/release/*.dylib $SHIP_DIR/
 
-tar -cvzf macOS-sierra.tar.gz ./$PACKAGE_NAME
+tar -cvzf macOS-sierra.tar.gz $SHIP_DIR
 
 echo "📦  Drag and drop $PWD/macOS-sierra.tar.gz into https://github.com/vapor/toolbox/releases/edit/$TAG"
 
@@ -43,6 +46,7 @@ while true; do
         * ) echo "Please answer yes or no.";;
     esac
 done
+
 
 echo "📦 Generating Ruby script\n\n\n"
 HASH=$(shasum -a 256 macOS-sierra.tar.gz | cut -d " " -f 1)
@@ -60,7 +64,4 @@ while true; do
     esac
 done
 
-rm -rf macOS-sierra.tar.gz
-rm -rf $PACKAGE_NAME
-git reset --hard HEAD
 git checkout master
