@@ -33,9 +33,12 @@ echo "- Type '$EXEC_NAME --help' into terminal to verify installation" >> $READM
 cp .build/release/Executable $PACKAGE_DIR/$EXEC_NAME
 cp .build/release/*.dylib $PACKAGE_DIR/
 
-tar -cvzf $SHIP_DIR/macOS-sierra.tar.gz $PACKAGE_DIR
+SIERRA_TAR=$SHIP_DIR/macOS-sierra.tar.gz
 
-echo "➡️  Drag and drop $SHIP_DIR/macOS-sierra.tar.gz into https://github.com/vapor/toolbox/releases/edit/$TAG"
+tar -cvzf $SIERRA_TAR $PACKAGE_DIR
+
+
+echo "➡️  Drag and drop $SIERRA_TAR into https://github.com/vapor/toolbox/releases/edit/$TAG"
 
 open https://github.com/vapor/toolbox/releases/edit/$TAG
 open $SHIP_DIR
@@ -51,7 +54,7 @@ done
 
 
 echo "📦 Generating Ruby script\n\n\n"
-HASH=$(shasum -a 256 macOS-sierra.tar.gz | cut -d " " -f 1)
+HASH=$(shasum -a 256 $SIERRA_TAR | cut -d " " -f 1)
 echo "    New checksum is:"
 echo ""
 echo "    $HASH"
