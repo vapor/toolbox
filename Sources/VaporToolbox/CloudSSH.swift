@@ -37,7 +37,7 @@ struct CloudSSHPush: MyCommand {
     ]
 
     /// See `Command`.
-    var help: [String] = ["Logs into Vapor Cloud"]
+    var help: [String] = ["Pushes SSH keys to cloud."]
 
     /// See `Command`.
     func trigger(with ctx: CommandContext) throws {
@@ -58,14 +58,15 @@ struct CloudSSHPushRunner {
     }
 
     func run() throws {
-        let n = name()
         let k = try key()
-        let _ = try api.push(name: n, key: k)
+        let n = name()
+        let created = try api.push(name: n, key: k)
+        ctx.console.output("Pushed key as \(created.name).".consoleText())
     }
 
     func name() -> String {
         if let name = ctx.options["name"] { return name }
-        return ctx.console.ask("name")
+        return ctx.console.ask("Give your key a readable name")
     }
 
     func key() throws -> String {
@@ -96,7 +97,7 @@ struct CloudSSHList: MyCommand {
 
     /// See `Command`.
     var options: [CommandOption] = [
-        .value(name: "long", short: "l", default: nil, help: ["Include the full key in logout"])
+        .flag(name: "long", short: "l", help: ["Include the full key in logout"])
     ]
 
     /// See `Command`.
@@ -129,19 +130,21 @@ struct CloudSSHListRunner {
 
     func log(_ list: [SSHKey]) {
         let long = ctx.options["long"]?.bool == true
-        let console = ctx.console
+        if list.isEmpty {
+            ctx.console.output("No SSH keys found. Nothing to show.")
+        }
         list.forEach { key in
             // Insert line of space for each key
-            defer { console.output("") }
-            console.output("Name:")
-            console.output(key.name.consoleText())
-            console.output("Created At:")
+            defer { ctx.console.output("") }
+            ctx.console.output("Name:")
+            ctx.console.output(key.name.consoleText())
+            ctx.console.output("Created At:")
             // TODO: Format to local timezone
-            console.output(key.createdAt.description.consoleText())
+            ctx.console.output(key.createdAt.description.consoleText())
 
             guard long else { return }
-            console.output("Key:")
-            console.output(key.key.consoleText())
+            ctx.console.output("Key:")
+            ctx.console.output(key.key.consoleText())
         }
     }
 }
@@ -154,7 +157,7 @@ struct CloudSSHDelete: MyCommand {
     var options: [CommandOption] = []
 
     /// See `Command`.
-    var help: [String] = ["Lists the SSH keys that you have pushed to cloud"]
+    var help: [String] = ["Deletes a given SSH Key"]
 
     /// See `Command`.
     func trigger(with ctx: CommandContext) throws {
@@ -176,6 +179,11 @@ struct CloudSSHDeleteRunner {
 
     func run() throws {
         let list = try api.list()
+        guard !list.isEmpty else {
+            ctx.console.output("No SSH keys found. Nothing to delete.")
+            return
+        }
+
         let choice = ctx.console.choose("Which Key?", from: list) { key in
             return "\(key.name) : \(key.createdAt)".consoleText()
         }
