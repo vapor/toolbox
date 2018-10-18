@@ -79,17 +79,22 @@ public func testCloud() throws {
     try signup()
 }
 
+extension String {
+    fileprivate var trailSlash: String { return finished(with: "/") }
+}
+
 let cloudBaseUrl = "https://api.v2.vapor.cloud/v2/"
-let gitUrl = cloudBaseUrl + "git"
-let gitSSHKeysUrl = gitUrl.finished(with: "/") + "keys"
-let authUrl = cloudBaseUrl + "auth/"
-let userUrl = authUrl + "users"
-let loginUrl = userUrl.finished(with: "/") + "login"
-let meUrl = userUrl.finished(with: "/") + "me"
+let gitUrl = cloudBaseUrl.trailSlash + "git"
+let gitSSHKeysUrl = gitUrl.trailSlash + "keys"
+let authUrl = cloudBaseUrl.trailSlash + "auth"
+let userUrl = authUrl.trailSlash + "users"
+let loginUrl = userUrl.trailSlash + "login"
+let meUrl = userUrl.trailSlash + "me"
 
-let appsUrl = cloudBaseUrl + "apps/applications"
-let environmentsUrl = appsUrl + "environments"
-
+let applicationsUrl = appsUrl.trailSlash + "applications"
+let appsUrl = cloudBaseUrl.trailSlash + "apps"
+let environmentsUrl = applicationsUrl.trailSlash + "environments"
+let organizationsUrl = authUrl.trailSlash + "organizations"
 
 struct CloudUser: Content {
     let id: UUID
@@ -402,10 +407,29 @@ let app: Application = {
 
 func asdfasdf() throws {
     let token = try Token.load()
-    let apps = ApplicationsApi(token: token)
+    let apps = OrganizationsApi(token: token)
     let list = try apps.list()
     print(list)
     print("")
+}
+
+struct Organization: Content {
+    let id: UUID
+    let createdAt: Date
+    let updatedAt: Date?
+    let slug: String
+    let name: String
+}
+
+struct OrganizationsApi {
+    let token: Token
+
+    func list() throws -> [Organization] {
+        let client = try makeClient()
+        let headers = token.headers
+        let response = client.send(.GET, headers: headers, to: organizationsUrl)
+        return try response.become([Organization].self)
+    }
 }
 
 struct CloudApp: Content {
@@ -426,7 +450,7 @@ struct ApplicationsApi: API {
     func list() throws -> [CloudApp] {
         let client = try makeClient()
         let headers = token.headers
-        let response = client.send(.GET, headers: headers, to: appsUrl)
+        let response = client.send(.GET, headers: headers, to: applicationsUrl)
         return try response.become([CloudApp].self)
     }
 }
