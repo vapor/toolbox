@@ -88,12 +88,12 @@ struct CloudSignupRunner {
 
     func email() -> String {
         if let email = ctx.options["email"] { return email }
-        return ctx.console.ask("email")
+        return ctx.console.ask("Email")
     }
 
     func password() -> String {
         if let pass = ctx.options["password"] { return pass }
-        return ctx.console.ask("password", isSecure: true)
+        return ctx.console.ask("Password", isSecure: true)
     }
 
     func firstName() -> String {
