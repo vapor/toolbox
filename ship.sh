@@ -59,7 +59,7 @@ echo "    New checksum is:"
 echo ""
 echo "    $HASH"
 echo ""
-echo "➡️  Copy and paste this into https://github.com/vapor/homebrew-tap/edit/master/vapor.rb"
+echo "➡️  Copy and paste this into https://github.com/vapor/homebrew-tap/edit/master/$EXEC_NAME"
 
 open https://github.com/vapor/homebrew-tap/edit/master/$EXEC_NAME.rb
 
