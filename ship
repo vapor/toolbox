@@ -21,6 +21,7 @@ PACKAGE_NAME="vapor-toolbox-$TAG"
 
 SHIP_DIR="./.ship"
 rm -rf $SHIP_DIR
+SIERRA_TAR="$SHIP_DIR/macOS-sierra.tar.gz"
 PACKAGE_DIR="$SHIP_DIR/$PACKAGE_NAME"
 mkdir -p $PACKAGE_DIR
 
@@ -32,13 +33,10 @@ echo "- Move *.dylib files into /usr/local/lib" >> $README
 echo "- Move executable $EXEC_NAME into /usr/local/bin" >> $README
 echo "- Type '$EXEC_NAME --help' into terminal to verify installation" >> $README
 
-cp .build/release/Executable $PACKAGE_DIR/$EXEC_NAME
-cp .build/release/*.dylib $PACKAGE_DIR/
-
-SIERRA_TAR=$SHIP_DIR/macOS-sierra.tar.gz
+cp .build/release/Executable "$PACKAGE_DIR/$EXEC_NAME"
+cp .build/release/*.dylib "$PACKAGE_DIR/"
 
 tar -cvzf $SIERRA_TAR $PACKAGE_DIR
-
 
 echo "➡️  Drag and drop $SIERRA_TAR into https://github.com/vapor/toolbox/releases/edit/$TAG"
 
