@@ -1,3 +1,11 @@
+/*
+
+ Current Issues
+
+ - View on a region w/ ID replies "Region not found"
+
+ */
+
 import Vapor
 
 struct CloudGroup: CommandGroup {
@@ -95,6 +103,9 @@ let applicationsUrl = appsUrl.trailSlash + "applications"
 let appsUrl = cloudBaseUrl.trailSlash + "apps"
 let environmentsUrl = applicationsUrl.trailSlash + "environments"
 let organizationsUrl = authUrl.trailSlash + "organizations"
+let regionsUrl = appsUrl.trailSlash + "regions"
+let plansUrl = appsUrl.trailSlash + "plans"
+let productsUrl = appsUrl.trailSlash + "products"
 
 struct CloudUser: Content {
     let id: UUID
@@ -407,9 +418,11 @@ let app: Application = {
 
 func asdfasdf() throws {
     let token = try Token.load()
-    let apps = OrganizationsApi(token: token)
-    let list = try apps.list()
+    let regions = SimpleResource<Plan>(token: token, url: plansUrl)
+    let list = try regions.list()
     print(list)
+    let view = try regions.view(id: list.first!.id.uuidString)
+    print(view)
     print("")
 }
 
@@ -421,14 +434,73 @@ struct Organization: Content {
     let name: String
 }
 
+struct Region: Content {
+    let id: UUID
+    let provider: String
+    let name: String
+    let country: String
+}
+
+struct Product: Content {
+    let id: UUID
+    let name: String
+    let slug: String
+}
+
+struct Plan: Content {
+    let id: UUID
+    let name: String
+    let slug: String
+
+    let details: [String: Int]
+    let description: String
+    let price: Double
+    let productID: UUID
+}
+
+struct SimpleResource<T: Content> {
+    let token: Token
+    let url: String
+
+    func list() throws -> [T] {
+        let client = try makeClient()
+        var headers = token.headers
+        headers.add(name: .contentType, value: "application/json")
+
+        let response = client.send(.GET, headers: headers, to: url)
+        print(try response.wait())
+        return try response.become([T].self)
+    }
+
+    func view(id: String) throws -> T {
+        let url = self.url.trailSlash + id
+
+        let client = try makeClient()
+        var headers = token.headers
+        headers.add(name: .contentType, value: "application/json")
+
+        let response = client.send(.GET, headers: headers, to: url)
+        return try response.become(T.self)
+    }
+}
+
 struct OrganizationsApi {
     let token: Token
 
     func list() throws -> [Organization] {
         let client = try makeClient()
         let headers = token.headers
-        let response = client.send(.GET, headers: headers, to: organizationsUrl)
+        let response = client.send(.GET, headers: headers, to: regionsUrl)
+        print(try! response.wait())
         return try response.become([Organization].self)
+    }
+
+    func view(id: String) throws -> Organization {
+        let url = organizationsUrl.trailSlash + "id"
+        let client = try makeClient()
+        let headers = token.headers
+        let response = client.send(.GET, headers: headers, to: url)
+        return try response.become(Organization.self)
     }
 }
 
