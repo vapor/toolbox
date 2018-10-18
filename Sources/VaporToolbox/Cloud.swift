@@ -418,7 +418,7 @@ let app: Application = {
 
 func asdfasdf() throws {
     let token = try Token.load()
-    let regions = SimpleResource<Plan>(token: token, url: plansUrl)
+    let regions = SimpleResourceAccess<Plan>(token: token, url: plansUrl)
     let list = try regions.list()
     print(list)
     let view = try regions.view(id: list.first!.id.uuidString)
@@ -458,7 +458,87 @@ struct Plan: Content {
     let productID: UUID
 }
 
-struct SimpleResource<T: Content> {
+protocol Resource: Content {
+
+}
+
+protocol CreatableResource: Resource {
+    associatedtype PostType
+}
+
+struct ComplexResourceAccess<T: CreatableResource> {
+
+}
+
+struct AuthorizedResourceAccess<T: Content> {
+    let token: Token
+    let url: String
+
+    func list() throws -> [T] {
+        let client = try makeClient()
+        var headers = token.headers
+        headers.add(name: .contentType, value: "application/json")
+
+        let response = client.send(.GET, headers: headers, to: url)
+        print(try response.wait())
+        return try response.become([T].self)
+    }
+
+    func view(id: String) throws -> T {
+        let url = self.url.trailSlash + id
+
+        let client = try makeClient()
+        var headers = token.headers
+        headers.add(name: .contentType, value: "application/json")
+
+        let response = client.send(.GET, headers: headers, to: url)
+        return try response.become(T.self)
+    }
+
+    func create<U: Content>(_ content: U) throws -> T {
+        let client = try makeClient()
+        var headers = token.headers
+        headers.add(name: .contentType, value: "application/json")
+
+        let response = client.send(.POST, headers: headers, to: url) { try $0.content.encode(content) }
+        return try response.become(T.self)
+    }
+
+    func update<U: Content>(id: String, with content: U) throws -> T {
+        let url = self.url.trailSlash + id
+        
+        let client = try makeClient()
+        var headers = token.headers
+        headers.add(name: .contentType, value: "application/json")
+
+        let response = client.send(.PATCH, headers: headers, to: url) { try $0.content.encode(content) }
+        return try response.become(T.self)
+    }
+
+    func replace(id: String, with content: T) throws -> T {
+        let url = self.url.trailSlash + id
+
+        let client = try makeClient()
+        var headers = token.headers
+        headers.add(name: .contentType, value: "application/json")
+
+        let response = client.send(.PUT, headers: headers, to: url) { try $0.content.encode(content) }
+        return try response.become(T.self)
+    }
+
+    func delete(id: String) throws {
+        let url = self.url.trailSlash + id
+
+        let client = try makeClient()
+        var headers = token.headers
+        headers.add(name: .contentType, value: "application/json")
+
+        let response = client.send(.DELETE, headers: headers, to: url)
+        try response.validate()
+    }
+}
+
+struct SimpleResourceAccess<T: Content> {
     let token: Token
     let url: String
 
