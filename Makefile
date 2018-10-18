@@ -1,2 +1,2 @@
 test-linux: 
-	docker-compose build --no-cache test
+	docker-compose up --build test
