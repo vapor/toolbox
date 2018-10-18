@@ -418,7 +418,7 @@ let app: Application = {
 
 func asdfasdf() throws {
     let token = try Token.load()
-    let regions = SimpleResourceAccess<Plan>(token: token, url: plansUrl)
+    let regions = AuthorizedResourceAccess<CloudApp>(token: token, url: applicationsUrl)
     let list = try regions.list()
     print(list)
     let view = try regions.view(id: list.first!.id.uuidString)
@@ -555,8 +555,9 @@ struct AuthorizedResourceAccess<T: Content> {
         headers.add(name: .contentType, value: "application/json")
 
         let client = try makeClient()
-        return client.send(method, headers: headers, to: url, beforeSend: beforeSend)
-
+        let response = client.send(method, headers: headers, to: url, beforeSend: beforeSend)
+        print(try! response.wait())
+        return response
     }
 }
 
