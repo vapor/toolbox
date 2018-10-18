@@ -4,6 +4,7 @@ struct CloudGroup: CommandGroup {
     /// See `CommandGroup`.
     var commands: Commands = [
         "login" : CloudLogin(),
+        "signup": CloudSignup(),
         "ssh": CloudSSHGroup(),
     ]
 

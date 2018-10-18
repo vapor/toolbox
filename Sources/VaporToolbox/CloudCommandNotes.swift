@@ -1,4 +1,7 @@
 /**
+ // Signup
+ vapor cloud signup (-firstName/-f, -lastName/-l, -email/-e, -password/-p, -organizationName/-o)
+
  // Login
  vapor cloud login (-email, -password)
 
