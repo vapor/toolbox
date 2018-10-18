@@ -193,9 +193,7 @@ extension Future where T == Response {
     }
 
     func validate() throws {
-        let resp = try wait().throwIfError()
-        print(resp)
-        print("")
+        let _ = try wait().throwIfError()
     }
 }
 
@@ -341,22 +339,22 @@ extension Token {
 }
 
 func asdf() throws {
-    let token = try UserApi.login(email: testEmail, password: testPassword)
-    print("Got tokenn: \(token)")
-    do {
-        print("Testing load not exist")
-        let no = try Token.load()
-        print("Exists? \(no != nil)")
-        print("")
-    } catch {
-        print("caught Error: \(error)")
-        print("")
-    }
-    try token.save()
-    let loaded = try Token.load()
-    print("loaded: \(loaded)")
-    print("equal: \(loaded == token)")
-    print("")
+//    let token = try UserApi.login(email: testEmail, password: testPassword)
+//    print("Got tokenn: \(token)")
+//    do {
+//        print("Testing load not exist")
+//        let no = try Token.load()
+////        print("Exists? \(no != nil)")
+//        print("")
+//    } catch {
+//        print("caught Error: \(error)")
+//        print("")
+//    }
+//    try token.save()
+//    let loaded = try Token.load()
+//    print("loaded: \(loaded)")
+//    print("equal: \(loaded == token)")
+//    print("")
 //    try testSSHKey(with: token)
 //    print
 //

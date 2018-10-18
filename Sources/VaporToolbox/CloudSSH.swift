@@ -60,13 +60,17 @@ struct CloudSSHPushRunner {
     func run() throws {
         let k = try key()
         let n = name()
+        ctx.console.output("Pushing SSH key...")
         let created = try api.push(name: n, key: k)
         ctx.console.output("Pushed key as \(created.name).".consoleText())
     }
 
     func name() -> String {
         if let name = ctx.options["name"] { return name }
-        return ctx.console.ask("Give your key a readable name")
+        let answer = ctx.console.ask("Give your key a readable name")
+        ctx.console.clear(.line)
+        ctx.console.clear(.line)
+        return answer
     }
 
     func key() throws -> String {
