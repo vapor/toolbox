@@ -1,6 +1,9 @@
+CURR_BRANCH=`git branch | grep \* | cut -d ' ' -f2`
+
 TAG=$1
 echo "📦  Checking out tag $TAG..."
 git checkout $TAG;
+git pull;
 
 echo "📦  Updating Swift packages..."
 swift package update
@@ -72,4 +75,4 @@ while true; do
     esac
 done
 
-git checkout master
+git checkout $CURR_BRANCH;
