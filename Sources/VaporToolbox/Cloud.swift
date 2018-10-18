@@ -5,6 +5,7 @@ struct CloudGroup: CommandGroup {
         "login" : CloudLogin(),
         "signup": CloudSignup(),
         "ssh": CloudSSHGroup(),
+        "deploy": CloudDeploy(),
     ]
 
     /// See `CommandGroup`.
@@ -85,6 +86,10 @@ let authUrl = cloudBaseUrl + "auth/"
 let userUrl = authUrl + "users"
 let loginUrl = userUrl.finished(with: "/") + "login"
 let meUrl = userUrl.finished(with: "/") + "me"
+
+let appsUrl = cloudBaseUrl + "apps/applications"
+let environmentsUrl = appsUrl + "environments"
+
 
 struct CloudUser: Content {
     let id: UUID
@@ -393,3 +398,36 @@ let app: Application = {
 
     return app
 }()
+
+
+func asdfasdf() throws {
+    let token = try Token.load()
+    let apps = ApplicationsApi(token: token)
+    let list = try apps.list()
+    print(list)
+    print("")
+}
+
+struct CloudApp: Content {
+    let updatedAt: Date
+    let name: String
+    let createdAt: Date
+    let namespace: String
+    let github: String?
+    let slug: String
+    let organizationID: UUID
+    let gitURL: String
+    let id: UUID
+}
+
+struct ApplicationsApi: API {
+    let token: Token
+
+    func list() throws -> [CloudApp] {
+        let client = try makeClient()
+        let headers = token.headers
+        let response = client.send(.GET, headers: headers, to: appsUrl)
+        return try response.become([CloudApp].self)
+    }
+}
+
