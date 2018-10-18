@@ -36,7 +36,7 @@ echo "- Type '$EXEC_NAME --help' into terminal to verify installation" >> $READM
 cp .build/release/Executable "$PACKAGE_DIR/$EXEC_NAME"
 cp .build/release/*.dylib "$PACKAGE_DIR/"
 
-tar -cvzf $SIERRA_TAR $PACKAGE_DIR
+tar -C $SHIP_DIR -cvzf $SIERRA_TAR $PACKAGE_NAME
 
 echo "➡️  Drag and drop $SIERRA_TAR into https://github.com/vapor/toolbox/releases/edit/$TAG"
 
