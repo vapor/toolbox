@@ -12,6 +12,8 @@ struct CloudGroup: CommandGroup {
     let commands: Commands = [
         "login" : CloudLogin(),
         "signup": CloudSignup(),
+        "me": Me(),
+        "dump-token": DumpToken(),
         "ssh": CloudSSHGroup(),
         "deploy": CloudDeploy(),
     ]
@@ -160,10 +162,8 @@ struct UserApi {
     }
 
     static func me(token: Token) throws -> CloudUser {
-        let client = try makeClient()
-        let headers = token.headers
-        let response = client.send(.GET, headers: headers, to: meUrl)
-        return try response.become(CloudUser.self)
+        let access = CloudUser.Access(with: token, baseUrl: meUrl)
+        return try access.view()
     }
 }
 
@@ -228,8 +228,22 @@ extension Content {
     }
 }
 
+
+protocol CloudResource: Content {
+    var id: UUID { get }
+}
+
+extension Content {
+    static func Access(with token: Token, baseUrl url: String) -> CloudResourceAccess<Self> {
+        return CloudResourceAccess<Self>(token: token, baseUrl: url)
+    }
+}
+
+
 struct SSHKeyApi: API {
     let token: Token
+
+    var access: CloudResourceAccess<SSHKey> { return SSHKey.Access(with: token, baseUrl: gitSSHKeysUrl) }
 
     func push(name: String, key: String) throws -> SSHKey {
         struct Package: Content {
@@ -237,45 +251,16 @@ struct SSHKeyApi: API {
             let key: String
         }
         let package = Package(name: name, key: key)
-        let cloud = CloudResourceAccess<SSHKey>(token: token, url: gitSSHKeysUrl)
-        return try cloud.create(package)
-    }
-
-    func _push(name: String, key: String) throws -> SSHKey {
-        struct Package: Content {
-            let name: String
-            let key: String
-        }
-        let package = Package(name: name, key: key)
-        let client = try makeClient()
-        let response = client.send(.POST, headers: contentHeaders, to: gitSSHKeysUrl) { try $0.content.encode(package) }
-        return try response.become(SSHKey.self)
+        return try access.create(package)
     }
 
     func list() throws -> [SSHKey] {
-        let cloud = CloudResourceAccess<SSHKey>(token: token, url: gitSSHKeysUrl)
-        return try cloud.list()
-//        let client = try makeClient()
-//        let response = client.send(.GET, headers: basicAuthHeaders, to: gitSSHKeysUrl)
-//        return try response.become([SSHKey].self)
-    }
-
-    func _list() throws -> [SSHKey] {
-        let client = try makeClient()
-        let response = client.send(.GET, headers: basicAuthHeaders, to: gitSSHKeysUrl)
-        return try response.become([SSHKey].self)
+        return try access.list()
     }
 
     func delete(_ key: SSHKey) throws {
-        let keyAccess = CloudResourceAccess<SSHKey>(token: token, url: gitSSHKeysUrl)
+        let keyAccess = CloudResourceAccess<SSHKey>(token: token, baseUrl: gitSSHKeysUrl)
         try keyAccess.delete(id: key.id.uuidString)
-    }
-
-    func _delete(_ key: SSHKey) throws {
-        let client = try makeClient()
-        let url = gitSSHKeysUrl.finished(with: "/") + key.id.uuidString
-        let response = client.send(.DELETE, headers: basicAuthHeaders, to: url)
-        try response.validate()
     }
 
     internal func clear() throws {
@@ -447,7 +432,7 @@ let app: Application = {
 
 func asdfasdf() throws {
     let token = try Token.load()
-    let regions = CloudResourceAccess<CloudApp>(token: token, url: applicationsUrl)
+    let regions = CloudResourceAccess<CloudApp>(token: token, baseUrl: applicationsUrl)
     let list = try regions.list()
     print(list)
     let view = try regions.view(id: list.first!.id.uuidString)
@@ -503,38 +488,43 @@ struct ComplexResourceAccess<T: CreatableResource> {
 
 struct CloudResourceAccess<T: Content> {
     let token: Token
-    let url: String
+    let baseUrl: String
+
+    func view() throws -> T {
+        let response = try send(.GET, to: baseUrl)
+        return try response.become(T.self)
+    }
 
     func list() throws -> [T] {
-        let response = try send(.GET, to: url)
+        let response = try send(.GET, to: baseUrl)
         return try response.become([T].self)
     }
 
     func view(id: String) throws -> T {
-        let url = self.url.trailSlash + id
+        let url = self.baseUrl.trailSlash + id
         let response = try send(.GET, to: url)
         return try response.become(T.self)
     }
 
     func create<U: Content>(_ content: U) throws -> T {
-        let response = try send(.POST, to: url, with: content)
+        let response = try send(.POST, to: baseUrl, with: content)
         return try response.become(T.self)
     }
 
     func update<U: Content>(id: String, with content: U) throws -> T {
-        let url = self.url.trailSlash + id
+        let url = self.baseUrl.trailSlash + id
         let response = try send(.PATCH, to: url, with: content)
         return try response.become(T.self)
     }
 
     func replace(id: String, with content: T) throws -> T {
-        let url = self.url.trailSlash + id
+        let url = self.baseUrl.trailSlash + id
         let response = try send(.PUT, to: url, with: content)
         return try response.become(T.self)
     }
 
     func delete(id: String) throws {
-        let url = self.url.trailSlash + id
+        let url = self.baseUrl.trailSlash + id
         let response = try send(.DELETE, to: url)
         try response.validate()
     }

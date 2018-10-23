@@ -42,6 +42,58 @@ struct CloudLoginRunner {
     }
 }
 
+struct Me: MyCommand {
+    /// See `Command`.
+    var arguments: [CommandArgument] = []
+
+    /// See `Command`.
+    var options: [CommandOption] = [
+        .flag(name: "all", short: "a", help: ["include more data about user"]),
+    ]
+
+    /// See `Command`.
+    var help: [String] = ["Shows information about user."]
+
+    /// See `Command`.
+    func trigger(with ctx: CommandContext) throws {
+        let token = try Token.load()
+        let me = try UserApi.me(token: token)
+        ctx.console.output("Email:")
+        ctx.console.output(me.email.consoleText())
+        ctx.console.output("Name:")
+        let name = me.firstName + " " + me.lastName
+        ctx.console.output(name.consoleText())
+
+        let all = ctx.options["all"]?.bool == true
+        guard all else { return }
+        ctx.console.output("ID:")
+        ctx.console.output(me.id.uuidString.consoleText())
+    }
+}
+
+struct DumpToken: MyCommand {
+    /// See `Command`.
+    var arguments: [CommandArgument] = []
+
+    /// See `Command`.
+    var options: [CommandOption] = []
+
+    /// See `Command`.
+    var help: [String] = ["Dump token data"]
+
+    /// See `Command`.
+    func trigger(with ctx: CommandContext) throws {
+        let token = try Token.load()
+        ctx.console.output("Expires At:")
+        ctx.console.output(token.expiresAt.description.consoleText())
+        ctx.console.output("UserID:")
+        ctx.console.output(token.userID.uuidString.description.consoleText())
+        ctx.console.output("ID:")
+        ctx.console.output(token.id.uuidString.consoleText())
+        ctx.console.output("Token:")
+        ctx.console.output(token.token.consoleText())
+    }
+}
 
 struct CloudSignup: MyCommand {
     /// See `Command`.
