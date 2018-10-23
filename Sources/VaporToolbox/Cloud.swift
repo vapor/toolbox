@@ -462,6 +462,8 @@ protocol Resource: Content {
 
 }
 
+
+
 protocol CreatableResource: Resource {
     associatedtype PostType
 }
@@ -475,58 +477,29 @@ struct AuthorizedResourceAccess<T: Content> {
     let url: String
 
     func list() throws -> [T] {
-//        let client = try makeClient()
-//        var headers = token.headers
-//        headers.add(name: .contentType, value: "application/json")
-//
-//        let response = client.send(.GET, headers: headers, to: url)
-//        print(try response.wait())
         let response = try send(.GET, to: url)
         return try response.become([T].self)
     }
 
     func view(id: String) throws -> T {
         let url = self.url.trailSlash + id
-
-//        let client = try makeClient()
-//        var headers = token.headers
-//        headers.add(name: .contentType, value: "application/json")
-//
-//        let response = client.send(.GET, headers: headers, to: url)
         let response = try send(.GET, to: url)
         return try response.become(T.self)
     }
 
     func create<U: Content>(_ content: U) throws -> T {
-//        let client = try makeClient()
-//        var headers = token.headers
-//        headers.add(name: .contentType, value: "application/json")
-//
-//        let response = client.send(.POST, headers: headers, to: url) { try $0.content.encode(content) }
         let response = try send(.POST, to: url, with: content)
         return try response.become(T.self)
     }
 
     func update<U: Content>(id: String, with content: U) throws -> T {
         let url = self.url.trailSlash + id
-        
-//        let client = try makeClient()
-//        var headers = token.headers
-//        headers.add(name: .contentType, value: "application/json")
-//
-//        let response = client.send(.PATCH, headers: headers, to: url) { try $0.content.encode(content) }
         let response = try send(.PATCH, to: url, with: content)
         return try response.become(T.self)
     }
 
     func replace(id: String, with content: T) throws -> T {
         let url = self.url.trailSlash + id
-
-//        let client = try makeClient()
-//        var headers = token.headers
-//        headers.add(name: .contentType, value: "application/json")
-//
-//        let response = client.send(.PUT, headers: headers, to: url) { try $0.content.encode(content) }
         let response = try send(.PUT, to: url, with: content)
         return try response.become(T.self)
     }
