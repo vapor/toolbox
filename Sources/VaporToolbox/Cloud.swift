@@ -18,6 +18,7 @@ struct CloudGroup: CommandGroup {
         "deploy": CloudDeploy(),
         "apps": CloudAppsGroup(),
         "orgs": CloudOrgsGroup(),
+        "envs": CloudEnvsGroup(),
     ]
 
     /// See `CommandGroup`.
@@ -444,6 +445,16 @@ struct Plan: Content {
     let productID: UUID
 }
 
+struct CloudEnv: Content {
+    let defaultBranch: String
+    let applicationID: UUID
+    let createdAt: Date
+    let id: UUID
+    let slug: String
+    let regionID: UUID
+    let updatedAt: Date?
+}
+
 protocol Resource: Content {
 
 }
@@ -520,6 +531,7 @@ struct CloudResourceAccess<T: Content> {
 
         let client = try makeClient()
         let response = client.send(method, headers: headers, to: url, beforeSend: beforeSend)
+//        print(try! response.wait())
         return response
     }
 }
@@ -621,6 +633,20 @@ let listOrganizations = Simple { ctx in
     ctx.console.log(orgs)
 }
 
+let listEnvironments = Simple { ctx in
+    let token = try Token.load()
+
+    let access = CloudApp.Access(with: token, baseUrl: applicationsUrl)
+    let apps = try access.list()
+    let app = ctx.console.choose("Which App?", from: apps) { app in
+        return app.name.consoleText()
+    }
+    let url = applicationsUrl.trailSlash + app.id.uuidString.trailSlash + "environments"
+    let envAccess = CloudEnv.Access(with: token, baseUrl: url)
+    let envs = try envAccess.list()
+    ctx.console.log(envs)
+}
+
 let listApplications = Simple { ctx in
     let token = try Token.load()
     let access = CloudApp.Access(with: token, baseUrl: applicationsUrl)
@@ -641,10 +667,8 @@ let detectApplication = Simple { ctx in
 extension Console {
     func log<C: Content>(_ c: C) {
         // TODO: throw
-        let data = try! JSONEncoder().encode(c)
-        let string = String(data: data, encoding: .utf8)
-        let value = "\(c)"
-        output(value.consoleText())
+        let p = try! c.printable()
+        output(p)
     }
     func log<C: Content>(_ c: [C]) {
         c.forEach(log)
@@ -675,7 +699,7 @@ struct CloudAppsGroup: CommandGroup {
     let commands: Commands = [
         "list" : listApplications,
         "detect": detectApplication,
-    ]
+        ]
 
     /// See `CommandGroup`.
     let options: [CommandOption] = []
@@ -683,6 +707,26 @@ struct CloudAppsGroup: CommandGroup {
     /// See `CommandGroup`.
     var help: [String] = [
         "Interact with Vapor Cloud Applications"
+    ]
+
+    /// See `CommandGroup`.
+    func run(using context: CommandContext) throws -> EventLoopFuture<Void> {
+        // should never run
+        throw "should not run"
+    }
+}
+
+struct CloudEnvsGroup: CommandGroup {
+    let commands: Commands = [
+        "list" : listEnvironments,
+        ]
+
+    /// See `CommandGroup`.
+    let options: [CommandOption] = []
+
+    /// See `CommandGroup`.
+    var help: [String] = [
+        "Interact with Vapor Cloud Environments"
     ]
 
     /// See `CommandGroup`.
