@@ -11,6 +11,19 @@ struct Git {
         try run("commit", "-m", msg)
     }
 
+    static func isCloudConfigured() throws -> Bool {
+        return try run("remote")
+            .split(separator: "\n")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .contains("cloud")
+    }
+
+    static func cloudUrl() throws -> String {
+        let isConfigured = try isCloudConfigured()
+        guard isConfigured else { throw "cloud url not yet configured" }
+        return try run("remote", "get-url", "cloud").trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     @discardableResult
     private static func run(_ args: String...) throws -> String {
         return try Process.execute("git", args)

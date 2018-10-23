@@ -16,6 +16,8 @@ struct CloudGroup: CommandGroup {
         "dump-token": DumpToken(),
         "ssh": CloudSSHGroup(),
         "deploy": CloudDeploy(),
+        "apps": CloudAppsGroup(),
+        "orgs": CloudOrgsGroup(),
     ]
 
     /// See `CommandGroup`.
@@ -97,6 +99,7 @@ let cloudBaseUrl = "https://api.v2.vapor.cloud/v2/"
 let gitUrl = cloudBaseUrl.trailSlash + "git"
 let gitSSHKeysUrl = gitUrl.trailSlash + "keys"
 let authUrl = cloudBaseUrl.trailSlash + "auth"
+let resetUrl = authUrl.trailSlash + "reset"
 let userUrl = authUrl.trailSlash + "users"
 let loginUrl = userUrl.trailSlash + "login"
 let meUrl = userUrl.trailSlash + "me"
@@ -108,64 +111,6 @@ let organizationsUrl = authUrl.trailSlash + "organizations"
 let regionsUrl = appsUrl.trailSlash + "regions"
 let plansUrl = appsUrl.trailSlash + "plans"
 let productsUrl = appsUrl.trailSlash + "products"
-
-struct CloudUser: Content {
-    let id: UUID
-    let firstName: String
-    let lastName: String
-    let email: String
-}
-
-struct UserApi {
-    static func signup(
-        email: String,
-        firstName: String,
-        lastName: String,
-        organizationName: String,
-        password: String
-    ) throws -> CloudUser {
-        struct NewUser: Content {
-            let email: String
-            let firstName: String
-            let lastName: String
-            let organizationName: String
-            let password: String
-        }
-
-        let content = NewUser(
-            email: email,
-            firstName: firstName,
-            lastName: lastName,
-            organizationName: organizationName,
-            password: password
-        )
-
-        let client = try makeClient()
-        let response = client.send(.POST, to: userUrl) { try $0.content.encode(content) }
-        return try response.become(CloudUser.self)
-    }
-
-    static func login(
-        email: String,
-        password: String
-    ) throws -> Token {
-        let combination = email + ":" + password
-        let data = combination.data(using: .utf8)!
-        let encoded = data.base64EncodedString()
-
-        let headers: HTTPHeaders = [
-            "Authorization": "Basic \(encoded)"
-        ]
-        let client = try makeClient()
-        let response = client.send(.POST, headers: headers, to: loginUrl)
-        return try response.become(Token.self)
-    }
-
-    static func me(token: Token) throws -> CloudUser {
-        let access = CloudUser.Access(with: token, baseUrl: meUrl)
-        return try access.view()
-    }
-}
 
 protocol API {
     var token: Token { get }
@@ -440,6 +385,33 @@ func asdfasdf() throws {
     print("")
 }
 
+public func fooBar() throws {
+    let token = try Token.load()
+    let access = CloudApp.Access(with: token, baseUrl: applicationsUrl)
+    let apps = try access.list()
+    let mapped = apps.map { try! $0.printable() }
+    mapped.forEach { mapp in
+        print(mapp)
+    }
+//    print("")
+}
+
+extension Content {
+    func printable() throws -> ConsoleText {
+        let data = try JSONEncoder().encode(self)
+        let possible = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        guard let obj = possible else { throw "not an object" }
+        var value = ""
+        obj.sorted { $0.key < $1.key }.forEach { (key, val) in
+            value += key.capitalized
+            value += ":\n"
+            value += "  \(val)"
+            value += "\n"
+        }
+        return value.consoleText()
+    }
+}
+
 struct Organization: Content {
     let id: UUID
     let createdAt: Date
@@ -562,7 +534,6 @@ struct SimpleResourceAccess<T: Content> {
         headers.add(name: .contentType, value: "application/json")
 
         let response = client.send(.GET, headers: headers, to: url)
-        print(try response.wait())
         return try response.become([T].self)
     }
 
@@ -585,7 +556,7 @@ struct OrganizationsApi {
         let client = try makeClient()
         let headers = token.headers
         let response = client.send(.GET, headers: headers, to: regionsUrl)
-        print(try! response.wait())
+//        print(try! response.wait())
         return try response.become([Organization].self)
     }
 
@@ -621,3 +592,102 @@ struct ApplicationsApi: API {
     }
 }
 
+struct Simple: MyCommand {
+    /// See `Command`.
+    let arguments: [CommandArgument] = []
+
+    /// See `Command`.
+    var options: [CommandOption] = []
+
+    /// See `Command`.
+    var help: [String] = []
+
+    let runner: (CommandContext) throws -> Void
+
+    init(runner: @escaping (CommandContext) throws -> Void) {
+        self.runner = runner
+    }
+
+    /// See `Command`.
+    func trigger(with ctx: CommandContext) throws {
+        try runner(ctx)
+    }
+}
+
+let listOrganizations = Simple { ctx in
+    let token = try Token.load()
+    let access = Organization.Access(with: token, baseUrl: organizationsUrl)
+    let orgs = try access.list()
+    ctx.console.log(orgs)
+}
+
+let listApplications = Simple { ctx in
+    let token = try Token.load()
+    let access = CloudApp.Access(with: token, baseUrl: applicationsUrl)
+    let apps = try access.list()
+    ctx.console.log(apps)
+}
+
+let detectApplication = Simple { ctx in
+    let token = try Token.load()
+    let access = CloudApp.Access(with: token, baseUrl: applicationsUrl)
+    let apps = try access.list()
+    let cloudGitUrl = try Git.cloudUrl()
+    let possible = apps.first { $0.gitURL == cloudGitUrl }
+    guard let app = possible  else { throw "No matching application found" }
+    ctx.console.log(app)
+}
+
+extension Console {
+    func log<C: Content>(_ c: C) {
+        // TODO: throw
+        let data = try! JSONEncoder().encode(c)
+        let string = String(data: data, encoding: .utf8)
+        let value = "\(c)"
+        output(value.consoleText())
+    }
+    func log<C: Content>(_ c: [C]) {
+        c.forEach(log)
+    }
+}
+
+struct CloudOrgsGroup: CommandGroup {
+    let commands: Commands = [
+        "list" : listOrganizations,
+    ]
+
+    /// See `CommandGroup`.
+    let options: [CommandOption] = []
+
+    /// See `CommandGroup`.
+    var help: [String] = [
+        "Interact with Vapor Cloud Orgs"
+    ]
+
+    /// See `CommandGroup`.
+    func run(using context: CommandContext) throws -> EventLoopFuture<Void> {
+        // should never run
+        throw "should not run"
+    }
+}
+
+struct CloudAppsGroup: CommandGroup {
+    let commands: Commands = [
+        "list" : listApplications,
+        "detect": detectApplication,
+    ]
+
+    /// See `CommandGroup`.
+    let options: [CommandOption] = []
+
+    /// See `CommandGroup`.
+    var help: [String] = [
+        "Interact with Vapor Cloud Applications"
+    ]
+
+    /// See `CommandGroup`.
+    func run(using context: CommandContext) throws -> EventLoopFuture<Void> {
+        // should never run
+        throw "should not run"
+    }
+}

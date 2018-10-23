@@ -24,6 +24,9 @@ struct CloudDeployRunner {
     let ctx: CommandContext
 
     func run() throws {
+        let isClean = try Git.isClean()
+        guard isClean else { throw "Git status is dirty, please commit changes before continuing" }
+
         print("foo")
 
         try asdfasdf()
