@@ -222,10 +222,26 @@ extension Future where T == Response {
     }
 }
 
+extension Content {
+    func resourceAccessor() throws -> CloudResourceAccess<Self> {
+        fatalError()
+    }
+}
+
 struct SSHKeyApi: API {
     let token: Token
 
     func push(name: String, key: String) throws -> SSHKey {
+        struct Package: Content {
+            let name: String
+            let key: String
+        }
+        let package = Package(name: name, key: key)
+        let cloud = CloudResourceAccess<SSHKey>(token: token, url: gitSSHKeysUrl)
+        return try cloud.create(package)
+    }
+
+    func _push(name: String, key: String) throws -> SSHKey {
         struct Package: Content {
             let name: String
             let key: String
@@ -237,12 +253,25 @@ struct SSHKeyApi: API {
     }
 
     func list() throws -> [SSHKey] {
+        let cloud = CloudResourceAccess<SSHKey>(token: token, url: gitSSHKeysUrl)
+        return try cloud.list()
+//        let client = try makeClient()
+//        let response = client.send(.GET, headers: basicAuthHeaders, to: gitSSHKeysUrl)
+//        return try response.become([SSHKey].self)
+    }
+
+    func _list() throws -> [SSHKey] {
         let client = try makeClient()
         let response = client.send(.GET, headers: basicAuthHeaders, to: gitSSHKeysUrl)
         return try response.become([SSHKey].self)
     }
 
     func delete(_ key: SSHKey) throws {
+        let keyAccess = CloudResourceAccess<SSHKey>(token: token, url: gitSSHKeysUrl)
+        try keyAccess.delete(id: key.id.uuidString)
+    }
+
+    func _delete(_ key: SSHKey) throws {
         let client = try makeClient()
         let url = gitSSHKeysUrl.finished(with: "/") + key.id.uuidString
         let response = client.send(.DELETE, headers: basicAuthHeaders, to: url)
@@ -418,7 +447,7 @@ let app: Application = {
 
 func asdfasdf() throws {
     let token = try Token.load()
-    let regions = AuthorizedResourceAccess<CloudApp>(token: token, url: applicationsUrl)
+    let regions = CloudResourceAccess<CloudApp>(token: token, url: applicationsUrl)
     let list = try regions.list()
     print(list)
     let view = try regions.view(id: list.first!.id.uuidString)
@@ -472,7 +501,7 @@ struct ComplexResourceAccess<T: CreatableResource> {
 
 }
 
-struct AuthorizedResourceAccess<T: Content> {
+struct CloudResourceAccess<T: Content> {
     let token: Token
     let url: String
 
@@ -529,7 +558,6 @@ struct AuthorizedResourceAccess<T: Content> {
 
         let client = try makeClient()
         let response = client.send(method, headers: headers, to: url, beforeSend: beforeSend)
-        print(try! response.wait())
         return response
     }
 }
