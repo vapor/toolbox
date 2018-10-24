@@ -107,11 +107,12 @@ let meUrl = userUrl.trailSlash + "me"
 
 let applicationsUrl = appsUrl.trailSlash + "applications"
 let appsUrl = cloudBaseUrl.trailSlash + "apps"
-let environmentsUrl = applicationsUrl.trailSlash + "environments"
+let environmentsUrl = appsUrl.trailSlash + "environments"
 let organizationsUrl = authUrl.trailSlash + "organizations"
 let regionsUrl = appsUrl.trailSlash + "regions"
 let plansUrl = appsUrl.trailSlash + "plans"
 let productsUrl = appsUrl.trailSlash + "products"
+let activitiesUrl = cloudBaseUrl.trailSlash + "activity/activities"
 
 protocol API {
     var token: Token { get }
@@ -361,6 +362,10 @@ func makeClient() throws -> Client {
     return try Request(using: app).make()
 }
 
+func makeWebSocketClient(url: URLRepresentable) throws -> Future<WebSocket> {
+    return try makeClient().webSocket(url)
+}
+
 let app: Application = {
     var config = Config.default()
     var env = try! Environment.detect()
@@ -387,13 +392,43 @@ func asdfasdf() throws {
 }
 
 public func fooBar() throws {
-    let token = try Token.load()
-    let access = CloudApp.Access(with: token, baseUrl: applicationsUrl)
-    let apps = try access.list()
-    let mapped = apps.map { try! $0.printable() }
-    mapped.forEach { mapp in
-        print(mapp)
+//    let token = try Token.load()
+//    let access = [String: String].Access(with: token, baseUrl: activitiesUrl)
+//    let apps = try access.list()
+//    print(apps)
+//    print("")
+//    let activityId = ""
+//    let activity =
+//    "wss://api.v2.vapor.cloud/v2/activity/activities/\(activityId)/channel"
+//    let echo = "wss://api-activity.v2.vapor.cloud/echo-test"
+//    let echo = "wss://sandbox.kaazing.net/echo"
+    let echo = "ws://localhost:8080/echo-test"
+    let ws = try makeWebSocketClient(url: echo).wait()
+
+    var count = 5
+    ws.onText { ws, text in
+        print("Got: \(text)")
+        sleep(3)
+        ws.send("more")
+        count -= 1
+        if count == 0 {
+            ws.close()
+        }
     }
+
+    ws.send("start")
+
+    // stay open
+    try ws.onClose.wait()
+    print("Closed")
+    print("")
+//    let token = try Token.load()
+//    let access = [String: String].Access(with: token, baseUrl: activitiesUrl)
+//    let apps = try access.list()
+//    let mapped = apps.map { try! $0.printable() }
+//    mapped.forEach { mapp in
+//        print(mapp)
+//    }
 //    print("")
 }
 
@@ -445,15 +480,22 @@ struct Plan: Content {
     let productID: UUID
 }
 
+struct Activity: Content {
+    let id: UUID
+}
+
 struct CloudEnv: Content {
     let defaultBranch: String
     let applicationID: UUID
-    let createdAt: Date
+    let createdAt: Date?
     let id: UUID
     let slug: String
     let regionID: UUID
     let updatedAt: Date?
+    let activity: Activity?
 }
+
+//{"slug":"production","applicationID":"E8ED0C82-2C7D-40C7-9603-29FD337393EA","regionID":"9E18D12A-40D9-46BD-8D43-1FD4D1BFDF15","defaultBranch":"master","activity":{"id":"508C9D1A-2F64-472F-9053-2FC040AA1787"},"id":"127D4299-8CA8-42FC-A09C-B3F675971419"}
 
 protocol Resource: Content {
 
@@ -531,7 +573,7 @@ struct CloudResourceAccess<T: Content> {
 
         let client = try makeClient()
         let response = client.send(method, headers: headers, to: url, beforeSend: beforeSend)
-//        print(try! response.wait())
+        print(try! response.wait())
         return response
     }
 }
@@ -647,6 +689,78 @@ let listEnvironments = Simple { ctx in
     ctx.console.log(envs)
 }
 
+
+let deployEnvironment = Simple { ctx in
+    let token = try Token.load()
+
+    let access = CloudApp.Access(with: token, baseUrl: applicationsUrl)
+    let apps = try access.list()
+    let app = ctx.console.choose("Which App?", from: apps) { app in
+        return app.name.consoleText()
+    }
+    let appEnvsUrl = applicationsUrl.trailSlash + app.id.uuidString.trailSlash + "environments"
+    let envAccess = CloudEnv.Access(with: token, baseUrl: appEnvsUrl)
+    let envs = try envAccess.list()
+    let env = ctx.console.choose("Which Env?", from: envs) { env in
+        return env.slug.consoleText()
+    }
+
+
+    let deployAccess = CloudEnv.Access(with: token, baseUrl: environmentsUrl)
+    let updated = try deployAccess.update(
+        id: env.id.uuidString.trailSlash + "deploy",
+        with: [String: String]()
+    )
+    print(updated.activity?.id.uuidString ?? "<error>")
+
+    guard let activity = updated.activity else { throw "no activity returned" }
+//    let wssUrl = "wss://api.v2.vapor.cloud/v2/activity/activities/\(activity.id.uuidString)/channel"
+    let wssUrl = "wss://sandbox.kaazing.net/echo"
+    print("Connecting to: \(wssUrl)")
+    let ws = try makeWebSocketClient(url: wssUrl).wait()
+    print("connected")
+    ws.onText { ws, text in
+        print("got text: \(text)")
+        ws.close()
+    }
+
+    ws.send("but")
+    try ws.onClose.wait()
+    print("Web socket closed")
+
+//
+//    let done = wss.flatMap { ws -> Future<Void> in
+//        print("Connected ws: \(ws)")
+//        // setup an on text callback that will print the echo
+//        ws.onText { ws, text in
+//            print("rec: \(text)")
+//            // close the websocket connection after we recv the echo
+////            ws.close()
+//            sleep(3)
+//            ws.send("foo")
+//        }
+//
+//        ws.onBinary { ws, data in
+//            print("Some data tho: \(data)")
+//        }
+//
+//        // when the websocket first connects, send message
+////        ws.send("hello, world!")
+//
+//        // return a future that will complete when the websocket closes
+//        return ws.onClose
+//    }
+//    try done.wait()
+//    print(done)
+////    let deployUrl = environmentsUrl.trailSlash + env.id.uuidString.trailSlash + "deploy"
+////    let deploy = [String: String].Access(with: token, baseUrl: deployUrl)
+////    let updated = try deploy.update(id: env.id.uuidString, with: [String: String]())
+//    print(updated)
+//    print("")
+//    ctx.console.output("Deployed \(updated.slug)".consoleText())
+
+}
+
 let listApplications = Simple { ctx in
     let token = try Token.load()
     let access = CloudApp.Access(with: token, baseUrl: applicationsUrl)
@@ -719,7 +833,8 @@ struct CloudAppsGroup: CommandGroup {
 struct CloudEnvsGroup: CommandGroup {
     let commands: Commands = [
         "list" : listEnvironments,
-        ]
+        "deploy": deployEnvironment
+    ]
 
     /// See `CommandGroup`.
     let options: [CommandOption] = []
