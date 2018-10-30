@@ -6,7 +6,7 @@ let package = Package(
     dependencies: [
         // 💧 A server-side Swift web framework.
         .package(url: "https://github.com/vapor/vapor.git", from: "3.0.0"),
-        .package(url: "https://github.com/apple/swift-syntax", from: "0.40200.0"),
+        .package(url: "https://github.com/tanner0101/swift-syntax", .branch("static")),
     ],
     targets: [
         // All of the commands and logic that powers the Vapor toolbox

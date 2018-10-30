@@ -1,9 +1,11 @@
 /.build
 /.bootstrap
 /Packages
+/.ship
 *.xcodeproj
 .DS_Store
 Package.pins
 Package.resolved
 DerivedData
+/Tests/LinuxMain.swift
 
