@@ -392,6 +392,7 @@ func asdfasdf() throws {
 }
 
 public func fooBar() throws {
+    return
 //    let token = try Token.load()
 //    let access = [String: String].Access(with: token, baseUrl: activitiesUrl)
 //    let apps = try access.list()
@@ -400,9 +401,9 @@ public func fooBar() throws {
 //    let activityId = ""
 //    let activity =
 //    "wss://api.v2.vapor.cloud/v2/activity/activities/\(activityId)/channel"
-//    let echo = "wss://api-activity.v2.vapor.cloud/echo-test"
+    let echo = "wss://api-activity.v2.vapor.cloud/echo-test"
 //    let echo = "wss://sandbox.kaazing.net/echo"
-    let echo = "ws://localhost:8080/echo-test"
+//    let echo = "ws://localhost:8080/echo-test"
     let ws = try makeWebSocketClient(url: echo).wait()
 
     var count = 5
@@ -520,8 +521,9 @@ struct CloudResourceAccess<T: Content> {
         return try response.become(T.self)
     }
 
-    func list() throws -> [T] {
-        let response = try send(.GET, to: baseUrl)
+    func list(query: String? = nil) throws -> [T] {
+        let url = query.flatMap { baseUrl + "?" + $0 } ?? baseUrl
+        let response = try send(.GET, to: url)
         return try response.become([T].self)
     }
 
@@ -714,17 +716,14 @@ let deployEnvironment = Simple { ctx in
     print(updated.activity?.id.uuidString ?? "<error>")
 
     guard let activity = updated.activity else { throw "no activity returned" }
-//    let wssUrl = "wss://api.v2.vapor.cloud/v2/activity/activities/\(activity.id.uuidString)/channel"
-    let wssUrl = "wss://sandbox.kaazing.net/echo"
+    let wssUrl = "wss://api.v2.vapor.cloud/v2/activity/activities/\(activity.id.uuidString)/channel"
+//    let wssUrl = "wss://sandbox.kaazing.net/echo"
     print("Connecting to: \(wssUrl)")
     let ws = try makeWebSocketClient(url: wssUrl).wait()
     print("connected")
     ws.onText { ws, text in
         print("got text: \(text)")
-        ws.close()
     }
-
-    ws.send("but")
     try ws.onClose.wait()
     print("Web socket closed")
 
@@ -770,13 +769,16 @@ let listApplications = Simple { ctx in
 
 let detectApplication = Simple { ctx in
     let token = try Token.load()
-    let access = CloudApp.Access(with: token, baseUrl: applicationsUrl)
-    let apps = try access.list()
     let cloudGitUrl = try Git.cloudUrl()
-    let possible = apps.first { $0.gitURL == cloudGitUrl }
-    guard let app = possible  else { throw "No matching application found" }
-    ctx.console.log(app)
+
+    let access = CloudApp.Access(with: token, baseUrl: applicationsUrl)
+    let apps = try access.list(query: "gitURL=\(cloudGitUrl)")
+    guard apps.count == 1 else { throw "No app found at \(cloudGitUrl)." }
+    ctx.console.log(apps[0])
 }
+
+//func detectApp(ctx: CommandContext) throws -> CloudApp {
+//}
 
 extension Console {
     func log<C: Content>(_ c: C) {
@@ -813,7 +815,8 @@ struct CloudAppsGroup: CommandGroup {
     let commands: Commands = [
         "list" : listApplications,
         "detect": detectApplication,
-        ]
+        "set-remote": cloudSetRemote,
+    ]
 
     /// See `CommandGroup`.
     let options: [CommandOption] = []
@@ -849,4 +852,99 @@ struct CloudEnvsGroup: CommandGroup {
         // should never run
         throw "should not run"
     }
+}
+
+let cloudSetRemote = Simple { ctx in
+    let isGit = try Git.isGitRepository()
+    guard isGit else {
+        throw "Not currently in a git repository."
+    }
+
+    let isConfigured = try Git.isCloudConfigured()
+    guard !isConfigured else {
+        throw "Cloud is already configured."
+    }
+
+    let token = try Token.load()
+    let access = CloudApp.Access(with: token, baseUrl: applicationsUrl)
+    let apps = try access.list()
+    let app = ctx.console.choose("Which app?", from: apps) {
+        return $0.name.consoleText()
+    }
+
+    try Git.setRemote(named: "cloud", url: app.gitURL)
+}
+
+
+func build(ctx: CommandContext) throws {
+    // Ensure logged in
+    let token = try Token.load()
+
+
+    let access = CloudApp.Access(with: token, baseUrl: applicationsUrl)
+    let apps = try access.list()
+    let app = ctx.console.choose("Which App?", from: apps) { app in
+        return app.name.consoleText()
+    }
+    let appEnvsUrl = applicationsUrl.trailSlash + app.id.uuidString.trailSlash + "environments"
+    let envAccess = CloudEnv.Access(with: token, baseUrl: appEnvsUrl)
+    let envs = try envAccess.list()
+    let env = ctx.console.choose("Which Env?", from: envs) { env in
+        return env.slug.consoleText()
+    }
+
+
+    let deployAccess = CloudEnv.Access(with: token, baseUrl: environmentsUrl)
+    let updated = try deployAccess.update(
+        id: env.id.uuidString.trailSlash + "deploy",
+        with: [String: String]()
+    )
+    print(updated.activity?.id.uuidString ?? "<error>")
+
+    guard let activity = updated.activity else { throw "no activity returned" }
+    let wssUrl = "wss://api.v2.vapor.cloud/v2/activity/activities/\(activity.id.uuidString)/channel"
+    //    let wssUrl = "wss://sandbox.kaazing.net/echo"
+    print("Connecting to: \(wssUrl)")
+    let ws = try makeWebSocketClient(url: wssUrl).wait()
+    print("connected")
+    ws.onText { ws, text in
+        print("got text: \(text)")
+    }
+    try ws.onClose.wait()
+    print("Web socket closed")
+
+    //
+    //    let done = wss.flatMap { ws -> Future<Void> in
+    //        print("Connected ws: \(ws)")
+    //        // setup an on text callback that will print the echo
+    //        ws.onText { ws, text in
+    //            print("rec: \(text)")
+    //            // close the websocket connection after we recv the echo
+    ////            ws.close()
+    //            sleep(3)
+    //            ws.send("foo")
+    //        }
+    //
+    //        ws.onBinary { ws, data in
+    //            print("Some data tho: \(data)")
+    //        }
+    //
+    //        // when the websocket first connects, send message
+    ////        ws.send("hello, world!")
+    //
+    //        // return a future that will complete when the websocket closes
+    //        return ws.onClose
+    //    }
+    //    try done.wait()
+    //    print(done)
+    ////    let deployUrl = environmentsUrl.trailSlash + env.id.uuidString.trailSlash + "deploy"
+    ////    let deploy = [String: String].Access(with: token, baseUrl: deployUrl)
+    ////    let updated = try deploy.update(id: env.id.uuidString, with: [String: String]())
+    //    print(updated)
+    //    print("")
+    //    ctx.console.output("Deployed \(updated.slug)".consoleText())
+
+}
+
+func selectApp() {
 }

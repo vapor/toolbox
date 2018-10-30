@@ -1,6 +1,20 @@
 import Vapor
 
 struct Git {
+    static func isGitRepository() throws -> Bool {
+        do {
+            let _ =  try run("status", "--porcelain")
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    static func setRemote(named name: String, url: String) throws {
+        try run("remote", "add", name, url)
+    }
+    
     static func isClean() throws -> Bool {
         return try run("status", "--porcelain")
             .trimmingCharacters(in: .whitespacesAndNewlines)
