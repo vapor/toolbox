@@ -10,15 +10,20 @@ import Vapor
 
 struct CloudGroup: CommandGroup {
     let commands: Commands = [
+        // global context
         "login" : CloudLogin(),
         "signup": CloudSignup(),
         "me": Me(),
         "dump-token": DumpToken(),
         "ssh": CloudSSHGroup(),
-        "deploy": CloudDeploy(),
         "apps": CloudAppsGroup(),
         "orgs": CloudOrgsGroup(),
         "envs": CloudEnvsGroup(),
+        // current or no context
+        "deploy": CloudDeploy(),
+        // current context
+        "detect": detectApplication,
+        "set-remote": cloudSetRemote,
     ]
 
     /// See `CommandGroup`.
@@ -821,8 +826,6 @@ struct CloudOrgsGroup: CommandGroup {
 struct CloudAppsGroup: CommandGroup {
     let commands: Commands = [
         "list" : listApplications,
-        "detect": detectApplication,
-        "set-remote": cloudSetRemote,
     ]
 
     /// See `CommandGroup`.
@@ -843,7 +846,6 @@ struct CloudAppsGroup: CommandGroup {
 struct CloudEnvsGroup: CommandGroup {
     let commands: Commands = [
         "list" : listEnvironments,
-        "deploy": deployEnvironment
     ]
 
     /// See `CommandGroup`.
@@ -862,7 +864,7 @@ struct CloudEnvsGroup: CommandGroup {
 }
 
 let cloudSetRemote = Simple { ctx in
-    let isGit = try Git.isGitRepository()
+    let isGit = Git.isGitRepository()
     guard isGit else {
         throw "Not currently in a git repository."
     }
@@ -880,6 +882,7 @@ let cloudSetRemote = Simple { ctx in
     }
 
     try Git.setRemote(named: "cloud", url: app.gitURL)
+    ctx.console.output("Cloud repository configured.")
 }
 
 

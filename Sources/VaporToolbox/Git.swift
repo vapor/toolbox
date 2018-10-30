@@ -73,7 +73,7 @@ struct Git {
 
     static func cloudUrl() throws -> String {
         let isConfigured = try isCloudConfigured()
-        guard isConfigured else { throw "cloud url not yet configured" }
+        guard isConfigured else { throw "cloud url not yet configured. use `vapor cloud apps set-remote" }
         return try run("remote", "get-url", "cloud").trimmingCharacters(in: .whitespacesAndNewlines)
     }
 

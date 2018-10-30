@@ -29,3 +29,21 @@
  - on return, connect properly to websocket
  - show logs
  **/
+
+
+/**
+ vapor cloud login - Logs into Vapor Cloud
+ vapor cloud signup - Creates a new account for Vapor Cloud.
+ vapor cloud ssh - Use this to interact with, list, push, and delete SSH keys on Vapor Cloud
+    list - lists all
+    push - pushes a key
+    delete - deletes a key
+ envs Interact with Vapor Cloud Environments
+ me Shows information about user.
+ deploy Deploys a Vapory Project
+ dump-token Dump token data
+ 
+ apps Interact with Vapor Cloud Applications
+ orgs - Interact with Vapor Cloud Orgs
+ envs Interact with Vapor Cloud Environments
+ */
