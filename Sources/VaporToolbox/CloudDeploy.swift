@@ -104,3 +104,14 @@ struct CloudDeployRunner {
 
     }
 }
+
+
+
+
+// git log --left-right --graph --cherry-pick --oneline cloud-api...origin/cloud-api
+// Local is BEHIND remote
+// > 8830125 (origin/cloud-api) more deploy work
+// Local is AHEAD of remote
+// < 5936b4f (HEAD -> cloud-api) more cloud commands
+// < d352994 going to test alternative websocket
+
