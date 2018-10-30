@@ -3,7 +3,7 @@ import Vapor
 struct CloudSSHGroup: CommandGroup {
     /// See `CommandGroup`.
     var commands: Commands = [
-        "push" : CloudSSHPush(),
+        "add" : CloudSSHPush(),
         "list": CloudSSHList(),
         "delete": CloudSSHDelete(),
     ]

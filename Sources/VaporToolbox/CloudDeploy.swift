@@ -6,14 +6,36 @@ struct CloudDeploy: MyCommand {
 
     /// See `Command`.
     var options: [CommandOption] = [
-        CommandOption
-            .value(name: "app", short: "a", default: nil, help: ["The slug associated with your app."]),
-//            .value(name: "env", short: "e", default: nil, help: ["The environment to deploy."]),
-            .value(name: "branch", short: "b", default: nil, help: ["A custom branch to deploy if different than the selected environment's default"])
+            .value(
+                name: "app",
+                short: "a",
+                default: nil,
+                help: [
+                    "The slug associated with your app."
+                ]
+            ),
+            .value(
+                name: "env",
+                short: "e",
+                default: nil,
+                help: [
+                    "The environment to deploy."
+                ]
+            ),
+            .value(
+                name: "branch",
+                short: "b",
+                default: nil,
+                help: [
+                    "A custom branch to deploy if different than the selected environment's default"
+                ]
+            ),
     ]
 
     /// See `Command`.
-    var help: [String] = ["Deploys a Vapory Project"]
+    var help: [String] = [
+        "Deploys a Vapory Project"
+    ]
 
     /// See `Command`.
     func trigger(with ctx: CommandContext) throws {
@@ -78,7 +100,7 @@ struct CloudDeployRunner {
         ctx.console.output("Disconnected.")
     }
 
-    func cloudApp() throws -> CloudApp {
+    private func cloudApp() throws -> CloudApp {
         if let slug = ctx.options["app"] {
             let cloudApps = CloudApp.Access(
                 with: token,
@@ -103,7 +125,7 @@ struct CloudDeployRunner {
         }
     }
 
-    func deployEnv(with app: CloudApp) throws -> CloudEnv {
+    private func deployEnv(with app: CloudApp) throws -> CloudEnv {
         // Collect Envs
         let appEnvsUrl = applicationsUrl.trailSlash
             + app.id.uuidString.trailSlash
@@ -128,13 +150,15 @@ struct CloudDeployRunner {
         }
     }
 
-    func deployBranch(with env: CloudEnv) -> String {
+    private func deployBranch(with env: CloudEnv) -> String {
         if let branch = ctx.options["branch"] { return branch }
         else { return env.defaultBranch }
     }
 
-    func confirm(branch: String) throws {
+    private func confirm(branch: String) throws {
         guard Git.isGitRepository() else { return }
+        ctx.console.pushEphemeral()
+        defer { ctx.console.popEphemeral() }
 
         // Check uncomitted changes
         let currentBranch = try Git.currentBranch()
@@ -144,11 +168,7 @@ struct CloudDeployRunner {
                 var prompt = "\(branch) has uncommitted changes.".consoleText()
                 prompt += "\n"
                 prompt += "Continue?"
-
-                ctx.console.pushEphemeral()
-                let shouldProceed = ctx.console.confirm(prompt)
-                ctx.console.popEphemeral()
-                guard shouldProceed else { throw "cancelled" }
+                guard ctx.console.confirm(prompt) else { throw "cancelled" }
             }
         } else {
             var prompt = "Cloud will deploy: ".consoleText()
@@ -159,55 +179,47 @@ struct CloudDeployRunner {
             prompt += "."
             prompt += "\n"
             prompt += "Continue?"
-
-            ctx.console.pushEphemeral()
-            let shouldProceed = ctx.console.confirm(prompt)
-            ctx.console.popEphemeral()
-            guard shouldProceed else { throw "cancelled" }
+            guard ctx.console.confirm(prompt) else { throw "cancelled" }
         }
 
         // Check Cloud Upstream
-        let (ahead, behind) = try Git.branch(branch, matchesRemote: "cloud")
-        guard ahead || behind else { return }
+        do {
+            let (ahead, behind) = try Git.branch(branch, matchesRemote: "cloud")
+            guard ahead || behind else { return }
 
-        var prompt = "".consoleText()
-        if ahead && behind {
-            prompt += "Local branch "
+            var prompt = "".consoleText()
+            if ahead && behind {
+                prompt += "Local branch "
+                prompt += branch.consoleText(.warning)
+                prompt += " does NOT MATCH "
+                prompt += "cloud/\(branch)".consoleText(.warning)
+                prompt += "."
+            } else if ahead {
+                prompt += "Local branch "
+                prompt += branch.consoleText(.warning)
+                prompt += " is AHEAD of "
+                prompt += "cloud/\(branch)".consoleText(.warning)
+                prompt += "."
+            } else if behind {
+                prompt += "Local branch "
+                prompt += branch.consoleText(.warning)
+                prompt += " is BEHIND "
+                prompt += "cloud/\(branch)".consoleText(.warning)
+                prompt += "."
+            } else { return }
+
+            prompt += "\n"
+            prompt += "Continue?"
+            guard ctx.console.confirm(prompt) else { throw "cancelled" }
+        } catch {
+            var prompt = "Unable to determine if remote ".consoleText()
             prompt += branch.consoleText(.warning)
-            prompt += " does NOT MATCH "
+            prompt += " matches "
             prompt += "cloud/\(branch)".consoleText(.warning)
             prompt += "."
-        } else if ahead {
-            prompt += "Local branch "
-            prompt += branch.consoleText(.warning)
-            prompt += " is AHEAD of "
-            prompt += "cloud/\(branch)".consoleText(.warning)
-            prompt += "."
-        } else if behind {
-            prompt += "Local branch "
-            prompt += branch.consoleText(.warning)
-            prompt += " is BEHIND "
-            prompt += "cloud/\(branch)".consoleText(.warning)
-            prompt += "."
+            prompt += "\n"
+            prompt += "Continue?"
+            guard ctx.console.confirm(prompt) else { throw "cancelled" }
         }
-
-        prompt += "\n"
-        prompt += "Continue?"
-
-        ctx.console.pushEphemeral()
-        let shouldProceed = ctx.console.confirm(prompt)
-        ctx.console.popEphemeral()
-        guard shouldProceed else { throw "cancelled" }
     }
 }
-
-
-
-
-// git log --left-right --graph --cherry-pick --oneline cloud-api...origin/cloud-api
-// Local is BEHIND remote
-// > 8830125 (origin/cloud-api) more deploy work
-// Local is AHEAD of remote
-// < 5936b4f (HEAD -> cloud-api) more cloud commands
-// < d352994 going to test alternative websocket
-
