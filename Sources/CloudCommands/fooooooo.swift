@@ -4,6 +4,7 @@ extension String: Error {}
 
 public struct CloudGroup: CommandGroup {
     public let commands: Commands = [
+        "login": CloudLogin(),
 //        // global context
 //        "login" : CloudLogin(),
 //        "signup": CloudSignup(),
@@ -18,7 +19,7 @@ public struct CloudGroup: CommandGroup {
 //        // current context
 //        "detect": detectApplication,
 //        "set-remote": cloudSetRemote,
-        :]
+    ]
 
     public let options: [CommandOption] = []
 

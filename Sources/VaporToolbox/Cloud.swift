@@ -363,14 +363,6 @@ func asdf() throws {
     print("")
 }
 
-func makeClient() throws -> Client {
-    return try Request(using: app).make()
-}
-
-func makeWebSocketClient(url: URLRepresentable) throws -> Future<WebSocket> {
-    return try makeClient().webSocket(url)
-}
-
 let app: Application = {
     var config = Config.default()
     var env = try! Environment.detect()
@@ -384,6 +376,14 @@ let app: Application = {
 
     return app
 }()
+
+func makeClient() throws -> Client {
+    return try Request(using: app).make()
+}
+
+func makeWebSocketClient(url: URLRepresentable) throws -> Future<WebSocket> {
+    return try makeClient().webSocket(url)
+}
 
 
 func asdfasdf() throws {
