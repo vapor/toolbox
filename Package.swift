@@ -13,9 +13,13 @@ let package = Package(
         .target(name: "VaporToolbox", dependencies: [
             "LinuxTestsGeneration",
             "Vapor",
+            "Cloud"
         ]),
         .target(name: "LinuxTestsGeneration", dependencies: [
             "SwiftSyntax",
+        ]),
+        .target(name: "Cloud", dependencies: [
+            "Vapor"
         ]),
         .testTarget(name: "LinuxTestsGenerationTests", dependencies: [
             "LinuxTestsGeneration",

@@ -1,4 +1,5 @@
 import Vapor
+import Cloud
 
 /// Creates an Application to run.
 public func boot() -> Future<Application> {
@@ -9,7 +10,7 @@ public func boot() -> Future<Application> {
     commands.use(CleanCommand(), as: "clean")
     commands.use(GenerateLinuxMain(), as: "linux-main")
     commands.use(Test(), as: "test")
-    commands.use(CloudGroup(), as: "cloud")
+    commands.use(Cloud.CloudGroup(), as: "cloud")
     services.register(commands)
 
     return Application.asyncBoot(services: services)
