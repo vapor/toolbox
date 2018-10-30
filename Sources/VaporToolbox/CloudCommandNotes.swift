@@ -12,10 +12,11 @@
  vapor cloud ssh push (-name, -path, -key)
  vapor cloud ssh list (-long)
  vapor cloud ssh delete
- */
 
-/**
-
+ // Deploy
+ vapor cloud 
+ vapor cloud deploy
+ // detect application
  */
 
 /**

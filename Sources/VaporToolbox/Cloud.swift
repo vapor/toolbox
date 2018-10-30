@@ -93,7 +93,7 @@ public func testCloud() throws {
 }
 
 extension String {
-    fileprivate var trailSlash: String { return finished(with: "/") }
+    internal var trailSlash: String { return finished(with: "/") }
 }
 
 let cloudBaseUrl = "https://api.v2.vapor.cloud/v2/"
@@ -768,13 +768,20 @@ let listApplications = Simple { ctx in
 }
 
 let detectApplication = Simple { ctx in
-    let token = try Token.load()
-    let cloudGitUrl = try Git.cloudUrl()
+    let app = try ctx.detectCloudApp()
+    ctx.console.log(app)
+}
 
-    let access = CloudApp.Access(with: token, baseUrl: applicationsUrl)
-    let apps = try access.list(query: "gitURL=\(cloudGitUrl)")
-    guard apps.count == 1 else { throw "No app found at \(cloudGitUrl)." }
-    ctx.console.log(apps[0])
+extension CommandContext {
+    func detectCloudApp() throws -> CloudApp {
+        let token = try Token.load()
+        let cloudGitUrl = try Git.cloudUrl()
+
+        let access = CloudApp.Access(with: token, baseUrl: applicationsUrl)
+        let apps = try access.list(query: "gitURL=\(cloudGitUrl)")
+        guard apps.count == 1 else { throw "No app found at \(cloudGitUrl)." }
+        return apps[0]
+    }
 }
 
 //func detectApp(ctx: CommandContext) throws -> CloudApp {
@@ -944,7 +951,4 @@ func build(ctx: CommandContext) throws {
     //    print("")
     //    ctx.console.output("Deployed \(updated.slug)".consoleText())
 
-}
-
-func selectApp() {
 }
