@@ -3,7 +3,7 @@
  IMPLEMENTED
 
  // Signup
- vapor cloud signup (-firstName/-f, -lastName/-l, -email/-e, -password/-p, -organizationName/-o)
+ vapor cloud signup (-first/-f, -last/-l, -email/-e, -password/-p, -org/-o)
 
  // Login
  vapor cloud login (-email, -password)
@@ -32,18 +32,28 @@
 
 
 /**
- vapor cloud login - Logs into Vapor Cloud
- vapor cloud signup - Creates a new account for Vapor Cloud.
- vapor cloud ssh - Use this to interact with, list, push, and delete SSH keys on Vapor Cloud
-    list - lists all
-    push - pushes a key
-    delete - deletes a key
- envs Interact with Vapor Cloud Environments
- me Shows information about user.
- deploy Deploys a Vapory Project
- dump-token Dump token data
- 
- apps Interact with Vapor Cloud Applications
+ // USER COMMANDS
+ me - Shows information about user.
+ login (-email, -password) - Logs into Vapor Cloud
+ signup (-first/-f, -last/-l, -email/-e, -password/-p, -org/-o) - Creates a new account for Vapor Cloud.
+
+ // SSH
+ ssh - Use this to interact with, list, push, and delete SSH keys on Vapor Cloud
+ ssh list - lists all
+ ssh push (-name/-n, [-path/-p || -key/-k]) - pushes a key
+ ssh delete - deletes a key
+
+ // DEPLOY
+ deploy - Deploys a Vapory Project
+
+ // LISTS
+ apps - Interact with Vapor Cloud Apps
+ apps list - List all Vapor Cloud Apps
  orgs - Interact with Vapor Cloud Orgs
- envs Interact with Vapor Cloud Environments
+ orgs list - List all Vapor Cloud Orgs
+ envs - Interact with Vapor Cloud Envs
+ envs list - List all Vapor Cloud Envs
+
+ // DEV
+ dump-token - Dump token data
  */
