@@ -9,8 +9,7 @@ struct CloudDeploy: MyCommand {
         CommandOption
             .value(name: "app", short: "a", default: nil, help: ["The slug associated with your app."]),
 //            .value(name: "env", short: "e", default: nil, help: ["The environment to deploy."]),
-//            .value(name: "branch", short: "b", default: nil, help: ["A custom branch to deploy if different than the selected environment's default"])
-
+            .value(name: "branch", short: "b", default: nil, help: ["A custom branch to deploy if different than the selected environment's default"])
     ]
 
     /// See `Command`.
@@ -105,14 +104,27 @@ struct CloudDeployRunner {
     }
 
     func deployEnv(with app: CloudApp) throws -> CloudEnv {
+        // Collect Envs
         let appEnvsUrl = applicationsUrl.trailSlash
             + app.id.uuidString.trailSlash
             + "environments"
         let envAccess = CloudEnv.Access(with: token, baseUrl: appEnvsUrl)
         let envs = try envAccess.list()
-        if envs.count == 1 { return envs[0] }
-        return ctx.console.choose("Which Env?", from: envs) { env in
-            return env.slug.consoleText()
+
+        // Select
+        let envSlug = ctx.options["env"]
+        if let envSlug = envSlug {
+            let possible = envs.first { $0.slug == envSlug }
+            guard let env = possible else {
+                throw "No environment found matching \(envSlug)"
+            }
+            return env
+        } else if envs.count == 1 {
+            return envs[0]
+        } else {
+            return ctx.console.choose("Which Env?", from: envs) { env in
+                return env.slug.consoleText()
+            }
         }
     }
 
