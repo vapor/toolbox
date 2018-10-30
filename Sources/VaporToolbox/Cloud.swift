@@ -575,7 +575,7 @@ struct CloudResourceAccess<T: Content> {
 
         let client = try makeClient()
         let response = client.send(method, headers: headers, to: url, beforeSend: beforeSend)
-        print(try! response.wait())
+//        print(try! response.wait())
         return response
     }
 }
