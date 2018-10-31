@@ -10,10 +10,10 @@ struct Test: MyCommand {
     var help: [String] = ["Quick tests."]
     
     func trigger(with ctx: CommandContext) throws {
-        let access = CloudApp.Access(with: token, on: container)
-
-        let cloudGitUrl = try Git.cloudUrl()
-        return access.matching(cloudGitUrl: cloudGitUrl)
+//        let access = CloudApp.Access(with: token, on: container)
+//
+//        let cloudGitUrl = try Git.cloudUrl()
+//        return access.matching(cloudGitUrl: cloudGitUrl)
     }
 }
 

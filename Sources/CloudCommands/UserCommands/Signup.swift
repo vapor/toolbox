@@ -23,7 +23,7 @@ struct CloudSignup: Command {
         let l = ctx.loadAndDisplay(.lastName)
         let o = ctx.loadAndDisplay(.org)
         let e = ctx.loadAndDisplay(.email)
-        let p = ctx.loadAndDisplay(.password, secure: true)
+        let p = ctx.loadAndDisplay(.password, secure: true) 
 
         let api = UserApi(on: ctx.container)
         let user = api.signup(
