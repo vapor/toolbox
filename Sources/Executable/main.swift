@@ -4,5 +4,10 @@ import Vapor
 
 //try fooBar()
 
-let app = try boot().wait()
-try app.run()
+do {
+    let app = try boot().wait()
+    try app.run()
+} catch {
+    print("Error:")
+    print("\(error)")
+}

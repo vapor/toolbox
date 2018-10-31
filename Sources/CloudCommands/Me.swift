@@ -20,44 +20,19 @@ struct Me: Command {
     func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
         let token = try Token.load()
         let me = try UserApi(on: ctx.container).me(token: token)
-        ctx.console.output("name:".consoleText(.info))
-        return me.map { (me) -> (Void) in
+        return me.map { me in
+            // name
             let name = me.firstName + " " + me.lastName
-            ctx.console.output("email:")
-            ctx.console.output(me.email.consoleText())
             ctx.console.output(name.consoleText())
 
+            // email
+            ctx.console.output(me.email.consoleText())
+
+            // id (future others)
             let all = ctx.options["all"]?.bool == true
             guard all else { return }
-            ctx.console.output("id:")
+            ctx.console.output("id: ", newLine: false)
             ctx.console.output(me.id.uuidString.consoleText())
-//            return .done(on: ctx.container)
         }
-//        let name = me.firstName + " " + me.lastName
-//        ctx.console.output("email:")
-//        ctx.console.output(me.email.consoleText())
-//        ctx.console.output(name.consoleText())
-//
-//        let all = ctx.options["all"]?.bool == true
-//        guard all else { return }
-//        ctx.console.output("id:")
-//        ctx.console.output(me.id.uuidString.consoleText())
-//        return .done(on: ctx.container)
     }
-
-    /// See `Command`.
-//    func trigger(with ctx: CommandContext) throws {
-//        let token = try Token.load()
-//        let me = try UserApi(on: ctx.container).me(token: token)
-//        ctx.console.output("name:".consoleText(.info))
-//        let name = me.firstName + " " + me.lastName
-//        ctx.console.output("email:")
-//        ctx.console.output(me.email.consoleText())
-//        ctx.console.output(name.consoleText())
-//
-//        let all = ctx.options["all"]?.bool == true
-//        guard all else { return }
-//        ctx.console.output("id:")
-//        ctx.console.output(me.id.uuidString.consoleText())
-//    }
 }

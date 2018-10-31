@@ -9,6 +9,9 @@ public struct CloudGroup: CommandGroup {
         "signup": CloudSignup(),
         "me": Me(),
         "reset-password": ResetPassword(),
+        "dump-token": DumpToken(),
+
+        
 //        // global context
 //        "login" : CloudLogin(),
 //        "signup": CloudSignup(),
@@ -37,7 +40,7 @@ public struct CloudGroup: CommandGroup {
     /// See `CommandGroup`.
     public func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
         ctx.console.info("Welcome to Cloud.")
-        ctx.console.output("Use `vapor cloud --help` to see commands.")
+        ctx.console.output("Use `vapor cloud -h` to see commands.")
         let cloud = [
             "   _  _         ",
             "  ( `   )_      ",

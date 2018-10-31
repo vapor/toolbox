@@ -23,7 +23,7 @@ public struct UserApi {
         lastName: String,
         organizationName: String,
         password: String
-    ) throws -> Future<CloudUser> {
+    ) -> Future<CloudUser> {
         struct Package: Content {
             let email: String
             let firstName: String
@@ -39,7 +39,7 @@ public struct UserApi {
             password: password
         )
 
-        let client = try makeClient(on: container)
+        let client = makeClient(on: container)
         let response = client.send(.POST, to: userUrl) { try $0.content.encode(content) }
         return response.become(CloudUser.self)
     }
@@ -47,7 +47,7 @@ public struct UserApi {
     public func login(
         email: String,
         password: String
-    ) throws -> Future<Token> {
+    ) -> Future<Token> {
         let combination = email + ":" + password
         let data = combination.data(using: .utf8)!
         let encoded = data.base64EncodedString()
@@ -55,23 +55,23 @@ public struct UserApi {
         let headers: HTTPHeaders = [
             "Authorization": "Basic \(encoded)"
         ]
-        let client = try makeClient(on: container)
+        let client = makeClient(on: container)
         let response = client.send(.POST, headers: headers, to: loginUrl)
         return response.become(Token.self)
     }
 
-    public func me(token: Token) throws -> Future<CloudUser> {
+    public func me(token: Token) -> Future<CloudUser> {
         let access = CloudUser.Access(with: token, baseUrl: meUrl, on: container)
         return access.view()
     }
 
-    public func reset(email: String) throws {
+    public func reset(email: String) -> Future<Void> {
         struct Package: Content {
             let email: String
         }
         let content = Package(email: email)
-        let client = try makeClient(on: container)
+        let client = makeClient(on: container)
         let response = client.send(.POST, to: resetUrl) { try $0.content.encode(content) }
-        try response.validate()
+        return response.validate()
     }
 }

@@ -1,7 +1,7 @@
 import Vapor
 import CloudAPI
 
-struct ResetPassword: MyCommand {
+struct ResetPassword: Command {
     /// See `Command`.
     var arguments: [CommandArgument] = []
 
@@ -13,26 +13,27 @@ struct ResetPassword: MyCommand {
             default: nil,
             help: ["The email to reset."]
         ),
-        ]
+    ]
 
     /// See `Command`.
     var help: [String] = ["Resets your account's password."]
 
     /// See `Command`.
-    func trigger(with ctx: CommandContext) throws {
+    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
         let runner = ResetPasswordRunner(ctx: ctx)
-        try runner.run()
+        return runner.run()
     }
 }
 
 struct ResetPasswordRunner {
     let ctx: CommandContext
 
-    func run() throws {
+    func run() -> Future<Void> {
         let e = email()
-        try UserApi(on: ctx.container).reset(email: e)
-        ctx.console.output("Password has been reset.".consoleText())
-        ctx.console.output("Check your email.".consoleText())
+        return UserApi(on: ctx.container).reset(email: e).map { _ in
+            self.ctx.console.output("Password has been reset.".consoleText())
+            self.ctx.console.output("Check your email.".consoleText())
+        }
     }
 
     func email() -> String {

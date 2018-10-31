@@ -1,7 +1,7 @@
 import Vapor
 import CloudAPI
 
-struct CloudLogin: MyCommand {
+struct CloudLogin: Command {
     /// See `Command`.
     var arguments: [CommandArgument] = []
 
@@ -25,22 +25,23 @@ struct CloudLogin: MyCommand {
     var help: [String] = ["Logs into Vapor Cloud"]
 
     /// See `Command`.
-    func trigger(with ctx: CommandContext) throws {
+    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
         let runner = CloudLoginRunner(ctx: ctx)
-        try runner.run()
+        return runner.run()
     }
 }
 
 struct CloudLoginRunner {
     let ctx: CommandContext
 
-    func run() throws {
+    func run() -> Future<Void> {
         let e = email()
         let p = password()
-        let token = try UserApi(on: ctx.container).login(email: e, password: p)
-//        try token.save()
-        throw "save it"
-        ctx.console.output("Cloud is Ready".consoleText(.info))
+        let token = UserApi(on: ctx.container).login(email: e, password: p)
+        return token.map {
+            try $0.save()
+            self.ctx.console.output("Cloud is Ready".consoleText(.info))
+        }
     }
 
     func email() -> String {
