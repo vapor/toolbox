@@ -23,7 +23,7 @@ struct CloudSignup: Command {
         let l = ctx.loadAndDisplay(.lastName)
         let o = ctx.loadAndDisplay(.org)
         let e = ctx.loadAndDisplay(.email)
-        let p = ctx.loadAndDisplay(.password)
+        let p = ctx.loadAndDisplay(.password, secure: true)
 
         let api = UserApi(on: ctx.container)
         let user = api.signup(
@@ -40,8 +40,8 @@ struct CloudSignup: Command {
 }
 
 extension CommandContext {
-    func loadAndDisplay(_ opt: CommandOption) -> String {
-        let val = load(opt)
+    func loadAndDisplay(_ opt: CommandOption, secure: Bool = false) -> String {
+        let val = load(opt, secure: secure)
         display(.firstName, value: val)
         return val
     }
