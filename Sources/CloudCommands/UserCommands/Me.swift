@@ -26,7 +26,7 @@ struct Me: Command {
 
             // id (future others)
             guard ctx.flag(.all) else { return }
-            ctx.console.output("id: ", newLine: false)
+            ctx.console.output("ID: ", newLine: false)
             ctx.console.output(me.id.uuidString.consoleText())
         }
     }

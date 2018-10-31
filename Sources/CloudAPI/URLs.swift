@@ -20,7 +20,7 @@ func environmentUrl(with app: CloudApp) -> String {
 }
 
 let appsUrl = cloudBaseUrl.trailSlash + "apps"
-public let environmentsUrl = appsUrl.trailSlash + "environments"
+let environmentsUrl = appsUrl.trailSlash + "environments"
 let organizationsUrl = authUrl.trailSlash + "organizations"
 let regionsUrl = appsUrl.trailSlash + "regions"
 let plansUrl = appsUrl.trailSlash + "plans"

@@ -1,4 +1,5 @@
 import Vapor
+import Globals
 import CloudAPI
 
 struct SSHAdd: Command {
