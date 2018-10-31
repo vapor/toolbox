@@ -2,27 +2,22 @@ import Vapor
 
 extension String: Error {}
 
-// TODO: Fix workaround
-private let app: Application = {
-    var config = Config.default()
-    var env = try! Environment.detect()
-    var services = Services.default()
-
-    let app = try! Application(
-        config: config,
-        environment: env,
-        services: services
+func makeApp() throws -> Application {
+    let app = try Application(
+        config: .default(),
+        environment: .detect(),
+        services: .default()
     )
 
     return app
-}()
-
-internal func makeClient() throws -> Client {
-    return try Request(using: app).make()
 }
 
-internal func makeWebSocketClient(url: URLRepresentable) throws -> Future<WebSocket> {
-    return try makeClient().webSocket(url)
+func makeClient(on container: Container) throws -> Client {
+    return FoundationClient.default(on: container)
+}
+
+internal func makeWebSocketClient(url: URLRepresentable, on container: Container) throws -> Future<WebSocket> {
+    return try makeClient(on: container).webSocket(url)
 }
 
 extension Future where T == Response {

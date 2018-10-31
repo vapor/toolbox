@@ -11,7 +11,13 @@ public struct CloudUser: Content {
 /// since most of its endpoints have specialized
 /// functionality
 public struct UserApi {
-    public static func signup(
+
+    public let container: Container
+    public init(on container: Container) {
+        self.container = container
+    }
+
+    public func signup(
         email: String,
         firstName: String,
         lastName: String,
@@ -33,12 +39,12 @@ public struct UserApi {
             password: password
         )
 
-        let client = try makeClient()
+        let client = try makeClient(on: container)
         let response = client.send(.POST, to: userUrl) { try $0.content.encode(content) }
         return try response.become(CloudUser.self)
     }
 
-    public static func login(
+    public func login(
         email: String,
         password: String
     ) throws -> Token {
@@ -49,22 +55,22 @@ public struct UserApi {
         let headers: HTTPHeaders = [
             "Authorization": "Basic \(encoded)"
         ]
-        let client = try makeClient()
+        let client = try makeClient(on: container)
         let response = client.send(.POST, headers: headers, to: loginUrl)
         return try response.become(Token.self)
     }
 
-    public static func me(token: Token) throws -> CloudUser {
-        let access = CloudUser.Access(with: token, baseUrl: meUrl)
+    public func me(token: Token) throws -> CloudUser {
+        let access = CloudUser.Access(with: token, baseUrl: meUrl, on: container)
         return try access.view()
     }
 
-    public static func reset(email: String) throws {
+    public func reset(email: String) throws {
         struct Package: Content {
             let email: String
         }
         let content = Package(email: email)
-        let client = try makeClient()
+        let client = try makeClient(on: container)
         let response = client.send(.POST, to: resetUrl) { try $0.content.encode(content) }
         try response.validate()
     }

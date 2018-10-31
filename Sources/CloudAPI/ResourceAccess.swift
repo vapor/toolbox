@@ -3,6 +3,13 @@ import Vapor
 struct ResourceAccess<T: Content> {
     let token: Token
     let baseUrl: String
+    let container: Container
+
+    init(token: Token, baseUrl: String, on container: Container) {
+        self.token = token
+        self.baseUrl = baseUrl
+        self.container = container
+    }
 
     func view() throws -> T {
         let response = try send(.GET, to: baseUrl)
@@ -63,15 +70,32 @@ extension ResourceAccess {
         var headers = token.headers
         headers.add(name: .contentType, value: "application/json")
 
-        let client = try makeClient()
+        let client = FoundationClient.default(on: container)
+//        let c: HTTPClient! = nil
+//        let client = try makeClient()
         let response = client.send(method, headers: headers, to: url, beforeSend: beforeSend)
         //        print(try! response.wait())
         return response
     }
 }
 
+//struct CloudClient: Client {
+//
+//}
+//extension HTTPClient {
+//    public func send(_ method: HTTPMethod, headers: HTTPHeaders = [:], to url: URLRepresentable, beforeSend: (Request) throws -> () = { _ in }) -> Future<Response> {
+//        do {
+//            let req = Request(http: .init(method: method, url: url, headers: headers), using: container)
+//            try beforeSend(req)
+//            return send(req)
+//        } catch {
+//            return container.eventLoop.newFailedFuture(error: error)
+//        }
+//    }
+//}
+
 extension Content {
-    static func Access(with token: Token, baseUrl url: String) -> ResourceAccess<Self> {
-        return ResourceAccess<Self>(token: token, baseUrl: url)
+    static func Access(with token: Token, baseUrl url: String, on container: Container) -> ResourceAccess<Self> {
+        return ResourceAccess<Self>(token: token, baseUrl: url, on: container)
     }
 }

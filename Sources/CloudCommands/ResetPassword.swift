@@ -30,7 +30,7 @@ struct ResetPasswordRunner {
 
     func run() throws {
         let e = email()
-        try UserApi.reset(email: e)
+        try UserApi(on: ctx.container).reset(email: e)
         ctx.console.output("Password has been reset.".consoleText())
         ctx.console.output("Check your email.".consoleText())
     }

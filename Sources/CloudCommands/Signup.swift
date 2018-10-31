@@ -58,7 +58,7 @@ struct CloudSignupRunner {
         let o = organization()
         let e = email()
         let p = try password()
-        let _ = try UserApi.signup(
+        let _ = try UserApi(on: ctx.container).signup(
             email: e,
             firstName: f,
             lastName: l,
