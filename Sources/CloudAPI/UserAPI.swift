@@ -8,7 +8,7 @@ public struct CloudUser: Content {
 }
 
 /// The User API is a specialized resource access controller
-/// since most of the HTTP endpoints have specialized
+/// since most of its endpoints have specialized
 /// functionality
 public struct UserApi {
     public static func signup(

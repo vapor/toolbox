@@ -1,10 +1,14 @@
 import Vapor
 
-extension String: Error {}
+//extension String: Error {}
 
 public struct CloudGroup: CommandGroup {
     public let commands: Commands = [
+        // USER COMMANDS
         "login": CloudLogin(),
+        "signup": CloudSignup(),
+        "me": Me(),
+        "reset-password": ResetPassword(),
 //        // global context
 //        "login" : CloudLogin(),
 //        "signup": CloudSignup(),
