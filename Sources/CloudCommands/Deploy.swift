@@ -55,7 +55,12 @@ struct CloudDeployRunner {
         }
 
         // Get Branch
-        let branch = env.map(getDeployBranch)
+        let branch = env.map { env -> String in
+            let branch = self.getDeployBranch(with: env)
+            try self.confirm(branch: branch)
+            return branch
+        }
+
         branch.success { branch in
             self.ctx.console.output("Branch: " + branch.consoleText() + ".")
         }
