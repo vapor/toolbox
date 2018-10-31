@@ -91,11 +91,11 @@ extension CommandOption {
 }
 
 extension CommandContext {
-    func load(_ option: CommandOption, _ message: String? = nil) -> String {
+    func load(_ option: CommandOption, _ message: String? = nil, secure: Bool = false) -> String {
         if let value = options[option.name] { return value }
         console.pushEphemeral()
         let message = message ?? option.name
-        let answer = console.ask(message.consoleText())
+        let answer = console.ask(message.consoleText(), isSecure: secure)
         console.popEphemeral()
         return answer
     }

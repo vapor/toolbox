@@ -205,6 +205,6 @@ extension CommandContext {
         let access = CloudApp.Access(with: token, on: container)
 
         let cloudGitUrl = try Git.cloudUrl()
-        return access.matching(cloudGitUrl: "gitURL=\(cloudGitUrl)")
+        return access.matching(cloudGitUrl: cloudGitUrl)
     }
 }

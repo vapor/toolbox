@@ -17,7 +17,7 @@ struct CloudLogin: Command {
     /// See `Command`.
     func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
         let e = ctx.load(.email)
-        let p = ctx.load(.password)
+        let p = ctx.load(.password, secure: true)
         let token = UserApi(on: ctx.container).login(email: e, password: p)
         return token.map { token in
             try token.save()

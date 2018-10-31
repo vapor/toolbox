@@ -10,26 +10,10 @@ struct Test: MyCommand {
     var help: [String] = ["Quick tests."]
     
     func trigger(with ctx: CommandContext) throws {
-        for i in 0...9 {
-            ctx.console.output(i.description.consoleText())
-        }
-//        ctx.console.pushEphemeral()
-        let _ = ctx.console.choose("Pick one", from: ["One", "Two", "Three"])
-//        ctx.console.popEphemeral()
+        let access = CloudApp.Access(with: token, on: container)
 
-        ctx.console.pushEphemeral()
-        ctx.console.output("Hey!")
-        ctx.console.output("WHy\nNot")
-        ctx.console.popEphemeral()
-        ctx.console.pushEphemeral()
-        let _ = ctx.console.ask("wiped")
-        ctx.console.popEphemeral()
-
-
-        ctx.console.pushEphemeral()
-        ctx.console.confirm("asdf")
-        ctx.console.popEphemeral()
-        throw "bar"
+        let cloudGitUrl = try Git.cloudUrl()
+        return access.matching(cloudGitUrl: cloudGitUrl)
     }
 }
 
