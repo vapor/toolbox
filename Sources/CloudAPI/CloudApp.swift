@@ -18,6 +18,16 @@ extension CloudApp {
     }
 }
 
+extension CloudApp {
+    public func environments(with token: Token, on container: Container) -> Future<[CloudEnv]> {
+        let appEnvsUrl = applicationsUrl.trailSlash
+            + id.uuidString.trailSlash
+            + "environments"
+        let envAccess = CloudEnv.Access(with: token, baseUrl: appEnvsUrl, on: container)
+        return envAccess.list()
+    }
+}
+
 extension ResourceAccess where T == CloudApp {
     public func matching(slug: String) -> Future<CloudApp> {
         return list(query: "slug=\(slug)").map { apps in

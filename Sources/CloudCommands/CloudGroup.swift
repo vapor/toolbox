@@ -1,7 +1,5 @@
 import Vapor
 
-//extension String: Error {}
-
 public struct CloudGroup: CommandGroup {
     public let commands: Commands = [
         // USER COMMANDS
@@ -18,6 +16,9 @@ public struct CloudGroup: CommandGroup {
 
         // DEPLOY
         "deploy": CloudDeploy(),
+
+        // REMOTE
+        "remote": RemoteGroup(),
 //        "apps": CloudAppsGroup(),
 //        "orgs": CloudOrgsGroup(),
 //        "envs": CloudEnvsGroup(),

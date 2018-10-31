@@ -5,7 +5,7 @@ internal func makeClient(on container: Container) -> Client {
     return FoundationClient.default(on: container)
 }
 
-public func makeWebSocketClient(url: URLRepresentable, on container: Container) -> Future<WebSocket> {
+internal func makeWebSocketClient(url: URLRepresentable, on container: Container) -> Future<WebSocket> {
     return makeClient(on: container).webSocket(url)
 }
 

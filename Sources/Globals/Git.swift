@@ -1,7 +1,7 @@
 import Vapor
 
-struct Git {
-    static func isGitRepository() -> Bool {
+public struct Git {
+    public static func isGitRepository() -> Bool {
         do {
             let _ =  try run("status", "--porcelain")
                 .trimmingCharacters(in: .whitespacesAndNewlines)
@@ -11,7 +11,7 @@ struct Git {
         }
     }
 
-    static func currentBranch() throws -> String {
+    public static func currentBranch() throws -> String {
         let branch = try run("branch")
             .split(separator: "\n")
             .map {
@@ -26,7 +26,7 @@ struct Git {
         return value
     }
 
-    static func branch(_ branch: String, matchesRemote remote: String) throws -> (ahead: Bool, behind: Bool) {
+    public static func branch(_ branch: String, matchesRemote remote: String) throws -> (ahead: Bool, behind: Bool) {
         let response = try run(
             "log",
             "--left-right",
@@ -50,28 +50,32 @@ struct Git {
         return (ahead, behind)
     }
 
-    static func setRemote(named name: String, url: String) throws {
+    public static func setRemote(named name: String, url: String) throws {
         try run("remote", "add", name, url)
     }
 
-    static func isClean() throws -> Bool {
+    public static func removeRemote(named name: String) throws {
+        try run("remote", "remove", name)
+    }
+
+    public static func isClean() throws -> Bool {
         return try run("status", "--porcelain")
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .isEmpty
     }
 
-    static func commitChanges(msg: String) throws {
+    public static func commitChanges(msg: String) throws {
         try run("commit", "-m", msg)
     }
 
-    static func isCloudConfigured() throws -> Bool {
+    public static func isCloudConfigured() throws -> Bool {
         return try run("remote")
             .split(separator: "\n")
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .contains("cloud")
     }
 
-    static func cloudUrl() throws -> String {
+    public static func cloudUrl() throws -> String {
         let isConfigured = try isCloudConfigured()
         guard isConfigured else { throw "cloud url not yet configured. use `vapor cloud apps set-remote" }
         return try run("remote", "get-url", "cloud").trimmingCharacters(in: .whitespacesAndNewlines)

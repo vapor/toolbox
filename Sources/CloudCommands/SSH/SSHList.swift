@@ -18,8 +18,6 @@ struct SSHList: Command {
         let runner = try CloudSSHListRunner(ctx: ctx)
         return runner.run()
     }
-
-
 }
 
 struct CloudSSHListRunner {

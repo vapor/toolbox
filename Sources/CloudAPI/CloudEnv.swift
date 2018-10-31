@@ -15,13 +15,25 @@ public struct CloudEnv: Content {
     public let activity: Activity?
 }
 
-extension CloudApp {
-    public func environments(with token: Token, on container: Container) -> Future<[CloudEnv]> {
-        let appEnvsUrl = applicationsUrl.trailSlash
-            + id.uuidString.trailSlash
-            + "environments"
-        let envAccess = CloudEnv.Access(with: token, baseUrl: appEnvsUrl, on: container)
-        return envAccess.list()
+extension CloudEnv {
+    public func deploy(
+        branch: String? = nil,
+        with token: Token,
+        on container: Container
+    ) throws -> Future<Activity> {
+        let access = CloudEnv.Access(with: token, baseUrl: environmentsUrl, on: container)
+        let id = self.id.uuidString.trailSlash + "deploy"
+        let package = [
+            "branch": branch ?? defaultBranch
+        ]
+
+        let deploy = access.update(id: id, with: package)
+        return deploy.map { env in
+            guard let activity = env.activity else {
+                throw "Unable to find deploy activity."
+            }
+            return activity
+        }
     }
 }
 
