@@ -12,9 +12,15 @@ let userUrl = authUrl.trailSlash + "users"
 let loginUrl = userUrl.trailSlash + "login"
 let meUrl = userUrl.trailSlash + "me"
 
-let applicationsUrl = appsUrl.trailSlash + "applications"
+public let applicationsUrl = appsUrl.trailSlash + "applications"
+public func environmentUrl(with app: CloudApp) -> String {
+    return applicationsUrl.trailSlash
+        + app.id.uuidString.trailSlash
+        + "environments"
+}
+
 let appsUrl = cloudBaseUrl.trailSlash + "apps"
-let environmentsUrl = appsUrl.trailSlash + "environments"
+public let environmentsUrl = appsUrl.trailSlash + "environments"
 let organizationsUrl = authUrl.trailSlash + "organizations"
 let regionsUrl = appsUrl.trailSlash + "regions"
 let plansUrl = appsUrl.trailSlash + "plans"

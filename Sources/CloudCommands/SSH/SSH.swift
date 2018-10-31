@@ -4,6 +4,7 @@ public struct SSHGroup: CommandGroup {
     public let commands: Commands = [
         "add": SSHAdd(),
         "list": SSHList(),
+        "delete": SSHDelete(),
     ]
 
     public let options: [CommandOption] = []

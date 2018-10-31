@@ -14,8 +14,10 @@ public struct CloudGroup: CommandGroup {
         "dump-token": DumpToken(),
 
         // SSH
-        "ssh-add": SSHAdd()
-//        "ssh": CloudSSHGroup(),
+        "ssh": SSHGroup(),
+
+        // DEPLOY
+        "deploy": CloudDeploy(),
 //        "apps": CloudAppsGroup(),
 //        "orgs": CloudOrgsGroup(),
 //        "envs": CloudEnvsGroup(),

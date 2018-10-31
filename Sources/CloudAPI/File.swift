@@ -2,6 +2,33 @@ import Vapor
 
 extension String: Error {}
 
+public struct CloudApp: Content {
+    public let updatedAt: Date
+    public let name: String
+    public let createdAt: Date
+    public let namespace: String
+    public let github: String?
+    public let slug: String
+    public let organizationID: UUID
+    public let gitURL: String
+    public let id: UUID
+}
+
+public struct Activity: Content {
+    public let id: UUID
+}
+
+public struct CloudEnv: Content {
+    public let defaultBranch: String
+    public let applicationID: UUID
+    public let createdAt: Date?
+    public let id: UUID
+    public let slug: String
+    public let regionID: UUID
+    public let updatedAt: Date?
+    public let activity: Activity?
+}
+
 func makeApp() throws -> Application {
     let app = try Application(
         config: .default(),
@@ -16,7 +43,7 @@ func makeClient(on container: Container) -> Client {
     return FoundationClient.default(on: container)
 }
 
-internal func makeWebSocketClient(url: URLRepresentable, on container: Container) -> Future<WebSocket> {
+public func makeWebSocketClient(url: URLRepresentable, on container: Container) -> Future<WebSocket> {
     return makeClient(on: container).webSocket(url)
 }
 
