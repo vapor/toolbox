@@ -23,7 +23,7 @@ public struct UserApi {
         lastName: String,
         organizationName: String,
         password: String
-    ) throws -> CloudUser {
+    ) throws -> Future<CloudUser> {
         struct Package: Content {
             let email: String
             let firstName: String
@@ -41,13 +41,13 @@ public struct UserApi {
 
         let client = try makeClient(on: container)
         let response = client.send(.POST, to: userUrl) { try $0.content.encode(content) }
-        return try response.become(CloudUser.self)
+        return response.become(CloudUser.self)
     }
 
     public func login(
         email: String,
         password: String
-    ) throws -> Token {
+    ) throws -> Future<Token> {
         let combination = email + ":" + password
         let data = combination.data(using: .utf8)!
         let encoded = data.base64EncodedString()
@@ -57,12 +57,12 @@ public struct UserApi {
         ]
         let client = try makeClient(on: container)
         let response = client.send(.POST, headers: headers, to: loginUrl)
-        return try response.become(Token.self)
+        return response.become(Token.self)
     }
 
-    public func me(token: Token) throws -> CloudUser {
+    public func me(token: Token) throws -> Future<CloudUser> {
         let access = CloudUser.Access(with: token, baseUrl: meUrl, on: container)
-        return try access.view()
+        return access.view()
     }
 
     public func reset(email: String) throws {

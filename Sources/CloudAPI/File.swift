@@ -21,12 +21,16 @@ internal func makeWebSocketClient(url: URLRepresentable, on container: Container
 }
 
 extension Future where T == Response {
-    internal func become<C: Content>(_ type: C.Type) throws -> C {
-        return try wait().throwIfError().content.decode(C.self).wait()
+    internal func become<C: Content>(_ type: C.Type) -> Future<C> {
+        return flatMap { response in
+            try response.throwIfError().content.decode(C.self)
+        }
     }
 
-    func validate() throws {
-        let _ = try wait().throwIfError()
+    func validate() -> Future<Void> {
+        return map {
+            try $0.throwIfError()
+        }
     }
 }
 
@@ -36,7 +40,20 @@ struct ResponseError: Content {
 }
 
 extension Response {
+    @discardableResult
     func throwIfError() throws -> Response {
+        print(self)
+        let error = try content.decode(ResponseError.self)
+        error.w
+//        error.addAwaiter { result in
+//            switch result {
+//            // error means not response error
+//            case .error(let er):
+//
+//            case .success(let responseError):
+//            }
+//        }
+
         if let error = try? content.decode(ResponseError.self).wait() {
             throw error.reason
         } else {

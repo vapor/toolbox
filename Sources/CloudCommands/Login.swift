@@ -38,7 +38,8 @@ struct CloudLoginRunner {
         let e = email()
         let p = password()
         let token = try UserApi(on: ctx.container).login(email: e, password: p)
-        try token.save()
+//        try token.save()
+        throw "save it"
         ctx.console.output("Cloud is Ready".consoleText(.info))
     }
 
