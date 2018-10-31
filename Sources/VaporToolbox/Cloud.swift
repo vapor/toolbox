@@ -693,6 +693,17 @@ let listEnvironments = Simple { ctx in
     ctx.console.log(envs)
 }
 
+let listApplications = Simple { ctx in
+    let token = try Token.load()
+    let access = CloudApp.Access(with: token, baseUrl: applicationsUrl)
+    let apps = try access.list()
+    ctx.console.log(apps)
+}
+
+let detectApplication = Simple { ctx in
+    let app = try ctx.detectCloudApp()
+    ctx.console.log(app)
+}
 
 let deployEnvironment = Simple { ctx in
     let token = try Token.load()
@@ -760,18 +771,6 @@ let deployEnvironment = Simple { ctx in
 //    print("")
 //    ctx.console.output("Deployed \(updated.slug)".consoleText())
 
-}
-
-let listApplications = Simple { ctx in
-    let token = try Token.load()
-    let access = CloudApp.Access(with: token, baseUrl: applicationsUrl)
-    let apps = try access.list()
-    ctx.console.log(apps)
-}
-
-let detectApplication = Simple { ctx in
-    let app = try ctx.detectCloudApp()
-    ctx.console.log(app)
 }
 
 extension CommandContext {

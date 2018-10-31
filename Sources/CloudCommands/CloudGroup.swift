@@ -19,14 +19,6 @@ public struct CloudGroup: CommandGroup {
 
         // REMOTE
         "remote": RemoteGroup(),
-//        "apps": CloudAppsGroup(),
-//        "orgs": CloudOrgsGroup(),
-//        "envs": CloudEnvsGroup(),
-//        // current or no context
-//        "deploy": CloudDeploy(),
-//        // current context
-//        "detect": detectApplication,
-//        "set-remote": cloudSetRemote,
     ]
 
     public let options: [CommandOption] = []
