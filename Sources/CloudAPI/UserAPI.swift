@@ -72,6 +72,6 @@ public struct UserApi {
         let content = Package(email: email)
         let client = makeClient(on: container)
         let response = client.send(.POST, to: resetUrl) { try $0.content.encode(content) }
-        return response.validate()
+        return response.validate().void()
     }
 }

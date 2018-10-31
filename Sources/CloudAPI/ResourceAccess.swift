@@ -48,7 +48,7 @@ public struct ResourceAccess<T: Content> {
     public func delete(id: String) -> Future<Void> {
         let url = self.baseUrl.trailSlash + id
         let response = send(.DELETE, to: url)
-        return response.validate()
+        return response.validate().void()
     }
 }
 
@@ -67,32 +67,15 @@ extension ResourceAccess {
         beforeSend: (Request) throws -> () = { _ in }
     ) -> Future<Response> {
         // Headers
-        var headers = token.headers
+        var headers = HTTPHeaders()
+        headers.add(name: .authorization, value: "Bearer \(token.key)")
         headers.add(name: .contentType, value: "application/json")
 
         let client = FoundationClient.default(on: container)
-//        let c: HTTPClient! = nil
-//        let client = try makeClient()
         let response = client.send(method, headers: headers, to: url, beforeSend: beforeSend)
-        //        print(try! response.wait())
         return response
     }
 }
-
-//struct CloudClient: Client {
-//
-//}
-//extension HTTPClient {
-//    public func send(_ method: HTTPMethod, headers: HTTPHeaders = [:], to url: URLRepresentable, beforeSend: (Request) throws -> () = { _ in }) -> Future<Response> {
-//        do {
-//            let req = Request(http: .init(method: method, url: url, headers: headers), using: container)
-//            try beforeSend(req)
-//            return send(req)
-//        } catch {
-//            return container.eventLoop.newFailedFuture(error: error)
-//        }
-//    }
-//}
 
 extension Content {
     public static func Access(with token: Token, baseUrl url: String, on container: Container) -> ResourceAccess<Self> {

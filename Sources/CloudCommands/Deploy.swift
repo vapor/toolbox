@@ -36,7 +36,6 @@ struct CloudDeployRunner {
         self.token = token
         self.access = CloudApp.Access(
             with: token,
-            baseUrl: applicationsUrl,
             on: ctx.container
         )
     }
