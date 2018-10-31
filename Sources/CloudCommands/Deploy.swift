@@ -42,91 +42,63 @@ struct CloudDeployRunner {
 
     func run() throws -> Future<Void> {
         // Get App
-        let app = try cloudApp()
-        let env = app.flatMap { app -> Future<CloudEnv> in
+        let app = try getDeployApp()
+        app.success { app in
             self.ctx.console.output("App: " + app.name.consoleText() + ".")
-            return try self.deployEnv(with: app)
         }
 
-        let deploy = env.flatMap { env -> Future<CloudEnv> in
+        // Get Env
+        let env = app.flatMap(getDeployEnv)
+        env.success { env in
             self.ctx.console.output("Environment: " + env.slug.consoleText() + ".")
-            let branch = self.deployBranch(with: env)
-            // Confirm Branch
-            try self.confirm(branch: branch)
-            self.ctx.console.output("Branch: " + env.defaultBranch.consoleText() + ".")
-
-            // Deploy
-            return self.deploy(env, branch: branch)
         }
 
-        return deploy.flatMap { env in
+        // Get Branch
+        let branch = env.map(getDeployBranch)
+        branch.success { branch in
+            self.ctx.console.output("Branch: " + branch.consoleText() + ".")
+        }
+
+        
+        let sd = env.and(branch).flatMap { val in
+            return self.triggerDeploy(val.0, branch: val.1)
+        }
+//        let deploy = env.flatMap { env -> Future<CloudEnv> in
+//            self.ctx.console.output("Environment: " + env.slug.consoleText() + ".")
+//            let branch = self.getDeployBranch(with: env)
+//
+//            // Confirm Branch
+//            try self.confirm(branch: branch)
+//            self.ctx.console.output("Branch: " + branch + ".")
+//
+//            // Deploy
+//            return self.deploy(env, branch: branch)
+//        }
+
+        return sd.flatMap { env in
             return try self.deployActivity(for: env)
         }
-//
-//        // Get Env
-//        let env = try deployEnv(with: app)
-//        ctx.console.output("Environment: " + env.slug.consoleText() + ".")
-//
-//        // Get Branch
-//        let branch = deployBranch(with: env)
-//        // Confirm Branch
-//        try confirm(branch: branch)
-//        ctx.console.output("Branch: " + env.defaultBranch.consoleText() + ".")
-//
-//
-//        // Deploy
-//        let deployAccess = CloudEnv.Access(with: token, baseUrl: environmentsUrl)
-//        let updated = try deployAccess.update(
-//            id: env.id.uuidString.trailSlash + "deploy",
-//            with: [
-//                "branch": branch
-//            ]
-//        )
-//
-//        // Activity
-//        guard let activity = updated.activity else { throw "no deploy activity found." }
-//        let wssUrl = "wss://api.v2.vapor.cloud/v2/activity/activities/\(activity.id.uuidString)/channel"
-//        ctx.console.pushEphemeral()
-//        ctx.console.output("Connecting to deploy...")
-//        let ws = try makeWebSocketClient(url: wssUrl).wait()
-//        ctx.console.popEphemeral()
-//        ctx.console.output("Connected to deploy.")
-//
-//        // Logs
-//        ws.onText { ws, text in
-//            self.ctx.console.output(text.consoleText())
-//        }
-//
-//        // Close
-//        try ws.onClose.wait()
-//        ctx.console.output("Disconnected.")
     }
 
     private func deployActivity(for env: CloudEnv) throws -> Future<Void> {
         // Activity
         guard let activity = env.activity else { throw "No deploy activity found." }
-        let wssUrl = "wss://api.v2.vapor.cloud/v2/activity/activities/\(activity.id.uuidString)/channel"
-        ctx.console.pushEphemeral()
         ctx.console.output("Connecting to deploy...")
-
-        let ws = makeWebSocketClient(url: wssUrl, on: ctx.container)
-        return ws.flatMap { ws in
-            self.ctx.console.popEphemeral()
-            self.ctx.console.output("Connected to deploy.")
-
-            // Logs
-            ws.onText { ws, text in
-                self.ctx.console.output(text.consoleText())
-            }
-
-            // Close
-            return ws.onClose.map {
+        return activity.listen(on: ctx.container) { update in
+            switch update {
+            case .connected:
+                // clear connecting
+                self.ctx.console.clear(.line)
+                self.ctx.console.output("Connected to deploy.")
+            case .message(let msg):
+                self.ctx.console.output(msg.consoleText())
+            case .close:
                 self.ctx.console.output("Disconnected.")
             }
         }
     }
 
-    private func deploy(_ env: CloudEnv, branch: String) -> Future<CloudEnv> {
+    private func triggerDeploy(_ env: CloudEnv, branch: String) -> Future<CloudEnv> {
         let deployAccess = CloudEnv.Access(with: self.token, baseUrl: environmentsUrl, on: ctx.container)
         return deployAccess.update(
             id: env.id.uuidString.finished(with: "/") + "deploy",
@@ -136,36 +108,60 @@ struct CloudDeployRunner {
         )
     }
 
-    private func cloudApp() throws -> Future<CloudApp> {
+    private func getDeployEnv(for app: CloudApp) throws -> Future<CloudEnv> {
+        let envs = app.environments(with: token, on: ctx.container)
+        return envs.map(self.choose)
+    }
+    
+    private func getDeployApp() throws -> Future<CloudApp> {
         if let slug = ctx.options.value(.app) {
-            let apps = access.list(query: "slug=\(slug)")
-            return apps.map { apps in
-                guard apps.count == 1 else {
-                    throw "Unable to find app matching slug: \(slug)."
-                }
-                return apps[0]
-            }
+            return access.matching(slug: slug)
         } else if Git.isGitRepository() {
             return try ctx.detectCloudApp(with: token)
         } else {
-            let apps = access.list()
-            return apps.map { apps in
-//                self.ctx.console.pushEphemeral()
+            return access.list().map { apps in
                 let app = self.ctx.console.choose("Which App?", from: apps) { app in
                     return app.name.consoleText()
                 }
-//                self.ctx.console.popEphemeral()
                 return app
             }
         }
     }
 
-    private func deployEnv(with app: CloudApp) throws -> Future<CloudEnv> {
+    private func deployEnv(with app: CloudApp) throws -> CloudEnv {
+        fatalError()
         // Collect Envs
-        let appEnvsUrl = environmentUrl(with: app)
-        let envAccess = CloudEnv.Access(with: token, baseUrl: appEnvsUrl, on: ctx.container)
-        let envs = envAccess.list()
-        return envs.map(self.choose)
+//        let appEnvsUrl = applicationsUrl.trailSlash
+//            + app.id.uuidString.trailSlash
+//            + "environments"
+//        let envAccess = CloudEnv.Access(with: token, baseUrl: appEnvsUrl)
+//        let envs = try envAccess.list()
+//
+//        // Select
+//        let envSlug = ctx.options["env"]
+//        if let envSlug = envSlug {
+//            let possible = envs.first { $0.slug == envSlug }
+//            guard let env = possible else {
+//                throw "No environment found matching \(envSlug)"
+//            }
+//            return env
+//        } else if envs.count == 1 {
+//            return envs[0]
+//        } else {
+//            return ctx.console.choose("Which Env?", from: envs) { env in
+//                return env.slug.consoleText()
+//            }
+//        }
+    }
+
+    private func _deployEnv(with app: CloudApp) throws -> Future<CloudEnv> {
+        
+        // Collect Envs
+//        let appEnvsUrl = environmentUrl(with: app)
+//        let envAccess = CloudEnv.Access(with: token, baseUrl: appEnvsUrl, on: ctx.container)
+//        let envs = envAccess.list()
+//        return envs.map(self.choose)
+        fatalError()
     }
 
     private func choose(from envs: [CloudEnv]) throws -> CloudEnv {
@@ -185,7 +181,7 @@ struct CloudDeployRunner {
         }
     }
 
-    private func deployBranch(with env: CloudEnv) -> String {
+    private func getDeployBranch(with env: CloudEnv) -> String {
         if let branch = ctx.options.value(.branch) { return branch }
         else { return env.defaultBranch }
     }
@@ -259,15 +255,19 @@ struct CloudDeployRunner {
     }
 }
 
+extension Future {
+    func success(_ run: @escaping (T) -> Void) {
+        addAwaiter { (result) in
+            guard case .success(let val) = result else { return }
+            run(val)
+        }
+    }
+}
 extension CommandContext {
     func detectCloudApp(with token: Token) throws -> Future<CloudApp> {
-        let cloudGitUrl = try Git.cloudUrl()
+        let access = CloudApp.Access(with: token, on: container)
 
-        let access = CloudApp.Access(with: token, baseUrl: applicationsUrl, on: container)
-        let apps = access.list(query: "gitURL=\(cloudGitUrl)")
-        return apps.map { apps in
-            guard apps.count == 1 else { throw "No app found at \(cloudGitUrl)." }
-            return apps[0]
-        }
+        let cloudGitUrl = try Git.cloudUrl()
+        return access.matching(cloudGitUrl: "gitURL=\(cloudGitUrl)")
     }
 }

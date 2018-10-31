@@ -12,8 +12,8 @@ let userUrl = authUrl.trailSlash + "users"
 let loginUrl = userUrl.trailSlash + "login"
 let meUrl = userUrl.trailSlash + "me"
 
-public let applicationsUrl = appsUrl.trailSlash + "applications"
-public func environmentUrl(with app: CloudApp) -> String {
+let applicationsUrl = appsUrl.trailSlash + "applications"
+func environmentUrl(with app: CloudApp) -> String {
     return applicationsUrl.trailSlash
         + app.id.uuidString.trailSlash
         + "environments"
