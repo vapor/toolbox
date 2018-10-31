@@ -30,7 +30,7 @@ public struct SSHKeyApi {
         return access.create(package)
     }
 
-    public func list() throws -> Future<[SSHKey]> {
+    public func list() -> Future<[SSHKey]> {
         return access.list()
     }
 
