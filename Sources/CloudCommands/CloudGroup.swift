@@ -9,14 +9,12 @@ public struct CloudGroup: CommandGroup {
         "signup": CloudSignup(),
         "me": Me(),
         "reset-password": ResetPassword(),
+
+        // DIAGNOSTICS
         "dump-token": DumpToken(),
 
-        
-//        // global context
-//        "login" : CloudLogin(),
-//        "signup": CloudSignup(),
-//        "me": Me(),
-//        "dump-token": DumpToken(),
+        // SSH
+        "ssh-add": SSHAdd()
 //        "ssh": CloudSSHGroup(),
 //        "apps": CloudAppsGroup(),
 //        "orgs": CloudOrgsGroup(),
