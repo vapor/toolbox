@@ -25,7 +25,48 @@ struct CloudDeploy: Command {
     }
 }
 
-struct CloudDeployRunner {
+
+protocol Runner {
+    var ctx: CommandContext { get }
+}
+
+protocol AuthorizedRunner: Runner {
+    var token: Token { get }
+}
+
+extension AuthorizedRunner {
+    func getDeployApp() throws -> Future<CloudApp> {
+        let access = CloudApp.Access(with: token, on: ctx.container)
+
+        if let slug = ctx.options.value(.app) {
+            return access.matching(slug: slug)
+        } else if Git.isGitRepository() {
+            return try getAppFromRepository()
+        } else {
+            let apps = access.list()
+            return ctx.select(from: apps)
+        }
+    }
+
+    func getAppFromRepository() throws -> Future<CloudApp> {
+        if try Git.isCloudConfigured() {
+            return try ctx.detectCloudApp(with: token)
+        }
+
+        // Configure App if it Hasn't already
+        ctx.console.pushEphemeral()
+        var prompt = "There is no cloud app configured with git.\n"
+        prompt += "Would you like to set it now?"
+        let setNow = ctx.console.confirm(prompt.consoleText())
+        ctx.console.popEphemeral()
+        // call this again to trigger same error
+        guard setNow else { return try ctx.detectCloudApp(with: token) }
+
+        return try RemoteSet().run(using: ctx).flatMap { return try self.ctx.detectCloudApp(with: self.token) }
+    }
+}
+
+struct CloudDeployRunner: AuthorizedRunner {
     let ctx: CommandContext
     let token: Token
     let access: ResourceAccess<CloudApp>
@@ -93,34 +134,6 @@ struct CloudDeployRunner {
     private func getDeployEnv(for app: CloudApp) throws -> Future<CloudEnv> {
         let envs = app.environments(with: token, on: ctx.container)
         return envs.map(self.choose)
-    }
-    
-    private func getDeployApp() throws -> Future<CloudApp> {
-        if let slug = ctx.options.value(.app) {
-            return access.matching(slug: slug)
-        } else if Git.isGitRepository() {
-            return try getAppFromRepository()
-        } else {
-            let apps = access.list()
-            return ctx.select(from: apps)
-        }
-    }
-
-    private func getAppFromRepository() throws -> Future<CloudApp> {
-        if try Git.isCloudConfigured() {
-            return try ctx.detectCloudApp(with: token)
-        }
-
-        // Configure App if it Hasn't already
-        ctx.console.pushEphemeral()
-        var prompt = "There is no cloud app configured with git.\n"
-        prompt += "Would you like to set it now?"
-        let setNow = ctx.console.confirm(prompt.consoleText())
-        ctx.console.popEphemeral()
-        // call this again to trigger same error
-        guard setNow else { return try ctx.detectCloudApp(with: token) }
-
-        return try RemoteSet().run(using: ctx).flatMap { return try self.ctx.detectCloudApp(with: self.token) }
     }
 
     private func choose(from envs: [CloudEnv]) throws -> CloudEnv {
