@@ -108,7 +108,6 @@ struct CloudDeployRunner {
 
     private func getAppFromRepository() throws -> Future<CloudApp> {
         if try Git.isCloudConfigured() {
-            print("cloud not configged")
             return try ctx.detectCloudApp(with: token)
         }
 
