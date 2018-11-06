@@ -73,14 +73,26 @@ struct New: Command {
             let info = [
                 "Project \"\(name)\" has been created.",
                 "Type `cd \(name)` to enter the project directory.",
-                "Use `vapor cloud deploy` to put your project LIVE!",
+                "Use `vapor cloud deploy` and put your project LIVE!",
                 "Enjoy!",
-                "",
             ]
 
-            ctx.console.center(info).forEach { line in
-                ctx.console.output(line.consoleText())
+            //ctx.console.center(info)
+            info.forEach { line in
+                var command = false
+                for c in line {
+                    if c == "`" { command = !command }
+
+                    ctx.console.output(
+                        c.description,
+                        style: command && c != "`" ? .info : .plain,
+                        newLine: false
+                    )
+                }
+                ctx.console.output("", style: .plain, newLine: true)
             }
+
+            
             return ctx.done
         }
 
