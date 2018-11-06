@@ -80,6 +80,11 @@ struct RemoteSet: Command {
         return app.map { app in
             try Git.setRemote(named: "cloud", url: app.gitURL)
             ctx.console.output("Cloud repository configured.")
+            // TODO:
+            // Load environments and push branches?
+            let push = ctx.console.confirm("Would you like to push to now?")
+            guard push else { return }
+            try Git.pushCloud(branch: "master")
         }
     }
 
