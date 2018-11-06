@@ -30,7 +30,7 @@ extension CloudApp {
 
 extension ResourceAccess where T == CloudApp {
     public func matching(slug: String) -> Future<CloudApp> {
-        return list(query: "slug=\(slug)").map { apps in
+        return list(query: "slug=\(slug)&exact=true").map { apps in
             guard apps.count == 1 else {
                 throw "Unable to find app matching slug: \(slug)."
             }
