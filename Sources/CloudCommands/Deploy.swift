@@ -315,7 +315,8 @@ struct CloudPushRunner: AuthorizedRunner {
         guard  try Git.isCloudConfigured() else { throw "Cloud remote not configured" }
         ctx.console.pushEphemeral()
         ctx.console.output("Pushing \(branch)...".consoleText(.info))
-        try Git.pushCloud(branch: branch)
+        let force = ctx.flag(.force)
+        try Git.pushCloud(branch: branch, force: force)
         ctx.console.popEphemeral()
         ctx.console.output("Pushed \(branch).".consoleText(.info))
     }
