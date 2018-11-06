@@ -65,19 +65,23 @@ enum Template {
         }
     }
 
-    //    /**
-    //     http(s)://whatever.com/foo/bar => http(s)://whatever.com/foo/bar
-    //     foo/some-template => https://github.com/foo/some-template
-    //     some-template => https://github.com/vapor/some-template
-    //     some => https://github.com/vapor/some
-    //     if fails, attempts `-template` suffix
-    //     some => https://github.com/vapor/some-template
-    //     */
+
+    /// http(s)://whatever.com/foo/bar => http(s)://whatever.com/foo/bar
+    /// foo/some-template => https://github.com/foo/some-template
+    /// some-template => https://github.com/vapor/some-template
+    /// some => https://github.com/vapor/some
+    /// if fails, attempts `-template` suffix
+    /// some => https://github.com/vapor/some-template
     private func expand(templateUrl url: String) throws -> String {
+        // all ssh urls are custom
+        if url.contains("@") { return url }
+
+        // expand github urls, ie: `repo-owner/name-of-repo`
+        // becomes `https://github.com/repo-owner/name-of-repo`
         let components = url.split(separator: "/")
         if components.count == 1 { throw "unexpected format, use `repo-owner/name-of-repo`" }
 
-        // passed repo-owner/name-of-repo, otherwise, expect a full url
+        // if not 2, then it's a full https url
         guard components.count == 2 else { return url }
         return "https://github.com/\(url)"
     }
