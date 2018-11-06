@@ -312,7 +312,7 @@ struct CloudPushRunner: AuthorizedRunner {
 
     func push(branch: String) throws {
         // TODO: Look for uncommitted changes
-        guard  try Git.isCloudConfigured() else { throw "Cloud remote not configured" }
+        guard  try Git.isCloudConfigured() else { throw "Cloud remote not configured." }
         ctx.console.pushEphemeral()
         ctx.console.output("Pushing \(branch)...".consoleText(.info))
         let force = ctx.flag(.force)
