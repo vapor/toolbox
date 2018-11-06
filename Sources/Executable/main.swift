@@ -12,7 +12,7 @@ do {
 } catch let error as ProcessExecuteError {
     let term = Terminal()
     term.error("Error:")
-    term.output(error.stdout.consoleText())
+    term.output(error.stderr.consoleText())
 } catch {
     let term = Terminal()
     term.error("Error:")
