@@ -1,3 +1,4 @@
+import Globals
 import Vapor
 
 struct CloudDeploy: MyCommand {

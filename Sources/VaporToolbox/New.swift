@@ -31,6 +31,7 @@ struct New: Command {
         let name = try ctx.argument("name")
         let template = ctx.template()
         let gitUrl = try template.fullUrl()
+        try Git.clone(repo: gitUrl, toFolder: name)
         let tag = ctx.options["tag"]
         print("Will clone: \(gitUrl) at tag: \(tag ?? "no-tag")")
         return ctx.done

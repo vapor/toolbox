@@ -1,6 +1,10 @@
 import Vapor
 
 public struct Git {
+    public static func clone(repo: String, toFolder folder: String) throws {
+        try run("clone", repo, folder)
+    }
+
     public static func isGitRepository() -> Bool {
         do {
             let _ =  try run("status", "--porcelain")
