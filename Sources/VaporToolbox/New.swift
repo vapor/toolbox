@@ -123,6 +123,74 @@ enum Template {
     }
 }
 
+struct PrintDroplet: Command {
+    var arguments: [CommandArgument] = []
+
+    /// See `Command`.
+    var options: [CommandOption] = []
+
+    /// See `Command`.
+    var help: [String] = ["Prints a droplet."]
+
+    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
+        for line in ctx.console.center(asciiArt) {
+            for character in line {
+                let style: ConsoleStyle
+                if let color = colors[character] {
+                    style = ConsoleStyle(color: color, background: nil, isBold: false)
+                } else {
+                    style = .plain
+                }
+                ctx.console.output(character.description, style: style, newLine: false)
+            }
+            ctx.console.output("", style: .plain, newLine: true)
+        }
+        return ctx.done
+    }
+
+
+    private let asciiArt: [String] = [
+        "                                ",
+        "               **               ",
+        "             **~~**             ",
+        "           **~~~~~~**           ",
+        "         **~~~~~~~~~~**         ",
+        "       **~~~~~~~~~~~~~~**       ",
+        "     **~~~~~~~~~~~~~~~~~~**     ",
+        "   **~~~~~~~~~~~~~~~~~~~~~~**   ",
+        "  **~~~~~~~~~~~~~~~~~~~~~~~~**  ",
+        " **~~~~~~~~~~~~~~~~~~~~~~~~~~** ",
+        "**~~~~~~~~~~~~~~~~~~~~~~~~~~~~**",
+        "**~~~~~~~~~~~~~~~~~~~~~~~~~~~~**",
+        "**~~~~~~~~~~~~~~~~~~~~~++++~~~**",
+        " **~~~~~~~~~~~~~~~~~~~++++~~~** ",
+        "  ***~~~~~~~~~~~~~~~++++~~~***  ",
+        "    ****~~~~~~~~~~++++~~****    ",
+        "       *****~~~~~~~~~*****      ",
+        "          *************         ",
+        "                                ",
+        " _       __    ___   ___   ___  ",
+        // the escaping `\` make these lines look weird,
+        // but they're correct
+        "\\ \\  /  / /\\  | |_) / / \\ | |_) ",
+        " \\_\\/  /_/--\\ |_|   \\_\\_/ |_| \\ ",
+        "   a web framework for Swift    ",
+        "                                "
+    ]
+
+    private let colors: [Character: ConsoleColor] = [
+        "*": .magenta,
+        "~": .blue,
+        "+": .cyan, // Droplet
+        "_": .magenta,
+        "/": .magenta,
+        "\\": .magenta,
+        "|": .magenta,
+        "-": .magenta,
+        ")": .magenta // Title
+    ]
+}
+
 //import Console
 //import libc
 //
