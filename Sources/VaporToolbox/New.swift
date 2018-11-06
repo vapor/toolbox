@@ -64,7 +64,7 @@ struct New: Command {
         try Git.commit(
             gitDir: gitDir,
             workTree: workTree,
-            msg: "Created new vapor project from template \(gitUrl)"
+            msg: "Created new vapor project from template `\(gitUrl)`"
         )
         ctx.console.output("Initialized project.")
 
