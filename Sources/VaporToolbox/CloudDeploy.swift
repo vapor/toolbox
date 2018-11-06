@@ -162,6 +162,8 @@ struct CloudDeployRunner {
         defer { ctx.console.popEphemeral() }
 
         // Check uncomitted changes
+        // any branch other than current brach
+        // CANT have uncommitted changes
         let currentBranch = try Git.currentBranch()
         if currentBranch == branch {
             let isClean = try Git.isClean()

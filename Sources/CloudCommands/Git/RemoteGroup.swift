@@ -56,7 +56,6 @@ struct RemoteRemove: Command {
     }
 }
 
-
 struct RemoteSet: Command {
     /// See `Command`.
     var arguments: [CommandArgument] = []
@@ -64,6 +63,62 @@ struct RemoteSet: Command {
     /// See `Command`.
     var options: [CommandOption] = [
         .app
+    ]
+
+    /// See `Command`.
+    var help: [String] = ["Link your local repository to a Cloud app."]
+
+    /// See `Command`.
+    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
+        try checkGit()
+
+        let token = try Token.load()
+        let access = CloudApp.Access(with: token, on: ctx.container)
+        let apps = access.list()
+        let app = ctx.select(from: apps)
+        return app.map { app in
+            try Git.setRemote(named: "cloud", url: app.gitURL)
+            ctx.console.output("Cloud repository configured.")
+            // TODO:
+            // Load environments and push branches?
+            ctx.console.pushEphemeral()
+            let push = ctx.console.confirm("Would you like to push to now?")
+            ctx.console.popEphemeral()
+            guard push else { return }
+
+            ctx.console.pushEphemeral()
+            ctx.console.output("Pushing `master` to cloud...")
+            try Git.pushCloud(branch: "master")
+            ctx.console.popEphemeral()
+            ctx.console.output("Pushed `master` to cloud.")
+        }
+    }
+
+    func checkGit() throws {
+        let isGit = Git.isGitRepository()
+        guard isGit else {
+            throw "Not currently in a git repository."
+        }
+
+        let alreadyConfigured = try Git.isCloudConfigured()
+        guard alreadyConfigured else { return }
+
+        var error = "Cloud is already configured."
+        error += "\n"
+        error += "Use 'vapor cloud remote remove' and try again."
+        throw error
+    }
+}
+
+
+struct PushCloud: Command {
+    /// See `Command`.
+    var arguments: [CommandArgument] = []
+
+    /// See `Command`.
+    var options: [CommandOption] = [
+        .app,
+        .env
     ]
 
     /// See `Command`.

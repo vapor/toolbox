@@ -73,7 +73,7 @@ public struct Git {
     }
 
     public static func pushCloud(branch: String) throws {
-        try run("push", "cloud", branch, "-u")
+        try run("push", "cloud", branch)
     }
 
     public static func setRemote(named name: String, url: String) throws {

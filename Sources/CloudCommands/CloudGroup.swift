@@ -17,6 +17,9 @@ public struct CloudGroup: CommandGroup {
         // DEPLOY
         "deploy": CloudDeploy(),
 
+        // Push
+        "push": CloudPush(),
+
         // REMOTE
         "remote": RemoteGroup(),
     ]
