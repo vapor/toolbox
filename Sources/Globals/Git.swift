@@ -1,8 +1,19 @@
 import Vapor
 
 public struct Git {
-    public static func clone(repo: String, toFolder folder: String) throws {
-        try run("clone", repo, folder)
+    public static func checkout(gitDir: String, workTree: String, checkout: String) throws -> String {
+        let gitDir = "--git-dir=\(gitDir)"
+        let workTree = "--work-tree=\(workTree)"
+        return try run(gitDir, workTree, "checkout", checkout)
+    }
+
+    public static func create(gitDir: String) throws -> String {
+        let gitDir = "--git-dir=\(gitDir)"
+        return try run(gitDir, "init")
+    }
+
+    public static func clone(repo: String, toFolder folder: String) throws -> String {
+        return try run("clone", repo, folder)
     }
 
     public static func isGitRepository() -> Bool {

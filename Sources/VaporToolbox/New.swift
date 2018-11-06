@@ -31,9 +31,31 @@ struct New: Command {
         let name = try ctx.argument("name")
         let template = ctx.template()
         let gitUrl = try template.fullUrl()
-        try Git.clone(repo: gitUrl, toFolder: name)
-        let tag = ctx.options["tag"]
-        print("Will clone: \(gitUrl) at tag: \(tag ?? "no-tag")")
+        let cloneOutput = try Git.clone(repo: gitUrl, toFolder: name)
+        ctx.console.output(cloneOutput.consoleText(), newLine: true)
+
+        // used to work on a git repository
+        // outside of current path
+        let gitDir = "--git-dir=./\(name)/.git"
+        let workTree = "--work-tree=./\(name)"
+
+        // Prioritize tag over branch
+        let checkout = ctx.options["tag"] ?? ctx.options["branch"]
+        if let checkout = checkout {
+            ctx.console.output("Checking out \(checkout).".consoleText())
+            let checkoutOutput = try Git.checkout(
+                gitDir: gitDir,
+                workTree: workTree,
+                checkout: checkout
+            )
+            ctx.console.output(checkoutOutput.consoleText(), newLine: true)
+        }
+
+        // clear existing git history
+        try Shell.delete("./\(name)/.git")
+        let initOutput = try Git.create(gitDir: gitDir)
+        ctx.console.output(initOutput.consoleText())
+
         return ctx.done
     }
 
