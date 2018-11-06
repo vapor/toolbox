@@ -33,7 +33,8 @@ struct CloudPush: Command {
     var options: [CommandOption] = [
         .app,
         .env,
-        .branch
+        .branch,
+        .force
     ]
 
     /// See `Command`.
@@ -313,10 +314,10 @@ struct CloudPushRunner: AuthorizedRunner {
         // TODO: Look for uncommitted changes
         guard  try Git.isCloudConfigured() else { throw "Cloud remote not configured" }
         ctx.console.pushEphemeral()
-        ctx.console.output("Pushing \(branch)...".consoleText())
+        ctx.console.output("Pushing \(branch)...".consoleText(.info))
         try Git.pushCloud(branch: branch)
         ctx.console.popEphemeral()
-        ctx.console.output("Pushed \(branch).".consoleText())
+        ctx.console.output("Pushed \(branch).".consoleText(.info))
     }
 
     private func monitor(_ activity: Activity) throws -> Future<Void> {

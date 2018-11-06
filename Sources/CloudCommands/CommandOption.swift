@@ -68,6 +68,16 @@ extension CommandOption {
             "The branch to use. If different than default."
         ]
     )
+
+    static let force: CommandOption = .flag(
+        name: "force",
+        short: "f",
+        help: [
+            "Force the operation.",
+            "You WILL lose data.",
+            "This action is irreversible.",
+        ]
+    )
 }
 extension CommandOption {
     static let readableName: CommandOption = .value(
