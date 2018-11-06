@@ -9,6 +9,10 @@ do {
     let term = Terminal()
     term.error("Error:")
     term.output(error.reason.consoleText())
+} catch let error as ProcessExecuteError {
+    let term = Terminal()
+    term.error("Error:")
+    term.output(error.stdout.consoleText())
 } catch {
     let term = Terminal()
     term.error("Error:")
