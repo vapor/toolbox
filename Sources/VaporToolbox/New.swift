@@ -29,7 +29,7 @@ struct New: Command {
     func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
         let name = try ctx.argument("name")
         let template = ctx.template()
-        let gitUrl = try ctx.expand(template)
+        let gitUrl = try template.fullUrl()
         let tag = ctx.options["tag"]
         print("Will clone: \(gitUrl) at tag: \(tag ?? "no-tag")")
         return ctx.done
@@ -54,25 +54,13 @@ enum Template {
     case `default`, web, api, auth
     case custom(repo: String)
 
-    private var str: String {
+    fileprivate func fullUrl() throws -> String {
         switch self {
-        case .default: return "api"
-        case .web: return "web"
-        case .api: return "api"
-        case .auth: return "auth"
-        case .custom(let str): return str
-        }
-    }
-}
-
-extension CommandContext {
-    fileprivate func expand(_ template: Template) throws -> String {
-            switch template {
-            case .default: fallthrough
-            case .web: return "https://github.com/vapor/api-template.git"
-            case .api: return "https://github.com/vapor/web-template.git"
-            case .auth: return "https://github.com/vapor/auth-template.git"
-            case .custom(let custom): return try expand(templateUrl: custom)
+        case .default: fallthrough
+        case .api: return "https://github.com/vapor/api-template.git"
+        case .web: return "https://github.com/vapor/web-template.git"
+        case .auth: return "https://github.com/vapor/auth-template.git"
+        case .custom(let custom): return try expand(templateUrl: custom).finished(with: ".git")
         }
     }
 
@@ -85,35 +73,12 @@ extension CommandContext {
     //     some => https://github.com/vapor/some-template
     //     */
     private func expand(templateUrl url: String) throws -> String {
-        // if valid URL, use it
-        guard !isValid(url: url) else { return url }
-        // `/` indicates `owner/repo`
-        guard !url.contains("/") else { return "https://github.com/" + url }
-        // no '/' indicates vapor default
-        let direct = "https://github.com/vapor/" + url
-        guard !isValid(url: direct) else { return direct }
-        // invalid url attempts `-template` suffix
-        return direct + "-template"
-    }
+        let components = url.split(separator: "/")
+        if components.count == 1 { throw "unexpected format, use `repo-owner/name-of-repo`" }
 
-    private func isValid(url: String) -> Bool {
-        do {
-            // http://stackoverflow.com/a/6136861/2611971
-            let result = try Process.execute(
-                    "curl",
-                    "-o",
-                    "/dev/null",
-                    "--silent",
-                    "--head",
-                    "--write-out",
-                    "'%{http_code}\\n'",
-                    url
-            )
-            return result.contains("200")
-        } catch {
-            // yucky...
-            return false
-        }
+        // passed repo-owner/name-of-repo, otherwise, expect a full url
+        guard components.count == 2 else { return url }
+        return "https://github.com/\(url).git"
     }
 }
 
