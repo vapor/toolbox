@@ -394,7 +394,7 @@ func asdfasdf() throws {
 }
 
 public func fooBar() throws {
-    return
+//    return
 //    let token = try Token.load()
 //    let access = [String: String].Access(with: token, baseUrl: activitiesUrl)
 //    let apps = try access.list()

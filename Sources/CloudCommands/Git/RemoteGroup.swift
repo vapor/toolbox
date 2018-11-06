@@ -102,6 +102,7 @@ struct RemoteSet: Command {
 extension CommandContext {
     func select(from apps: Future<[CloudApp]>) -> Future<CloudApp> {
         return apps.map { apps in
+            if apps.isEmpty { throw "No apps found, visit https://dashboard.vapor.cloud/apps to create one." }
             return self.console.choose("Which app?", from: apps) {
                 return $0.name.consoleText()
             }
