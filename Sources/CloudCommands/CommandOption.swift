@@ -78,6 +78,14 @@ extension CommandOption {
             "This action is irreversible.",
         ]
     )
+
+    static let push: CommandOption = .flag(
+        name: "push",
+        short: "p",
+        help: [
+            "Push to cloud as well."
+        ]
+    )
 }
 extension CommandOption {
     static let readableName: CommandOption = .value(
