@@ -16,7 +16,8 @@ struct New: Command {
             "-t auth to create a new authenticated API app",
             "-t api (default) to create a new API"
         ]),
-        .value(name: "tag", short: nil, default: nil, help: ["A specialized template to use."]),
+        .value(name: "tag", short: nil, default: nil, help: ["A specific tag to use."]),
+        .value(name: "branch", short: "b", default: nil, help: ["A specific brach to use."]),
 
     ]
 
@@ -57,10 +58,10 @@ enum Template {
     fileprivate func fullUrl() throws -> String {
         switch self {
         case .default: fallthrough
-        case .api: return "https://github.com/vapor/api-template.git"
-        case .web: return "https://github.com/vapor/web-template.git"
-        case .auth: return "https://github.com/vapor/auth-template.git"
-        case .custom(let custom): return try expand(templateUrl: custom).finished(with: ".git")
+        case .api: return "https://github.com/vapor/api-template"
+        case .web: return "https://github.com/vapor/web-template"
+        case .auth: return "https://github.com/vapor/auth-template"
+        case .custom(let custom): return try expand(templateUrl: custom)
         }
     }
 
@@ -78,7 +79,7 @@ enum Template {
 
         // passed repo-owner/name-of-repo, otherwise, expect a full url
         guard components.count == 2 else { return url }
-        return "https://github.com/\(url).git"
+        return "https://github.com/\(url)"
     }
 }
 
