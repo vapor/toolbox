@@ -41,8 +41,8 @@ struct New: Command {
 
         // used to work on a git repository
         // outside of current path
-        let gitDir = "--git-dir=./\(name)/.git"
-        let workTree = "--work-tree=./\(name)"
+        let gitDir = "./\(name)/.git"
+        let workTree = "./\(name)"
 
         // Prioritize tag over branch
         let checkout = ctx.options["tag"] ?? ctx.options["branch"]
