@@ -134,7 +134,7 @@ struct CloudSignupRunner {
             organizationName: o,
             password: p
         )
-        ctx.console.output("Welcome to Cloud".consoleText(.info))
+        ctx.console.output("Welcome to Cloud.".consoleText())
     }
 
     func email() -> String {

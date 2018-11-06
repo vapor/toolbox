@@ -19,11 +19,11 @@ struct CloudSignup: Command {
 
     /// See `Command`.
     func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
-        let f = ctx.loadAndDisplay(.firstName)
-        let l = ctx.loadAndDisplay(.lastName)
-        let o = ctx.loadAndDisplay(.org)
-        let e = ctx.loadAndDisplay(.email)
-        let p = ctx.loadAndDisplay(.password, secure: true) 
+        let f = try ctx.loadAndDisplay(.firstName)
+        let l = try ctx.loadAndDisplay(.lastName)
+        let o = try ctx.loadAndDisplay(.org)
+        let e = try ctx.loadAndDisplay(.email)
+        let p = try ctx.loadAndDisplay(.password, secure: true)
 
         let api = UserApi(on: ctx.container)
         let user = api.signup(
@@ -40,14 +40,16 @@ struct CloudSignup: Command {
 }
 
 extension CommandContext {
-    func loadAndDisplay(_ opt: CommandOption, secure: Bool = false) -> String {
-        let val = load(opt, secure: secure)
-        display(.firstName, value: val)
+    func loadAndDisplay(_ opt: CommandOption, secure: Bool = false) throws -> String {
+        let val = load(opt, secure: secure).trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !val.isEmpty else { throw "No value entered for \(opt.name)" }
+        display(opt, value: val, secure: secure)
         return val
     }
 
-    func display(_ opt: CommandOption, value: String) {
+    func display(_ opt: CommandOption, value: String, secure: Bool) {
         console.output(opt.name.consoleText(.info), newLine: false)
-        console.output(": " + value.consoleText())
+        let text = secure ? "*****" : value.consoleText()
+        console.output(": " + text)
     }
 }
