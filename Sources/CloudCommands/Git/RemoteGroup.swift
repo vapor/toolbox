@@ -82,9 +82,16 @@ struct RemoteSet: Command {
             ctx.console.output("Cloud repository configured.")
             // TODO:
             // Load environments and push branches?
+            ctx.console.pushEphemeral()
             let push = ctx.console.confirm("Would you like to push to now?")
+            ctx.console.popEphemeral()
             guard push else { return }
+
+            ctx.console.pushEphemeral()
+            ctx.console.output("Pushing `master` to cloud...")
             try Git.pushCloud(branch: "master")
+            ctx.console.popEphemeral()
+            ctx.console.output("Pushed `master` to cloud.")
         }
     }
 
