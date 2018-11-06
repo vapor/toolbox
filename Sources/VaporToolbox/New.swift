@@ -24,7 +24,7 @@ struct New: Command {
     /// See `Command`.
     var help: [String] = [
         "Creates a new vapor application from a template.",
-        "use vapor new NameOfYourApp",
+        "use `vapor new NameOfYourApp`",
     ]
 
     func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
@@ -34,10 +34,10 @@ struct New: Command {
 
         // Cloning
         ctx.console.pushEphemeral()
-        ctx.console.info("Cloning `\(gitUrl)`...")
+        ctx.console.output("Cloning `\(gitUrl)`...".consoleText())
         let _ = try Git.clone(repo: gitUrl, toFolder: name)
         ctx.console.popEphemeral()
-        ctx.console.info("Cloned `\(gitUrl)`.")
+        ctx.console.output("Cloned `\(gitUrl)`.".consoleText())
 
         // used to work on a git repository
         // outside of current path
