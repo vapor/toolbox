@@ -68,8 +68,22 @@ struct New: Command {
         )
         ctx.console.output("Initialized project.")
 
-        // configure cloud?
-        return ctx.done
+        // print the Droplet
+        return try PrintDroplet().run(using: ctx).flatMap {
+            let info = [
+                "Project \"\(name)\" has been created.",
+                "Type `cd \(name)` to enter the project directory.",
+                "Use `vapor cloud deploy` to host your project for free!",
+                "Enjoy!",
+                "",
+            ]
+
+            ctx.console.center(info).forEach { line in
+                ctx.console.output(line.consoleText())
+            }
+            return ctx.done
+        }
+
     }
 
 }
