@@ -31,8 +31,13 @@ struct New: Command {
         let name = try ctx.argument("name")
         let template = ctx.template()
         let gitUrl = try template.fullUrl()
-        let cloneOutput = try Git.clone(repo: gitUrl, toFolder: name)
-        ctx.console.output(cloneOutput.consoleText(), newLine: true)
+
+        // Cloning
+        ctx.console.pushEphemeral()
+        ctx.console.info("Cloning `\(gitUrl)`...")
+        let _ = try Git.clone(repo: gitUrl, toFolder: name)
+        ctx.console.popEphemeral()
+        ctx.console.info("Cloned `\(gitUrl)`.")
 
         // used to work on a git repository
         // outside of current path
@@ -42,20 +47,28 @@ struct New: Command {
         // Prioritize tag over branch
         let checkout = ctx.options["tag"] ?? ctx.options["branch"]
         if let checkout = checkout {
-            ctx.console.output("Checking out \(checkout).".consoleText())
-            let checkoutOutput = try Git.checkout(
+            let _ = try Git.checkout(
                 gitDir: gitDir,
                 workTree: workTree,
                 checkout: checkout
             )
-            ctx.console.output(checkoutOutput.consoleText(), newLine: true)
+            ctx.console.output("Checked out `\(checkout)`.".consoleText())
         }
 
         // clear existing git history
         try Shell.delete("./\(name)/.git")
-        let initOutput = try Git.create(gitDir: gitDir)
-        ctx.console.output(initOutput.consoleText())
+        let _ = try Git.create(gitDir: gitDir)
+        ctx.console.output("Created git repository.")
 
+        // initialize
+        try Git.commit(
+            gitDir: gitDir,
+            workTree: workTree,
+            msg: "Created new vapor project from template \(gitUrl)"
+        )
+        ctx.console.output("Initialized project.")
+
+        // configure cloud?
         return ctx.done
     }
 

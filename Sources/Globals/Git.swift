@@ -12,6 +12,13 @@ public struct Git {
         return try run(gitDir, "init")
     }
 
+    public static func commit(gitDir: String, workTree: String, msg: String) throws {
+        let gitDir = "--git-dir=\(gitDir)"
+        let workTree = "--work-tree=\(workTree)"
+        try run(gitDir, workTree, "add", ".")
+        try run(gitDir, workTree, "commit", "-m", msg)
+    }
+
     public static func clone(repo: String, toFolder folder: String) throws -> String {
         return try run("clone", repo, folder)
     }
