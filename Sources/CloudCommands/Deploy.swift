@@ -170,7 +170,6 @@ extension AuthorizedRunner {
         do {
             let (ahead, behind) = try Git.branch(branch, matchesRemote: "cloud")
             guard ahead || behind else { return }
-
             var prompt = "".consoleText()
             if ahead && behind {
                 prompt += "Local branch "
@@ -215,7 +214,7 @@ extension AuthorizedRunner {
             // other branches can't have uncommitted changes
             let isClean = try Git.isClean()
             if !isClean {
-                var prompt = "\(branch) has uncommitted changes.".consoleText()
+                var prompt = "Branch `\(branch)` has uncommitted changes.".consoleText(.warning)
                 prompt += "\n"
                 prompt += "Continue?"
                 guard ctx.console.confirm(prompt) else { throw "cancelled" }
@@ -255,15 +254,17 @@ struct CloudDeployRunner: AuthorizedRunner {
         let env = try loadEnv(for: app)
         let branch = try loadBranch(with: env, cloudAction: "deploy")
 
-        var envAndBranch = env.and(branch)
         // If we should push first, insert push operation
+        let operation: Future<Void>
         if ctx.flag(.push) {
             let push = try CloudPushRunner(ctx: ctx)
-            envAndBranch = branch.map(push.push).flatMap { envAndBranch }
+            operation = branch.map(push.push)
+        } else {
+            operation = Future.map(on: ctx.container) { }
         }
 
         // Deploy
-        let deploy = envAndBranch.flatMap(createDeploy)
+        let deploy = operation.flatMap { env.and(branch).flatMap(self.createDeploy) }
         return deploy.flatMap(monitor)
     }
 
@@ -283,7 +284,7 @@ struct CloudDeployRunner: AuthorizedRunner {
         }
     }
 
-    private func createDeploy(val: (env: CloudEnv, branch: String)) throws -> Future<Activity> {
+    private func createDeploy(_ val: (env: CloudEnv, branch: String)) throws -> Future<Activity> {
         return try val.env.deploy(branch: val.branch, with: token, on: ctx.container)
     }
 }
@@ -314,7 +315,6 @@ struct CloudPushRunner: AuthorizedRunner {
         let app = try loadApp()
         let env = try loadEnv(for: app)
         let branch = try loadBranch(with: env, cloudAction: "push")
-
         // Deploy
         return branch.map(push)
     }
@@ -323,31 +323,11 @@ struct CloudPushRunner: AuthorizedRunner {
         // TODO: Look for uncommitted changes
         guard  try Git.isCloudConfigured() else { throw "Cloud remote not configured." }
         ctx.console.pushEphemeral()
-        ctx.console.output("Pushing \(branch)...".consoleText(.info))
+        ctx.console.output("Pushing \(branch)...".consoleText())
         let force = ctx.flag(.force)
         try Git.pushCloud(branch: branch, force: force)
         ctx.console.popEphemeral()
-        ctx.console.output("Pushed \(branch).".consoleText(.info))
-    }
-
-    private func monitor(_ activity: Activity) throws -> Future<Void> {
-        ctx.console.output("Connecting to deploy...")
-        return activity.listen(on: ctx.container) { update in
-            switch update {
-            case .connected:
-                // clear connecting
-                self.ctx.console.clear(.line)
-                self.ctx.console.output("Connected to deploy.")
-            case .message(let msg):
-                self.ctx.console.output(msg.consoleText())
-            case .close:
-                self.ctx.console.output("Disconnected.")
-            }
-        }
-    }
-
-    private func createDeploy(val: (env: CloudEnv, branch: String)) throws -> Future<Activity> {
-        return try val.env.deploy(branch: val.branch, with: token, on: ctx.container)
+        ctx.console.output("Pushed \(branch).".consoleText())
     }
 }
 

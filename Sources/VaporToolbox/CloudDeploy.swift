@@ -168,7 +168,7 @@ struct CloudDeployRunner {
         if currentBranch == branch {
             let isClean = try Git.isClean()
             if !isClean {
-                var prompt = "\(branch) has uncommitted changes.".consoleText()
+                var prompt = "Branch `\(branch)` has uncommitted changes.".consoleText(.warning)
                 prompt += "\n"
                 prompt += "Continue?"
                 guard ctx.console.confirm(prompt) else { throw "cancelled" }
