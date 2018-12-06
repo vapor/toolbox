@@ -1,4 +1,5 @@
 import Vapor
+import Globals
 
 /// Cleans temporary files created by Xcode and SPM.
 struct CleanCommand: Command {

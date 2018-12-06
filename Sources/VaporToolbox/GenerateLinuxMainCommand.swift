@@ -1,4 +1,5 @@
 import Vapor
+import Globals
 import LinuxTestsGeneration
 
 /// Cleans temporary files created by Xcode and SPM.
