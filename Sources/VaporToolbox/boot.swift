@@ -13,7 +13,7 @@ public func boot() -> Future<Application> {
     commands.use(PrintDroplet(), as: "drop")
 
     // for running quick exec tests
-    commands.use(Test(), as: "test")
+//    commands.use(Test(), as: "test")
     services.register(commands)
 
     return Application.asyncBoot(services: services)
