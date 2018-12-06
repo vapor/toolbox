@@ -14,6 +14,7 @@ public func boot() -> Future<Application> {
 
     // for running quick exec tests
     commands.use(Test(), as: "test")
+    commands.use(XcodeCommand(), as: "xcode")
     services.register(commands)
 
     return Application.asyncBoot(services: services)
