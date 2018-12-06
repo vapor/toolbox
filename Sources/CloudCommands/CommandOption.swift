@@ -5,41 +5,41 @@ extension CommandOption {
         name: "email",
         short: "e",
         default: nil,
-        help: ["The email to use."]
+        help: ["the email to use."]
     )
 
     static let password: CommandOption = .value(
         name: "password",
         short: "p",
         default: nil,
-        help: ["The password to use."]
+        help: ["the password to use."]
     )
 
     static let firstName: CommandOption = .value(
         name: "first-name",
         short: "f",
         default: nil,
-        help: ["Your first name."]
+        help: ["your first name."]
     )
 
     static let lastName: CommandOption = .value(
         name: "last-name",
         short: "l",
         default: nil,
-        help: ["Your last name."]
+        help: ["your last name."]
     )
 
     static let org: CommandOption = .value(
         name: "org",
         short: "o",
         default: nil,
-        help: ["Organization name to use."]
+        help: ["organization name to use."]
     )
 
     static let all: CommandOption = .flag(
         name: "all",
         short: "a",
-        help: ["Include more complete data."]
+        help: ["include more complete data."]
     )
 }
 
@@ -49,7 +49,7 @@ extension CommandOption {
         short: "a",
         default: nil,
         help: [
-            "The slug associated with your app."
+            "the slug associated with your app."
         ]
     )
     static let env: CommandOption = .value(
@@ -57,7 +57,7 @@ extension CommandOption {
         short: "e",
         default: nil,
         help: [
-            "The environment to use."
+            "the environment to use."
         ]
     )
     static let branch: CommandOption = .value(
@@ -65,7 +65,7 @@ extension CommandOption {
         short: "b",
         default: nil,
         help: [
-            "The branch to use. If different than default."
+            "the branch to use. If different than default."
         ]
     )
 
@@ -73,9 +73,9 @@ extension CommandOption {
         name: "force",
         short: "f",
         help: [
-            "Force the operation.",
-            "You WILL lose data.",
-            "This action is irreversible.",
+            "force the operation.",
+            "you WILL lose data.",
+            "this action is irreversible.",
         ]
     )
 
@@ -83,7 +83,7 @@ extension CommandOption {
         name: "push",
         short: "p",
         help: [
-            "Push to cloud as well."
+            "push to cloud as well."
         ]
     )
 }
@@ -92,19 +92,19 @@ extension CommandOption {
         name: "readable-name",
         short: "n",
         default: nil,
-        help: ["The readable name to give your key."]
+        help: ["the readable name to give your key."]
     )
     static let path: CommandOption = .value(
         name: "path",
         short: "p",
         default: nil,
-        help: ["A custom path to they public key that should be pushed."]
+        help: ["a custom path to they public key that should be pushed."]
     )
     static let key: CommandOption = .value(
         name: "key",
         short: "k",
         default: nil,
-        help: ["Use this to pass the contents of your public key directly."]
+        help: ["use this to pass the contents of your public key directly."]
     )
 }
 

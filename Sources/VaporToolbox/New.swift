@@ -9,21 +9,21 @@ struct New: Command {
     /// See `Command`.
     var options: [CommandOption] = [
         .value(name: "template", short: "t", default: nil, help: [
-            "A specific template to use.",
+            "a specific template to use.",
             "-t repo/template for github templates",
             "-t full-url-here.git for non github templates",
             "-t web to create a new web app",
             "-t auth to create a new authenticated API app",
             "-t api (default) to create a new API"
         ]),
-        .value(name: "tag", short: nil, default: nil, help: ["A specific tag to use."]),
-        .value(name: "branch", short: "b", default: nil, help: ["A specific brach to use."]),
+        .value(name: "tag", short: nil, default: nil, help: ["a specific tag to use."]),
+        .value(name: "branch", short: "b", default: nil, help: ["a specific brach to use."]),
 
     ]
 
     /// See `Command`.
     var help: [String] = [
-        "Creates a new vapor application from a template.",
+        "creates a new vapor application from a template.",
         "use `vapor new NameOfYourApp`",
     ]
 
@@ -34,10 +34,10 @@ struct New: Command {
 
         // Cloning
         ctx.console.pushEphemeral()
-        ctx.console.output("Cloning `\(gitUrl)`...".consoleText())
+        ctx.console.output("cloning `\(gitUrl)`...".consoleText())
         let _ = try Git.clone(repo: gitUrl, toFolder: name)
         ctx.console.popEphemeral()
-        ctx.console.output("Cloned `\(gitUrl)`.".consoleText())
+        ctx.console.output("cloned `\(gitUrl)`.".consoleText())
 
         // used to work on a git repository
         // outside of current path
@@ -52,29 +52,29 @@ struct New: Command {
                 workTree: workTree,
                 checkout: checkout
             )
-            ctx.console.output("Checked out `\(checkout)`.".consoleText())
+            ctx.console.output("checked out `\(checkout)`.".consoleText())
         }
 
         // clear existing git history
         try Shell.delete("./\(name)/.git")
         let _ = try Git.create(gitDir: gitDir)
-        ctx.console.output("Created git repository.")
+        ctx.console.output("created git repository.")
 
         // initialize
         try Git.commit(
             gitDir: gitDir,
             workTree: workTree,
-            msg: "Created new vapor project from template `\(gitUrl)`"
+            msg: "created new vapor project from template `\(gitUrl)`"
         )
-        ctx.console.output("Initialized project.")
+        ctx.console.output("initialized project.")
 
         // print the Droplet
         return try PrintDroplet().run(using: ctx).flatMap {
             let info = [
-                "Project \"\(name)\" has been created.",
-                "Type `cd \(name)` to enter the project directory.",
-                "Use `vapor cloud deploy` and put your project LIVE!",
-                "Enjoy!",
+                "project \"\(name)\" has been created.",
+                "type `cd \(name)` to enter the project directory.",
+                "use `vapor cloud deploy` and put your project LIVE!",
+                "enjoy!",
             ]
 
             //ctx.console.center(info)
