@@ -63,6 +63,7 @@ struct Logs: Command {
     var options: [CommandOption] = [
         .app,
         .env,
+        .lines,
         .showTimestamps,
     ]
 
@@ -113,7 +114,8 @@ struct LogsRunner: AuthorizedRunner {
                 // pod -- a specific pod
                 // timestamps -- whether to include timestamps
                 let timestamps = self.ctx.flag(.showTimestamps)
-                let query = "lines=200&timestamps=\(timestamps.description)"
+                let lines = self.ctx.options.value(.lines) ?? "200"
+                let query = "lines=\(lines)&timestamps=\(timestamps.description)"
                 let list = logs.list(query: query)
                 return list.map { list in
                     for log in list {
