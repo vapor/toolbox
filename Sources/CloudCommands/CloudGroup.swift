@@ -1,4 +1,6 @@
 import Vapor
+import CloudAPI
+import Globals
 
 public struct CloudGroup: CommandGroup {
     public let commands: Commands = [
@@ -22,6 +24,9 @@ public struct CloudGroup: CommandGroup {
 
         // REMOTE
         "remote": RemoteGroup(),
+
+        // LOGS
+        "logs": Logs()
     ]
 
     public let options: [CommandOption] = []
@@ -47,5 +52,54 @@ public struct CloudGroup: CommandGroup {
         let centered = ctx.console.center(cloud)
         centered.map { $0.consoleText() } .forEach(ctx.console.output)
         return .done(on: ctx.container)
+    }
+}
+
+struct Logs: Command {
+
+    var arguments: [CommandArgument] = []
+
+    /// See `Command`.
+    var options: [CommandOption] = [
+        .app
+    ]
+
+    /// See `Command`.
+    var help: [String] = [
+        "get logs for your application."
+    ]
+
+    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
+        let runner = try LogsRunner(ctx: ctx)
+        return try runner.run()
+    }
+}
+
+struct LogsRunner: AuthorizedRunner {
+    let ctx: CommandContext
+    let token: Token
+
+    init(ctx: CommandContext) throws {
+        let token = try Token.load()
+
+        self.ctx = ctx
+        self.token = token
+    }
+
+    func run() throws -> Future<Void> {
+        let app = try loadApp()
+        let env = try loadEnv(for: app)
+        return env.flatMap { env in
+            let url = replicasUrl(with: env)
+            let access = CloudReplica.Access(
+                with: self.token,
+                baseUrl: url,
+                on: self.ctx.container
+            )
+            let replicas = access.list()
+            return replicas.map { replicas in
+                print("Got replicas: \(replicas)")
+            }
+        }
     }
 }

@@ -65,14 +65,14 @@ extension AuthorizedRunner {
     // Get App
 
     func loadApp() throws -> Future<CloudApp> {
-        let app = try getDeployApp()
+        let app = try loadCloudApp()
         app.success { app in
             self.ctx.console.output("App: " + app.name.consoleText() + ".")
         }
         return app
     }
 
-    private func getDeployApp() throws -> Future<CloudApp> {
+    private func loadCloudApp() throws -> Future<CloudApp> {
         let access = CloudApp.Access(with: token, on: ctx.container)
 
         if let slug = ctx.options.value(.app) {

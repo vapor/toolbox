@@ -73,7 +73,10 @@ extension ResourceAccess {
 
         let client = FoundationClient.default(on: container)
         let response = client.send(method, headers: headers, to: url, beforeSend: beforeSend)
-        return response
+        return response.map { response in
+//            print("Got response:\n\(response)\n\n***")
+            return response
+        }
     }
 }
 
