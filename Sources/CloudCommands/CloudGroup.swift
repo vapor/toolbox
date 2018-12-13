@@ -61,7 +61,9 @@ struct Logs: Command {
 
     /// See `Command`.
     var options: [CommandOption] = [
-        .app
+        .app,
+        .env,
+        .showTimestamps,
     ]
 
     /// See `Command`.
@@ -97,8 +99,30 @@ struct LogsRunner: AuthorizedRunner {
                 on: self.ctx.container
             )
             let replicas = access.list()
-            return replicas.map { replicas in
-                print("Got replicas: \(replicas)")
+            return replicas.flatMap { replicas in
+                let replicas = replicas.filter { $0.slug == "web" }
+                guard replicas.count == 1 else {
+                    throw "there should only ever be a single web type replica"
+                }
+                let web = replicas[0]
+
+                let logsEndpoint = logsUrl(with: web)
+                let logs = CloudLogs.Access(with: self.token, baseUrl: logsEndpoint, on: self.ctx.container)
+                // query
+                // lines -- default 200
+                // pod -- a specific pod
+                // timestamps -- whether to include timestamps
+                let timestamps = self.ctx.flag(.showTimestamps)
+                let query = "lines=200&timestamps=\(timestamps.description)"
+                let list = logs.list(query: query)
+                return list.map { list in
+                    for log in list {
+                        self.ctx.console.output("pod: ", newLine: false)
+                        self.ctx.console.output(log.name.consoleText(.info))
+                        let output = log.logs + "\n"
+                        self.ctx.console.output(output.consoleText())
+                    }
+                }
             }
         }
     }

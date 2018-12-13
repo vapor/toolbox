@@ -25,6 +25,13 @@ public func replicasUrl(with env: CloudEnv) -> String {
         + "replicas"
 }
 
+public func logsUrl(with replica: CloudReplica) -> String {
+    return appsUrl.trailSlash
+        + "replicas".trailSlash
+        + replica.id.uuidString.trailSlash
+        + "logs"
+}
+
 let appsUrl = cloudBaseUrl.trailSlash + "apps"
 let environmentsUrl = appsUrl.trailSlash + "environments"
 let organizationsUrl = authUrl.trailSlash + "organizations"

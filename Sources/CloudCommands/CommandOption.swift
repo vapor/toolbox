@@ -52,6 +52,12 @@ extension CommandOption {
             "the slug associated with your app."
         ]
     )
+    static let showTimestamps: CommandOption = .flag(
+        name: "show-timestamps",
+        short: "t",
+        help: ["if passed, should show timestamps"]
+    )
+
     static let env: CommandOption = .value(
         name: "env",
         short: "e",

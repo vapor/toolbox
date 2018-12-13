@@ -11,3 +11,8 @@ public struct CloudReplica: Content {
     public let updatedAt: Date
     public let createdAt: Date
 }
+
+public struct CloudLogs: Content {
+    public let name: String
+    public let logs: String
+}
