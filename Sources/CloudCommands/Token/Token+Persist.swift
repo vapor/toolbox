@@ -5,12 +5,32 @@ import Foundation
 extension Token {
     /// Save cloud Token
     func save() throws {
+        // ensure vapor directory already exists
+        try makeVaporDirectoryIfNecessary()
+
+        // create it
         let path = try Token.filePath()
         let data = try JSONEncoder().encode(self)
         let create = FileManager.default.createFile(
             atPath: path, contents: data, attributes: nil
         )
         guard create else { throw "there was a problem svaing the token." }
+    }
+
+    private func makeVaporDirectoryIfNecessary() throws {
+        let vaporDirectory = try Shell.homeDirectory().finished(with: "/") + ".vapor"
+        var isDirectory: ObjCBool = false
+        let exists = FileManager.default
+            .fileExists(atPath: vaporDirectory, isDirectory: &isDirectory)
+        if exists && !isDirectory.boolValue {
+            throw "found unexpected file at ~/.vapor"
+        }
+        guard !exists else { return }
+        try FileManager.default.createDirectory(
+            atPath: vaporDirectory,
+            withIntermediateDirectories: false,
+            attributes: nil
+        )
     }
 
     /// Load Cloud Token
