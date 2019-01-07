@@ -18,11 +18,11 @@ struct XcodeCommand: Command {
     var options: [CommandOption] = []
 
     /// See `Command`.
-    var help: [String] = ["generates Xcode projects for SPM packages."]
+    var help: [String] = ["generates xcode projects for spm packages."]
 
     /// See `Command`.
     func run(using ctx: CommandContext) throws -> Future<Void> {
-        ctx.console.output("generating Xcodeproj...")
+        ctx.console.output("generating xcodeproj...")
         let generateProcess = Process.asyncExecute(
             "swift",
             ["package", "generate-xcodeproj"],
@@ -49,7 +49,7 @@ struct XcodeCommand: Command {
                 try Shell.bash("open *.xcodeproj")
             } else {
                 ctx.console.output(
-                    "failed to generate Xcodeproj.",
+                    "failed to generate xcodeproj.",
                     style: .error,
                     newLine: true
                 )
