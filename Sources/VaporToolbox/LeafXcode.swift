@@ -1,5 +1,6 @@
 import Vapor
 import Globals
+import Leaf
 
 // TODO: Xcode Additions
 // automatically add xcconfig
@@ -24,9 +25,20 @@ struct LeafXcodeCommand: Command {
     func run(using ctx: CommandContext) throws -> Future<Void> {
         ctx.console.output("loading leaf file")
         let file = try Shell.readFile(path: "~/Desktop/test-leaf-file.swift")
-        ctx.console.output("got file:")
-        ctx.console.output(file.consoleText())
-        return .done(on: ctx.container)
+
+        let config = LeafConfig(tags: .default(), viewsDir: "./", shouldCache: false)
+        let renderer = LeafRenderer(config: config, using: ctx.container)
+        let data = Data(bytes: file.utf8)
+        let rendered = renderer.render(template: data, [String: String](), userInfo: ["name": "logan"])
+        return rendered.map { view in
+            print(view)
+            let str = String(bytes: view.data, encoding: .utf8)
+            print(str)
+            ctx.console.output("got file:")
+            ctx.console.output(file.consoleText())
+        }
+//        return .done(on: ctx.container)
+
 //        ctx.console.output("generating xcodeproj...")
 //        let generateProcess = Process.asyncExecute(
 //            "swift",
