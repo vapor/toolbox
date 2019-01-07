@@ -29,7 +29,7 @@ struct LeafXcodeCommand: Command {
         let config = LeafConfig(tags: .default(), viewsDir: "./", shouldCache: false)
         let renderer = LeafRenderer(config: config, using: ctx.container)
         let data = Data(bytes: file.utf8)
-        let rendered = renderer.render(template: data, ["name": "context"], userInfo: ["name": "logan"])
+        let rendered = renderer.render(template: data, ["name": "context"])
         return rendered.map { view in
             print(view)
             let str = String(bytes: view.data, encoding: .utf8)
