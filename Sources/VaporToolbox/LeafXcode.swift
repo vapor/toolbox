@@ -15,6 +15,22 @@ struct Manifest: Content {
     let dependencies: [Dependency] = []
 }
 
+let dependencyTree: [String: Manifest.Dependency] = [
+    "vapor": .init(
+        gitUrl: "https://github.com/vapor/vapor.git",
+        version: "3.0.0",
+        importTargets: ["Vapor"],
+        comment: "💧 a server-side Swift web framework."
+    ),
+    "leaf": .init(
+        gitUrl: "https://github.com/vapor/leaf.git",
+        version: "3.0.0",
+        importTargets: ["leaf"],
+        comment: "🍃 a templating language built in swift."
+    )
+]
+
+
 
 let vaporDependency = NewProjectConfig.Dependency(
     gitUrl: "https://github.com/vapor/vapor.git",
@@ -136,6 +152,27 @@ struct LeafXcodeCommand: Command {
 //                )
 //            }
 //        }
+    }
+
+    private func buildManifest(with ctx: CommandContext) throws -> Future<Manifest> {
+
+        fatalError()
+    }
+
+    private func dependencies(with ctx: CommandContext) throws -> [Manifest.Dependency] {
+        let save = "save"
+        var all = dependencyTree.keys.sorted { $0 < $1 }
+        all.append(save)
+
+        var choices = [String]()
+        while all.count > 0 {
+            let choice = ctx.console.choose("which dependencies?", from: all)
+            all.removeAll { $0 == choice}
+            if choice == save { break }
+            choices.append(choice)
+        }
+
+        return choices.compactMap { dependencyTree[$0] }
     }
 }
 
