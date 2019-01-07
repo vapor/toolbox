@@ -6,7 +6,7 @@ import Leaf
 let vaporDependency = NewProjectConfig.Dependency(
     gitUrl: "https://github.com/vapor/vapor.git",
     version: "3.0.0",
-    includes: ["Vapor"],
+    includes: ["Vapor", "TesterLongName"],
     comment: "💧 A server-side Swift web framework."
 )
 
