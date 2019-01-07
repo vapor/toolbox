@@ -2,6 +2,19 @@ import Vapor
 import Globals
 import Leaf
 
+struct Manifest: Content {
+    struct Dependency: Content {
+        let gitUrl: String
+        let version: String
+        let importTargets: [String]
+        let comment: String?
+    }
+
+    let swiftToolsVersion: String = "4.0"
+    let packageName: String = "VaporApp"
+    let dependencies: [Dependency] = []
+}
+
 
 let vaporDependency = NewProjectConfig.Dependency(
     gitUrl: "https://github.com/vapor/vapor.git",
