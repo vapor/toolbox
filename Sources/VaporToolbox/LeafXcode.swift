@@ -102,7 +102,8 @@ struct LeafXcodeCommand: Command {
 
     /// See `Command`.
     func run(using ctx: CommandContext) throws -> Future<Void> {
-        return try testPackageSwiftLoad(ctx: ctx)
+        let deps = try dependencies(with: ctx)
+            return try testPackageSwiftLoad(ctx: ctx)
         ctx.console.output("loading leaf file")
         let file = try Shell.readFile(path: "~/Desktop/test-leaf-file.swift")
 
@@ -160,15 +161,15 @@ struct LeafXcodeCommand: Command {
     }
 
     private func dependencies(with ctx: CommandContext) throws -> [Manifest.Dependency] {
-        let save = "save"
+        let done = "done"
         var all = dependencyTree.keys.sorted { $0 < $1 }
-        all.append(save)
+        all.append(done)
 
         var choices = [String]()
         while all.count > 0 {
-            let choice = ctx.console.choose("which dependencies?", from: all)
+            let choice = ctx.console.choose("add dependencies?", from: all)
             all.removeAll { $0 == choice}
-            if choice == save { break }
+            if choice == done { break }
             choices.append(choice)
         }
 
