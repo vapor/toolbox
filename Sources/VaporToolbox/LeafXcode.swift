@@ -244,11 +244,11 @@ struct LeafXcodeCommand: Command {
         }
 
         // load dependencies
-        let deps =  try dependencies(with: ctx)
+//        let deps =  try dependencies(with: ctx)
         return Manifest(
             swiftToolsVersion: tools,
             packageName: name,
-            dependencies: deps
+            dependencies: []
         )
     }
 
