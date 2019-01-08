@@ -189,7 +189,7 @@ struct LeafXcodeCommand: Command {
         let data = Data(bytes: file.utf8)
         let rendered = renderer.render(template: data, mani)
         return rendered.map { view in
-            let str = String(bytes: view.data, encoding: .utf8)!
+            let str = String(bytes: view.data, encoding: .utf8)!.replacingOccurrences(of: "\"", with: "\\\"")
             // TODO: Do w/ file manager more safely
             try Shell.bash("rm -rf \(manifestPath)")
             try Shell.bash("echo \"\(str)\" >> \(manifestPath)")
