@@ -170,11 +170,17 @@ struct LeafXcodeCommand: Command {
     /// See `Command`.
     func run(using ctx: CommandContext) throws -> Future<Void> {
         let mani = try buildManifest(with: ctx)
+        try clone(
+            gitUrl: "https://github.com/vapor/web-template",
+            name: mani.packageName,
+            ctx: ctx
+        )
+
         // clone git repo
         // run leaf processor on ./clone-to-name/Package.swift
         // should be able to build this project and deploy it to vapor cloud, as is
 //        let clone =
-        let file = try Shell.readFile(path: "~/Desktop/delete-me/Package.swift")
+        let file = try Shell.readFile(path: "./\(mani.packageName)/Package.swift")
 
         let config = LeafConfig(tags: .default(), viewsDir: "./", shouldCache: false)
         let renderer = LeafRenderer(config: config, using: ctx.container)
@@ -189,6 +195,43 @@ struct LeafXcodeCommand: Command {
         }
     }
 
+    func clone(gitUrl: String, name: String, ctx: CommandContext) throws {
+        // Cloning
+        ctx.console.pushEphemeral()
+        ctx.console.output("cloning `\(gitUrl)`...".consoleText())
+        let _ = try Git.clone(repo: gitUrl, toFolder: name)
+        ctx.console.popEphemeral()
+        ctx.console.output("cloned `\(gitUrl)`.".consoleText())
+
+        // used to work on a git repository
+        // outside of current path
+        let gitDir = "./\(name)/.git"
+        let workTree = "./\(name)"
+
+        // Prioritize tag over branch
+        let checkout = ctx.options["tag"] ?? ctx.options["branch"]
+        if let checkout = checkout {
+            let _ = try Git.checkout(
+                gitDir: gitDir,
+                workTree: workTree,
+                checkout: checkout
+            )
+            ctx.console.output("checked out `\(checkout)`.".consoleText())
+        }
+
+        // clear existing git history
+        try Shell.delete("./\(name)/.git")
+        let _ = try Git.create(gitDir: gitDir)
+        ctx.console.output("created git repository.")
+
+        // initialize
+        try Git.commit(
+            gitDir: gitDir,
+            workTree: workTree,
+            msg: "created new vapor project from template `\(gitUrl)`"
+        )
+        ctx.console.output("initialized project.")
+    }
 
 
     private func buildManifest(with ctx: CommandContext) throws -> Manifest {
