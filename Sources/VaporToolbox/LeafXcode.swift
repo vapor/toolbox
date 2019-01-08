@@ -2,6 +2,7 @@ import Vapor
 import Globals
 import Leaf
 
+let swiftToolsVersionDefault = "4.0"
 struct Manifest: Content {
     struct Dependency: Content {
         let gitUrl: String
@@ -10,9 +11,19 @@ struct Manifest: Content {
         let comment: String?
     }
 
-    let swiftToolsVersion: String = "4.0"
-    let packageName: String = "VaporApp"
-    let dependencies: [Dependency] = []
+    let swiftToolsVersion: String
+    let packageName: String
+    let dependencies: [Dependency]
+
+    init(
+        swiftToolsVersion: String,
+        packageName: String = "VaporApp",
+        dependencies: [Dependency]
+    ) {
+        self.swiftToolsVersion = swiftToolsVersion
+        self.packageName = packageName
+        self.dependencies = dependencies
+    }
 }
 
 let dependencyTree: [String: Manifest.Dependency] = [
@@ -102,7 +113,8 @@ struct LeafXcodeCommand: Command {
 
     /// See `Command`.
     func run(using ctx: CommandContext) throws -> Future<Void> {
-        let deps = try dependencies(with: ctx)
+        let mani = try buildManifest(with: ctx)
+//        let deps = try dependencies(with: ctx)
             return try testPackageSwiftLoad(ctx: ctx)
         ctx.console.output("loading leaf file")
         let file = try Shell.readFile(path: "~/Desktop/test-leaf-file.swift")
@@ -155,9 +167,21 @@ struct LeafXcodeCommand: Command {
 //        }
     }
 
-    private func buildManifest(with ctx: CommandContext) throws -> Future<Manifest> {
+    private func buildManifest(with ctx: CommandContext) throws -> Manifest {
+        var tools = ctx.console.ask(
+            "which swift tools version? (press enter to use \(swiftToolsVersionDefault))".consoleText()
+        )
+        if tools.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            tools = swiftToolsVersionDefault
+        }
 
-        fatalError()
+        // load dependencies
+        let deps =  try dependencies(with: ctx)
+        return Manifest(
+            swiftToolsVersion: tools,
+            packageName: "VaporApp",
+            dependencies: deps
+        )
     }
 
     private func dependencies(with ctx: CommandContext) throws -> [Manifest.Dependency] {
