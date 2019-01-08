@@ -112,7 +112,7 @@ struct LeafXcodeCommand: Command {
     var help: [String] = ["generates xcode projects for spm packages."]
 
     /// See `Command`.
-    func run(using ctx: CommandContext) throws -> Future<Void> {
+    func _run(using ctx: CommandContext) throws -> Future<Void> {
         let mani = try buildManifest(with: ctx)
 //        let deps = try dependencies(with: ctx)
             return try testPackageSwiftLoad(ctx: ctx)
@@ -167,7 +167,32 @@ struct LeafXcodeCommand: Command {
 //        }
     }
 
+    /// See `Command`.
+    func run(using ctx: CommandContext) throws -> Future<Void> {
+        let mani = try buildManifest(with: ctx)
+        // clone git repo
+        // run leaf processor on ./clone-to-name/Package.swift
+        // should be able to build this project and deploy it to vapor cloud, as is
+//        let clone =
+        let file = try Shell.readFile(path: "~/Desktop/delete-me/Package.swift")
+
+        let config = LeafConfig(tags: .default(), viewsDir: "./", shouldCache: false)
+        let renderer = LeafRenderer(config: config, using: ctx.container)
+        let data = Data(bytes: file.utf8)
+        let rendered = renderer.render(template: data, mani)
+        return rendered.map { view in
+            print(view)
+            let str = String(bytes: view.data, encoding: .utf8)
+            print(str!)
+            ctx.console.output("got file:")
+            ctx.console.output(file.consoleText())
+        }
+    }
+
+
+
     private func buildManifest(with ctx: CommandContext) throws -> Manifest {
+        let name = ctx.console.ask("project name")
         var tools = ctx.console.ask(
             "which swift tools version? (press enter to use \(swiftToolsVersionDefault))".consoleText()
         )
@@ -179,7 +204,7 @@ struct LeafXcodeCommand: Command {
         let deps =  try dependencies(with: ctx)
         return Manifest(
             swiftToolsVersion: tools,
-            packageName: "VaporApp",
+            packageName: name,
             dependencies: deps
         )
     }
@@ -218,3 +243,4 @@ func testPackageSwiftLoad(ctx: CommandContext) throws -> Future<Void> {
         ctx.console.output(file.consoleText())
     }
 }
+
