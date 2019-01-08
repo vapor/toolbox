@@ -176,20 +176,24 @@ struct LeafXcodeCommand: Command {
             ctx: ctx
         )
 
+        let manifestPath = "./\(mani.packageName)/Package.swift"
+
         // clone git repo
         // run leaf processor on ./clone-to-name/Package.swift
         // should be able to build this project and deploy it to vapor cloud, as is
 //        let clone =
-        let file = try Shell.readFile(path: "./\(mani.packageName)/Package.swift")
+        let file = try Shell.readFile(path: manifestPath)
 
         let config = LeafConfig(tags: .default(), viewsDir: "./", shouldCache: false)
         let renderer = LeafRenderer(config: config, using: ctx.container)
         let data = Data(bytes: file.utf8)
         let rendered = renderer.render(template: data, mani)
         return rendered.map { view in
-            print(view)
-            let str = String(bytes: view.data, encoding: .utf8)
-            print(str!)
+            let str = String(bytes: view.data, encoding: .utf8)!
+            // TODO: Do w/ file manager more safely
+            try Shell.bash("rm -rf \(manifestPath)")
+            try Shell.bash("echo \"\(str)\" >> \(manifestPath)")
+            print(str)
             ctx.console.output("got file:")
             ctx.console.output(file.consoleText())
         }
