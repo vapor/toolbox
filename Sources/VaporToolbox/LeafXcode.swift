@@ -171,7 +171,7 @@ struct LeafXcodeCommand: Command {
     func run(using ctx: CommandContext) throws -> Future<Void> {
         let mani = try buildManifest(with: ctx)
         try clone(
-            gitUrl: "https://github.com/vapor/web-template",
+            gitUrl: "https://github.com/loganwright/vapor-template",
             name: mani.packageName,
             ctx: ctx
         )
