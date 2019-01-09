@@ -8,15 +8,16 @@ let package = Package(
         .package(url: "https://github.com/vapor/vapor.git", from: "3.0.0"),
         .package(url: "https://github.com/tanner0101/swift-syntax", .branch("static")),
         .package(url: "https://github.com/vapor/leaf.git", from: "3.0.0"),
+        // ::vapor
     ],
     targets: [
         // All of the commands and logic that powers the Vapor toolbox
         .target(name: "VaporToolbox", dependencies: [
             "LinuxTestsGeneration",
-            "Vapor",
-            "CloudCommands",
-            "Globals",
-            "Leaf",
+           "Vapor",
+           "CloudCommands",
+           "Globals",
+           "Leaf",
         ]),
         .target(name: "LinuxTestsGeneration", dependencies: [
             "SwiftSyntax",
@@ -41,5 +42,3 @@ let package = Package(
         .target(name: "Executable", dependencies: ["VaporToolbox"]),
     ]
 )
-
-
