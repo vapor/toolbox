@@ -3,13 +3,53 @@ import Globals
 import Leaf
 
 let swiftToolsVersionDefault = "4.0"
+
+/*
+
+ {
+    "url": "https://github.com/vapor/fluent"
+    "name": "Fluent"
+ }
+
+ data
+ {
+ "database-name": String.self
+ }
+
+ maybe a template really just loads in all the associated files,
+ dependency
+
+ - configure.swift
+   import list
+   register provider
+   configure
+ source-files/ <<all the files to add>>
+ */
+struct Provider {
+    let url: String
+    let name: String
+
+}
+
+/*
+ Template Dependency:
+ - package dependency git import
+ - target imports
+ - fileset
+ - configure file additions
+ */
+//struct _Manifest: Content {
+//
+//    let swiftToolsVersion: String
+//    let packageName: String
+//
+//    let includeFluent: Bool
+//    let fluentDatabaseName: String
+//
+//    let includeLeaf:
+//}
+
 struct Manifest: Content {
-    struct Dependency: Content {
-        let gitUrl: String
-        let version: String
-        let importTargets: [String]
-        let comment: String?
-    }
 
     let swiftToolsVersion: String
     let packageName: String
@@ -23,6 +63,15 @@ struct Manifest: Content {
         self.swiftToolsVersion = swiftToolsVersion
         self.packageName = packageName
         self.dependencies = dependencies
+    }
+}
+
+extension Manifest {
+    struct Dependency: Content {
+        let gitUrl: String
+        let version: String
+        let importTargets: [String]
+        let comment: String?
     }
 }
 
@@ -170,13 +219,14 @@ struct LeafXcodeCommand: Command {
     /// See `Command`.
     func run(using ctx: CommandContext) throws -> Future<Void> {
         let mani = try buildManifest(with: ctx)
-        try clone(
-            gitUrl: "https://github.com/loganwright/vapor-template",
-            name: mani.packageName,
-            ctx: ctx
-        )
-
-        let manifestPath = "./\(mani.packageName)/Package.swift"
+//        try clone(
+//            gitUrl: "https://github.com/loganwright/vapor-template",
+//            name: mani.packageName,
+//            ctx: ctx
+//        )
+//
+//        let manifestPath = "./\(mani.packageName)/Package.swift"
+        let manifestPath = "/Users/loganwright/Desktop/delete-me/Package.swift"
 
         // clone git repo
         // run leaf processor on ./clone-to-name/Package.swift
@@ -190,9 +240,9 @@ struct LeafXcodeCommand: Command {
         let rendered = renderer.render(template: data, mani)
         return rendered.map { view in
             let str = String(bytes: view.data, encoding: .utf8)!.replacingOccurrences(of: "\"", with: "\\\"")
-            // TODO: Do w/ file manager more safely
-            try Shell.bash("rm -rf \(manifestPath)")
-            try Shell.bash("echo \"\(str)\" >> \(manifestPath)")
+//            // TODO: Do w/ file manager more safely
+//            try Shell.bash("rm -rf \(manifestPath)")
+//            try Shell.bash("echo \"\(str)\" >> \(manifestPath)")
             print(str)
             ctx.console.output("got file:")
             ctx.console.output(file.consoleText())

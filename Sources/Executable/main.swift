@@ -2,9 +2,6 @@ import Foundation
 import VaporToolbox
 import Vapor
 
-try testtt()
-throw "noooo"
-
 do {
     let app = try boot().wait()
     try app.run()
