@@ -29,61 +29,106 @@ struct SimpleTestCase {
     }
 }
 
+public func testtt() throws {
+    let manifest = "/Users/loganwright/Desktop/yoooooo/Package.swift"
+    let _ = try ManifestVisitor.processFile(at: manifest)
+}
 typealias SimplifiedTestSuite = [SimpleTestCase]
 
+func dump(_ syntax: Syntax) {
+    print("Type: \(type(of: syntax))")
+    if let token = syntax as? TokenSyntax {
+        print("Kind: \(token.tokenKind)")
+    }
+    print("Value:")
+    print("\(syntax)")
+}
 /// To properly generate the file, we can't simply process
 /// a single file, but rather need to process the
 /// module (and ideally dependencies) in its entirety to
 /// understand the file
+/*
+ Type: FunctionCallArgumentSyntax
+ Value:
+
+ dependencies: [
+ // vapor web framework
+ .package(url: "https://github.com/vapor/vapor.git", from: "3.0.0"),
+ ],
+
+ // NOTE Look into .label
+ .label
+ */
+
+/*
+ Type: ArrayExprSyntax
+ Value:
+ [
+ // vapor web framework
+ .package(url: "https://github.com/vapor/vapor.git", from: "3.0.0"),
+ ]
+
+ // NOTES
+ `.elements`
+ */
+
 class ManifestVisitor: SyntaxVisitor {
-    fileprivate private(set) var potentialTestCases: [ClassDeclSyntax] = []
-    fileprivate private(set) var potentialTestFunctions: [FunctionDeclSyntax] = []
-    fileprivate var _testSuite: TestSuite? = nil
+
+    override func visitPre(_ node: Syntax) {
+        defer { super.visitPre(node) }
+        dump(node)
+        print("***")
+    }
+//    override func visit(_ node: Syntax) {
+//        defer { super.visit(node) }
+//        print("Visited node: \n\(node)")
+//        print("")
+//    }
 
     override func visit(_ node: ClassDeclSyntax) {
         defer { super.visit(node) }
-        potentialTestCases.append(node)
+//        potentialTestCases.append(node)
     }
 
     override func visit(_ node: FunctionDeclSyntax) {
         defer { super.visit(node) }
 //        guard node.looksLikeTestFunction else { return }
-        potentialTestFunctions.append(node)
+//        potentialTestFunctions.append(node)
     }
 }
 
-extension Gatherer {
-    static func processFile(at url: String) throws -> Gatherer {
+extension ManifestVisitor {
+    static func processFile(at url: String) throws -> ManifestVisitor {
         let url = URL(fileURLWithPath: url)
         let sourceFile = try SyntaxTreeParser.parse(url)
-        let gatherer = Gatherer()
-        gatherer.visit(sourceFile)
-        return gatherer
+        let visitor = ManifestVisitor()
+        visitor.visit(sourceFile)
+        return visitor
     }
 }
-
-extension Gatherer {
-    fileprivate convenience init(potentialTestFunctions: [FunctionDeclSyntax], potentialTestCases: [ClassDeclSyntax]) {
-        fatalError()
-    }
-}
-
-extension Array where Element == Gatherer {
-    func merge() -> Gatherer {
-        fatalError()
-    }
-}
-
-extension Gatherer {
-    private func testCases() -> [ClassDeclSyntax] {
-        fatalError()
-    }
-
-    private func tests() -> [FunctionDeclSyntax] {
-        fatalError()
-    }
-
-    func makeTestSuite() throws -> TestSuite {
-        fatalError()
-    }
-}
+//
+//extension Gatherer {
+//    fileprivate convenience init(potentialTestFunctions: [FunctionDeclSyntax], potentialTestCases: [ClassDeclSyntax]) {
+//        fatalError()
+//    }
+//}
+//
+//extension Array where Element == Gatherer {
+//    func merge() -> Gatherer {
+//        fatalError()
+//    }
+//}
+//
+//extension Gatherer {
+//    private func testCases() -> [ClassDeclSyntax] {
+//        fatalError()
+//    }
+//
+//    private func tests() -> [FunctionDeclSyntax] {
+//        fatalError()
+//    }
+//
+//    func makeTestSuite() throws -> TestSuite {
+//        fatalError()
+//    }
+//}
