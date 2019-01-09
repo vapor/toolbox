@@ -5,11 +5,26 @@ import Leaf
 let swiftToolsVersionDefault = "4.0"
 
 /*
+ - leaf
+ - fluent<all-dbs>
+ - leaf + fluent
+ - fluent<all-dbs> + cloud
+ */
+
+/*
+ What if instead, we just keep templates as they are, but additionally,
+ we allow leaf executions, and they can define a `template.json` w/
+ defaults that we would allow to be overridden automatically through
+ CLI questions, ie: for Fluent, we could have a single template and
+ insert the specific database type.
+ */
+/*
 
  {
-    "url": "https://github.com/vapor/fluent"
+    "url": "https://github.com/vapor/fluent-#(fluent-db-name).git"
     "name": "Fluent"
  }
+ provider.swift
 
  data
  {
