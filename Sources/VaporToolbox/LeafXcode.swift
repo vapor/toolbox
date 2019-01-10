@@ -234,8 +234,22 @@ extension FileManager {
     }
 
     func allFiles(at path: String) throws -> [String] {
+        let path = path.finished(with: "/")
         guard isDirectory(path: path) else { throw path + " is not a directory." }
-        return try contentsOfDirectory(atPath: path)
+
+        let excludes = [
+            ".git",
+            ".gitignore",
+            ".DS_Store"
+        ]
+        let paths = try contentsOfDirectory(atPath: path)
+            .filter { !excludes.contains($0) }
+            .map { path + $0 }
+
+        return try paths.reduce([]) { all, next in
+            if isDirectory(path: next) { return try all + allFiles(at: next) }
+            else { return all + [next] }
+        }
     }
 }
 
