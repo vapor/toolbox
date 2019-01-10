@@ -195,9 +195,10 @@ struct TemplateVariable: Content {
     let `var`: String
     let question: String
     let choices: [String]?
+    let `default`: String?
 }
 
-struct PopulateInfo: Command {
+struct LoadLeafPackage: Command {
     /// See `Command`.
     var arguments: [CommandArgument] = [
         .argument(name: "path", help: ["path to the file to process"])
@@ -211,15 +212,90 @@ struct PopulateInfo: Command {
 
     /// See `Command`.
     func run(using ctx: CommandContext) throws -> Future<Void> {
-        let file = try Shell.readFile(path: ctx.argument("path"))
-        let data = Data(bytes: file.utf8)
+        let path = try ctx.argument("path")
+        let package = try ctx.loadLeafPackage(path: path)
+        print("Made package")
+        print(package)
+        return ctx.done
+    }
+}
 
-        let foo = JSONDecoder()
-        let tvs = try foo.decode([TemplateVariable].self, from: data)
-        var package = [String: String]()
-        try tvs.forEach { tv in
-            let answer = try ctx.console.ask(tv)
-            package[tv.var] = answer
+struct TTTemplate: Content {
+    let preConfigure: String
+    let configure: String
+    let postConfigure: String
+}
+
+extension FileManager {
+    func isDirectory(path: String) -> Bool {
+        var isDirectory: ObjCBool = false
+        fileExists(atPath: path, isDirectory: &isDirectory)
+        return isDirectory.boolValue
+    }
+
+    func allFiles(at path: String) throws -> [String] {
+        guard isDirectory(path: path) else { throw path + " is not a directory." }
+        return try contentsOfDirectory(atPath: path)
+    }
+}
+
+public func ASDF() throws {
+    let home = try Shell.homeDirectory()
+    let path = home.finished(with: "/") + "Desktop/fluent-template"
+    let all = try FileManager.default.allFiles(at: path)
+    print(all)
+    print("")
+}
+
+class Processor {
+    let path: String
+    private let files: FileManager = .default
+
+    init(path: String) throws {
+        self.path = path
+        guard files.isDirectory(path: path) else {
+            throw "expected to find a template folder at: " + path
+        }
+    }
+
+    func process() throws {
+
+    }
+}
+
+struct ProcessTemplate: Command {
+    /// See `Command`.
+    var arguments: [CommandArgument] = [
+        .argument(name: "path", help: ["path to the folder containing a template"])
+    ]
+
+    /// See `Command`.
+    var options: [CommandOption] = []
+
+    /// See `Command`.
+    var help: [String] = ["generates xcode projects for spm packages."]
+
+    /// See `Command`.
+    func run(using ctx: CommandContext) throws -> Future<Void> {
+        let path = try ctx.argument("path")
+        guard FileManager.default.isDirectory(path: path) else {
+            throw "expected to find a template folder at: " + path
+        }
+
+        let package = try ctx.loadLeafPackage(path: path)
+
+        let file: String =  { fatalError() }()
+        let config = LeafConfig(tags: .default(), viewsDir: path, shouldCache: false)
+        let renderer = LeafRenderer(config: config, using: ctx.container)
+
+        let data = Data(bytes: file.utf8)
+        let rendered = renderer.render(template: data, ["name": "context"])
+        return rendered.map { view in
+            print(view)
+            let str = String(bytes: view.data, encoding: .utf8)
+            print(str)
+            ctx.console.output("got file:")
+            ctx.console.output(file.consoleText())
         }
 
         print("Made package")
@@ -228,9 +304,32 @@ struct PopulateInfo: Command {
     }
 }
 
+
+
+extension CommandContext {
+    func loadLeafPackage(path: String) throws -> [String: String] {
+        let file = try Shell.readFile(path: path)
+        let data = Data(bytes: file.utf8)
+
+        let foo = JSONDecoder()
+        let tvs = try foo.decode([TemplateVariable].self, from: data)
+        var package = [String: String]()
+        try tvs.forEach { tv in
+            let answer = try console.ask(tv)
+            package[tv.var] = answer
+        }
+        return package
+    }
+}
+
 extension Console {
     func ask(_ tv: TemplateVariable) throws -> String {
-        let question = tv.question.consoleText()
+        var q = tv.question
+        if let def = tv.default {
+            q = q + " (\(def) is default)"
+        }
+
+        let question = q.consoleText()
         guard let choices = tv.choices else {
             return ask(question)
         }

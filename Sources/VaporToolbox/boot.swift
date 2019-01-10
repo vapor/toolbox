@@ -16,7 +16,8 @@ public func boot() -> Future<Application> {
     commands.use(Test(), as: "test")
     commands.use(XcodeCommand(), as: "xcode")
     commands.use(LeafXcodeCommand(), as: "leaf")
-    commands.use(PopulateInfo(), as: "info")
+    commands.use(LoadLeafPackage(), as: "info")
+    
     services.register(commands)
 
     return Application.asyncBoot(services: services)
