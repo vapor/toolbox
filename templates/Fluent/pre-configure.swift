@@ -1,1 +1,1 @@
-try services.register(Fluent<%=fluentdb%>Provider())
+try services.register(Fluent#(fluentdb)Provider())

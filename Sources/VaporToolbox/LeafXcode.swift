@@ -11,6 +11,19 @@ let swiftToolsVersionDefault = "4.0"
  */
 
 /*
+ leaf.data
+
+ {
+ "type": "string",
+ "question": "which fluent database?"
+ "answers": ["SQLite", "PostgreSQL", "MySQL"]
+ },
+ {
+
+ }
+ */
+
+/*
  template/
     info.json
         - provider name
@@ -176,6 +189,53 @@ struct NewProjectConfig: Content {
 
     var swiftVersion = "4.1"
     var dependencies: [Dependency] = [vaporDependency, leafDependency]
+}
+
+struct TemplateVariable: Content {
+    let `var`: String
+    let question: String
+    let choices: [String]?
+}
+
+struct PopulateInfo: Command {
+    /// See `Command`.
+    var arguments: [CommandArgument] = [
+        .argument(name: "path", help: ["path to the file to process"])
+    ]
+
+    /// See `Command`.
+    var options: [CommandOption] = []
+
+    /// See `Command`.
+    var help: [String] = ["generates xcode projects for spm packages."]
+
+    /// See `Command`.
+    func run(using ctx: CommandContext) throws -> Future<Void> {
+        let file = try Shell.readFile(path: ctx.argument("path"))
+        let data = Data(bytes: file.utf8)
+
+        let foo = JSONDecoder()
+        let tvs = try foo.decode([TemplateVariable].self, from: data)
+        var package = [String: String]()
+        try tvs.forEach { tv in
+            let answer = try ctx.console.ask(tv)
+            package[tv.var] = answer
+        }
+
+        print("Made package")
+        print(package)
+        return ctx.done
+    }
+}
+
+extension Console {
+    func ask(_ tv: TemplateVariable) throws -> String {
+        let question = tv.question.consoleText()
+        guard let choices = tv.choices else {
+            return ask(question)
+        }
+        return choose(question, from: choices)
+    }
 }
 
 // TODO: Xcode Additions

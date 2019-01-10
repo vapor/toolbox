@@ -1,8 +1,8 @@
-import Fluent<%=fluentdb%>
+import Fluent#(fluentdb)
 import Vapor
 
 /// A single entry of a Todo list.
-final class Todo: <%=fluentdb%>Model {
+final class Todo: #(fluentdb)Model {
     /// The unique identifier for this `Todo`.
     var id: Int?
 
