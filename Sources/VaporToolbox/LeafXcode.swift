@@ -5,6 +5,28 @@ import Leaf
 let swiftToolsVersionDefault = "4.0"
 
 /*
+ - load template, field questions
+ - execute leaf processor on all template files
+ -
+ */
+
+/*
+ template/
+    info.json
+        - provider name
+        - target includes
+        - questions? ie: how to get fluent database type, etc.
+    pre-configure.template
+    configure.template
+    post-configure.template
+    sources/
+        your/source/files/here.swift
+    files/
+        top/level/files/here.md
+        Resources/Views/Home.leaf
+ */
+
+/*
  - leaf
  - fluent<all-dbs>
  - leaf + fluent
