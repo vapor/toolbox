@@ -213,7 +213,7 @@ struct LoadLeafPackage: Command {
     /// See `Command`.
     func run(using ctx: CommandContext) throws -> Future<Void> {
         let path = try ctx.argument("path")
-        let package = try ctx.loadLeafPackage(path: path)
+        let package = try ctx.loadLeafData(path: path)
         print("Made package")
         print(package)
         return ctx.done
@@ -257,7 +257,20 @@ public func ASDF() throws {
     let home = try Shell.homeDirectory()
     let path = home.finished(with: "/") + "Desktop/fluent-template"
     let all = try FileManager.default.allFiles(at: path)
-    print(all)
+
+    let leafPackageFile = path.finished(with: "/") + "info.json"
+    let package = try ctx.loadLeafData(path: leafPackageFile)
+    print(package)
+
+    let paths = all.filter { $0 != leafPackageFile }
+    // TODO: TURN ALL PATHS INTO [PATH: PROCESSED CONTENTS]
+    for path in paths {
+        let config = LeafConfig(tags: .default(), viewsDir: path, shouldCache: false)
+        let renderer = LeafRenderer(config: config, using: ctx.container)
+
+        let data = Data(bytes: file.utf8)
+        let rendered = renderer.render(template: data, ["name": "context"])
+    }
     print("")
 }
 
@@ -296,7 +309,7 @@ struct ProcessTemplate: Command {
             throw "expected to find a template folder at: " + path
         }
 
-        let package = try ctx.loadLeafPackage(path: path)
+        let package = try ctx.loadLeafData(path: path)
 
         let file: String =  { fatalError() }()
         let config = LeafConfig(tags: .default(), viewsDir: path, shouldCache: false)
@@ -321,7 +334,7 @@ struct ProcessTemplate: Command {
 
 
 extension CommandContext {
-    func loadLeafPackage(path: String) throws -> [String: String] {
+    func loadLeafData(path: String) throws -> [String: String] {
         let file = try Shell.readFile(path: path)
         let data = Data(bytes: file.utf8)
 
