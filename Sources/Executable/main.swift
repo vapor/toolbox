@@ -2,8 +2,8 @@ import Foundation
 import VaporToolbox
 import Vapor
 
-try ASDF()
-throw "done"
+//try ASDF()
+//throw "done"
 
 do {
     let app = try boot().wait()

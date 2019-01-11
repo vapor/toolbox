@@ -198,7 +198,40 @@ struct TemplateVariable: Content {
     let `default`: String?
 }
 
-struct LoadLeafPackage: Command {
+
+public struct LeafGroup: CommandGroup {
+    public let commands: Commands = [
+        "render": LeafRenderFolder()
+    ]
+
+    public let options: [CommandOption] = []
+
+    /// See `CommandGroup`.
+    public var help: [String] = [
+        "leaf interactions"
+    ]
+
+    public init() {}
+
+    /// See `CommandGroup`.
+    public func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
+        return ctx.done
+//        ctx.console.info("Welcome to Cloud.")
+//        ctx.console.output("Use `vapor cloud -h` to see commands.")
+//        let cloud = [
+//            "   _  _         ",
+//            "  ( `   )_      ",
+//            " (    )    `)   ",
+//            "(_   (_ .  _) _)",
+//            "                ",
+//            ]
+//        let centered = ctx.console.center(cloud)
+//        centered.map { $0.consoleText() } .forEach(ctx.console.output)
+//        return .done(on: ctx.container)
+    }
+}
+
+struct LeafRenderFolder: Command {
     /// See `Command`.
     var arguments: [CommandArgument] = [
         .argument(name: "path", help: ["path to the file to process"])
@@ -208,15 +241,51 @@ struct LoadLeafPackage: Command {
     var options: [CommandOption] = []
 
     /// See `Command`.
-    var help: [String] = ["generates xcode projects for spm packages."]
+    var help: [String] = ["leaf package stuff"]
 
     /// See `Command`.
     func run(using ctx: CommandContext) throws -> Future<Void> {
         let path = try ctx.argument("path")
-        let package = try ctx.loadLeafData(path: path)
+        let leafPackageFile = path.finished(with: "/") + "info.json"
+
+        let package = try ctx.loadLeafData(path: leafPackageFile)
         print("Made package")
         print(package)
-        return ctx.done
+        let all = try FileManager.default.allFiles(at: path)
+
+        //    let package = try ctx.loadLeafData(path: leafPackageFile)
+        //    print(package)
+
+        let config = LeafConfig(tags: .default(), viewsDir: path, shouldCache: false)
+        let renderer = LeafRenderer(config: config, using: ctx.container)
+        let paths = all.filter { $0 != leafPackageFile }
+        // TODO: TURN ALL PATHS INTO [PATH: PROCESSED CONTENTS]
+        var views: [Future<View>] = []
+        for path in paths {
+            print("rendering \(path)")
+            let contents = try Shell.readFile(path: path)
+            let data = Data(bytes: contents.utf8)
+            let rendered = renderer.render(template: data, package)
+            views.append(rendered)
+            rendered.whenSuccess { view in
+                let view = String(bytes: view.data, encoding: .utf8)
+                if let view = view {
+                    print("\(path)")
+                    print(view)
+                } else {
+                    print("no")
+                }
+                print("")
+            }
+            //                print("rendered: \(rendered)")
+            //                print("")
+        }
+
+        let flat = views.flatten(on: ctx.container)
+        return flat.map { views in
+            print("")
+        }
+//        return ctx.done
     }
 }
 
@@ -259,18 +328,18 @@ public func ASDF() throws {
     let all = try FileManager.default.allFiles(at: path)
 
     let leafPackageFile = path.finished(with: "/") + "info.json"
-    let package = try ctx.loadLeafData(path: leafPackageFile)
-    print(package)
+//    let package = try ctx.loadLeafData(path: leafPackageFile)
+//    print(package)
 
     let paths = all.filter { $0 != leafPackageFile }
     // TODO: TURN ALL PATHS INTO [PATH: PROCESSED CONTENTS]
-    for path in paths {
-        let config = LeafConfig(tags: .default(), viewsDir: path, shouldCache: false)
-        let renderer = LeafRenderer(config: config, using: ctx.container)
-
-        let data = Data(bytes: file.utf8)
-        let rendered = renderer.render(template: data, ["name": "context"])
-    }
+//    for path in paths {
+//        let config = LeafConfig(tags: .default(), viewsDir: path, shouldCache: false)
+//        let renderer = LeafRenderer(config: config, using: ctx.container)
+//
+//        let data = Data(bytes: file.utf8)
+//        let rendered = renderer.render(template: data, ["name": "context"])
+//    }
     print("")
 }
 
@@ -351,16 +420,16 @@ extension CommandContext {
 
 extension Console {
     func ask(_ tv: TemplateVariable) throws -> String {
-        var q = tv.question
-        if let def = tv.default {
-            q = q + " (\(def) is default)"
+        if let choices = tv.choices {
+            return choose(tv.question.consoleText(), from: choices)
+        } else if let def = tv.default {
+            let question = tv.question + " (\(def) is default)"
+            let answer =  ask(question.consoleText())
+            if answer.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return def }
+            else { return def }
+        } else {
+            return ask(tv.question.consoleText())
         }
-
-        let question = q.consoleText()
-        guard let choices = tv.choices else {
-            return ask(question)
-        }
-        return choose(question, from: choices)
     }
 }
 
