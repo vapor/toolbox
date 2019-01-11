@@ -287,6 +287,28 @@ extension Seed {
     }
 }
 
+extension Array where Element == Seed.Exclusion {
+    func shouldExclude(path: String) -> Bool {
+        for exclusion in self {
+            if exclusion.matches(path: path) { return false }
+        }
+        return true
+    }
+}
+
+extension Seed.Exclusion {
+    func matches(path: String) -> Bool {
+        switch self {
+        case .folder(let f):
+            return path.finished(with: "/").hasSuffix(f)
+        case .fileType(let t):
+            return path.hasSuffix(t)
+        case .file(let f):
+            return path.hasSuffix(f)
+        }
+    }
+}
+
 struct Seed: Content {
     let name: String
     let excluding: [Exclusion]
@@ -304,21 +326,19 @@ extension Console {
     func answer(_ questions: [Seed.Question]) throws -> [Seed.Answer] {
         var answered: [Seed.Answer] = []
         for question in questions {
-            if let res = try answer(question, answered: answered) {
+            if let res = answer(question, answered: answered) {
                 answered.append(res)
             }
         }
         return answered
     }
 
-    private func answer(_ question: Seed.Question, answered: [Seed.Answer]) throws -> Seed.Answer? {
+    private func answer(_ question: Seed.Question, answered: [Seed.Answer]) -> Seed.Answer? {
         if let condition = question.matchCondition {
-            guard try answered.satisfy(condition) else { return nil }
+            guard answered.satisfy(condition) else { return nil }
         }
 
-//        pushEphemeral()
         let val = fulfill(question)
-//        popEphemeral()
         let readable = question.readableVar + ": "
         output(readable.consoleText(), newLine: false)
         output(val.consoleText())
@@ -381,20 +401,16 @@ struct LeafRenderFolder: Command {
         print("Got answers: \(answers)")
         print("got seed: \(seed)")
         print("is a folder")
-        return ctx.done
 //        let leafPackageFile = path.finished(with: "/") + "info.json"
 //
 //        let package = try ctx.loadLeafData(path: leafPackageFile)
 //        print("Made package")
 //        print(package)
-//        let all = try FileManager.default.allFiles(at: path)
-//
-//        //    let package = try ctx.loadLeafData(path: leafPackageFile)
-//        //    print(package)
-//
-//        let config = LeafConfig(tags: .default(), viewsDir: path, shouldCache: false)
-//        let renderer = LeafRenderer(config: config, using: ctx.container)
-//        let paths = all.filter { $0 != leafPackageFile }
+        let all = try FileManager.default.allFiles(at: path)
+        let config = LeafConfig(tags: .default(), viewsDir: path, shouldCache: false)
+        let renderer = LeafRenderer(config: config, using: ctx.container)
+        let paths = all.filter { !seed.excluding.shouldExclude(path: $0) }
+
 //        // TODO: TURN ALL PATHS INTO [PATH: PROCESSED CONTENTS]
 //        var views: [Future<View>] = []
 //        for path in paths {
@@ -421,7 +437,7 @@ struct LeafRenderFolder: Command {
 //        return flat.map { views in
 //            print("")
 //        }
-////        return ctx.done
+        return ctx.done
     }
 }
 
@@ -467,7 +483,7 @@ public func ASDF() throws {
 //    let package = try ctx.loadLeafData(path: leafPackageFile)
 //    print(package)
 
-    let paths = all.filter { $0 != leafPackageFile }
+//    let paths = all.filter { $0 != leafPackageFile }
     // TODO: TURN ALL PATHS INTO [PATH: PROCESSED CONTENTS]
 //    for path in paths {
 //        let config = LeafConfig(tags: .default(), viewsDir: path, shouldCache: false)
