@@ -242,6 +242,10 @@ extension Seed {
         let choices: [String]?
         let `default`: String?
         let matchCondition: MatchCondition?
+
+        var readableVar: String {
+            return self.var
+        }
     }
 }
 
@@ -312,14 +316,24 @@ extension Console {
             guard try answered.satisfy(condition) else { return nil }
         }
 
+//        pushEphemeral()
         let val = fulfill(question)
+//        popEphemeral()
+        let readable = question.readableVar + ": "
+        output(readable.consoleText(), newLine: false)
+        output(val.consoleText())
         return Seed.Answer(val: val, question: question)
     }
 
     private func fulfill(_ question: Seed.Question) -> String {
         if let choices = question.choices {
             return choose(question.display.consoleText(), from: choices)
-        } else if let def = question.default {
+        }
+
+        // only run on non-choose, choose above will clear on its own
+        pushEphemeral()
+        defer { popEphemeral() }
+        if let def = question.default {
             let question = question.display + " (\(def) is default)"
             let answer =  ask(question.consoleText())
             if answer.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return def }
