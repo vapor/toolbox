@@ -238,7 +238,7 @@ extension Seed {
             let equals: String
         }
         let `var`: String
-        let question: String
+        let display: String
         let choices: [String]?
         let `default`: String?
         let matchCondition: MatchCondition?
@@ -295,39 +295,46 @@ extension Seed {
         let question: Question
     }
 }
-extension Console {
-//    func ask(_ tv: TemplateVariable) throws -> String {
-//        if let choices = tv.choices {
-//            return choose(tv.question.consoleText(), from: choices)
-//        } else if let def = tv.default {
-//            let question = tv.question + " (\(def) is default)"
-//            let answer =  ask(question.consoleText())
-//            if answer.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return def }
-//            else { return def }
-//        } else {
-//            return ask(tv.question.consoleText())
-//        }
-//    }
 
-    func answer(_ questions: [Seed.Question]) {
-        fatalError()
+extension Console {
+    func answer(_ questions: [Seed.Question]) throws -> [Seed.Answer] {
+        var answered: [Seed.Answer] = []
+        for question in questions {
+            if let res = try answer(question, answered: answered) {
+                answered.append(res)
+            }
+        }
+        return answered
     }
 
-    func answer(_ question: Seed.Question, answers: [Seed.Answer]) throws -> Seed.Answer? {
+    private func answer(_ question: Seed.Question, answered: [Seed.Answer]) throws -> Seed.Answer? {
         if let condition = question.matchCondition {
-            guard try answers.satisfy(condition) else { return nil }
+            guard try answered.satisfy(condition) else { return nil }
         }
 
-        fatalError()
+        let val = fulfill(question)
+        return Seed.Answer(val: val, question: question)
     }
+
+    private func fulfill(_ question: Seed.Question) -> String {
+        if let choices = question.choices {
+            return choose(question.display.consoleText(), from: choices)
+        } else if let def = question.default {
+            let question = question.display + " (\(def) is default)"
+            let answer =  ask(question.consoleText())
+            if answer.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return def }
+            else { return def }
+        } else {
+            return ask(question.display.consoleText())
+        }
+    }
+
 }
 
 extension Array where Element == Seed.Answer {
-    func satisfy(_ condition: Seed.Question.MatchCondition) throws -> Bool {
+    func satisfy(_ condition: Seed.Question.MatchCondition) -> Bool {
         let matching = first { $0.question.var == condition.var }
-        guard let answer = matching else {
-            throw "questions out of order, \(condition.var) hasn't yet been set"
-        }
+        guard let answer = matching else { return false }
         return answer.val == condition.equals
     }
 }
@@ -356,6 +363,8 @@ struct LeafRenderFolder: Command {
         let data = Data(bytes: contents.utf8)
         let decoder = JSONDecoder()
         let seed = try decoder.decode(Seed.self, from: data)
+        let answers = try ctx.console.answer(seed.questions)
+        print("Got answers: \(answers)")
         print("got seed: \(seed)")
         print("is a folder")
         return ctx.done
