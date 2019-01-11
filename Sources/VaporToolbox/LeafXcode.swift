@@ -231,6 +231,107 @@ public struct LeafGroup: CommandGroup {
     }
 }
 
+extension Seed {
+    struct Question: Content {
+        struct MatchCondition: Content {
+            let `var`: String
+            let equals: String
+        }
+        let `var`: String
+        let question: String
+        let choices: [String]?
+        let `default`: String?
+        let matchCondition: MatchCondition?
+    }
+}
+
+extension Seed {
+    enum Exclusion: Codable {
+        // has trailing `/`, ie: `images/`
+        case folder(String)
+        // has leading `*`, ie: `*.jpg`
+        case fileType(String)
+        // all others will be interpreted as a file
+        case file(String)
+
+        private var str: String {
+            switch self {
+            case .folder(let s): return s
+            case .fileType(let s): return "*" + s
+            case .file(let s): return s
+            }
+        }
+
+        func encode(to encoder: Encoder) throws {
+            var single = encoder.singleValueContainer()
+            try single.encode(str)
+        }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            let value = try container.decode(String.self)
+            if value.hasPrefix("*") {
+                let stripped = value.dropFirst()
+                let type = String(stripped)
+                self = .fileType(type)
+            } else if value.hasSuffix("/") {
+                self = .folder(value)
+            } else {
+                self = .file(value)
+            }
+        }
+    }
+}
+
+struct Seed: Content {
+    let name: String
+    let excluding: [Exclusion]
+    let questions: [Question]
+}
+
+extension Seed {
+    struct Answer {
+        let val: String
+        let question: Question
+    }
+}
+extension Console {
+//    func ask(_ tv: TemplateVariable) throws -> String {
+//        if let choices = tv.choices {
+//            return choose(tv.question.consoleText(), from: choices)
+//        } else if let def = tv.default {
+//            let question = tv.question + " (\(def) is default)"
+//            let answer =  ask(question.consoleText())
+//            if answer.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return def }
+//            else { return def }
+//        } else {
+//            return ask(tv.question.consoleText())
+//        }
+//    }
+
+    func answer(_ questions: [Seed.Question]) {
+        fatalError()
+    }
+
+    func answer(_ question: Seed.Question, answers: [Seed.Answer]) throws -> Seed.Answer? {
+        if let condition = question.matchCondition {
+            guard try answers.satisfy(condition) else { return nil }
+        }
+
+        fatalError()
+    }
+}
+
+extension Array where Element == Seed.Answer {
+    func satisfy(_ condition: Seed.Question.MatchCondition) throws -> Bool {
+        let matching = first { $0.question.var == condition.var }
+        guard let answer = matching else {
+            throw "questions out of order, \(condition.var) hasn't yet been set"
+        }
+        return answer.val == condition.equals
+    }
+}
+
 struct LeafRenderFolder: Command {
     /// See `Command`.
     var arguments: [CommandArgument] = [
@@ -246,46 +347,58 @@ struct LeafRenderFolder: Command {
     /// See `Command`.
     func run(using ctx: CommandContext) throws -> Future<Void> {
         let path = try ctx.argument("path")
-        let leafPackageFile = path.finished(with: "/") + "info.json"
-
-        let package = try ctx.loadLeafData(path: leafPackageFile)
-        print("Made package")
-        print(package)
-        let all = try FileManager.default.allFiles(at: path)
-
-        //    let package = try ctx.loadLeafData(path: leafPackageFile)
-        //    print(package)
-
-        let config = LeafConfig(tags: .default(), viewsDir: path, shouldCache: false)
-        let renderer = LeafRenderer(config: config, using: ctx.container)
-        let paths = all.filter { $0 != leafPackageFile }
-        // TODO: TURN ALL PATHS INTO [PATH: PROCESSED CONTENTS]
-        var views: [Future<View>] = []
-        for path in paths {
-            print("rendering \(path)")
-            let contents = try Shell.readFile(path: path)
-            let data = Data(bytes: contents.utf8)
-            let rendered = renderer.render(template: data, package)
-            views.append(rendered)
-            rendered.whenSuccess { view in
-                let view = String(bytes: view.data, encoding: .utf8)
-                if let view = view {
-                    print("\(path)")
-                    print(view)
-                } else {
-                    print("no")
-                }
-                print("")
-            }
-            //                print("rendered: \(rendered)")
-            //                print("")
+        guard FileManager.default.isDirectory(path: path) else {
+            throw "expected a directory, got \(path)"
         }
 
-        let flat = views.flatten(on: ctx.container)
-        return flat.map { views in
-            print("")
-        }
-//        return ctx.done
+        let seedPath = path.finished(with: "/") + "leaf.seed"
+        let contents = try Shell.readFile(path: seedPath)
+        let data = Data(bytes: contents.utf8)
+        let decoder = JSONDecoder()
+        let seed = try decoder.decode(Seed.self, from: data)
+        print("got seed: \(seed)")
+        print("is a folder")
+        return ctx.done
+//        let leafPackageFile = path.finished(with: "/") + "info.json"
+//
+//        let package = try ctx.loadLeafData(path: leafPackageFile)
+//        print("Made package")
+//        print(package)
+//        let all = try FileManager.default.allFiles(at: path)
+//
+//        //    let package = try ctx.loadLeafData(path: leafPackageFile)
+//        //    print(package)
+//
+//        let config = LeafConfig(tags: .default(), viewsDir: path, shouldCache: false)
+//        let renderer = LeafRenderer(config: config, using: ctx.container)
+//        let paths = all.filter { $0 != leafPackageFile }
+//        // TODO: TURN ALL PATHS INTO [PATH: PROCESSED CONTENTS]
+//        var views: [Future<View>] = []
+//        for path in paths {
+//            print("rendering \(path)")
+//            let contents = try Shell.readFile(path: path)
+//            let data = Data(bytes: contents.utf8)
+//            let rendered = renderer.render(template: data, package)
+//            views.append(rendered)
+//            rendered.whenSuccess { view in
+//                let view = String(bytes: view.data, encoding: .utf8)
+//                if let view = view {
+//                    print("\(path)")
+//                    print(view)
+//                } else {
+//                    print("no")
+//                }
+//                print("")
+//            }
+//            //                print("rendered: \(rendered)")
+//            //                print("")
+//        }
+//
+//        let flat = views.flatten(on: ctx.container)
+//        return flat.map { views in
+//            print("")
+//        }
+////        return ctx.done
     }
 }
 
