@@ -311,7 +311,7 @@ extension Seed.Exclusion {
 
 struct Seed: Content {
     let name: String
-    let excluding: [Exclusion]
+    let excludes: [Exclusion]
     let questions: [Question]
 }
 
@@ -409,7 +409,7 @@ struct LeafRenderFolder: Command {
         let all = try FileManager.default.allFiles(at: path)
         let config = LeafConfig(tags: .default(), viewsDir: path, shouldCache: false)
         let renderer = LeafRenderer(config: config, using: ctx.container)
-        let paths = all.filter { !seed.excluding.shouldExclude(path: $0) }
+        let paths = all.filter { !seed.excludes.shouldExclude(path: $0) }
 
 //        // TODO: TURN ALL PATHS INTO [PATH: PROCESSED CONTENTS]
 //        var views: [Future<View>] = []
