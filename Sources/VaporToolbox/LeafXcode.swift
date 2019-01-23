@@ -241,11 +241,7 @@ extension Seed {
         let display: String
         let choices: [String]?
         let `default`: String?
-        let matchCondition: MatchCondition?
-
-        var readableVar: String {
-            return self.var
-        }
+        let conditions: [Condition]?
     }
 }
 
@@ -284,6 +280,12 @@ extension Seed {
                 self = .file(value)
             }
         }
+    }
+    
+    struct Condition: Codable {
+        let `var`: String
+        let equals: String?
+        let `in`: [String]?
     }
 }
 
@@ -334,12 +336,12 @@ extension Console {
     }
 
     private func answer(_ question: Seed.Question, answered: [Seed.Answer]) -> Seed.Answer? {
-        if let condition = question.matchCondition {
+        if let condition = question.conditions {
             guard answered.satisfy(condition) else { return nil }
         }
 
         let val = fulfill(question)
-        let readable = question.readableVar + ": "
+        let readable = question.var + ": "
         output(readable.consoleText(), newLine: false)
         output(val.consoleText())
         return Seed.Answer(val: val, question: question)
@@ -366,10 +368,19 @@ extension Console {
 }
 
 extension Array where Element == Seed.Answer {
-    func satisfy(_ condition: Seed.Question.MatchCondition) -> Bool {
+    func satisfy(_ conditions: [Seed.Condition]) -> Bool {
+        for condition in conditions {
+            guard satisfy(condition) else { return false }
+        }
+        return true
+    }
+    
+    func satisfy(_ condition: Seed.Condition) -> Bool {
         let matching = first { $0.question.var == condition.var }
         guard let answer = matching else { return false }
-        return answer.val == condition.equals
+        if let expectation = condition.equals { return expectation == answer.val }
+        if let `in` = condition.in { return `in`.contains(answer.val) }
+        return false
     }
 }
 
@@ -387,7 +398,9 @@ struct LeafRenderFolder: Command {
 
     /// See `Command`.
     func run(using ctx: CommandContext) throws -> Future<Void> {
-        let path = try ctx.argument("path")
+        let raw = try ctx.argument("path")
+        // expand `~` for example
+        let path = try Shell.bash("echo \(raw)")
         guard FileManager.default.isDirectory(path: path) else {
             throw "expected a directory, got \(path)"
         }
@@ -525,7 +538,9 @@ struct ProcessTemplate: Command {
 
     /// See `Command`.
     func run(using ctx: CommandContext) throws -> Future<Void> {
-        let path = try ctx.argument("path")
+        let raw = try ctx.argument("path")
+        // expand `~` for example
+        let path = try Shell.bash("echo \(raw)")
         guard FileManager.default.isDirectory(path: path) else {
             throw "expected to find a template folder at: " + path
         }
