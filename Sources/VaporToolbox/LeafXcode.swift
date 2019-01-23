@@ -442,8 +442,17 @@ struct LeafRenderFolder: Command {
         return flat.map { views in
             for (view, path) in views {
                 let url = URL(fileURLWithPath: path)
-                try view.data.write(to: url)
+                guard let str = String(bytes: view.data, encoding: .utf8) else {
+                    fatalError("unable to create string") }
+                if str.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    try Shell.delete(path)
+                } else {
+                    try view.data.write(to: url)
+                }
             }
+            
+            try Shell.delete(seedPath)
+            // TODO: Delete Empty Folders
         }
     }
 }
