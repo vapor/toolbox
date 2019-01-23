@@ -421,40 +421,23 @@ struct LeafRenderFolder: Command {
         let seed = try decoder.decode(Seed.self, from: data)
         let answers = try ctx.console.answer(seed.questions)
         let package = answers.package()
-        print(package)
-        print("Got answers: \(answers)")
-        print("got seed: \(seed)")
-        print("is a folder")
-//        let leafPackageFile = path.finished(with: "/") + "info.json"
-//
-//        let package = try ctx.loadLeafData(path: leafPackageFile)
-//        print("Made package")
-//        print(package)
+
+        // MARK: Collect Paths
         let all = try FileManager.default.allFiles(at: path)
         let config = LeafConfig(tags: .default(), viewsDir: path, shouldCache: false)
         let renderer = LeafRenderer(config: config, using: ctx.container)
         let paths = all.filter { !seed.excludes.shouldExclude(path: $0) }
-        print("all paths: \(paths)")
-        print("")
-//        // TODO: TURN ALL PATHS INTO [PATH: PROCESSED CONTENTS]
-        var views: [Future<View>] = []
+       
+        // MARK: Render Files
+        var views: [Future<(View, String)>] = []
         for path in paths {
             let contents = try Shell.readFile(path: path)
             let data = Data(bytes: contents.utf8)
-            let rendered = renderer.render(template: data, package)
+            let rendered = renderer.render(template: data, package).and(result: path)
             views.append(rendered)
-            rendered.addAwaiter { (result) in
-                print("PATH: \(path)")
-                switch result {
-                case .error(let err):
-                    print("err: \(err)")
-                case .success(_):
-                    print("succeeded")
-                }
-                print("")
-            }
         }
 
+        // MARK: Write Files
         let flat = views.flatten(on: ctx.container)
         return flat.map { views in
             print("Got views: \(views)")
