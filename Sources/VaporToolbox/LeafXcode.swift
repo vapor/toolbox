@@ -292,9 +292,9 @@ extension Seed {
 extension Array where Element == Seed.Exclusion {
     func shouldExclude(path: String) -> Bool {
         for exclusion in self {
-            if exclusion.matches(path: path) { return false }
+            if exclusion.matches(path: path) { return true }
         }
-        return true
+        return false
     }
 }
 
@@ -382,6 +382,14 @@ extension Array where Element == Seed.Answer {
         if let `in` = condition.in { return `in`.contains(answer.val) }
         return false
     }
+    
+    func package() -> [String: String] {
+        var pack = [String: String]()
+        forEach { answer in
+            pack[answer.question.var] = answer.val
+        }
+        return pack
+    }
 }
 
 struct LeafRenderFolder: Command {
@@ -405,12 +413,15 @@ struct LeafRenderFolder: Command {
             throw "expected a directory, got \(path)"
         }
 
+        // MARK: Compile Package
         let seedPath = path.finished(with: "/") + "leaf.seed"
         let contents = try Shell.readFile(path: seedPath)
         let data = Data(bytes: contents.utf8)
         let decoder = JSONDecoder()
         let seed = try decoder.decode(Seed.self, from: data)
         let answers = try ctx.console.answer(seed.questions)
+        let package = answers.package()
+        print(package)
         print("Got answers: \(answers)")
         print("got seed: \(seed)")
         print("is a folder")
@@ -423,34 +434,32 @@ struct LeafRenderFolder: Command {
         let config = LeafConfig(tags: .default(), viewsDir: path, shouldCache: false)
         let renderer = LeafRenderer(config: config, using: ctx.container)
         let paths = all.filter { !seed.excludes.shouldExclude(path: $0) }
-
+        print("all paths: \(paths)")
+        print("")
 //        // TODO: TURN ALL PATHS INTO [PATH: PROCESSED CONTENTS]
-//        var views: [Future<View>] = []
-//        for path in paths {
-//            print("rendering \(path)")
-//            let contents = try Shell.readFile(path: path)
-//            let data = Data(bytes: contents.utf8)
-//            let rendered = renderer.render(template: data, package)
-//            views.append(rendered)
-//            rendered.whenSuccess { view in
-//                let view = String(bytes: view.data, encoding: .utf8)
-//                if let view = view {
-//                    print("\(path)")
-//                    print(view)
-//                } else {
-//                    print("no")
-//                }
-//                print("")
-//            }
-//            //                print("rendered: \(rendered)")
-//            //                print("")
-//        }
-//
-//        let flat = views.flatten(on: ctx.container)
-//        return flat.map { views in
-//            print("")
-//        }
-        return ctx.done
+        var views: [Future<View>] = []
+        for path in paths {
+            let contents = try Shell.readFile(path: path)
+            let data = Data(bytes: contents.utf8)
+            let rendered = renderer.render(template: data, package)
+            views.append(rendered)
+            rendered.addAwaiter { (result) in
+                print("PATH: \(path)")
+                switch result {
+                case .error(let err):
+                    print("err: \(err)")
+                case .success(_):
+                    print("succeeded")
+                }
+                print("")
+            }
+        }
+
+        let flat = views.flatten(on: ctx.container)
+        return flat.map { views in
+            print("Got views: \(views)")
+            print("")
+        }
     }
 }
 
