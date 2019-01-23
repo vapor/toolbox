@@ -440,8 +440,10 @@ struct LeafRenderFolder: Command {
         // MARK: Write Files
         let flat = views.flatten(on: ctx.container)
         return flat.map { views in
-            print("Got views: \(views)")
-            print("")
+            for (view, path) in views {
+                let url = URL(fileURLWithPath: path)
+                try view.data.write(to: url)
+            }
         }
     }
 }
