@@ -99,97 +99,97 @@ import Leaf
 //    let includeLeaf:
 //}
 
-struct Manifest: Content {
-
-    let swiftToolsVersion: String
-    let packageName: String
-    let dependencies: [Dependency]
-
-    init(
-        swiftToolsVersion: String,
-        packageName: String = "VaporApp",
-        dependencies: [Dependency]
-    ) {
-        self.swiftToolsVersion = swiftToolsVersion
-        self.packageName = packageName
-        self.dependencies = dependencies
-    }
-}
-
-extension Manifest {
-    struct Dependency: Content {
-        let gitUrl: String
-        let version: String
-        let importTargets: [String]
-        let comment: String?
-    }
-}
-
-let dependencyTree: [String: Manifest.Dependency] = [
-    "vapor": .init(
-        gitUrl: "https://github.com/vapor/vapor.git",
-        version: "3.0.0",
-        importTargets: ["Vapor"],
-        comment: "💧 a server-side Swift web framework."
-    ),
-    "leaf": .init(
-        gitUrl: "https://github.com/vapor/leaf.git",
-        version: "3.0.0",
-        importTargets: ["leaf"],
-        comment: "🍃 a templating language built in swift."
-    )
-]
-
-
-
-let vaporDependency = NewProjectConfig.Dependency(
-    gitUrl: "https://github.com/vapor/vapor.git",
-    version: "3.0.0",
-    includes: ["Vapor", "TesterLongName"],
-    comment: "💧 A server-side Swift web framework."
-)
-
-let leafDependency = NewProjectConfig.Dependency(
-    gitUrl: "https://github.com/vapor/leaf.git",
-    version: "3.0.0",
-    includes: ["Leaf"],
-    comment: "a templating engine"
-)
-
-struct NewProjectConfig: Content {
-    struct Dependency: Content {
-        let gitUrl: String
-        let version: String
-        let comment: String?
-
-        // the names to include as dependencies, for example ["FluentSQLite"]
-        // usually one name, but possible to have dependency w/ multiple
-        // libraries
-        let includes: [String]
-
-        private(set) var package: String
-
-        init(gitUrl: String, version: String, includes: [String], comment: String? = nil) {
-            self.gitUrl = gitUrl
-            self.version = version
-            self.includes = includes
-            self.comment = comment
-
-            self.package = ".package(url: " + gitUrl + ", from: " + version + ")"
-        }
-//        func _package() -> String {
-//            var generated = ""
-//            if let comment = comment {
-//                generated += "// " + comment + "\n"
-//            }
-//            generated += ".package(url: " + gitUrl + ", from: " + version + "),"
-//            return generated
+//struct Manifest: Content {
+//
+//    let swiftToolsVersion: String
+//    let packageName: String
+//    let dependencies: [Dependency]
+//
+//    init(
+//        swiftToolsVersion: String,
+//        packageName: String = "VaporApp",
+//        dependencies: [Dependency]
+//    ) {
+//        self.swiftToolsVersion = swiftToolsVersion
+//        self.packageName = packageName
+//        self.dependencies = dependencies
+//    }
+//}
+//
+//extension Manifest {
+//    struct Dependency: Content {
+//        let gitUrl: String
+//        let version: String
+//        let importTargets: [String]
+//        let comment: String?
+//    }
+//}
+//
+//let dependencyTree: [String: Manifest.Dependency] = [
+//    "vapor": .init(
+//        gitUrl: "https://github.com/vapor/vapor.git",
+//        version: "3.0.0",
+//        importTargets: ["Vapor"],
+//        comment: "💧 a server-side Swift web framework."
+//    ),
+//    "leaf": .init(
+//        gitUrl: "https://github.com/vapor/leaf.git",
+//        version: "3.0.0",
+//        importTargets: ["leaf"],
+//        comment: "🍃 a templating language built in swift."
+//    )
+//]
+//
+//
+//
+//let vaporDependency = NewProjectConfig.Dependency(
+//    gitUrl: "https://github.com/vapor/vapor.git",
+//    version: "3.0.0",
+//    includes: ["Vapor", "TesterLongName"],
+//    comment: "💧 A server-side Swift web framework."
+//)
+//
+//let leafDependency = NewProjectConfig.Dependency(
+//    gitUrl: "https://github.com/vapor/leaf.git",
+//    version: "3.0.0",
+//    includes: ["Leaf"],
+//    comment: "a templating engine"
+//)
+//
+//struct NewProjectConfig: Content {
+//    struct Dependency: Content {
+//        let gitUrl: String
+//        let version: String
+//        let comment: String?
+//
+//        // the names to include as dependencies, for example ["FluentSQLite"]
+//        // usually one name, but possible to have dependency w/ multiple
+//        // libraries
+//        let includes: [String]
+//
+//        private(set) var package: String
+//
+//        init(gitUrl: String, version: String, includes: [String], comment: String? = nil) {
+//            self.gitUrl = gitUrl
+//            self.version = version
+//            self.includes = includes
+//            self.comment = comment
+//
+//            self.package = ".package(url: " + gitUrl + ", from: " + version + ")"
 //        }
-    }
-
-    var swiftVersion = "4.1"
-    var dependencies: [Dependency] = [vaporDependency, leafDependency]
-}
+////        func _package() -> String {
+////            var generated = ""
+////            if let comment = comment {
+////                generated += "// " + comment + "\n"
+////            }
+////            generated += ".package(url: " + gitUrl + ", from: " + version + "),"
+////            return generated
+////        }
+//    }
+//
+//    var swiftVersion = "4.1"
+//    var dependencies: [Dependency] = [vaporDependency, leafDependency]
+//}
 //
 //struct TemplateVariable: Content {
 //    let `var`: String
@@ -445,11 +445,11 @@ struct LeafRenderFolder: Command {
     }
 }
 
-struct TTTemplate: Content {
-    let preConfigure: String
-    let configure: String
-    let postConfigure: String
-}
+//struct TTTemplate: Content {
+//    let preConfigure: String
+//    let configure: String
+//    let postConfigure: String
+//}
 
 extension FileManager {
     func isDirectory(path: String) -> Bool {
@@ -478,42 +478,42 @@ extension FileManager {
     }
 }
 
-public func ASDF() throws {
-    let home = try Shell.homeDirectory()
-    let path = home.finished(with: "/") + "Desktop/fluent-template"
-    let all = try FileManager.default.allFiles(at: path)
-
-    let leafPackageFile = path.finished(with: "/") + "info.json"
-//    let package = try ctx.loadLeafData(path: leafPackageFile)
-//    print(package)
-
-//    let paths = all.filter { $0 != leafPackageFile }
-    // TODO: TURN ALL PATHS INTO [PATH: PROCESSED CONTENTS]
-//    for path in paths {
-//        let config = LeafConfig(tags: .default(), viewsDir: path, shouldCache: false)
-//        let renderer = LeafRenderer(config: config, using: ctx.container)
+//public func ASDF() throws {
+//    let home = try Shell.homeDirectory()
+//    let path = home.finished(with: "/") + "Desktop/fluent-template"
+//    let all = try FileManager.default.allFiles(at: path)
 //
-//        let data = Data(bytes: file.utf8)
-//        let rendered = renderer.render(template: data, ["name": "context"])
+//    let leafPackageFile = path.finished(with: "/") + "info.json"
+////    let package = try ctx.loadLeafData(path: leafPackageFile)
+////    print(package)
+//
+////    let paths = all.filter { $0 != leafPackageFile }
+//    // TODO: TURN ALL PATHS INTO [PATH: PROCESSED CONTENTS]
+////    for path in paths {
+////        let config = LeafConfig(tags: .default(), viewsDir: path, shouldCache: false)
+////        let renderer = LeafRenderer(config: config, using: ctx.container)
+////
+////        let data = Data(bytes: file.utf8)
+////        let rendered = renderer.render(template: data, ["name": "context"])
+////    }
+//    print("")
+//}
+//
+//class Processor {
+//    let path: String
+//    private let files: FileManager = .default
+//
+//    init(path: String) throws {
+//        self.path = path
+//        guard files.isDirectory(path: path) else {
+//            throw "expected to find a template folder at: " + path
+//        }
 //    }
-    print("")
-}
-
-class Processor {
-    let path: String
-    private let files: FileManager = .default
-
-    init(path: String) throws {
-        self.path = path
-        guard files.isDirectory(path: path) else {
-            throw "expected to find a template folder at: " + path
-        }
-    }
-
-    func process() throws {
-
-    }
-}
+//
+//    func process() throws {
+//
+//    }
+//}
 
 //struct ProcessTemplate: Command {
 //    /// See `Command`.
