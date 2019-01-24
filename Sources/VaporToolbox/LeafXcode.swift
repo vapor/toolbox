@@ -190,13 +190,13 @@ struct NewProjectConfig: Content {
     var swiftVersion = "4.1"
     var dependencies: [Dependency] = [vaporDependency, leafDependency]
 }
-
-struct TemplateVariable: Content {
-    let `var`: String
-    let question: String
-    let choices: [String]?
-    let `default`: String?
-}
+//
+//struct TemplateVariable: Content {
+//    let `var`: String
+//    let question: String
+//    let choices: [String]?
+//    let `default`: String?
+//}
 
 
 public struct LeafGroup: CommandGroup {
@@ -216,18 +216,6 @@ public struct LeafGroup: CommandGroup {
     /// See `CommandGroup`.
     public func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
         return ctx.done
-//        ctx.console.info("Welcome to Cloud.")
-//        ctx.console.output("Use `vapor cloud -h` to see commands.")
-//        let cloud = [
-//            "   _  _         ",
-//            "  ( `   )_      ",
-//            " (    )    `)   ",
-//            "(_   (_ .  _) _)",
-//            "                ",
-//            ]
-//        let centered = ctx.console.center(cloud)
-//        centered.map { $0.consoleText() } .forEach(ctx.console.output)
-//        return .done(on: ctx.container)
     }
 }
 
@@ -527,81 +515,81 @@ class Processor {
     }
 }
 
-struct ProcessTemplate: Command {
-    /// See `Command`.
-    var arguments: [CommandArgument] = [
-        .argument(name: "path", help: ["path to the folder containing a template"])
-    ]
+//struct ProcessTemplate: Command {
+//    /// See `Command`.
+//    var arguments: [CommandArgument] = [
+//        .argument(name: "path", help: ["path to the folder containing a template"])
+//    ]
+//
+//    /// See `Command`.
+//    var options: [CommandOption] = []
+//
+//    /// See `Command`.
+//    var help: [String] = ["generates xcode projects for spm packages."]
+//
+//    /// See `Command`.
+//    func run(using ctx: CommandContext) throws -> Future<Void> {
+//        let raw = try ctx.argument("path")
+//        // expand `~` for example
+//        let path = try Shell.bash("echo \(raw)")
+//        guard FileManager.default.isDirectory(path: path) else {
+//            throw "expected to find a template folder at: " + path
+//        }
+//
+//        let package = try ctx.loadLeafData(path: path)
+//
+//        let file: String =  { fatalError() }()
+//        let config = LeafConfig(tags: .default(), viewsDir: path, shouldCache: false)
+//        let renderer = LeafRenderer(config: config, using: ctx.container)
+//
+//        let data = Data(bytes: file.utf8)
+//        let rendered = renderer.render(template: data, ["name": "context"])
+//        return rendered.map { view in
+//            print(view)
+//            let str = String(bytes: view.data, encoding: .utf8)
+//            print(str)
+//            ctx.console.output("got file:")
+//            ctx.console.output(file.consoleText())
+//        }
+//
+//        print("Made package")
+//        print(package)
+//        return ctx.done
+//    }
+//}
 
-    /// See `Command`.
-    var options: [CommandOption] = []
-
-    /// See `Command`.
-    var help: [String] = ["generates xcode projects for spm packages."]
-
-    /// See `Command`.
-    func run(using ctx: CommandContext) throws -> Future<Void> {
-        let raw = try ctx.argument("path")
-        // expand `~` for example
-        let path = try Shell.bash("echo \(raw)")
-        guard FileManager.default.isDirectory(path: path) else {
-            throw "expected to find a template folder at: " + path
-        }
-
-        let package = try ctx.loadLeafData(path: path)
-
-        let file: String =  { fatalError() }()
-        let config = LeafConfig(tags: .default(), viewsDir: path, shouldCache: false)
-        let renderer = LeafRenderer(config: config, using: ctx.container)
-
-        let data = Data(bytes: file.utf8)
-        let rendered = renderer.render(template: data, ["name": "context"])
-        return rendered.map { view in
-            print(view)
-            let str = String(bytes: view.data, encoding: .utf8)
-            print(str)
-            ctx.console.output("got file:")
-            ctx.console.output(file.consoleText())
-        }
-
-        print("Made package")
-        print(package)
-        return ctx.done
-    }
-}
 
 
+//extension CommandContext {
+//    func loadLeafData(path: String) throws -> [String: String] {
+//        let file = try Shell.readFile(path: path)
+//        let data = Data(bytes: file.utf8)
+//
+//        let foo = JSONDecoder()
+//        let tvs = try foo.decode([TemplateVariable].self, from: data)
+//        var package = [String: String]()
+//        try tvs.forEach { tv in
+//            let answer = try console.ask(tv)
+//            package[tv.var] = answer
+//        }
+//        return package
+//    }
+//}
 
-extension CommandContext {
-    func loadLeafData(path: String) throws -> [String: String] {
-        let file = try Shell.readFile(path: path)
-        let data = Data(bytes: file.utf8)
-
-        let foo = JSONDecoder()
-        let tvs = try foo.decode([TemplateVariable].self, from: data)
-        var package = [String: String]()
-        try tvs.forEach { tv in
-            let answer = try console.ask(tv)
-            package[tv.var] = answer
-        }
-        return package
-    }
-}
-
-extension Console {
-    func ask(_ tv: TemplateVariable) throws -> String {
-        if let choices = tv.choices {
-            return choose(tv.question.consoleText(), from: choices)
-        } else if let def = tv.default {
-            let question = tv.question + " (\(def) is default)"
-            let answer =  ask(question.consoleText())
-            if answer.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return def }
-            else { return def }
-        } else {
-            return ask(tv.question.consoleText())
-        }
-    }
-}
+//extension Console {
+//    func ask(_ tv: TemplateVariable) throws -> String {
+//        if let choices = tv.choices {
+//            return choose(tv.question.consoleText(), from: choices)
+//        } else if let def = tv.default {
+//            let question = tv.question + " (\(def) is default)"
+//            let answer =  ask(question.consoleText())
+//            if answer.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return def }
+//            else { return def }
+//        } else {
+//            return ask(tv.question.consoleText())
+//        }
+//    }
+//}
 
 // TODO: Xcode Additions
 // automatically add xcconfig
