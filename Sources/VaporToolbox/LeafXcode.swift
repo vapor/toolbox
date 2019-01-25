@@ -186,6 +186,7 @@ extension Array where Element == Seed.Answer {
 struct LeafRenderFolder: Command {
     /// See `Command`.
     var arguments: [CommandArgument] = [
+        // todo, this should maybe be optional, or `-p` and default to `./`
         .argument(name: "path", help: ["path to the file to process"])
     ]
 
