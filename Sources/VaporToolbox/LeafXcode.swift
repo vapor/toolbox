@@ -183,22 +183,31 @@ extension Array where Element == Seed.Answer {
     }
 }
 
+extension CommandOption {
+    static let path: CommandOption = .value(
+        name: "path",
+        short: "p",
+        default: "./",
+        help: ["the path to the folder that should be rendered. defaults to current path"]
+    )
+}
+
 struct LeafRenderFolder: Command {
     /// See `Command`.
-    var arguments: [CommandArgument] = [
-        // todo, this should maybe be optional, or `-p` and default to `./`
-        .argument(name: "path", help: ["path to the file to process"])
-    ]
+    var arguments: [CommandArgument] = []
 
     /// See `Command`.
-    var options: [CommandOption] = []
+    var options: [CommandOption] = [
+        .path
+    ]
 
     /// See `Command`.
     var help: [String] = ["leaf package stuff"]
 
     /// See `Command`.
     func run(using ctx: CommandContext) throws -> Future<Void> {
-        let raw = try ctx.argument("path")
+        let raw = ctx.options.value(.path) ?? "./"
+        
         // expand `~` for example
         let path = try Shell.bash("echo \(raw)")
         guard FileManager.default.isDirectory(path: path) else {
@@ -226,7 +235,6 @@ struct LeafRenderFolder: Command {
             let contents = try Shell.readFile(path: path)
             let data = Data(bytes: contents.utf8)
             let rendered = renderer.render(template: data, package).and(result: path)
-            print("rendering: \(path)")
             views.append(rendered)
         }
 

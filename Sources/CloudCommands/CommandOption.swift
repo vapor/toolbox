@@ -112,7 +112,7 @@ extension CommandOption {
         name: "path",
         short: "p",
         default: nil,
-        help: ["a custom path to they public key that should be pushed."]
+        help: ["a custom path to the public key that should be pushed."]
     )
     static let key: CommandOption = .value(
         name: "key",
@@ -138,7 +138,7 @@ extension CommandContext {
 }
 
 extension Dictionary where Key == String, Value == String {
-    func value(_ option: CommandOption) -> String? {
+    public func value(_ option: CommandOption) -> String? {
         return self[option.name]
     }
 }
