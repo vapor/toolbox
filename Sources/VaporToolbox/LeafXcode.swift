@@ -93,7 +93,7 @@ extension Seed.Exclusion {
     func matches(path: String) -> Bool {
         switch self {
         case .folder(let f):
-            return path.finished(with: "/").hasSuffix(f)
+            return path.finished(with: "/").contains(f)
         case .fileType(let t):
             return path.hasSuffix(t)
         case .file(let f):
@@ -226,6 +226,7 @@ struct LeafRenderFolder: Command {
             let contents = try Shell.readFile(path: path)
             let data = Data(bytes: contents.utf8)
             let rendered = renderer.render(template: data, package).and(result: path)
+            print("rendering: \(path)")
             views.append(rendered)
         }
 
