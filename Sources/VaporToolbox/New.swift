@@ -61,43 +61,52 @@ struct New: Command {
         ctx.console.output("created git repository.")
         
         // if leaf.seed file, render template here
-
-        // initialize
-        try Git.commit(
-            gitDir: gitDir,
-            workTree: workTree,
-            msg: "created new vapor project from template `\(gitUrl)`"
-        )
-        ctx.console.output("initialized project.")
-
-        // print the Droplet
-        return try PrintDroplet().run(using: ctx).flatMap {
-            let info = [
-                "project \"\(name)\" has been created.",
-                "type `cd \(name)` to enter the project directory.",
-                "use `vapor cloud deploy` and put your project LIVE!",
-                "enjoy!",
-            ]
-
-            //ctx.console.center(info)
-            info.forEach { line in
-                var command = false
-                for c in line {
-                    if c == "`" { command = !command }
-
-                    ctx.console.output(
-                        c.description,
-                        style: command && c != "`" ? .info : .plain,
-                        newLine: false
-                    )
-                }
-                ctx.console.output("", style: .plain, newLine: true)
-            }
-
-
-            return ctx.done
+        let seedPath = workTree.finished(with: "/") + "leaf.seed"
+        
+        let next: Future<Void>
+        if FileManager.default.fileExists(atPath: seedPath) {
+            next = try LeafRenderFolder().run(using: ctx)
+        } else {
+            next = Future.map(on: ctx.container) {}
         }
 
+        return next.flatMap {
+            // initialize
+            try Git.commit(
+                gitDir: gitDir,
+                workTree: workTree,
+                msg: "created new vapor project from template `\(gitUrl)`"
+            )
+            ctx.console.output("initialized project.")
+            
+            // print the Droplet
+            return try PrintDroplet().run(using: ctx).flatMap {
+                let info = [
+                    "project \"\(name)\" has been created.",
+                    "type `cd \(name)` to enter the project directory.",
+                    "use `vapor cloud deploy` and put your project LIVE!",
+                    "enjoy!",
+                    ]
+                
+                //ctx.console.center(info)
+                info.forEach { line in
+                    var command = false
+                    for c in line {
+                        if c == "`" { command = !command }
+                        
+                        ctx.console.output(
+                            c.description,
+                            style: command && c != "`" ? .info : .plain,
+                            newLine: false
+                        )
+                    }
+                    ctx.console.output("", style: .plain, newLine: true)
+                }
+                
+                
+                return ctx.done
+            }
+        }
     }
 
 }
