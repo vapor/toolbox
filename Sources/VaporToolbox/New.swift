@@ -65,7 +65,8 @@ struct New: Command {
         
         let next: Future<Void>
         if FileManager.default.fileExists(atPath: seedPath) {
-            next = try LeafRenderFolder().run(using: ctx)
+            let renderContext = CommandContext(console: ctx.console, arguments: [:], options: ["path": workTree], on: ctx.container)
+            next = try LeafRenderFolder().run(using: renderContext)
         } else {
             next = Future.map(on: ctx.container) {}
         }
