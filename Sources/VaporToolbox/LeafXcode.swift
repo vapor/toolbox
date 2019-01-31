@@ -24,10 +24,6 @@ public struct LeafGroup: CommandGroup {
 
 extension Seed {
     struct Question: Content {
-        struct MatchCondition: Content {
-            let `var`: String
-            let equals: String
-        }
         let `var`: String
         let display: String
         let choices: [String]?
