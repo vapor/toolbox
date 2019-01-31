@@ -59,6 +59,8 @@ struct New: Command {
         try Shell.delete("./\(name)/.git")
         let _ = try Git.create(gitDir: gitDir)
         ctx.console.output("created git repository.")
+        
+        // if leaf.seed file, render template here
 
         // initialize
         try Git.commit(
