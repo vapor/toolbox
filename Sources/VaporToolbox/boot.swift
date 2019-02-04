@@ -15,6 +15,10 @@ public func boot() -> Future<Application> {
     // for running quick exec tests
     commands.use(Test(), as: "test")
     commands.use(XcodeCommand(), as: "xcode")
+    commands.use(LeafGroup(), as: "leaf")
+//    commands.use(LeafXcodeCommand(), as: "leaf")
+//    commands.use(LoadLeafPackage(), as: "info")
+
     services.register(commands)
 
     return Application.asyncBoot(services: services)

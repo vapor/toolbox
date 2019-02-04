@@ -1,0 +1,5 @@
+- pull base template
+- pull sub templates
+- render sub templates
+- render base template w/ subtemplate data
+- cleanup
