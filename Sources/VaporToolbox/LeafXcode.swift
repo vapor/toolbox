@@ -33,6 +33,11 @@ extension Seed {
 }
 
 extension Seed {
+    struct ConditionalInclude: Codable {
+        let condition: Seed.Condition
+        let includes: [String]
+    }
+    
     enum Exclusion: Codable {
         // has trailing `/`, ie: `images/`
         case folder(String)
@@ -102,6 +107,7 @@ struct Seed: Content {
     let name: String
     let excludes: [Exclusion]
     let questions: [Question]
+    let conditionalIncludes: [ConditionalInclude]?
 }
 
 extension Seed {
@@ -249,7 +255,14 @@ struct LeafRenderFolder: Command {
             }
             
             try Shell.delete(seedPath)
-            // TODO: Delete Empty Folders
+            // TODO: Delete Empty Folders?
+        } .map {
+            try seed.conditionalIncludes?.forEach { include in
+                if answers.satisfy(include.condition) { return }
+                else {
+                    try include.includes.map { path.finished(with: "/") + $0 } .forEach(Shell.delete)
+                }
+            }
         }
     }
 }
