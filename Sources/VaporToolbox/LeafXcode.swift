@@ -11,7 +11,7 @@ public struct LeafGroup: CommandGroup {
 
     /// See `CommandGroup`.
     public var help: [String] = [
-        "leaf interactions"
+        "commands for interacting with leaf"
     ]
 
     public init() {}
