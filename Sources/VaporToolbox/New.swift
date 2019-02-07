@@ -131,7 +131,7 @@ enum Template {
 
     fileprivate func fullUrl() throws -> String {
         switch self {
-        case .default: return "https://github.com/vapor/api-template"
+        case .default: return "https://github.com/vapor/template"
         case .api: return "https://github.com/vapor/api-template"
         case .web: return "https://github.com/vapor/web-template"
         case .auth: return "https://github.com/vapor/auth-template"
