@@ -154,19 +154,3 @@ extension Array {
  +----------------------------------+---------+------------------------+----------------+
 
  */
-
-//extension String {
-//    public static var plain: ConsoleStyle { return .init(color: nil) }
-//
-//    /// Green text with no background.
-//    public static var success: ConsoleStyle { return .init(color: .green) }
-//
-//    /// Light blue text with no background.
-//    public static var info: ConsoleStyle { return .init(color: .cyan) }
-//
-//    /// Yellow text with no background.
-//    public static var warning: ConsoleStyle { return .init(color: .yellow) }
-//
-//    /// Red text with no background.
-//    public static var error: ConsoleStyle { return .init(color: .red) }
-//}
