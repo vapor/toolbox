@@ -1,27 +1,44 @@
+// swift-tools-version:4.2
 import PackageDescription
 
 let package = Package(
     name: "VaporToolbox",
-    targets: [
-        Target(name: "VaporToolbox", dependencies: ["Cloud", "Shared"]),
-        Target(name: "Executable", dependencies: ["VaporToolbox"]),
-        Target(name: "Cloud", dependencies: ["Shared"]),
-        Target(name: "Shared"),
-    ],
     dependencies: [
-        // Vapor Cloud clients.
-	.Package(url: "git@github.com:vapor-cloud/clients.git", majorVersion: 0, minor: 22),
-
-        // Core console protocol.
-        .Package(url: "https://github.com/vapor/console.git", majorVersion: 2),
-        
-        // JSON parsing / serializing.
-        .Package(url: "https://github.com/vapor/json.git", majorVersion: 2),
-        
-        // Vapor web framework.
-        .Package(url: "https://github.com/vapor/vapor.git", majorVersion: 2),
-        
-        // Redis
-        .Package(url: "https://github.com/vapor/redis.git", majorVersion: 2)
+        // 💧 A server-side Swift web framework.
+        .package(url: "https://github.com/vapor/vapor.git", from: "3.0.0"),
+        .package(url: "https://github.com/tanner0101/swift-syntax", .branch("static")),
+        .package(url: "https://github.com/vapor/leaf.git", from: "3.0.0"),
+        // ::vapor
+    ],
+    targets: [
+        // All of the commands and logic that powers the Vapor toolbox
+        .target(name: "VaporToolbox", dependencies: [
+            "LinuxTestsGeneration",
+           "Vapor",
+           "CloudCommands",
+           "Globals",
+           "Leaf",
+        ]),
+        .target(name: "LinuxTestsGeneration", dependencies: [
+            "SwiftSyntax",
+            "Globals",
+        ]),
+        .target(name: "CloudCommands", dependencies: [
+            "Vapor",
+            "CloudAPI",
+            "Globals",
+        ]),
+        .target(name: "CloudAPI", dependencies: [
+            "Vapor",
+            "Globals",
+        ]),
+        .target(name: "Globals", dependencies: [
+            "Vapor",
+        ]),
+        .testTarget(name: "LinuxTestsGenerationTests", dependencies: [
+            "LinuxTestsGeneration",
+        ]),
+        // Runnable module, executes the main command group.
+        .target(name: "Executable", dependencies: ["VaporToolbox"]),
     ]
 )
