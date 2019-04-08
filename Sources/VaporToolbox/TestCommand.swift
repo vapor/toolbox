@@ -13,6 +13,7 @@ struct Test: Command {
     ]
 
     func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
+        print("test ran")
         return ctx.done
     }
 }

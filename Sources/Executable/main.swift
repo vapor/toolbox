@@ -2,9 +2,7 @@ import Foundation
 import VaporToolbox
 import Vapor
 
-//try ASDF()
-//throw "done"
-let app = try boot().wait()
+let app = boot()
 
 do {
     try app.run().wait()

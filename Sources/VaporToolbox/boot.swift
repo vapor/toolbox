@@ -3,7 +3,7 @@ import CloudCommands
 import Globals
 
 /// Creates an Application to run.
-public func boot() -> EventLoopFuture<Application> {
+public func boot() -> Application {
     var services = Services.default()
 
     var commands = CommandConfig()
@@ -20,9 +20,8 @@ public func boot() -> EventLoopFuture<Application> {
 //    commands.use(LeafXcodeCommand(), as: "leaf")
 //    commands.use(LoadLeafPackage(), as: "info")
 
-    todo()
-//    services.register(commands)
+    services.register(CommandConfig.self, { _ in commands })
 
-    todo()
-//    return Application.asyncBoot(services: services)
+    
+    return Application(configure: { services })
 }
