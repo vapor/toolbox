@@ -1,4 +1,5 @@
 import Foundation
+import Globals
 
 struct XcodeBuild {
     static func derivedDataLocation(forProject project: String? = nil) throws -> String {
@@ -8,7 +9,8 @@ struct XcodeBuild {
             args.append(project)
         }
         args.append("-showBuildSettings")
-        let raw = try Process.execute("xcodebuild", args)
+//        let raw = try Process.execute("xcodebuild", args)
+        let raw: String = { todo() }()
         let buildSettings = raw.buildSettingsDictionary()
         guard let config = buildSettings["CONFIGURATION_BUILD_DIR"] else {
             throw "Unable to find value for CONFIGURATION_BUILD_DIR"

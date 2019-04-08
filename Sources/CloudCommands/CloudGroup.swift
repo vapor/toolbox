@@ -51,7 +51,7 @@ public struct CloudGroup: CommandGroup {
         ]
         let centered = ctx.console.center(cloud)
         centered.map { $0.consoleText() } .forEach(ctx.console.output)
-        return .done(on: ctx.container)
+        return ctx.done
     }
 }
 
@@ -89,26 +89,29 @@ struct LogsRunner: AuthorizedRunner {
         self.token = token
     }
 
-    func run() throws -> Future<Void> {
+    func run() throws -> EventLoopFuture<Void> {
         let app = try loadApp()
         let env = try loadEnv(for: app)
         return env.flatMap { env in
             let url = replicasUrl(with: env)
-            let access = CloudReplica.Access(
-                with: self.token,
-                baseUrl: url,
-                on: self.ctx.container
-            )
+            let access: ResourceAccess<CloudReplica>! = { todo() }()
+//            let access = CloudReplica.Access(
+//                with: self.token,
+//                baseUrl: url,
+//                on: self.ctx.container
+//            )
             let replicas = access.list()
             return replicas.flatMap { replicas in
                 let replicas = replicas.filter { $0.slug == "web" }
                 guard replicas.count == 1 else {
-                    throw "there should only ever be a single web type replica"
+                    return self.ctx.eventLoop.makeFailedFuture("there should only ever be a single web type replica")
                 }
                 let web = replicas[0]
 
                 let logsEndpoint = logsUrl(with: web)
-                let logs = CloudLogs.Access(with: self.token, baseUrl: logsEndpoint, on: self.ctx.container)
+                let logs: ResourceAccess<CloudLogs>! = { todo() }()
+//                let logs = CloudLogs.Access(with: self.token, baseUrl: logsEndpoint, on: self.ctx.container)
+                
                 // query
                 // lines -- default 200
                 // pod -- a specific pod

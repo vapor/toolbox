@@ -1,5 +1,6 @@
 import Vapor
 import CloudAPI
+import Globals
 
 struct ResetPassword: Command {
     /// See `Command`.
@@ -16,9 +17,10 @@ struct ResetPassword: Command {
     /// See `Command`.
     func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
         let e = ctx.load(.email)
-        return UserApi(on: ctx.container).reset(email: e).map { _ in
-            ctx.console.output("Password has been reset.".consoleText())
-            ctx.console.output("Check: \(e).".consoleText())
-        }
+        todo()
+//        return UserApi(on: ctx.container).reset(email: e).map { _ in
+//            ctx.console.output("Password has been reset.".consoleText())
+//            ctx.console.output("Check: \(e).".consoleText())
+//        }
     }
 }

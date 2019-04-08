@@ -1,8 +1,9 @@
 import Vapor
 import CloudCommands
+import Globals
 
 /// Creates an Application to run.
-public func boot() -> Future<Application> {
+public func boot() -> EventLoopFuture<Application> {
     var services = Services.default()
 
     var commands = CommandConfig()
@@ -19,7 +20,9 @@ public func boot() -> Future<Application> {
 //    commands.use(LeafXcodeCommand(), as: "leaf")
 //    commands.use(LoadLeafPackage(), as: "info")
 
-    services.register(commands)
+    todo()
+//    services.register(commands)
 
-    return Application.asyncBoot(services: services)
+    todo()
+//    return Application.asyncBoot(services: services)
 }

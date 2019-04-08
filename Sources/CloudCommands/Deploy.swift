@@ -64,7 +64,7 @@ extension AuthorizedRunner {
 
     // Get App
 
-    func loadApp() throws -> Future<CloudApp> {
+    func loadApp() throws -> EventLoopFuture<CloudApp> {
         let app = try loadCloudApp()
         app.success { app in
             self.ctx.console.output("App: " + app.name.consoleText() + ".")
@@ -72,20 +72,21 @@ extension AuthorizedRunner {
         return app
     }
 
-    private func loadCloudApp() throws -> Future<CloudApp> {
-        let access = CloudApp.Access(with: token, on: ctx.container)
-
-        if let slug = ctx.options.value(.app) {
-            return access.matching(slug: slug)
-        } else if Git.isGitRepository() {
-            return try getAppFromRepository()
-        } else {
-            let apps = access.list()
-            return ctx.select(from: apps)
-        }
+    private func loadCloudApp() throws -> EventLoopFuture<CloudApp> {
+        todo()
+//        let access = CloudApp.Access(with: token, on: ctx.container)
+//
+//        if let slug = ctx.options.value(.app) {
+//            return access.matching(slug: slug)
+//        } else if Git.isGitRepository() {
+//            return try getAppFromRepository()
+//        } else {
+//            let apps = access.list()
+//            return ctx.select(from: apps)
+//        }
     }
 
-    private func getAppFromRepository() throws -> Future<CloudApp> {
+    private func getAppFromRepository() throws -> EventLoopFuture<CloudApp> {
         if try Git.isCloudConfigured() {
             return try ctx.detectCloudApp(with: token)
         }
@@ -99,22 +100,25 @@ extension AuthorizedRunner {
         // call this again to trigger same error
         guard setNow else { return try ctx.detectCloudApp(with: token) }
 
-        return try RemoteSet().run(using: ctx).flatMap { return try self.ctx.detectCloudApp(with: self.token) }
+        todo()
+//        return try RemoteSet().run(using: ctx).flatMap { return try self.ctx.detectCloudApp(with: self.token) }
     }
 
     // Environment
 
-    func loadEnv(for app: Future<CloudApp>) throws -> Future<CloudEnv> {
-        let env = app.flatMap(getDeployEnv)
-        env.success { env in
-            self.ctx.console.output("Environment: " + env.slug.consoleText() + ".")
-        }
-        return env
+    func loadEnv(for app: EventLoopFuture<CloudApp>) throws -> EventLoopFuture<CloudEnv> {
+        todo()
+//        let env = app.flatMap(getDeployEnv)
+//        env.success { env in
+//            self.ctx.console.output("Environment: " + env.slug.consoleText() + ".")
+//        }
+//        return env
     }
 
-    private func getDeployEnv(for app: CloudApp) throws -> Future<CloudEnv> {
-        let envs = app.environments(with: token, on: ctx.container)
-        return envs.map(self.choose)
+    private func getDeployEnv(for app: CloudApp) throws -> EventLoopFuture<CloudEnv> {
+        todo()
+//        let envs = app.environments(with: token, on: ctx.container)
+//        return envs.map(self.choose)
     }
 
     private func choose(from envs: [CloudEnv]) throws -> CloudEnv {
@@ -135,18 +139,19 @@ extension AuthorizedRunner {
     }
 
     // Branch
-    func loadBranch(with env: Future<CloudEnv>, cloudAction: String) throws -> Future<String> {
-        let branch = env.map { env -> String in
-            let branch = self.getCloudInteractionBranch(with: env)
-            try self.confirm(branch: branch, cloudAction: cloudAction)
-            return branch
-        }
-
-        branch.success { branch in
-            self.ctx.console.output("Branch: " + branch.consoleText() + ".")
-        }
-
-        return branch
+    func loadBranch(with env: EventLoopFuture<CloudEnv>, cloudAction: String) throws -> EventLoopFuture<String> {
+        todo()
+//        let branch = env.map { env -> String in
+//            let branch = self.getCloudInteractionBranch(with: env)
+//            try self.confirm(branch: branch, cloudAction: cloudAction)
+//            return branch
+//        }
+//
+//        branch.success { branch in
+//            self.ctx.console.output("Branch: " + branch.consoleText() + ".")
+//        }
+//
+//        return branch
     }
 
     private func getCloudInteractionBranch(with env: CloudEnv) -> String {
@@ -243,49 +248,55 @@ struct CloudDeployRunner: AuthorizedRunner {
 
         self.ctx = ctx
         self.token = token
-        self.access = CloudApp.Access(
-            with: token,
-            on: ctx.container
-        )
+        todo()
+//        self.access = CloudApp.Access(
+//            with: token,
+//            on: ctx.container
+//        )
     }
 
-    func run() throws -> Future<Void> {
+    func run() throws -> EventLoopFuture<Void> {
         let app = try loadApp()
         let env = try loadEnv(for: app)
         let branch = try loadBranch(with: env, cloudAction: "deploy")
 
         // If we should push first, insert push operation
-        let operation: Future<Void>
+        let operation: EventLoopFuture<Void>
         if ctx.flag(.push) {
             let push = try CloudPushRunner(ctx: ctx)
-            operation = branch.map(push.push)
+            todo()
+//            operation = branch.map(push.push)
+            todo()
         } else {
-            operation = Future.map(on: ctx.container) { }
+            operation = ctx.done
         }
 
         // Deploy
-        let deploy = operation.flatMap { env.and(branch).flatMap(self.createDeploy) }
-        return deploy.flatMap(monitor)
+        todo()
+//        let deploy = operation.flatMap { env.and(branch).flatMap(self.createDeploy) }
+//        return deploy.flatMap(monitor)
     }
 
-    private func monitor(_ activity: Activity) throws -> Future<Void> {
+    private func monitor(_ activity: Activity) throws -> EventLoopFuture<Void> {
         ctx.console.output("Connecting to deploy...")
-        return activity.listen(on: ctx.container) { update in
-            switch update {
-            case .connected:
-                // clear connecting
-                self.ctx.console.clear(.line)
-                self.ctx.console.output("Connected to deploy.")
-            case .message(let msg):
-                self.ctx.console.output(msg.consoleText())
-            case .close:
-                self.ctx.console.output("Disconnected.")
-            }
-        }
+        todo()
+//        return activity.listen(on: ctx.container) { update in
+//            switch update {
+//            case .connected:
+//                // clear connecting
+//                self.ctx.console.clear(.line)
+//                self.ctx.console.output("Connected to deploy.")
+//            case .message(let msg):
+//                self.ctx.console.output(msg.consoleText())
+//            case .close:
+//                self.ctx.console.output("Disconnected.")
+//            }
+//        }
     }
 
-    private func createDeploy(_ val: (env: CloudEnv, branch: String)) throws -> Future<Activity> {
-        return try val.env.deploy(branch: val.branch, with: token, on: ctx.container)
+    private func createDeploy(_ val: (env: CloudEnv, branch: String)) throws -> EventLoopFuture<Activity> {
+        todo()
+//        return try val.env.deploy(branch: val.branch, with: token, on: ctx.container)
     }
 }
 
@@ -305,18 +316,20 @@ struct CloudPushRunner: AuthorizedRunner {
 
         self.ctx = ctx
         self.token = token
-        self.access = CloudApp.Access(
-            with: token,
-            on: ctx.container
-        )
+        todo()
+//        self.access = CloudApp.Access(
+//            with: token,
+//            on: ctx.container
+//        )
     }
 
-    func run() throws -> Future<Void> {
+    func run() throws -> EventLoopFuture<Void> {
         let app = try loadApp()
         let env = try loadEnv(for: app)
         let branch = try loadBranch(with: env, cloudAction: "push")
         // Deploy
-        return branch.map(push)
+        todo()
+//        return branch.map(push)
     }
 
     func push(branch: String) throws {
@@ -331,19 +344,21 @@ struct CloudPushRunner: AuthorizedRunner {
     }
 }
 
-extension Future {
-    func success(_ run: @escaping (T) -> Void) {
-        addAwaiter { (result) in
-            guard case .success(let val) = result else { return }
-            run(val)
-        }
+extension EventLoopFuture {
+    func success(_ run: @escaping (Value) -> Void) {
+        todo()
+//        addAwaiter { (result) in
+//            guard case .success(let val) = result else { return }
+//            run(val)
+//        }
     }
 }
 extension CommandContext {
-    func detectCloudApp(with token: Token) throws -> Future<CloudApp> {
-        let access = CloudApp.Access(with: token, on: container)
-
-        let cloudGitUrl = try Git.cloudUrl()
-        return access.matching(cloudGitUrl: cloudGitUrl)
+    func detectCloudApp(with token: Token) throws -> EventLoopFuture<CloudApp> {
+        todo()
+//        let access = CloudApp.Access(with: token, on: container)
+//
+//        let cloudGitUrl = try Git.cloudUrl()
+//        return access.matching(cloudGitUrl: cloudGitUrl)
     }
 }

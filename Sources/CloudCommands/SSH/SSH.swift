@@ -20,6 +20,6 @@ public struct SSHGroup: CommandGroup {
     public func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
         ctx.console.info("Interact with SSH Keys on Vapor Cloud.")
         ctx.console.output("Use `vapor cloud ssh -h` to see commands.")
-        return .done(on: ctx.container)
+        return ctx.done
     }
 }

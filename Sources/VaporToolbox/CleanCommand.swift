@@ -18,10 +18,10 @@ struct CleanCommand: Command {
     var help: [String] = ["Cleans temporary files."]
 
     /// See `Command`.
-    func run(using ctx: CommandContext) throws -> Future<Void> {
+    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
         let cleaner = try Cleaner(ctx: ctx)
         try cleaner.run()
-        return .done(on: ctx.container)
+        return ctx.done
     }
 }
 
@@ -64,12 +64,13 @@ class Cleaner {
 
     private func cleanPackageResolved() throws -> CleanResult {
         guard files.contains("Package.resolved") else { return .notNecessary }
-        if ctx.options["update"]?.bool == true {
-            try Shell.delete("Package.resolved")
-            return .success
-        } else {
-            return .ignored("use [--update,-u] flag to remove this file during clean")
-        }
+        todo()
+//        if ctx.options["update"]?.bool == true {
+//            try Shell.delete("Package.resolved")
+//            return .success
+//        } else {
+//            return .ignored("use [--update,-u] flag to remove this file during clean")
+//        }
     }
 
     private func cleanBuildFolder() throws -> CleanResult {

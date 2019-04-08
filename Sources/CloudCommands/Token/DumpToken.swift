@@ -22,6 +22,6 @@ struct DumpToken: Command {
         ctx.console.output(token.id.uuidString.consoleText())
         ctx.console.info("Token: ", newLine: false)
         ctx.console.output(token.key.consoleText())
-        return .done(on: ctx.container)
+        return ctx.done
     }
 }

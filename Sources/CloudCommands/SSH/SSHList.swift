@@ -1,5 +1,6 @@
 import Vapor
 import CloudAPI
+import Globals
 
 struct SSHList: Command {
     /// See `Command`.
@@ -27,11 +28,12 @@ struct CloudSSHListRunner {
 
     init(ctx: CommandContext) throws {
         self.token = try Token.load()
-        self.api = SSHKeyApi(with: token, on: ctx.container)
+        todo()
+//        self.api = SSHKeyApi(with: token, on: ctx.container)
         self.ctx = ctx
     }
 
-    func run() -> Future<Void> {
+    func run() -> EventLoopFuture<Void> {
         let list = api.list()
         return list.map {
             self.log($0)

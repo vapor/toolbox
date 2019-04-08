@@ -18,7 +18,7 @@ struct GenerateLinuxMain: Command {
     var help: [String] = ["Generates LinuxMain.swift file"]
 
     /// See `Command`.
-    func run(using ctx: CommandContext) throws -> Future<Void> {
+    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
         let ignoredDirectories = ctx.options["ignored-directories"]?.components(separatedBy: ",") ?? []
         let cwd = try Shell.cwd()
         let testsDirectory = cwd.finished(with: "/") + "Tests"
@@ -30,6 +30,6 @@ struct GenerateLinuxMain: Command {
         ctx.console.output("Writing Tests/LinuxMain.swift..")
         try linuxMain.write()
         ctx.console.success("Generated Tests/LinuxMain.swift.")
-        return .done(on: ctx.container)
+        return ctx.done
     }
 }

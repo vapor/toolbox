@@ -1,6 +1,6 @@
 import Vapor
 import Globals
-import Leaf
+import LeafKit
 
 public struct LeafGroup: CommandGroup {
     public let commands: Commands = [
@@ -207,63 +207,64 @@ struct LeafRenderFolder: Command {
     var help: [String] = ["leaf package stuff"]
 
     /// See `Command`.
-    func run(using ctx: CommandContext) throws -> Future<Void> {
-        let raw = ctx.options.value(.path) ?? "./"
-        
-        // expand `~` for example
-        let path = try Shell.bash("echo \(raw)")
-        guard FileManager.default.isDirectory(path: path) else {
-            throw "expected a directory, got \(path)"
-        }
-
-        // MARK: Compile Package
-        let seedPath = path.finished(with: "/") + "leaf.seed"
-        let contents = try Shell.readFile(path: seedPath)
-        let data = Data(bytes: contents.utf8)
-        let decoder = JSONDecoder()
-        let seed = try decoder.decode(Seed.self, from: data)
-        let answers = try ctx.console.answer(seed.questions)
-        let package = answers.package()
-
-        // MARK: Collect Paths
-        let all = try FileManager.default.allFiles(at: path)
-        let config = LeafConfig(tags: .default(), viewsDir: path, shouldCache: false)
-        let renderer = LeafRenderer(config: config, using: ctx.container)
-        let paths = all.filter { !seed.excludes.shouldExclude(path: $0) }
-       
-        // MARK: Render Files
-        var views: [Future<(View, String)>] = []
-        for path in paths {
-            let contents = try Shell.readFile(path: path)
-            let data = Data(bytes: contents.utf8)
-            let rendered = renderer.render(template: data, package).and(result: path)
-            views.append(rendered)
-        }
-
-        // MARK: Write Files
-        let flat = views.flatten(on: ctx.container)
-        return flat.map { views in
-            for (view, path) in views {
-                let url = URL(fileURLWithPath: path)
-                guard let str = String(bytes: view.data, encoding: .utf8) else {
-                    fatalError("unable to create string") }
-                if str.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    try Shell.delete(path)
-                } else {
-                    try view.data.write(to: url)
-                }
-            }
-            
-            try Shell.delete(seedPath)
-            // TODO: Delete Empty Folders?
-        } .map {
-            try seed.conditionalIncludes?.forEach { include in
-                if answers.satisfy(include.condition) { return }
-                else {
-                    try include.includes.map { path.finished(with: "/") + $0 } .forEach(Shell.delete)
-                }
-            }
-        }
+    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
+        todo()
+//        let raw = ctx.options.value(.path) ?? "./"
+//
+//        // expand `~` for example
+//        let path = try Shell.bash("echo \(raw)")
+//        guard FileManager.default.isDirectory(path: path) else {
+//            throw "expected a directory, got \(path)"
+//        }
+//
+//        // MARK: Compile Package
+//        let seedPath = path.finished(with: "/") + "leaf.seed"
+//        let contents = try Shell.readFile(path: seedPath)
+//        let data = Data(bytes: contents.utf8)
+//        let decoder = JSONDecoder()
+//        let seed = try decoder.decode(Seed.self, from: data)
+//        let answers = try ctx.console.answer(seed.questions)
+//        let package = answers.package()
+//
+//        // MARK: Collect Paths
+//        let all = try FileManager.default.allFiles(at: path)
+//        let config = LeafConfig(tags: .default(), viewsDir: path, shouldCache: false)
+//        let renderer = LeafRenderer(config: config, using: ctx.container)
+//        let paths = all.filter { !seed.excludes.shouldExclude(path: $0) }
+//
+//        // MARK: Render Files
+//        var views: [Future<(View, String)>] = []
+//        for path in paths {
+//            let contents = try Shell.readFile(path: path)
+//            let data = Data(bytes: contents.utf8)
+//            let rendered = renderer.render(template: data, package).and(result: path)
+//            views.append(rendered)
+//        }
+//
+//        // MARK: Write Files
+//        let flat = views.flatten(on: ctx.container)
+//        return flat.map { views in
+//            for (view, path) in views {
+//                let url = URL(fileURLWithPath: path)
+//                guard let str = String(bytes: view.data, encoding: .utf8) else {
+//                    fatalError("unable to create string") }
+//                if str.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+//                    try Shell.delete(path)
+//                } else {
+//                    try view.data.write(to: url)
+//                }
+//            }
+//
+//            try Shell.delete(seedPath)
+//            // TODO: Delete Empty Folders?
+//        } .map {
+//            try seed.conditionalIncludes?.forEach { include in
+//                if answers.satisfy(include.condition) { return }
+//                else {
+//                    try include.includes.map { path.finished(with: "/") + $0 } .forEach(Shell.delete)
+//                }
+//            }
+//        }
     }
 }
 

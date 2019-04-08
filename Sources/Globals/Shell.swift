@@ -1,9 +1,14 @@
 import Vapor
 
+public func todo() -> Never {
+    fatalError()
+}
+
 public struct Shell {
     @discardableResult
     public static func bash(_ input: String) throws -> String {
-        return try Process.execute("/bin/sh", "-c", input)
+        todo()
+//        return try Process.execute("/bin/sh", "-c", input)
     }
 
     public static func delete(_ path: String) throws {

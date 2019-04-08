@@ -1,4 +1,5 @@
 import Vapor
+import Globals
 
 extension CommandOption {
     static let email: CommandOption = .value(
@@ -133,7 +134,8 @@ extension CommandContext {
     }
 
     func flag(_ option: CommandOption) -> Bool {
-        return options[option.name]?.bool == true
+        todo()
+//        return options[option.name]?.bool == true
     }
 }
 

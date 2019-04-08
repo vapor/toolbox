@@ -1,6 +1,10 @@
+import Globals
 
 extension String {
-    internal var trailSlash: String { return finished(with: "/") }
+    internal var trailSlash: String {
+        todo()
+//        return finished(with: "/")
+    }
 }
 
 let cloudBaseUrl = "https://api.v2.vapor.cloud/v2/"

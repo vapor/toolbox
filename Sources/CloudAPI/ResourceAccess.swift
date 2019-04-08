@@ -1,4 +1,5 @@
 import Vapor
+import Globals
 
 public struct ResourceAccess<T: Content> {
     public let token: Token
@@ -11,41 +12,41 @@ public struct ResourceAccess<T: Content> {
         self.container = container
     }
 
-    public func view() -> Future<T> {
+    public func view() -> EventLoopFuture<T> {
         let response = send(.GET, to: baseUrl)
         return response.become(T.self)
     }
 
-    public func view(id: String) -> Future<T> {
+    public func view(id: String) -> EventLoopFuture<T> {
         let url = self.baseUrl.trailSlash + id
         let response = send(.GET, to: url)
         return response.become(T.self)
     }
 
-    public func list(query: String? = nil) -> Future<[T]> {
+    public func list(query: String? = nil) -> EventLoopFuture<[T]> {
         let url = query.flatMap { baseUrl + "?" + $0 } ?? baseUrl
         let response = send(.GET, to: url)
         return response.become([T].self)
     }
 
-    public func create<U: Content>(_ content: U) -> Future<T> {
+    public func create<U: Content>(_ content: U) -> EventLoopFuture<T> {
         let response = send(.POST, to: baseUrl, with: content)
         return response.become(T.self)
     }
 
-    public func update<U: Content>(id: String, with content: U) -> Future<T> {
+    public func update<U: Content>(id: String, with content: U) -> EventLoopFuture<T> {
         let url = self.baseUrl.trailSlash + id
         let response = send(.PATCH, to: url, with: content)
         return response.become(T.self)
     }
 
-    public func replace(id: String, with content: T) -> Future<T> {
+    public func replace(id: String, with content: T) -> EventLoopFuture<T> {
         let url = self.baseUrl.trailSlash + id
         let response = send(.PUT, to: url, with: content)
         return response.become(T.self)
     }
 
-    public func delete(id: String) -> Future<Void> {
+    public func delete(id: String) -> EventLoopFuture<Void> {
         let url = self.baseUrl.trailSlash + id
         let response = send(.DELETE, to: url)
         return response.validate().void()
@@ -57,26 +58,28 @@ extension ResourceAccess {
         _ method: HTTPMethod,
         to url: URLRepresentable,
         with content: C
-    ) -> Future<Response> {
-        return send(method, to: url) { try $0.content.encode(content) }
+    ) -> EventLoopFuture<HTTPResponse> {
+        todo()
+//        return send(method, to: url) { try $0.content.encode(content) }
     }
 
     private func send(
         _ method: HTTPMethod,
         to url: URLRepresentable,
-        beforeSend: (Request) throws -> () = { _ in }
-    ) -> Future<Response> {
+        beforeSend: (HTTPRequest) throws -> () = { _ in }
+    ) -> EventLoopFuture<HTTPResponse> {
         // Headers
         var headers = HTTPHeaders()
         headers.add(name: .authorization, value: "Bearer \(token.key)")
         headers.add(name: .contentType, value: "application/json")
 
-        let client = FoundationClient.default(on: container)
-        let response = client.send(method, headers: headers, to: url, beforeSend: beforeSend)
-        return response.map { response in
-//            print("Got response:\n\(response)\n\n***")
-            return response
-        }
+        todo()
+//        let client = FoundationClient.default(on: container)
+//        let response = client.send(method, headers: headers, to: url, beforeSend: beforeSend)
+//        return response.map { response in
+////            print("Got response:\n\(response)\n\n***")
+//            return response
+//        }
     }
 }
 

@@ -1,5 +1,6 @@
 import Vapor
 import CloudAPI
+import Globals
 
 struct CloudSignup: Command {
     /// See `Command`.
@@ -25,17 +26,18 @@ struct CloudSignup: Command {
         let e = try ctx.loadAndDisplay(.email)
         let p = try ctx.loadAndDisplay(.password, secure: true)
 
-        let api = UserApi(on: ctx.container)
-        let user = api.signup(
-            email: e,
-            firstName: f,
-            lastName: l,
-            organizationName: o,
-            password: p
-        )
-        return user.map { _ in
-            ctx.console.output("Welcome to Cloud".consoleText(.info))
-        }
+        todo()
+//        let api = UserApi(on: ctx.container)
+//        let user = api.signup(
+//            email: e,
+//            firstName: f,
+//            lastName: l,
+//            organizationName: o,
+//            password: p
+//        )
+//        return user.map { _ in
+//            ctx.console.output("Welcome to Cloud".consoleText(.info))
+//        }
     }
 }
 

@@ -4,20 +4,16 @@ import Vapor
 
 //try ASDF()
 //throw "done"
+let app = try boot().wait()
 
 do {
-    let app = try boot().wait()
-    try app.run()
+    try app.run().wait()
 } catch let error as CommandError {
-    let term = Terminal()
+    let term = Terminal(on: app.eventLoopGroup.next())
     term.error("Error:")
     term.output(error.reason.consoleText())
-} catch let error as ProcessExecuteError {
-    let term = Terminal()
-    term.error("Error:")
-    term.output(error.stderr.consoleText())
 } catch {
-    let term = Terminal()
+    let term = Terminal(on: app.eventLoopGroup.next())
     term.error("Error:")
     term.output("\(error)".consoleText())
 }

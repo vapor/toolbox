@@ -1,4 +1,5 @@
 import Vapor
+import Globals
 
 public struct Activity: Content {
     public let id: UUID
@@ -20,7 +21,7 @@ extension CloudEnv {
         branch: String? = nil,
         with token: Token,
         on container: Container
-    ) throws -> Future<Activity> {
+    ) throws -> EventLoopFuture<Activity> {
         let access = CloudEnv.Access(with: token, baseUrl: environmentsUrl, on: container)
         let id = self.id.uuidString.trailSlash + "deploy"
         let package = [
@@ -28,12 +29,13 @@ extension CloudEnv {
         ]
 
         let deploy = access.update(id: id, with: package)
-        return deploy.map { env in
-            guard let activity = env.activity else {
-                throw "Unable to find deploy activity."
-            }
-            return activity
-        }
+        todo()
+//        return deploy.map { env in
+//            guard let activity = env.activity else {
+//                throw "Unable to find deploy activity."
+//            }
+//            return activity
+//        }
     }
 }
 
@@ -48,7 +50,7 @@ extension Activity {
         return "wss://api.v2.vapor.cloud/v2/activity/activities/\(id.uuidString)/channel"
     }
 
-    public func listen(on container: Container, _ listener: @escaping (Update) -> Void) -> Future<Void> {
+    public func listen(on container: Container, _ listener: @escaping (Update) -> Void) -> EventLoopFuture<Void> {
         let ws = makeWebSocketClient(url: wssUrl, on: container)
         return ws.flatMap { ws in
             listener(.connected)

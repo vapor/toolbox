@@ -21,7 +21,7 @@ public struct RemoteGroup: CommandGroup {
     public func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
         ctx.console.info("Interact with git remotes on Vapor Cloud.")
         ctx.console.output("Use `vapor cloud remote -h` to see commands.")
-        return .done(on: ctx.container)
+        return ctx.done
     }
 }
 
@@ -40,7 +40,7 @@ struct RemoteRemove: Command {
         try checkGit()
         try Git.removeRemote(named: "cloud")
         ctx.console.output("Removed Cloud repository.")
-        return .done(on: ctx.container)
+        return ctx.done
     }
 
     func checkGit() throws {
@@ -73,25 +73,26 @@ struct RemoteSet: Command {
         try checkGit()
 
         let token = try Token.load()
-        let access = CloudApp.Access(with: token, on: ctx.container)
-        let apps = access.list()
-        let app = ctx.select(from: apps)
-        return app.map { app in
-            try Git.setRemote(named: "cloud", url: app.gitURL)
-            ctx.console.output("Cloud repository configured.")
-            // TODO:
-            // Load environments and push branches?
-            ctx.console.pushEphemeral()
-            let push = ctx.console.confirm("Would you like to push to now?")
-            ctx.console.popEphemeral()
-            guard push else { return }
-
-            ctx.console.pushEphemeral()
-            ctx.console.output("Pushing `master` to cloud...")
-            try Git.pushCloud(branch: "master", force: false)
-            ctx.console.popEphemeral()
-            ctx.console.output("Pushed `master` to cloud.")
-        }
+        todo()
+//        let access = CloudApp.Access(with: token, on: ctx.container)
+//        let apps = access.list()
+//        let app = ctx.select(from: apps)
+//        return app.map { app in
+//            try Git.setRemote(named: "cloud", url: app.gitURL)
+//            ctx.console.output("Cloud repository configured.")
+//            // TODO:
+//            // Load environments and push branches?
+//            ctx.console.pushEphemeral()
+//            let push = ctx.console.confirm("Would you like to push to now?")
+//            ctx.console.popEphemeral()
+//            guard push else { return }
+//
+//            ctx.console.pushEphemeral()
+//            ctx.console.output("Pushing `master` to cloud...")
+//            try Git.pushCloud(branch: "master", force: false)
+//            ctx.console.popEphemeral()
+//            ctx.console.output("Pushed `master` to cloud.")
+//        }
     }
 
     func checkGit() throws {
@@ -111,13 +112,14 @@ struct RemoteSet: Command {
 }
 
 extension CommandContext {
-    func select(from apps: Future<[CloudApp]>) -> Future<CloudApp> {
-        return apps.map { apps in
-            if apps.isEmpty { throw "No apps found, visit https://dashboard.vapor.cloud/apps to create one." }
-            return self.console.choose("Which app?", from: apps) {
-                return $0.name.consoleText()
-            }
-        }
+    func select(from apps: EventLoopFuture<[CloudApp]>) -> EventLoopFuture<CloudApp> {
+        todo()
+//        return apps.map { apps in
+//            if apps.isEmpty { throw "No apps found, visit https://dashboard.vapor.cloud/apps to create one." }
+//            return self.console.choose("Which app?", from: apps) {
+//                return $0.name.consoleText()
+//            }
+//        }
     }
 }
 

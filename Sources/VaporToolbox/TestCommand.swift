@@ -13,6 +13,6 @@ struct Test: Command {
     ]
 
     func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
-        return .done(on: ctx.container)
+        return ctx.done
     }
 }

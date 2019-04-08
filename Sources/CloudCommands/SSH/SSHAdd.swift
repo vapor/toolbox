@@ -30,11 +30,12 @@ struct CloudSSHAddRunner {
 
     init(ctx: CommandContext) throws {
         self.token = try Token.load()
-        self.api = SSHKeyApi(with: token, on: ctx.container)
-        self.ctx = ctx
+        todo()
+//        self.api = SSHKeyApi(with: token, on: ctx.container)
+//        self.ctx = ctx
     }
 
-    func run() throws -> Future<Void> {
+    func run() throws -> EventLoopFuture<Void> {
         let k = try key()
         let n = name()
         ctx.console.output("Pushing SSH key...")
@@ -65,7 +66,7 @@ struct CloudSSHAddRunner {
         if let path = ctx.options.value(.path) { return path }
         let allKeys = try Shell.bash("ls  ~/.ssh/*.pub")
         let separated = allKeys.split(separator: "\n").map(String.init)
-        let term = Terminal()
+        let term = Terminal(on: ctx.eventLoop)
         return term.choose("Which key would you like to push?", from: separated)
     }
 }

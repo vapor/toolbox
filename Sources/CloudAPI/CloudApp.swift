@@ -1,4 +1,5 @@
 import Vapor
+import Globals
 
 public struct CloudApp: Content {
     public let updatedAt: Date
@@ -19,7 +20,7 @@ extension CloudApp {
 }
 
 extension CloudApp {
-    public func environments(with token: Token, on container: Container) -> Future<[CloudEnv]> {
+    public func environments(with token: Token, on container: Container) -> EventLoopFuture<[CloudEnv]> {
         let appEnvsUrl = applicationsUrl.trailSlash
             + id.uuidString.trailSlash
             + "environments"
@@ -29,21 +30,23 @@ extension CloudApp {
 }
 
 extension ResourceAccess where T == CloudApp {
-    public func matching(slug: String) -> Future<CloudApp> {
-        return list(query: "slug=\(slug)&exact=true").map { apps in
-            guard apps.count == 1 else {
-                throw "Unable to find app matching slug: \(slug)."
-            }
-            return apps[0]
-        }
+    public func matching(slug: String) -> EventLoopFuture<CloudApp> {
+        todo()
+//        return list(query: "slug=\(slug)&exact=true").map { apps in
+//            guard apps.count == 1 else {
+//                throw "Unable to find app matching slug: \(slug)."
+//            }
+//            return apps[0]
+//        }
     }
 
-    public func matching(cloudGitUrl: String) -> Future<CloudApp> {
+    public func matching(cloudGitUrl: String) -> EventLoopFuture<CloudApp> {
         let apps = list(query: "gitURL=\(cloudGitUrl)")
-        return apps.map { apps in
-            guard apps.count == 1 else { throw "No app found at \(cloudGitUrl)." }
-            return apps[0]
-        }
+        todo()
+//        return apps.map { apps in
+//            guard apps.count == 1 else { throw "No app found at \(cloudGitUrl)." }
+//            return apps[0]
+//        }
     }
 }
 
