@@ -208,41 +208,50 @@ struct LeafRenderFolder: Command {
 
     /// See `Command`.
     func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
-        todo()
-//        let raw = ctx.options.value(.path) ?? "./"
-//
-//        // expand `~` for example
-//        let path = try Shell.bash("echo \(raw)")
-//        guard FileManager.default.isDirectory(path: path) else {
-//            throw "expected a directory, got \(path)"
-//        }
-//
-//        // MARK: Compile Package
-//        let seedPath = path.finished(with: "/") + "leaf.seed"
-//        let contents = try Shell.readFile(path: seedPath)
-//        let data = Data(bytes: contents.utf8)
-//        let decoder = JSONDecoder()
-//        let seed = try decoder.decode(Seed.self, from: data)
-//        let answers = try ctx.console.answer(seed.questions)
-//        let package = answers.package()
-//
-//        // MARK: Collect Paths
-//        let all = try FileManager.default.allFiles(at: path)
-//        let config = LeafConfig(tags: .default(), viewsDir: path, shouldCache: false)
-//        let renderer = LeafRenderer(config: config, using: ctx.container)
-//        let paths = all.filter { !seed.excludes.shouldExclude(path: $0) }
-//
-//        // MARK: Render Files
-//        var views: [Future<(View, String)>] = []
-//        for path in paths {
+        let raw = ctx.options.value(.path) ?? "./"
+
+        // expand `~` for example
+        let path = try Shell.bash("echo \(raw)")
+        guard FileManager.default.isDirectory(path: path) else {
+            throw "expected a directory, got \(path)"
+        }
+
+        // MARK: Compile Package
+        let seedPath = path.finished(with: "/") + "leaf.seed"
+        let contents = try Shell.readFile(path: seedPath)
+        let data = Data(bytes: contents.utf8)
+        let decoder = JSONDecoder()
+        let seed = try decoder.decode(Seed.self, from: data)
+        let answers = try ctx.console.answer(seed.questions)
+        let package = answers.package()
+
+        // MARK: Collect Paths
+        let all = try FileManager.default.allFiles(at: path)
+        
+        let config = LeafConfig(rootDirectory: path)
+        let threadPool = NIOThreadPool(numberOfThreads: 1)
+        threadPool.start()
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        let renderer = LeafRenderer(config: config, threadPool: threadPool, eventLoop: ctx.eventLoop)
+        let paths = all.filter { !seed.excludes.shouldExclude(path: $0) }
+
+        // MARK: Render Files
+        var renders: [EventLoopFuture<(ByteBuffer, String)>] = []
+        for path in paths {
 //            let contents = try Shell.readFile(path: path)
 //            let data = Data(bytes: contents.utf8)
+            var data: [String: LeafData] = [:]
+            package.forEach { key, val in
+                data[key] = .string(val)
+            }
+            let rendered = renderer.render(path: path, context: data).and(value: path)
 //            let rendered = renderer.render(template: data, package).and(result: path)
-//            views.append(rendered)
-//        }
-//
-//        // MARK: Write Files
-//        let flat = views.flatten(on: ctx.container)
+            renders.append(rendered)
+        }
+
+        // MARK: Write Files
+                todo()
+//        let flat = renders.flatten(on: ctx.container)
 //        return flat.map { views in
 //            for (view, path) in views {
 //                let url = URL(fileURLWithPath: path)
