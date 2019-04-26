@@ -62,33 +62,31 @@ struct CloudGroup: CommandGroup {
 }
 
 struct Logs: Command {
-
-    var arguments: [CommandArgument] = []
-
-    /// See `Command`.
-    var options: [CommandOption] = [
-        .app,
-        .env,
-        .lines,
-        .showTimestamps,
-    ]
-
-    /// See `Command`.
-    var help: [String] = [
-        "get logs for your application."
-    ]
-
-    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
+    // definition
+    struct Signature: CommandSignature {
+        let app: Option = .app
+        let env: Option = .env
+        let lines: Option = .lines
+        let timestamps: Option = .showTimestamps
+    }
+    
+    // signature
+    let signature = Signature()
+    
+    // help
+    let help: String? = "get logs for your application."
+    
+    func run(using ctx: Context) throws {
         let runner = try LogsRunner(ctx: ctx)
         return try runner.run()
     }
 }
 
 struct LogsRunner: AuthorizedRunner {
-    let ctx: CommandContext
+    let ctx: AnyCommandContext
     let token: Token
 
-    init(ctx: CommandContext) throws {
+    init(ctx: AnyCommandContext) throws {
         let token = try Token.load()
 
         self.ctx = ctx

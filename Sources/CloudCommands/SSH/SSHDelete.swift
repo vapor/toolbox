@@ -3,14 +3,12 @@ import CloudAPI
 import Globals
 
 struct SSHDelete: Command {
+    struct Signature: CommandSignature {}
+    
     /// See `Command`.
-    var arguments: [CommandArgument] = []
-
-    /// See `Command`.
-    var options: [CommandOption] = []
-
-    /// See `Command`.
-    var help: [String] = ["Delete an SSH Key."]
+    let signature = Signature()
+    
+    let help: String? = "delete an ssh key from vapor cloud."
 
     /// See `Command`.
     func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {

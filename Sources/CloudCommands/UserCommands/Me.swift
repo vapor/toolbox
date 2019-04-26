@@ -3,18 +3,16 @@ import CloudAPI
 import Globals
 
 struct Me: Command {
+    struct Signature: CommandSignature {
+        let all: Option = .all
+    }
+    
     /// See `Command`.
-    var arguments: [CommandArgument] = []
+    let signature = Signature()
+    
+    let help: String? = "shows information about logged in user."
 
-    /// See `Command`.
-    var options: [CommandOption] = [
-        .all
-    ]
-
-    /// See `Command`.
-    var help: [String] = ["Shows information about user."]
-
-    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
+    func run(using ctx: Context) throws {
         let token = try Token.load()
         todo()
 //        let me = UserApi(on: ctx.container).me(token: token)

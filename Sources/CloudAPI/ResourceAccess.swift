@@ -59,27 +59,23 @@ extension ResourceAccess {
         to url: URLRepresentable,
         with content: C
     ) -> EventLoopFuture<ClientResponse> {
-        todo()
-//        return send(method, to: url) { try $0.content.encode(content) }
+        return send(method, to: url) { try $0.content.encode(content) }
     }
 
     private func send(
         _ method: HTTPMethod,
         to url: URLRepresentable,
-        beforeSend: (ClientRequest) throws -> () = { _ in }
+        beforeSend: (inout ClientRequest) throws -> () = { _ in }
     ) -> EventLoopFuture<ClientResponse> {
         // Headers
         var headers = HTTPHeaders()
         headers.add(name: .authorization, value: "Bearer \(token.key)")
         headers.add(name: .contentType, value: "application/json")
 
-        todo()
-//        let client = FoundationClient.default(on: container)
-//        let response = client.send(method, headers: headers, to: url, beforeSend: beforeSend)
-//        return response.map { response in
-////            print("Got response:\n\(response)\n\n***")
-//            return response
-//        }
+        let client: FoundationClient = { todo() }() // = FoundationClient.default(on: container)
+        var req = ClientRequest(method: method, url: url.convertToURL()!, headers: headers, body: nil)
+        try! beforeSend(&req)
+        return client.send(req).map(logResponse)
     }
 }
 
@@ -87,4 +83,12 @@ extension Content {
     public static func Access(with token: Token, baseUrl url: String, on container: Container) -> ResourceAccess<Self> {
         return ResourceAccess<Self>(token: token, baseUrl: url, on: container)
     }
+}
+
+
+let logResponses = true
+func logResponse(_ resp: ClientResponse) -> ClientResponse {
+    guard logResponses else { return resp }
+    print("Got response:\n\(resp)\n\n")
+    return resp
 }

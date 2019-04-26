@@ -12,31 +12,20 @@ extension Command {
 }
 
 struct CloudLogin: Command {
-    public struct Signature: CommandSignature {
-        public let email = Option.email
-        public let password = Option.password
+    struct Signature: CommandSignature {
+        let email: Option = .email
+        let password: Option = .password
     }
     
     /// See `Command`.
-    public let signature = Signature()
-    
-//    /// See `Command`.
-//    var arguments: [CommandArgument] = []
-//
-//    /// See `Command`.
-//    var options: [CommandOption] = [
-//        .email,
-//        .password
-//    ]
+    let signature = Signature()
 
-    /// See `Command`.
-    var help: String? = "logs into vapor cloud."
-//    var help: [String] = ["Logs into Vapor Cloud"]
+    let help: String? = "logs into vapor cloud."
 
     /// See `Command`.
     func run(using ctx: Context) throws {
-//        let e = ctx.load(.email)
-//        let p = ctx.load(.password, secure: true)
+        let e = ctx.load(.email)
+        let p = ctx.load(.password, secure: true)
         todo()
 //        let token = UserApi(on: ctx.container).login(email: e, password: p)
 //        return token.map { token in
