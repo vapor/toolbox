@@ -20,20 +20,18 @@ extension CloudEnv {
     public func deploy(
         branch: String? = nil,
         with token: Token
-    ) -> EventLoopFuture<Activity> {
+    ) throws -> Activity {
         let access = CloudEnv.Access(with: token, baseUrl: environmentsUrl)
         let id = self.id.uuidString.trailSlash + "deploy"
         let package = [
             "branch": branch ?? defaultBranch
         ]
 
-        let deploy = access.update(id: id, with: package)
-        return deploy.flatMapThrowing { env in
-            guard let activity = env.activity else {
-                throw "Unable to find deploy activity."
-            }
-            return activity
+        let env = try access.update(id: id, with: package)
+        guard let activity = env.activity else {
+            throw "Unable to find deploy activity."
         }
+        return activity
     }
 }
 

@@ -19,20 +19,20 @@ public struct SSHKeyApi {
         self.access = SSHKey.Access(with: token, baseUrl: gitSSHKeysUrl)
     }
 
-    public func add(name: String, key: String) -> EventLoopFuture<SSHKey> {
+    public func add(name: String, key: String) throws -> SSHKey {
         struct Package: Content {
             let name: String
             let key: String
         }
         let package = Package(name: name, key: key)
-        return access.create(package)
+        return try access.create(package)
     }
 
-    public func list() -> EventLoopFuture<[SSHKey]> {
-        return access.list()
+    public func list() throws -> [SSHKey] {
+        return try access.list()
     }
 
-    public func delete(_ key: SSHKey) -> EventLoopFuture<Void> {
-        return access.delete(id: key.id.uuidString)
+    public func delete(_ key: SSHKey) throws {
+        return try access.delete(id: key.id.uuidString)
     }
 }

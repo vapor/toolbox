@@ -20,31 +20,26 @@ extension CloudApp {
 }
 
 extension CloudApp {
-    public func environments(with token: Token) -> EventLoopFuture<[CloudEnv]> {
+    public func environments(with token: Token) -> [CloudEnv] {
         let appEnvsUrl = applicationsUrl.trailSlash
             + id.uuidString.trailSlash
             + "environments"
         let envAccess = CloudEnv.Access(with: token, baseUrl: appEnvsUrl)
-        return envAccess.list()
+        return try envAccess.list()
     }
 }
 
 extension ResourceAccess where T == CloudApp {
-    public func matching(slug: String) -> EventLoopFuture<CloudApp> {
-        return list(query: "slug=\(slug)&exact=true").flatMapThrowing { apps in
-            guard apps.count == 1 else {
-                throw "Unable to find app matching slug: \(slug)."
-            }
-            return apps[0]
-        }
+    public func matching(slug: String) throws -> CloudApp {
+        let apps = try list(query: "slug=\(slug)&exact=true")
+        guard apps.count == 1 else { throw "unable to find app matching slug: \(slug)" }
+        return apps[0]
     }
 
-    public func matching(cloudGitUrl: String) -> EventLoopFuture<CloudApp> {
-        let apps = list(query: "gitURL=\(cloudGitUrl)")
-        return apps.flatMapThrowing { apps in
-            guard apps.count == 1 else { throw "No app found at \(cloudGitUrl)." }
-            return apps[0]
-        }
+    public func matching(cloudGitUrl: String) throws -> CloudApp {
+        let apps = try list(query: "gitURL=\(cloudGitUrl)")
+        guard apps.count == 1 else { throw "No app found at \(cloudGitUrl)." }
+        return apps[0]
     }
 }
 
