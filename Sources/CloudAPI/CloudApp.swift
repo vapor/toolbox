@@ -14,39 +14,37 @@ public struct CloudApp: Content {
 }
 
 extension CloudApp {
-    public static func Access(with token: Token, on container: Container) -> ResourceAccess<CloudApp> {
-        return .init(token: token, baseUrl: applicationsUrl, on: container)
+    public static func Access(with token: Token) -> ResourceAccess<CloudApp> {
+        return .init(token: token, baseUrl: applicationsUrl)
     }
 }
 
 extension CloudApp {
-    public func environments(with token: Token, on container: Container) -> EventLoopFuture<[CloudEnv]> {
+    public func environments(with token: Token) -> EventLoopFuture<[CloudEnv]> {
         let appEnvsUrl = applicationsUrl.trailSlash
             + id.uuidString.trailSlash
             + "environments"
-        let envAccess = CloudEnv.Access(with: token, baseUrl: appEnvsUrl, on: container)
+        let envAccess = CloudEnv.Access(with: token, baseUrl: appEnvsUrl)
         return envAccess.list()
     }
 }
 
 extension ResourceAccess where T == CloudApp {
     public func matching(slug: String) -> EventLoopFuture<CloudApp> {
-        todo()
-//        return list(query: "slug=\(slug)&exact=true").map { apps in
-//            guard apps.count == 1 else {
-//                throw "Unable to find app matching slug: \(slug)."
-//            }
-//            return apps[0]
-//        }
+        return list(query: "slug=\(slug)&exact=true").flatMapThrowing { apps in
+            guard apps.count == 1 else {
+                throw "Unable to find app matching slug: \(slug)."
+            }
+            return apps[0]
+        }
     }
 
     public func matching(cloudGitUrl: String) -> EventLoopFuture<CloudApp> {
         let apps = list(query: "gitURL=\(cloudGitUrl)")
-        todo()
-//        return apps.map { apps in
-//            guard apps.count == 1 else { throw "No app found at \(cloudGitUrl)." }
-//            return apps[0]
-//        }
+        return apps.flatMapThrowing { apps in
+            guard apps.count == 1 else { throw "No app found at \(cloudGitUrl)." }
+            return apps[0]
+        }
     }
 }
 

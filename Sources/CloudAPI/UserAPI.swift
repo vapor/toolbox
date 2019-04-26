@@ -24,7 +24,7 @@ public struct UserApi {
         lastName: String,
         organizationName: String,
         password: String
-    ) -> EventLoopFuture<CloudUser> {
+    ) throws -> CloudUser {
         struct Package: Content {
             let email: String
             let firstName: String
@@ -39,17 +39,15 @@ public struct UserApi {
             organizationName: organizationName,
             password: password
         )
-
-        let client = makeClient(on: container)
-        todo()
-//        let response = client.send(.POST, to: userUrl) { try $0.content.encode(content) }
-//        return response.become(CloudUser.self)
+        
+        let req = try ClientRequest(method: .POST, url: userUrl, body: content)
+        return try makeClient().send(req).become(CloudUser.self).wait()
     }
 
     public func login(
         email: String,
         password: String
-    ) -> EventLoopFuture<Token> {
+    ) throws -> Token {
         let combination = email + ":" + password
         let data = combination.data(using: .utf8)!
         let encoded = data.base64EncodedString()
@@ -57,24 +55,23 @@ public struct UserApi {
         let headers: HTTPHeaders = [
             "Authorization": "Basic \(encoded)"
         ]
-        let client = makeClient(on: container)
+        let client = makeClient()
         let response = client.send(.POST, headers: headers, to: loginUrl)
-        return response.become(Token.self)
+        return try response.become(Token.self).wait()
     }
 
     public func me(token: Token) -> EventLoopFuture<CloudUser> {
-        let access = CloudUser.Access(with: token, baseUrl: meUrl, on: container)
+        let access = CloudUser.Access(with: token, baseUrl: meUrl)
         return access.view()
     }
 
-    public func reset(email: String) -> EventLoopFuture<Void> {
+    public func reset(email: String) throws {
         struct Package: Content {
             let email: String
         }
         let content = Package(email: email)
-        let client = makeClient(on: container)
-        todo()
-//        let response = client.send(.POST, to: resetUrl) { try $0.content.encode(content) }
-//        return response.validate().void()
+        
+        let req = try ClientRequest(method: .POST, url: resetUrl, body: content)
+        try makeClient().send(req).validate().void().wait()
     }
 }

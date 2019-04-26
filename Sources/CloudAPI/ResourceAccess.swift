@@ -4,12 +4,10 @@ import Globals
 public struct ResourceAccess<T: Content> {
     public let token: Token
     public let baseUrl: String
-    public let container: Container
 
-    init(token: Token, baseUrl: String, on container: Container) {
+    init(token: Token, baseUrl: String) {
         self.token = token
         self.baseUrl = baseUrl
-        self.container = container
     }
 
     public func view() -> EventLoopFuture<T> {
@@ -72,16 +70,25 @@ extension ResourceAccess {
         headers.add(name: .authorization, value: "Bearer \(token.key)")
         headers.add(name: .contentType, value: "application/json")
 
-        let client: FoundationClient = { todo() }() // = FoundationClient.default(on: container)
         var req = ClientRequest(method: method, url: url.convertToURL()!, headers: headers, body: nil)
         try! beforeSend(&req)
-        return client.send(req).map(logResponse)
+
+        return makeClient().send(req).map(logResponse)
+    }
+}
+
+extension ClientRequest {
+    init<C: Content>(method: HTTPMethod, url rep: URLRepresentable, headers: HTTPHeaders = [:], body: C) throws {
+        guard let url = rep.convertToURL() else { throw "unable to convert \(rep) to url" }
+        var req = ClientRequest(method: method, url: url, headers: headers, body: nil)
+        try req.content.encode(body)
+        self = req
     }
 }
 
 extension Content {
-    public static func Access(with token: Token, baseUrl url: String, on container: Container) -> ResourceAccess<Self> {
-        return ResourceAccess<Self>(token: token, baseUrl: url, on: container)
+    public static func Access(with token: Token, baseUrl url: String) -> ResourceAccess<Self> {
+        return ResourceAccess<Self>(token: token, baseUrl: url)
     }
 }
 

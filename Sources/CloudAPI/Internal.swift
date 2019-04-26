@@ -1,9 +1,11 @@
 import Vapor
 import Globals
 
-internal func makeClient(on container: Container) -> Client {
-    todo()
-//    return FoundationClient.default(on: container)
+let group = MultiThreadedEventLoopGroup(numberOfThreads: { todo() }())
+
+internal func makeClient() -> Client {
+    let next = group.next()
+    return FoundationClient(.shared, on: next)
 }
 
 internal func makeWebSocketClient(url: URLRepresentable, on container: Container) -> EventLoopFuture<WebSocket> {
@@ -14,19 +16,6 @@ internal func makeWebSocketClient(url: URLRepresentable, on container: Container
 private struct ResponseError: Content {
     let error: Bool
     let reason: String
-}
-
-extension EventLoopFuture {
-    public func _flatMap<NewValue>(file: StaticString = #file, line: UInt = #line, _ callback: @escaping (Value) throws -> EventLoopFuture<NewValue>) -> EventLoopFuture<NewValue> {
-        let wrapped: (Value) -> EventLoopFuture<NewValue> = { [unowned self] in
-            do {
-                return try callback($0)
-            } catch {
-                return self.eventLoop.makeFailedFuture(error)
-            }
-        }
-        return flatMap(wrapped)
-    }
 }
 
 extension EventLoopFuture where Value == ClientResponse {
@@ -69,18 +58,18 @@ extension EventLoopFuture where Value == ClientResponse {
             // pass along response for subsequent testing
             return response
         }
+    }
+}
 
-//        return flatMap { response in
-//            // Check if ErrorResponse (returns 200, but is error)
-//            let cloudError = try response.content.decode(ResponseError.self)
-//            return cloudError.mapIfError { cloudError in
-//                // if UNABLE to map ResponseError
-//                // then it is our object
-//                return ResponseError(error: false, reason: "")
-//            } .map { cloudError in
-//                if cloudError.error { throw cloudError.reason }
-//                return response
-//            }
-//        }
+extension EventLoopFuture {
+    public func _flatMap<NewValue>(file: StaticString = #file, line: UInt = #line, _ callback: @escaping (Value) throws -> EventLoopFuture<NewValue>) -> EventLoopFuture<NewValue> {
+        let wrapped: (Value) -> EventLoopFuture<NewValue> = { [unowned self] in
+            do {
+                return try callback($0)
+            } catch {
+                return self.eventLoop.makeFailedFuture(error)
+            }
+        }
+        return flatMap(wrapped)
     }
 }

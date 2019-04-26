@@ -11,7 +11,7 @@ struct SSHDelete: Command {
     let help: String? = "delete an ssh key from vapor cloud."
 
     /// See `Command`.
-    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
+    func run(using ctx: Context) throws {
         let runner = try SSHDeleteRunner(ctx: ctx)
         return runner.run()
     }
