@@ -12,13 +12,11 @@ public struct SSHKey: Content {
 
 public struct SSHKeyApi {
     public let token: Token
-    public let container: Container
     private let access: ResourceAccess<SSHKey>
 
-    public init(with token: Token, on container: Container) {
+    public init(with token: Token) {
         self.token = token
-        self.container = container
-        self.access = SSHKey.Access(with: token, baseUrl: gitSSHKeysUrl, on: container)
+        self.access = SSHKey.Access(with: token, baseUrl: gitSSHKeysUrl)
     }
 
     public func add(name: String, key: String) -> EventLoopFuture<SSHKey> {

@@ -19,23 +19,21 @@ public struct CloudEnv: Content {
 extension CloudEnv {
     public func deploy(
         branch: String? = nil,
-        with token: Token,
-        on container: Container
-    ) throws -> EventLoopFuture<Activity> {
-        let access = CloudEnv.Access(with: token, baseUrl: environmentsUrl, on: container)
+        with token: Token
+    ) -> EventLoopFuture<Activity> {
+        let access = CloudEnv.Access(with: token, baseUrl: environmentsUrl)
         let id = self.id.uuidString.trailSlash + "deploy"
         let package = [
             "branch": branch ?? defaultBranch
         ]
 
         let deploy = access.update(id: id, with: package)
-        todo()
-//        return deploy.map { env in
-//            guard let activity = env.activity else {
-//                throw "Unable to find deploy activity."
-//            }
-//            return activity
-//        }
+        return deploy.flatMapThrowing { env in
+            guard let activity = env.activity else {
+                throw "Unable to find deploy activity."
+            }
+            return activity
+        }
     }
 }
 
