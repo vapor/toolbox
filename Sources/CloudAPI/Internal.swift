@@ -16,7 +16,7 @@ private struct ResponseError: Content {
     let reason: String
 }
 
-extension EventLoopFuture where Value == HTTPResponse {
+extension EventLoopFuture where Value == ClientResponse {
 
     /// Clear the response
     /// Should ALWAYS (until you don't want to) call `validate()`
@@ -46,7 +46,7 @@ extension EventLoopFuture where Value == HTTPResponse {
     /// but I don't have a better way to map where
     /// contents might be A or B and need to move on
     /// will think about and revisit
-    internal func validate() -> EventLoopFuture<HTTPResponse> {
+    internal func validate() -> EventLoopFuture<ClientResponse> {
         todo()
 //        return flatMap { response in
 //            // Check if ErrorResponse (returns 200, but is error)

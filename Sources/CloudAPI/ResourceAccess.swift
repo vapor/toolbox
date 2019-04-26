@@ -58,7 +58,7 @@ extension ResourceAccess {
         _ method: HTTPMethod,
         to url: URLRepresentable,
         with content: C
-    ) -> EventLoopFuture<HTTPResponse> {
+    ) -> EventLoopFuture<ClientResponse> {
         todo()
 //        return send(method, to: url) { try $0.content.encode(content) }
     }
@@ -66,8 +66,8 @@ extension ResourceAccess {
     private func send(
         _ method: HTTPMethod,
         to url: URLRepresentable,
-        beforeSend: (HTTPRequest) throws -> () = { _ in }
-    ) -> EventLoopFuture<HTTPResponse> {
+        beforeSend: (ClientRequest) throws -> () = { _ in }
+    ) -> EventLoopFuture<ClientResponse> {
         // Headers
         var headers = HTTPHeaders()
         headers.add(name: .authorization, value: "Bearer \(token.key)")

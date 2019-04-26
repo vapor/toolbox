@@ -2,44 +2,51 @@ import Vapor
 import CloudAPI
 import Globals
 
-public struct CloudGroup: CommandGroup {
-    public let commands: Commands = [
+struct CloudGroup: CommandGroup {
+    /// See `CommandRunnable`.
+    struct Signature: CommandSignature { }
+    
+    /// See `CommandRunnable`.
+    let signature = Signature()
+    
+    /// See `CommandGroup`.
+    var commands: Commands = [
         // USER COMMANDS
         "login": CloudLogin(),
         "signup": CloudSignup(),
         "me": Me(),
         "reset-password": ResetPassword(),
-
+        
         // DIAGNOSTICS
         "dump-token": DumpToken(),
-
+        
         // SSH
         "ssh": SSHGroup(),
-
+        
         // DEPLOY
         "deploy": CloudDeploy(),
-
+        
         // Push
         "push": CloudPush(),
-
+        
         // REMOTE
         "remote": RemoteGroup(),
-
+        
         // LOGS
         "logs": Logs()
     ]
-
-    public let options: [CommandOption] = []
-
+    
     /// See `CommandGroup`.
-    public var help: [String] = [
-        "Interact with Vapor Cloud."
-    ]
-
-    public init() {}
-
+    var help: String?
+    
+    /// Creates a new `BasicCommandGroup`.
+    internal init(commands: Commands, help: String?) {
+        self.help = help
+        self.commands = commands
+    }
+    
     /// See `CommandGroup`.
-    public func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
+    func run(using ctx: CommandContext<CloudGroup>) throws {
         ctx.console.info("Welcome to Cloud.")
         ctx.console.output("Use `vapor cloud -h` to see commands.")
         let cloud = [
@@ -51,7 +58,6 @@ public struct CloudGroup: CommandGroup {
         ]
         let centered = ctx.console.center(cloud)
         centered.map { $0.consoleText() } .forEach(ctx.console.output)
-        return ctx.done
     }
 }
 
