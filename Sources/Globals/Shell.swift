@@ -1,6 +1,8 @@
 import Vapor
 
-public func todo() -> Never {
+public func todo(file: StaticString = #file) -> Never {
+    let file = file.description.split(separator: "/").last ?? "<>"
+    print("file: \(file)")
     fatalError()
 }
 

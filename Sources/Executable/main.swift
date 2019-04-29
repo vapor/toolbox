@@ -5,13 +5,14 @@ import Vapor
 let app = boot()
 
 do {
-    try app.run().wait()
+    try app.run()
+//    try app.run().wait()
 } catch let error as CommandError {
-    let term = Terminal(on: app.eventLoopGroup.next())
+    let term = Terminal()
     term.error("Error:")
     term.output(error.reason.consoleText())
 } catch {
-    let term = Terminal(on: app.eventLoopGroup.next())
+    let term = Terminal()
     term.error("Error:")
     term.output("\(error)".consoleText())
 }
