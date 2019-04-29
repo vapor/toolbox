@@ -7,7 +7,7 @@ extension Argument where Value == String {
 
 extension CommandContext {
     func arg<V: LosslessStringConvertible>(_ arg: Argument<V>) throws -> String {
-        guard let val = arguments.value(arg.name) else { throw "missing value for argument '\(arg.name)'" }
+        guard let val = arguments[arg.name] else { throw "missing value for argument '\(arg.name)'" }
         return val
     }
 }

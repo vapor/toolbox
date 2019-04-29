@@ -3,22 +3,23 @@ import Globals
 import LeafKit
 
 public struct LeafGroup: CommandGroup {
+    /// See `CommandRunnable`.
+    struct Signature: CommandSignature { }
+    
+    /// See `CommandRunnable`.
+    let signature = Signature()
+    
     public let commands: Commands = [
         "render": LeafRenderFolder()
     ]
 
-    public let options: [CommandOption] = []
-
-    /// See `CommandGroup`.
-    public var help: [String] = [
-        "commands for interacting with leaf"
-    ]
+    let help: String? = "commands for interacting with leaf."
 
     public init() {}
 
     /// See `CommandGroup`.
-    public func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
-        return ctx.done
+    public func run(using ctx: CommandContext<LeafGroup>) throws {
+        
     }
 }
 
@@ -185,30 +186,29 @@ extension Array where Element == Seed.Answer {
     }
 }
 
-extension CommandOption {
-    static let path: CommandOption = .value(
-        name: "path",
-        short: "p",
-        default: "./",
-        help: ["the path to the folder that should be rendered. defaults to current path"]
-    )
+extension Option where Value == String {
+    static let path: Option = .init(name: "path", short: "p", type: .value(default: "./"), help: "the path to the folder that should be rendered. defaults to working directory.")
 }
 
+//extension CommandOption {
+//    static let path: CommandOption = .value(
+//        name: "path",
+//        short: "p",
+//        default: "./",
+//        help: ["the path to the folder that should be rendered. defaults to current path"]
+//    )
+//}
+
 struct LeafRenderFolder: Command {
-    /// See `Command`.
-    var arguments: [CommandArgument] = []
+    struct Signature: CommandSignature {
+        let path: Option = .path
+    }
+    let signature = Signature()
+    let help: String? = "render a leaf template."
 
     /// See `Command`.
-    var options: [CommandOption] = [
-        .path
-    ]
-
-    /// See `Command`.
-    var help: [String] = ["leaf package stuff"]
-
-    /// See `Command`.
-    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
-        let raw = ctx.options.value(.path) ?? "./"
+    func run(using ctx: Context) throws {
+        let raw = ctx.load(.path)
 
         // expand `~` for example
         let path = try Shell.bash("echo \(raw)")
@@ -227,27 +227,28 @@ struct LeafRenderFolder: Command {
 
         // MARK: Collect Paths
         let all = try FileManager.default.allFiles(at: path)
-        
-        let config = LeafConfig(rootDirectory: path)
-        let threadPool = NIOThreadPool(numberOfThreads: 1)
-        threadPool.start()
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        let renderer = LeafRenderer(config: config, threadPool: threadPool, eventLoop: ctx.eventLoop)
-        let paths = all.filter { !seed.excludes.shouldExclude(path: $0) }
-
-        // MARK: Render Files
-        var renders: [EventLoopFuture<(ByteBuffer, String)>] = []
-        for path in paths {
-//            let contents = try Shell.readFile(path: path)
-//            let data = Data(bytes: contents.utf8)
-            var data: [String: LeafData] = [:]
-            package.forEach { key, val in
-                data[key] = .string(val)
-            }
-            let rendered = renderer.render(path: path, context: data).and(value: path)
-//            let rendered = renderer.render(template: data, package).and(result: path)
-            renders.append(rendered)
-        }
+ 
+        todo()
+//        let config = LeafConfig(rootDirectory: path)
+//        let threadPool = NIOThreadPool(numberOfThreads: 1)
+//        threadPool.start()
+//        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+//        let renderer = LeafRenderer(config: config, threadPool: threadPool, eventLoop: ctx.eventLoop)
+//        let paths = all.filter { !seed.excludes.shouldExclude(path: $0) }
+//
+//        // MARK: Render Files
+//        var renders: [EventLoopFuture<(ByteBuffer, String)>] = []
+//        for path in paths {
+////            let contents = try Shell.readFile(path: path)
+////            let data = Data(bytes: contents.utf8)
+//            var data: [String: LeafData] = [:]
+//            package.forEach { key, val in
+//                data[key] = .string(val)
+//            }
+//            let rendered = renderer.render(path: path, context: data).and(value: path)
+////            let rendered = renderer.render(template: data, package).and(result: path)
+//            renders.append(rendered)
+//        }
 
         // MARK: Write Files
                 todo()
