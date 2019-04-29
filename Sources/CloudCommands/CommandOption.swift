@@ -209,7 +209,7 @@ extension CommandContext {
 //        return value
 //    }
     
-    func load<V: LosslessStringConvertible>(_ opt: Option<V>, _ message: String? = nil, secure: Bool = false) -> V? {
+    func load<V: LosslessStringConvertible>(_ opt: Option<V>, _ message: String? = nil, secure: Bool = false) -> V {
         if let raw = self.options[opt.name] {
             return V.convertOrFail(raw)
         }

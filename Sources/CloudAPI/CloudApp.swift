@@ -20,7 +20,7 @@ extension CloudApp {
 }
 
 extension CloudApp {
-    public func environments(with token: Token) -> [CloudEnv] {
+    public func environments(with token: Token) throws -> [CloudEnv] {
         let appEnvsUrl = applicationsUrl.trailSlash
             + id.uuidString.trailSlash
             + "environments"

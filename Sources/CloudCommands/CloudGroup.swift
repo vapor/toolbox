@@ -82,11 +82,11 @@ struct Logs: Command {
     }
 }
 
-struct LogsRunner: AuthorizedRunner {
-    let ctx: AnyCommandContext
+struct LogsRunner<C: CommandRunnable>: AuthorizedRunner {
+    let ctx: CommandContext<C>
     let token: Token
 
-    init(ctx: AnyCommandContext) throws {
+    init(ctx: CommandContext<C>) throws {
         let token = try Token.load()
 
         self.ctx = ctx
@@ -98,41 +98,68 @@ struct LogsRunner: AuthorizedRunner {
         let env = try loadEnv(for: app)
         return env.flatMap { env in
             let url = replicasUrl(with: env)
-            let access: ResourceAccess<CloudReplica>! = { todo() }()
-//            let access = CloudReplica.Access(
-//                with: self.token,
-//                baseUrl: url,
-//                on: self.ctx.container
-//            )
-            let replicas = access.list()
-            return replicas.flatMap { replicas in
-                let replicas = replicas.filter { $0.slug == "web" }
-                guard replicas.count == 1 else {
-                    return self.ctx.eventLoop.makeFailedFuture("there should only ever be a single web type replica")
-                }
-                let web = replicas[0]
-
-                let logsEndpoint = logsUrl(with: web)
-                let logs: ResourceAccess<CloudLogs>! = { todo() }()
-//                let logs = CloudLogs.Access(with: self.token, baseUrl: logsEndpoint, on: self.ctx.container)
-                
-                // query
-                // lines -- default 200
-                // pod -- a specific pod
-                // timestamps -- whether to include timestamps
-                let timestamps = self.ctx.flag(.showTimestamps)
-                let lines = self.ctx.options.value(.lines) ?? "200"
-                let query = "lines=\(lines)&timestamps=\(timestamps.description)"
-                let list = logs.list(query: query)
-                return list.map { list in
-                    for log in list {
-                        self.ctx.console.output("pod: ", newLine: false)
-                        self.ctx.console.output(log.name.consoleText(.info))
-                        let output = log.logs + "\n"
-                        self.ctx.console.output(output.consoleText())
-                    }
+            let access = CloudReplica.Access(
+                with: self.token,
+                baseUrl: url
+            )
+            let replicas = try access.list()
+//            return replicas.flatMap { replicas in
+            let replicas = replicas.filter { $0.slug == "web" }
+            guard replicas.count == 1 else { throw "there should only ever be a single web type replica" }
+            let web = replicas[0]
+            
+            let logsEndpoint = logsUrl(with: web)
+//            let logs: ResourceAccess<CloudLogs>! = { todo() }()
+            let logs = CloudLogs.Access(with: self.token, baseUrl: logsEndpoint)
+            
+            // query
+            // lines -- default 200
+            // pod -- a specific pod
+            // timestamps -- whether to include timestamps
+            let timestamps = self.ctx.flag(.showTimestamps)
+            let lines = self.ctx.options.value(.lines) ?? "200"
+            let query = "lines=\(lines)&timestamps=\(timestamps.description)"
+            let list = logs.list(query: query)
+            return list.map { list in
+                for log in list {
+                    self.ctx.console.output("pod: ", newLine: false)
+                    self.ctx.console.output(log.name.consoleText(.info))
+                    let output = log.logs + "\n"
+                    self.ctx.console.output(output.consoleText())
                 }
             }
+            //            }
+            
+            
+            
+//            return replicas.flatMap { replicas in
+//                let replicas = replicas.filter { $0.slug == "web" }
+//                guard replicas.count == 1 else {
+//                    throw "there should only ever be a single web type replica"
+//                }
+//                let web = replicas[0]
+//
+//                let logsEndpoint = logsUrl(with: web)
+//                let logs: ResourceAccess<CloudLogs>! = { todo() }()
+////                let logs = CloudLogs.Access(with: self.token, baseUrl: logsEndpoint, on: self.ctx.container)
+//
+//                // query
+//                // lines -- default 200
+//                // pod -- a specific pod
+//                // timestamps -- whether to include timestamps
+//                let timestamps = self.ctx.flag(.showTimestamps)
+//                let lines = self.ctx.options.value(.lines) ?? "200"
+//                let query = "lines=\(lines)&timestamps=\(timestamps.description)"
+//                let list = logs.list(query: query)
+//                return list.map { list in
+//                    for log in list {
+//                        self.ctx.console.output("pod: ", newLine: false)
+//                        self.ctx.console.output(log.name.consoleText(.info))
+//                        let output = log.logs + "\n"
+//                        self.ctx.console.output(output.consoleText())
+//                    }
+//                }
+//            }
         }
     }
 }
