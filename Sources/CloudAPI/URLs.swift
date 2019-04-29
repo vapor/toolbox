@@ -2,8 +2,8 @@ import Globals
 
 extension String {
     internal var trailSlash: String {
-        todo()
-//        return finished(with: "/")
+        if hasSuffix("/") { return self }
+        else { return self + "/" }
     }
 }
 

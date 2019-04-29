@@ -35,6 +35,7 @@ let package = Package(
         .target(name: "CloudAPI", dependencies: [
             "Vapor",
             "Globals",
+            "NIOWebSocketClient"
         ]),
         .target(name: "Globals", dependencies: [
             "Vapor",

@@ -6,11 +6,42 @@ public func todo(file: StaticString = #file) -> Never {
     fatalError()
 }
 
+extension Process {
+    static func run(_ program: String, args: [String]) throws -> String {
+        let task = Process()
+        if #available(OSX 10.13, *) {
+            task.executableURL = URL(fileURLWithPath: program)
+        } else {
+            fatalError("yell at logan")
+        }
+        task.arguments = args
+        
+        let output = Pipe()
+        let error = Pipe()
+        task.standardOutput = output
+        task.standardError = error
+        
+        
+        if #available(OSX 10.13, *) {
+            try task.run()
+        } else {
+            fatalError("yell at logan")
+        }
+        
+        let outputData = output.fileHandleForReading.readDataToEndOfFile()
+        let errorData = error.fileHandleForReading.readDataToEndOfFile()
+        
+        let op = String(decoding: outputData, as: UTF8.self)
+        let err = String(decoding: errorData, as: UTF8.self)
+        guard err.isEmpty else { throw err }
+        return op
+    }
+}
+
 public struct Shell {
     @discardableResult
     public static func bash(_ input: String) throws -> String {
-        todo()
-//        return try Process.execute("/bin/sh", "-c", input)
+        return try Process.run("/bin/sh", args: ["-c", input])
     }
 
     public static func delete(_ path: String) throws {
