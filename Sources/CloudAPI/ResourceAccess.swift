@@ -100,7 +100,7 @@ extension Content {
 }
 
 
-let logResponses = true
+let logResponses = false
 extension ClientResponse {
     func logged() -> ClientResponse {
         guard logResponses else { return self }

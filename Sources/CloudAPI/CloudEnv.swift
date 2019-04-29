@@ -59,6 +59,8 @@ extension Activity {
         defer { try! client.syncShutdown() }
         
         let connection = client.connect(host: host, port: 80, uri: uri, headers: [:]) { ws in
+            listener(.connected)
+            print("connected")
             // Logs
             ws.onText { ws, text in
                 listener(.message(text))

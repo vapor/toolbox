@@ -113,8 +113,7 @@ public struct Git {
 
     @discardableResult
     private static func run(_ args: String...) throws -> String {
-        todo()
-//        return try Process.execute("git", args)
+        return try Process.run("git", args: args)
     }
 }
 

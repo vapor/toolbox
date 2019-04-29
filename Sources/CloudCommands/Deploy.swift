@@ -86,7 +86,7 @@ struct CloudPush: Command {
 extension CommandContext {
     func loadApp(with token: Token) throws -> CloudApp {
         let app = try loadCloudApp(with: token)
-        console.output("App: " + app.name.consoleText() + ".")
+        console.output("app: " + app.name.consoleText() + ".")
         return app
     }
     

@@ -33,15 +33,15 @@ struct CloudSSHAddRunner<C: CommandRunnable> {
     func run() throws {
         let k = try key()
         let n = name()
-        ctx.console.output("Pushing SSH key...")
+        ctx.console.output("pushing ssh key...")
         let created = try api.add(name: n, key: k)
-        self.ctx.console.output("Pushed key as \(created.name).".consoleText())
+        self.ctx.console.output("pushed key as \(created.name).".consoleText())
 //        return created.map { created in
 //        }
     }
 
     func name() -> String {
-        return ctx.load(.readableName, "Give your key a readable name")
+        return ctx.load(.readableName, "give your key a readable name")
     }
 
     func key() throws -> String {
@@ -62,6 +62,6 @@ struct CloudSSHAddRunner<C: CommandRunnable> {
         let allKeys = try Shell.bash("ls  ~/.ssh/*.pub")
         let separated = allKeys.split(separator: "\n").map(String.init)
         let term = Terminal()
-        return term.choose("Which key would you like to push?", from: separated)
+        return term.choose("which key would you like to push?", from: separated)
     }
 }
