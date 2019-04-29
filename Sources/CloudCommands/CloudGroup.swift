@@ -82,7 +82,7 @@ struct Logs: Command {
     }
 }
 
-struct LogsRunner<C: CommandRunnable>: AuthorizedRunner {
+struct LogsRunner<C: CommandRunnable> {//}: AuthorizedRunner {
     let ctx: CommandContext<C>
     let token: Token
 

@@ -1,34 +1,71 @@
 import Vapor
 import Globals
 
+extension Argument where Value == String {
+    static let name: Argument = .init(name: "name", help: "what to name your project.")
+}
+
+extension CommandContext {
+    func arg<V: LosslessStringConvertible>(_ arg: Argument<V>) throws -> String {
+        guard let val = arguments.value(arg.name) else { throw "missing value for argument '\(arg.name)'" }
+        return val
+    }
+}
+
+let templateHelp = [
+    "a specific template to use.",
+    "-t repo/template for github templates",
+    "-t full-url-here.git for non github templates",
+    "-t web to create a new web app",
+    "-t auth to create a new authenticated API app",
+    "-t api (default) to create a new API"
+] .joined(separator: "\n")
+
+extension Option where Value == String {
+    static let template: Option = .init(name: "template", short: "t", type: .value, help: templateHelp)
+    static let tag: Option = .init(name: "tag", short: "T", type: .value, help: "a specific template tag to use.")
+    static let branch: Option = .init(name: "branch", short: "b", type: .value, help: "a specific template branch to use.")
+}
+
 struct New: Command {
-    var arguments: [CommandArgument] = [
-        .argument(name: "name", help: ["What to name your project."])
-    ]
+    struct Signature: CommandSignature {
+        let name: Argument = .name
+        
+        // options
+        let template: Option = .template
+        let tag: Option = .tag
+        let branch: Option = .branch
+    }
+    let signature = Signature()
+    let help: String? = "creates a new vapor app from template. use 'vapor new MyName'."
+//
+//    var arguments: [CommandArgument] = [
+//        .argument(name: "name", help: ["What to name your project."])
+//    ]
+//
+//    /// See `Command`.
+//    var options: [CommandOption] = [
+//        .value(name: "template", short: "t", default: nil, help: [
+//            "a specific template to use.",
+//            "-t repo/template for github templates",
+//            "-t full-url-here.git for non github templates",
+//            "-t web to create a new web app",
+//            "-t auth to create a new authenticated API app",
+//            "-t api (default) to create a new API"
+//        ]),
+//        .value(name: "tag", short: nil, default: nil, help: ["a specific tag to use."]),
+//        .value(name: "branch", short: "b", default: nil, help: ["a specific brach to use."]),
+//
+//    ]
+//
+//    /// See `Command`.
+//    var help: [String] = [
+//        "creates a new vapor application from a template.",
+//        "use `vapor new NameOfYourApp`",
+//    ]
 
-    /// See `Command`.
-    var options: [CommandOption] = [
-        .value(name: "template", short: "t", default: nil, help: [
-            "a specific template to use.",
-            "-t repo/template for github templates",
-            "-t full-url-here.git for non github templates",
-            "-t web to create a new web app",
-            "-t auth to create a new authenticated API app",
-            "-t api (default) to create a new API"
-        ]),
-        .value(name: "tag", short: nil, default: nil, help: ["a specific tag to use."]),
-        .value(name: "branch", short: "b", default: nil, help: ["a specific brach to use."]),
-
-    ]
-
-    /// See `Command`.
-    var help: [String] = [
-        "creates a new vapor application from a template.",
-        "use `vapor new NameOfYourApp`",
-    ]
-
-    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
-        let name = try ctx.argument("name")
+    func run(using ctx: Context) throws {
+        let name = try ctx.arg(.name)
         let template = ctx.template()
         let gitUrl = try template.fullUrl()
 
@@ -45,7 +82,7 @@ struct New: Command {
         let workTree = "./\(name)"
 
         // Prioritize tag over branch
-        let checkout = ctx.options["tag"] ?? ctx.options["branch"]
+        let checkout = ctx.options.value(.tag) ?? ctx.options.value(.branch)
         if let checkout = checkout {
             let _ = try Git.checkout(
                 gitDir: gitDir,
@@ -62,18 +99,19 @@ struct New: Command {
         
         // if leaf.seed file, render template here
         let seedPath = workTree.finished(with: "/") + "leaf.seed"
+  
+        todo()
         
-        let next: EventLoopFuture<Void>
-        if FileManager.default.fileExists(atPath: seedPath) {
-            let renderContext = CommandContext(console: ctx.console, arguments: [:], options: ["path": workTree])
-            next = try LeafRenderFolder().run(using: renderContext)
-        } else {
-            next = ctx.done
-        }
-
-        return next.flatMap {
-            todo()
-            // initialize
+//        let next: EventLoopFuture<Void>
+//        if FileManager.default.fileExists(atPath: seedPath) {
+//            let renderContext = CommandContext(console: ctx.console, arguments: [:], options: ["path": workTree])
+//            next = try LeafRenderFolder().run(using: renderContext)
+//        } else {
+//            next = ctx.done
+//        }
+//
+//        return next.flatMap {
+//            // initialize
 //            try Git.commit(
 //                gitDir: gitDir,
 //                workTree: workTree,
@@ -108,7 +146,7 @@ struct New: Command {
 //
 //                return ctx.done
 //            }
-        }
+//        }
     }
 
 }
@@ -163,15 +201,11 @@ enum Template {
 }
 
 struct PrintDroplet: Command {
-    var arguments: [CommandArgument] = []
-
-    /// See `Command`.
-    var options: [CommandOption] = []
-
-    /// See `Command`.
-    var help: [String] = ["Prints a droplet."]
-
-    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
+    struct Signature: CommandSignature {}
+    let signature = Signature()
+    let help: String? = "prints a droplet."
+    
+    func run(using ctx: Context) throws {
         for line in ctx.console.center(asciiArt) {
             for character in line {
                 let style: ConsoleStyle
@@ -184,7 +218,6 @@ struct PrintDroplet: Command {
             }
             ctx.console.output("", style: .plain, newLine: true)
         }
-        return ctx.done
     }
 
 

@@ -1,6 +1,6 @@
 import Vapor
 
-public func drawTable(with ctx: CommandContext) {
+public func drawTable(with console: Console) {
     let zero: [ConsoleText] = [
         "x",
         "xcodeproj",
@@ -19,7 +19,7 @@ public func drawTable(with ctx: CommandContext) {
 
     let drawer = TableDrawer(rows: [zero, one, two])
     let table = drawer.drawTable()
-    ctx.console.output(table)
+    console.output(table)
 }
 
 class TableDrawer {

@@ -1,38 +1,32 @@
 import Vapor
 import Globals
 
+extension Option where Value == Bool {
+    static var update: Option = .init(name: "update", short: "u", type: .flag, help: "cleans Package.resolved file if it exists.")
+}
 /// Cleans temporary files created by Xcode and SPM.
 struct CleanCommand: Command {
+    struct Signature: CommandSignature {
+        let update: Option = .update
+    }
+    let signature = Signature()
+    let help: String? = "cleans temporary files."
+    
     /// See `Command`.
-    var arguments: [CommandArgument] = []
-
-    /// See `Command`.
-    var options: [CommandOption] = [
-        .flag(name: "update", short: "u", help: [
-            "Cleans the Package.resolved file if it exists",
-            "This is equivalent to doing `swift package update`"
-        ])
-    ]
-
-    /// See `Command`.
-    var help: [String] = ["Cleans temporary files."]
-
-    /// See `Command`.
-    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
+    func run(using ctx: Context) throws {
         let cleaner = try Cleaner(ctx: ctx)
         try cleaner.run()
-        return ctx.done
     }
 }
 
-class Cleaner {
-    let ctx: CommandContext
+class Cleaner<C: CommandRunnable> {
+    let ctx: CommandContext<C>
     let cwd: String
     let files: String
 
     var operations: [String: CleanResult] = [:]
 
-    init(ctx: CommandContext) throws {
+    init(ctx: CommandContext<C>) throws {
         self.ctx = ctx
         let cwd = try Shell.cwd()
         self.cwd = cwd.finished(with: "/")
@@ -64,13 +58,12 @@ class Cleaner {
 
     private func cleanPackageResolved() throws -> CleanResult {
         guard files.contains("Package.resolved") else { return .notNecessary }
-        todo()
-//        if ctx.options["update"]?.bool == true {
-//            try Shell.delete("Package.resolved")
-//            return .success
-//        } else {
-//            return .ignored("use [--update,-u] flag to remove this file during clean")
-//        }
+        if ctx.flag(.update) {
+            try Shell.delete("Package.resolved")
+            return .success
+        } else {
+            return .ignored("use [--update,-u] flag to remove this file during clean")
+        }
     }
 
     private func cleanBuildFolder() throws -> CleanResult {

@@ -11,19 +11,15 @@ import Globals
 //
 // Generates an Xcode project
 struct XcodeCommand: Command {
+    struct Signature: CommandSignature {}
+    let signature = Signature()
+    let help: String? = "generates xcode projects for spm packages."
+    
     /// See `Command`.
-    var arguments: [CommandArgument] = []
-
-    /// See `Command`.
-    var options: [CommandOption] = []
-
-    /// See `Command`.
-    var help: [String] = ["generates xcode projects for spm packages."]
-
-    /// See `Command`.
-    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
-        ctx.console.output("generating xcodeproj...")
+    func run(using ctx: Context) throws {
+        ctx.console.output("generating xcodeproj..")
         todo()
+
 //        let generateProcess = Process.asyncExecute(
 //            "swift",
 //            ["package", "generate-xcodeproj"],

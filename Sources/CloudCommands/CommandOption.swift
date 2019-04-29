@@ -209,7 +209,7 @@ extension CommandContext {
 //        return value
 //    }
     
-    func load<V: LosslessStringConvertible>(_ opt: Option<V>, _ message: String? = nil, secure: Bool = false) -> V {
+    public func load<V: LosslessStringConvertible>(_ opt: Option<V>, _ message: String? = nil, secure: Bool = false) -> V {
         if let raw = self.options[opt.name] {
             return V.convertOrFail(raw)
         }
@@ -220,7 +220,7 @@ extension CommandContext {
         return V.convertOrFail(answer)
     }
     
-    func flag(_ opt: Option<Bool>) -> Bool {
+    public func flag(_ opt: Option<Bool>) -> Bool {
         return self.options[opt.name].flatMap(Bool.init) ?? false
     }
     

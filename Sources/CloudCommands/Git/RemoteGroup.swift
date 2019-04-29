@@ -3,73 +3,59 @@ import CloudAPI
 import Globals
 
 public struct RemoteGroup: CommandGroup {
+    public struct Signature: CommandSignature { }
+    public let signature = Signature()
+    
     public let commands: Commands = [
         "set": RemoteSet(),
         "remove": RemoteRemove(),
     ]
-
-    public let options: [CommandOption] = []
-
-    /// See `CommandGroup`.
-    public var help: [String] = [
-        "Interacts with git remotes on Vapor Cloud."
-    ]
+    
+    public let help: String? = "interacts with git remotes on vapor cloud."
 
     public init() {}
 
     /// See `CommandGroup`.
-    public func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
+    public func run(using ctx: CommandContext<RemoteGroup>) throws {
         ctx.console.info("Interact with git remotes on Vapor Cloud.")
         ctx.console.output("Use `vapor cloud remote -h` to see commands.")
-        return ctx.done
     }
 }
 
 struct RemoteRemove: Command {
-    /// See `Command`.
-    var arguments: [CommandArgument] = []
-
-    /// See `Command`.
-    var options: [CommandOption] = []
-
-    /// See `Command`.
-    var help: [String] = ["Unlink your local repository from a Cloud app."]
-
-    /// See `Command`.
-    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
+    struct Signature: CommandSignature { }
+    let signature = Signature()
+    let help: String? = "unlink your local repository from a vapor cloud app."
+    
+    
+    func run(using ctx: Context) throws {
         try checkGit()
         try Git.removeRemote(named: "cloud")
-        ctx.console.output("Removed Cloud repository.")
-        return ctx.done
+        ctx.console.output("removed cloud repository.")
     }
 
     func checkGit() throws {
         let isGit = Git.isGitRepository()
         guard isGit else {
-            throw "Not currently in a git repository."
+            throw "not currently in a git repository."
         }
 
         let alreadyConfigured = try Git.isCloudConfigured()
         if !alreadyConfigured {
-            throw "No Cloud repository configured."
+            throw "no cloud repository configured."
         }
     }
 }
 
 struct RemoteSet: Command {
-    /// See `Command`.
-    var arguments: [CommandArgument] = []
+    struct Signature: CommandSignature {
+        let app: Option = .app
+    }
+    let signature = Signature()
+    let help: String? = "link your local repo to a cloud app."
 
     /// See `Command`.
-    var options: [CommandOption] = [
-        .app
-    ]
-
-    /// See `Command`.
-    var help: [String] = ["Link your local repository to a Cloud app."]
-
-    /// See `Command`.
-    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
+    func run(using ctx: Context) throws {
         try checkGit()
 
         let token = try Token.load()

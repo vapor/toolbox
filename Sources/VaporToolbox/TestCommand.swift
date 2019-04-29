@@ -1,19 +1,11 @@
 import Vapor
 
 struct Test: Command {
+    struct Signature: CommandSignature {}
+    let signature = Signature()
+    let help: String? = "quick tests. probably don't call this. you shouldn't see it."
 
-    var arguments: [CommandArgument] = []
-
-    /// See `Command`.
-    var options: [CommandOption] = []
-
-    /// See `Command`.
-    var help: [String] = [
-        "Quick tests. Probably don't call this. It shouldn't be here."
-    ]
-
-    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
+    func run(using ctx: Context) throws {
         print("test ran")
-        return ctx.done
     }
 }

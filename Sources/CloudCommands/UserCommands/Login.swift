@@ -8,7 +8,7 @@ import Globals
 //}
 
 extension Command {
-    typealias Context = CommandContext<Self>
+    public typealias Context = CommandContext<Self>
 }
 
 struct CloudLogin: Command {
@@ -26,7 +26,10 @@ struct CloudLogin: Command {
     func run(using ctx: Context) throws {
         let e = ctx.load(.email)
         let p = ctx.load(.password, secure: true)
-        todo()
+        let token = try UserApi().login(email: e, password: p)
+        try token.save()
+        ctx.console.output("cloud is ready.".consoleText(.info))
+
 //        let token = UserApi(on: ctx.container).login(email: e, password: p)
 //        return token.map { token in
 //            try token.save()
