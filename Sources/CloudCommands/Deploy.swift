@@ -3,27 +3,39 @@ import CloudAPI
 import Globals
 
 struct CloudDeploy: Command {
-    /// See `Command`.
-    var arguments: [CommandArgument] = []
+    struct Signature: CommandSignature {
+        let app: Option = .app
+        let env: Option = .env
+        let branch: Option = .branch
+        let push: Option = .push
+        let force: Option = .force
+    }
+    
+    let signature = Signature()
+    
+    let help: String? = "deploy a cloud project."
+    
+//    /// See `Command`.
+//    var arguments: [CommandArgument] = []
+//
+//    /// See `Command`.
+//    var options: [CommandOption] = [
+//        .app,
+//        .env,
+//        .branch,
+//        .push,
+//        .force,
+//    ]
+//
+//    /// See `Command`.
+//    var help: [String] = [
+//        "Deploys a Vapory Project"
+//    ]
 
     /// See `Command`.
-    var options: [CommandOption] = [
-        .app,
-        .env,
-        .branch,
-        .push,
-        .force,
-    ]
-
-    /// See `Command`.
-    var help: [String] = [
-        "Deploys a Vapory Project"
-    ]
-
-    /// See `Command`.
-    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
+    func run(using ctx: CommandContext) throws {//} -> EventLoopFuture<Void> {
         let runner = try CloudDeployRunner(ctx: ctx)
-        return try runner.run()
+        try runner.run()
     }
 }
 
@@ -69,13 +81,13 @@ extension CommandContext {
     
     private func loadCloudApp(with token: Token) throws -> CloudApp {
         let access = CloudApp.Access(with: token)
-        if let slug = self.load(.app) {
-            return access.matching(slug: slug)
+        if let slug = self.options.value(.app) {
+            return try access.matching(slug: slug)
         } else if Git.isGitRepository() {
             return try getAppFromRepository(with: token)
         } else {
-            let list = access.list()
-            return select(from: apps)
+            let list = try access.list()
+            return select(from: list)
         }
     }
     
@@ -525,11 +537,10 @@ extension EventLoopFuture {
     }
 }
 extension CommandContext {
-    func detectCloudApp(with token: Token) throws -> EventLoopFuture<CloudApp> {
-        todo()
-//        let access = CloudApp.Access(with: token, on: container)
-//
-//        let cloudGitUrl = try Git.cloudUrl()
-//        return access.matching(cloudGitUrl: cloudGitUrl)
+    func detectCloudApp(with token: Token) throws -> CloudApp {
+//        todo()
+        let access = CloudApp.Access(with: token)
+        let cloudGitUrl = try Git.cloudUrl()
+        return try access.matching(cloudGitUrl: cloudGitUrl)
     }
 }
