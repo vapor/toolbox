@@ -72,7 +72,7 @@ private extension ClientResponse {
     }
 }
 
-internal func makeWebSocketClient(url: URLRepresentable, on container: Container) -> EventLoopFuture<WebSocket> {
+internal func makeWebSocketClient(url: URLRepresentable) -> WebSocket {
     todo()
 //    return makeClient(on: container).webSocket(url)
 }

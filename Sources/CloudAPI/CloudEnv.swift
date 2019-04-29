@@ -1,5 +1,6 @@
 import Vapor
 import Globals
+import NIOWebSocketClient
 
 public struct Activity: Content {
     public let id: UUID
@@ -45,21 +46,59 @@ extension Activity {
     private var wssUrl: String {
         return "wss://api.v2.vapor.cloud/v2/activity/activities/\(id.uuidString)/channel"
     }
-
-    public func listen(on container: Container, _ listener: @escaping (Update) -> Void) -> EventLoopFuture<Void> {
-        let ws = makeWebSocketClient(url: wssUrl, on: container)
-        return ws.flatMap { ws in
-            listener(.connected)
-
+    
+    private var host: String {
+        return "api.v2.vapor.cloud"
+    }
+    private var uri: String {
+        return "/v2/activity/activities/\(id.uuidString)/channel"
+    }
+    
+    public func listen(_ listener: @escaping (Update) -> Void) throws {
+        let client = WebSocketClient(eventLoopGroupProvider: .createNew)
+        defer { try! client.syncShutdown() }
+        
+        let connection = client.connect(host: host, port: 80, uri: uri, headers: [:]) { ws in
             // Logs
             ws.onText { ws, text in
                 listener(.message(text))
             }
-
+            
             // Close
-            return ws.onClose.map {
+            let _ = ws.onClose.map {
                 listener(.close)
             }
         }
+        try connection.wait()
     }
+    
+    public func _listen(_ listener: @escaping (Update) -> Void){
+        let ws = makeWebSocketClient(url: wssUrl)
+        listener(.connected)
+        
+        // Logs
+        ws.onText { ws, text in
+            listener(.message(text))
+        }
+        
+        // Close
+        let _ = ws.onClose.map {
+            listener(.close)
+        }
+    }
+}
+
+func testExample() throws {
+//    let client = WebSocketClient(eventLoopGroupProvider: .createNew)
+//    defer { try! client.syncShutdown() }
+//    let url: URL! = nil
+//    client.connect(host: "api", port: , uri: "", headers: , onUpgrade: )
+//    try client.connect(host: "echo.websocket.org", port: 80) { webSocket in
+//        webSocket.send(text: "Hello")
+//        webSocket.onText { webSocket, string in
+//            print(string)
+////            XCTAssertEqual(string, "Hello")
+//            webSocket.close(promise: nil)
+//        }
+//        }.wait()
 }

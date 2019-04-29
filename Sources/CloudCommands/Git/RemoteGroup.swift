@@ -59,7 +59,26 @@ struct RemoteSet: Command {
         try checkGit()
 
         let token = try Token.load()
-        todo()
+        let access = CloudApp.Access(with: token)
+        let apps = try access.list()
+        let app = try ctx.select(from: apps)
+        try Git.setRemote(named: "cloud", url: app.gitURL)
+        ctx.console.output("cloud repository configured.")
+        // TODO:
+        // Load environments and push branches?
+        ctx.console.pushEphemeral()
+        let push = ctx.console.confirm("would you like to push to now?")
+        ctx.console.popEphemeral()
+        guard push else { return }
+        
+        ctx.console.pushEphemeral()
+        ctx.console.output("pushing `master` to cloud...")
+        try Git.pushCloud(branch: "master", force: false)
+        ctx.console.popEphemeral()
+        ctx.console.output("pushed `master` to cloud.")
+//        return app.map { app in
+//        }
+        
 //        let access = CloudApp.Access(with: token, on: ctx.container)
 //        let apps = access.list()
 //        let app = ctx.select(from: apps)

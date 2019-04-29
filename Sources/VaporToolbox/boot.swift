@@ -16,7 +16,7 @@ public func boot() -> Application {
     // for running quick exec tests
     commands.use(Test(), as: "test")
     commands.use(XcodeCommand(), as: "xcode")
-//    commands.use(LeafGroup(), as: "leaf")
+    commands.use(LeafGroup(), as: "leaf")
 //    commands.use(LeafXcodeCommand(), as: "leaf")
 //    commands.use(LoadLeafPackage(), as: "info")
 
