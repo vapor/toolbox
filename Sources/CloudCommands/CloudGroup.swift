@@ -2,15 +2,15 @@ import Vapor
 import CloudAPI
 import Globals
 
-struct CloudGroup: CommandGroup {
+public struct CloudGroup: CommandGroup {
     /// See `CommandRunnable`.
-    struct Signature: CommandSignature { }
+    public struct Signature: CommandSignature { }
     
     /// See `CommandRunnable`.
-    let signature = Signature()
+    public let signature = Signature()
     
     /// See `CommandGroup`.
-    var commands: Commands = [
+    public var commands: Commands = [
         // USER COMMANDS
         "login": CloudLogin(),
         "signup": CloudSignup(),
@@ -37,18 +37,15 @@ struct CloudGroup: CommandGroup {
     ]
     
     /// See `CommandGroup`.
-    var help: String?
+    public var help: String? = "cloouuuddddd"
     
     /// Creates a new `BasicCommandGroup`.
-    internal init(commands: Commands, help: String?) {
-        self.help = help
-        self.commands = commands
-    }
+    public init() {}
     
     /// See `CommandGroup`.
-    func run(using ctx: CommandContext<CloudGroup>) throws {
-        ctx.console.info("Welcome to Cloud.")
-        ctx.console.output("Use `vapor cloud -h` to see commands.")
+    public func run(using ctx: CommandContext<CloudGroup>) throws {
+        ctx.console.info("welcome to cloud.")
+        ctx.console.output("use `vapor cloud -h` to see commands.")
         let cloud = [
             "   _  _         ",
             "  ( `   )_      ",
