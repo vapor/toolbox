@@ -3,46 +3,41 @@ import Globals
 import CloudAPI
 
 struct SSHAdd: Command {
-    /// See `Command`.
-    var arguments: [CommandArgument] = []
+    struct Signature: CommandSignature {
+        let readableName: Option = .readableName
+        let path: Option = .path
+        let key: Option = .key
+    }
+    
+    let signature = Signature()
+    
+    let help: String? = "add an ssh key to cloud."
 
-    /// See `Command`.
-    var options: [CommandOption] = [
-        .readableName,
-        .path,
-        .key,
-    ]
-
-    /// See `Command`.
-    var help: [String] = ["Add an SSH key to cloud."]
-
-    /// See `Command`.
-    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
+    func run(using ctx: Context) throws {
         let runner = try CloudSSHAddRunner(ctx: ctx)
-        return try runner.run()
+        try runner.run()
     }
 }
 
-struct CloudSSHAddRunner {
-    let ctx: CommandContext
+struct CloudSSHAddRunner<C: CommandRunnable> {
+    let ctx: CommandContext<C>
     let token: Token
     let api: SSHKeyApi
 
-    init(ctx: CommandContext) throws {
+    init(ctx: CommandContext<C>) throws {
         self.token = try Token.load()
-        todo()
-//        self.api = SSHKeyApi(with: token, on: ctx.container)
-//        self.ctx = ctx
+        self.api = SSHKeyApi(with: token)
+        self.ctx = ctx
     }
 
-    func run() throws -> EventLoopFuture<Void> {
+    func run() throws {
         let k = try key()
         let n = name()
         ctx.console.output("Pushing SSH key...")
-        let created = api.add(name: n, key: k)
-        return created.map { created in
-            self.ctx.console.output("Pushed key as \(created.name).".consoleText())
-        }
+        let created = try api.add(name: n, key: k)
+        self.ctx.console.output("Pushed key as \(created.name).".consoleText())
+//        return created.map { created in
+//        }
     }
 
     func name() -> String {
@@ -66,7 +61,7 @@ struct CloudSSHAddRunner {
         if let path = ctx.options.value(.path) { return path }
         let allKeys = try Shell.bash("ls  ~/.ssh/*.pub")
         let separated = allKeys.split(separator: "\n").map(String.init)
-        let term = Terminal(on: ctx.eventLoop)
+        let term = Terminal()
         return term.choose("Which key would you like to push?", from: separated)
     }
 }

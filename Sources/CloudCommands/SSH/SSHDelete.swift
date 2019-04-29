@@ -40,7 +40,7 @@ struct SSHDeleteRunner {
     }
 
     func run() throws {
-        let list = try api.list().wait()
+        let list = try api.list()//.wait()
         guard !list.isEmpty else {
             self.ctx.console.output("No SSH keys found. Nothing to delete.")
             return
@@ -50,7 +50,7 @@ struct SSHDeleteRunner {
             return "\(key.name) : \(key.createdAt)".consoleText()
         }
         
-        try self.api.delete(choice).wait()
+        try self.api.delete(choice)//.wait()
     }
     
 //    func run() -> EventLoopFuture<Void> {

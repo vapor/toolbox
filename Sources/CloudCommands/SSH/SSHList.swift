@@ -3,41 +3,34 @@ import CloudAPI
 import Globals
 
 struct SSHList: Command {
-    /// See `Command`.
-    var arguments: [CommandArgument] = []
+    struct Signature: CommandSignature {
+        let all: Option = .all
+    }
+    
+    let signature = Signature()
+    
+    let help: String? = "lists the ssh keys that you have pushed to cloud."
 
-    /// See `Command`.
-    var options: [CommandOption] = [
-        .all
-    ]
-
-    /// See `Command`.
-    var help: [String] = ["Lists the SSH keys that you have pushed to cloud"]
-
-    /// See `Command`.
-    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
+    func run(using ctx: Context) throws {
         let runner = try CloudSSHListRunner(ctx: ctx)
-        return runner.run()
+        try runner.run()
     }
 }
 
-struct CloudSSHListRunner {
-    let ctx: CommandContext
+struct CloudSSHListRunner<C: CommandRunnable> {
+    let ctx: CommandContext<C>
     let token: Token
     let api: SSHKeyApi
 
-    init(ctx: CommandContext) throws {
+    init(ctx: CommandContext<C>) throws {
         self.token = try Token.load()
-        todo()
-//        self.api = SSHKeyApi(with: token, on: ctx.container)
+        self.api = SSHKeyApi(with: token)
         self.ctx = ctx
     }
 
-    func run() -> EventLoopFuture<Void> {
-        let list = api.list()
-        return list.map {
-            self.log($0)
-        }
+    func run() throws {
+        let list = try api.list()
+        log(list)
     }
 
     func log(_ list: [SSHKey]) {

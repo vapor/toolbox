@@ -118,7 +118,7 @@ struct LogsRunner<C: CommandRunnable>: AuthorizedRunner {
         let timestamps = self.ctx.flag(.showTimestamps)
         let lines = self.ctx.options.value(.lines) ?? "200"
         let query = "lines=\(lines)&timestamps=\(timestamps.description)"
-        let entries = logs.list(query: query)
+        let entries = try logs.list(query: query)
         for log in entries {
             self.ctx.console.output("pod: ", newLine: false)
             self.ctx.console.output(log.name.consoleText(.info))
