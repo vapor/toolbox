@@ -60,14 +60,16 @@ extension Activity {
         
         let connection = client.connect(host: host, port: 80, uri: uri, headers: [:]) { ws in
             listener(.connected)
-            print("connected")
-            // Logs
+
             ws.onText { ws, text in
                 listener(.message(text))
             }
             
-            // Close
-            let _ = ws.onClose.map {
+            ws.onBinary { ws, binary in
+                print("got binary!!!")
+            }
+
+            ws.onCloseCode { _ in
                 listener(.close)
             }
         }
@@ -88,19 +90,4 @@ extension Activity {
             listener(.close)
         }
     }
-}
-
-func testExample() throws {
-//    let client = WebSocketClient(eventLoopGroupProvider: .createNew)
-//    defer { try! client.syncShutdown() }
-//    let url: URL! = nil
-//    client.connect(host: "api", port: , uri: "", headers: , onUpgrade: )
-//    try client.connect(host: "echo.websocket.org", port: 80) { webSocket in
-//        webSocket.send(text: "Hello")
-//        webSocket.onText { webSocket, string in
-//            print(string)
-////            XCTAssertEqual(string, "Hello")
-//            webSocket.close(promise: nil)
-//        }
-//        }.wait()
 }

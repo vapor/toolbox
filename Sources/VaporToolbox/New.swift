@@ -38,32 +38,7 @@ struct New: Command {
         let branch: Option = .branch
     }
     let signature = Signature()
-    let help: String? = "creates a new vapor app from template. use 'vapor new MyName'."
-//
-//    var arguments: [CommandArgument] = [
-//        .argument(name: "name", help: ["What to name your project."])
-//    ]
-//
-//    /// See `Command`.
-//    var options: [CommandOption] = [
-//        .value(name: "template", short: "t", default: nil, help: [
-//            "a specific template to use.",
-//            "-t repo/template for github templates",
-//            "-t full-url-here.git for non github templates",
-//            "-t web to create a new web app",
-//            "-t auth to create a new authenticated API app",
-//            "-t api (default) to create a new API"
-//        ]),
-//        .value(name: "tag", short: nil, default: nil, help: ["a specific tag to use."]),
-//        .value(name: "branch", short: "b", default: nil, help: ["a specific brach to use."]),
-//
-//    ]
-//
-//    /// See `Command`.
-//    var help: [String] = [
-//        "creates a new vapor application from a template.",
-//        "use `vapor new NameOfYourApp`",
-//    ]
+    let help: String? = "creates a new vapor app from template. use 'vapor new ProjectName'."
 
     func run(using ctx: Context) throws {
         let name = try ctx.arg(.name)
@@ -100,54 +75,45 @@ struct New: Command {
 
         // if leaf.seed file, render template here
         let seedPath = workTree.finished(with: "/") + "leaf.seed"
-  
-        todo()
+        if FileManager.default.fileExists(atPath: seedPath) {
+            var opts = ctx.options
+            opts["path"] = workTree
+            let next = AnyCommandContext(console: ctx.console, arguments: ctx.arguments, options: opts)
+            try LeafRenderFolder().run(using: next)
+        }
+
+        // initialize
+        try Git.commit(
+            gitDir: gitDir,
+            workTree: workTree,
+            msg: "created new vapor project from template `\(gitUrl)`"
+        )
+        ctx.console.output("initialized project.")
         
-//        let next: EventLoopFuture<Void>
-//        if FileManager.default.fileExists(atPath: seedPath) {
-//            let renderContext = CommandContext(console: ctx.console, arguments: [:], options: ["path": workTree])
-//            next = try LeafRenderFolder().run(using: renderContext)
-//        } else {
-//            next = ctx.done
-//        }
-//
-//        return next.flatMap {
-//            // initialize
-//            try Git.commit(
-//                gitDir: gitDir,
-//                workTree: workTree,
-//                msg: "created new vapor project from template `\(gitUrl)`"
-//            )
-//            ctx.console.output("initialized project.")
-//
-//            // print the Droplet
-//            return try PrintDroplet().run(using: ctx).flatMap {
-//                let info = [
-//                    "project \"\(name)\" has been created.",
-//                    "type `cd \(name)` to enter the project directory.",
-//                    "use `vapor cloud deploy` and put your project LIVE!",
-//                    "enjoy!",
-//                    ]
-//
-//                //ctx.console.center(info)
-//                info.forEach { line in
-//                    var command = false
-//                    for c in line {
-//                        if c == "`" { command = !command }
-//
-//                        ctx.console.output(
-//                            c.description,
-//                            style: command && c != "`" ? .info : .plain,
-//                            newLine: false
-//                        )
-//                    }
-//                    ctx.console.output("", style: .plain, newLine: true)
-//                }
-//
-//
-//                return ctx.done
-//            }
-//        }
+        // print the Droplet
+        let next = AnyCommandContext(console: ctx.console, arguments: ctx.arguments, options: ctx.options)
+        try PrintDroplet().run(using: next)
+        
+        // print next info
+        let info = [
+            "project \"\(name)\" has been created.",
+            "type `cd \(name)` to enter the project directory.",
+            "use `vapor cloud deploy` and put your project LIVE!",
+            "enjoy!",
+        ]
+        info.forEach { line in
+            var command = false
+            for c in line {
+                if c == "`" { command = !command }
+                
+                ctx.console.output(
+                    c.description,
+                    style: command && c != "`" ? .info : .plain,
+                    newLine: false
+                )
+            }
+            ctx.console.output("", style: .plain, newLine: true)
+        }
     }
 
 }

@@ -154,7 +154,7 @@ extension Console {
             let question = question.display + " (\(def) is default)"
             let answer =  ask(question.consoleText())
             if answer.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return def }
-            else { return def }
+            else { return answer }
         } else {
             return ask(question.display.consoleText())
         }
@@ -209,8 +209,10 @@ struct LeafRenderFolder: Command {
 
     /// See `Command`.
     func run(using ctx: Context) throws {
-        let raw = ctx.load(.path)
-
+        var raw = ctx.load(.path)
+        if raw == "./" {
+            raw = Process().currentDirectoryPath
+        }
         // expand `~` for example
         let path = try Shell.bash("echo \(raw)")
         guard FileManager.default.isDirectory(path: path) else {
@@ -279,10 +281,17 @@ struct LeafRenderFolder: Command {
     }
 }
 
+extension String {
+    internal var trailSlash: String {
+        if hasSuffix("/") { return self }
+        else { return self + "/" }
+    }
+}
+
 extension FileManager {
     func isDirectory(path: String) -> Bool {
         var isDirectory: ObjCBool = false
-        fileExists(atPath: path, isDirectory: &isDirectory)
+        let _ = fileExists(atPath: path, isDirectory: &isDirectory)
         return isDirectory.boolValue
     }
 

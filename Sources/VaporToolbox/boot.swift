@@ -1,6 +1,26 @@
 import Vapor
 import CloudCommands
 import Globals
+import NIOWebSocketClient
+
+var count = 0
+public func testExample() throws {
+    let client = WebSocketClient(eventLoopGroupProvider: .createNew)
+    defer { try! client.syncShutdown() }
+    try client.connect(host: "echo.websocket.org", port: 80) { webSocket in
+        webSocket.send(text: "Hello")
+        webSocket.onText { webSocket, string in
+            print("\(count): " + string)
+            count += 1
+            guard count > 5 else {
+                sleep(2)
+                webSocket.send(text: "ayo \(count)")
+                return
+            }
+            webSocket.close(promise: nil)
+        }
+        }.wait()
+}
 
 /// Creates an Application to run.
 public func boot() -> Application {

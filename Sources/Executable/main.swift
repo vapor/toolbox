@@ -2,6 +2,7 @@ import Foundation
 import VaporToolbox
 import Vapor
 
+//try testExample()
 let app = boot()
 
 do {

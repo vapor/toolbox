@@ -9,11 +9,12 @@ public func todo(file: StaticString = #file) -> Never {
 extension Process {
     static func run(_ program: String, args: [String]) throws -> String {
         let task = Process()
-        if #available(OSX 10.13, *) {
-            task.executableURL = URL(fileURLWithPath: program)
-        } else {
-            fatalError("yell at logan")
-        }
+        task.launchPath = program
+//        if #available(OSX 10.13, *) {
+//            task.executableURL = URL(fileURLWithPath: program)
+//        } else {
+//            fatalError("yell at logan")
+//        }
         task.arguments = args
         
         let output = Pipe()
@@ -34,7 +35,7 @@ extension Process {
         let op = String(decoding: outputData, as: UTF8.self)
         let err = String(decoding: errorData, as: UTF8.self)
         guard err.isEmpty else { throw err }
-        return op
+        return op.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
 

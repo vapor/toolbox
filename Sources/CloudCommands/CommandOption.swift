@@ -71,9 +71,16 @@ extension LosslessStringConvertible {
     }
 }
 
+extension Option {
+    var `default`: String? {
+        guard case let .value(d) = self.optionType else { return nil }
+        return d
+    }
+}
+
 extension CommandContext {
     public func load<V: LosslessStringConvertible>(_ opt: Option<V>, _ message: String? = nil, secure: Bool = false) -> V {
-        if let raw = self.options[opt.name] {
+        if let raw = self.options[opt.name] ?? opt.default {
             return V.convertOrFail(raw)
         }
         let msg = message ?? opt.name
