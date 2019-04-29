@@ -4,7 +4,7 @@ import Globals
 
 /// Creates an Application to run.
 public func boot() -> Application {
-    var services = Services.default()
+//    var services = Services.default()
 
 //    var commands = CommandConfig()
 //    commands.use(CleanCommand(), as: "clean")
@@ -22,6 +22,6 @@ public func boot() -> Application {
 //
 //    services.register(CommandConfig.self, { _ in commands })
 
-    
-    return Application(configure: { services })
+    todo()
+//    return Application(configure: { services })
 }

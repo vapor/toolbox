@@ -65,40 +65,41 @@ struct New: Command {
 //    ]
 
     func run(using ctx: Context) throws {
-        let name = try ctx.arg(.name)
-        let template = ctx.template()
-        let gitUrl = try template.fullUrl()
-
-        // Cloning
-        ctx.console.pushEphemeral()
-        ctx.console.output("cloning `\(gitUrl)`...".consoleText())
-        let _ = try Git.clone(repo: gitUrl, toFolder: name)
-        ctx.console.popEphemeral()
-        ctx.console.output("cloned `\(gitUrl)`.".consoleText())
-
-        // used to work on a git repository
-        // outside of current path
-        let gitDir = "./\(name)/.git"
-        let workTree = "./\(name)"
-
-        // Prioritize tag over branch
-        let checkout = ctx.options.value(.tag) ?? ctx.options.value(.branch)
-        if let checkout = checkout {
-            let _ = try Git.checkout(
-                gitDir: gitDir,
-                workTree: workTree,
-                checkout: checkout
-            )
-            ctx.console.output("checked out `\(checkout)`.".consoleText())
-        }
-
-        // clear existing git history
-        try Shell.delete("./\(name)/.git")
-        let _ = try Git.create(gitDir: gitDir)
-        ctx.console.output("created git repository.")
-        
-        // if leaf.seed file, render template here
-        let seedPath = workTree.finished(with: "/") + "leaf.seed"
+        todo()
+//        let name = try ctx.arg(.name)
+//        let template = ctx.template()
+//        let gitUrl = try template.fullUrl()
+//
+//        // Cloning
+//        ctx.console.pushEphemeral()
+//        ctx.console.output("cloning `\(gitUrl)`...".consoleText())
+//        let _ = try Git.clone(repo: gitUrl, toFolder: name)
+//        ctx.console.popEphemeral()
+//        ctx.console.output("cloned `\(gitUrl)`.".consoleText())
+//
+//        // used to work on a git repository
+//        // outside of current path
+//        let gitDir = "./\(name)/.git"
+//        let workTree = "./\(name)"
+//
+//        // Prioritize tag over branch
+//        let checkout = ctx.options.value(.tag) ?? ctx.options.value(.branch)
+//        if let checkout = checkout {
+//            let _ = try Git.checkout(
+//                gitDir: gitDir,
+//                workTree: workTree,
+//                checkout: checkout
+//            )
+//            ctx.console.output("checked out `\(checkout)`.".consoleText())
+//        }
+//
+//        // clear existing git history
+//        try Shell.delete("./\(name)/.git")
+//        let _ = try Git.create(gitDir: gitDir)
+//        ctx.console.output("created git repository.")
+//
+//        // if leaf.seed file, render template here
+//        let seedPath = workTree.finished(with: "/") + "leaf.seed"
   
         todo()
         
