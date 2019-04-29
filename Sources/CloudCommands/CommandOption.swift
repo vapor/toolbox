@@ -244,3 +244,7 @@ extension Dictionary where Key == String, Value == String {
         return self[option.name]
     }
 }
+
+//extension String: LosslessStringConvertible {
+//    
+//}

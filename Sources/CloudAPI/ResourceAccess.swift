@@ -71,7 +71,7 @@ extension ResourceAccess {
         headers.add(name: .authorization, value: "Bearer \(token.key)")
         headers.add(name: .contentType, value: "application/json")
 
-        var req = ClientRequest(method: method, url: url.convertToURL()!, headers: headers, body: nil)
+        var req = try ClientRequest(method: method, to: url, headers: headers)
         try beforeSend(&req)
 
         return try Web.send(req).logged()
@@ -79,11 +79,17 @@ extension ResourceAccess {
 }
 
 extension ClientRequest {
-    init<C: Content>(method: HTTPMethod, url rep: URLRepresentable, headers: HTTPHeaders = [:], body: C) throws {
+    init<C: Content>(method: HTTPMethod, to rep: URLRepresentable, headers: HTTPHeaders = [:], body: C) throws {
         guard let url = rep.convertToURL() else { throw "unable to convert \(rep) to url" }
-        var req = ClientRequest(method: method, url: url, headers: headers, body: nil)
+        var req = try ClientRequest(method: method, to: url, headers: headers)
         try req.content.encode(body)
         self = req
+    }
+    
+    init(method: HTTPMethod, to rep: URLRepresentable, headers: HTTPHeaders) throws {
+        guard let url = rep.convertToURL() else { throw "unable to convert \(rep) to url" }
+        // weird forwarding to original method, cleanup at some point `to` vs `url` is confusing
+        self = ClientRequest(method: method, url: url, headers: headers, body: nil)
     }
 }
 

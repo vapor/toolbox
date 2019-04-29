@@ -1,7 +1,7 @@
 import Vapor
 import Globals
 
-let group = MultiThreadedEventLoopGroup(numberOfThreads: { todo() }())
+//let group = MultiThreadedEventLoopGroup(numberOfThreads: { todo() }())
 
 //internal func makeClient() -> Client {
 //    let next = group.next()

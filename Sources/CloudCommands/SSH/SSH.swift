@@ -1,25 +1,24 @@
 import Vapor
 
 public struct SSHGroup: CommandGroup {
+    // empty sig
+    public struct Signature: CommandSignature { }
+    public let signature = Signature()
+    
     public let commands: Commands = [
         "add": SSHAdd(),
         "list": SSHList(),
         "delete": SSHDelete(),
     ]
 
-    public let options: [CommandOption] = []
-
-    /// See `CommandGroup`.
-    public var help: [String] = [
-        "Interact with SSH Keys on Vapor Cloud."
-    ]
+    public let help: String? = "interacts with ssh keys on vapor cloud."
 
     public init() {}
 
     /// See `CommandGroup`.
-    public func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
-        ctx.console.info("Interact with SSH Keys on Vapor Cloud.")
-        ctx.console.output("Use `vapor cloud ssh -h` to see commands.")
+    public func run(using ctx: CommandContext<SSHGroup>) throws {
+        ctx.console.info("interact with SSH Keys on vapor cloud.")
+        ctx.console.output("use `vapor cloud ssh -h` to see commands.")
         return ctx.done
     }
 }

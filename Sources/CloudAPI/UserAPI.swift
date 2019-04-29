@@ -13,10 +13,7 @@ public struct CloudUser: Content {
 /// functionality
 public struct UserApi {
 
-    public let container: Container
-    public init(on container: Container) {
-        self.container = container
-    }
+    public init() {}
 
     public func signup(
         email: String,
@@ -40,8 +37,8 @@ public struct UserApi {
             password: password
         )
         
-        let req = try ClientRequest(method: .POST, url: userUrl, body: content)
-        return try makeClient().send(req).become(CloudUser.self).wait()
+        let req = try ClientRequest(method: .POST, to: userUrl, body: content)
+        return try Web.send(req).become(CloudUser.self)
     }
 
     public func login(
@@ -55,14 +52,15 @@ public struct UserApi {
         let headers: HTTPHeaders = [
             "Authorization": "Basic \(encoded)"
         ]
-        let client = makeClient()
-        let response = client.send(.POST, headers: headers, to: loginUrl)
-        return try response.become(Token.self).wait()
+//        let client = makeClient()
+        let req = try ClientRequest(method: .POST, to: loginUrl, headers: headers)
+        let response = try Web.send(req)
+        return try response.become(Token.self)//.wait()
     }
 
-    public func me(token: Token) -> EventLoopFuture<CloudUser> {
+    public func me(token: Token) throws -> CloudUser {
         let access = CloudUser.Access(with: token, baseUrl: meUrl)
-        return access.view()
+        return try access.view()
     }
 
     public func reset(email: String) throws {
@@ -71,7 +69,7 @@ public struct UserApi {
         }
         let content = Package(email: email)
         
-        let req = try ClientRequest(method: .POST, url: resetUrl, body: content)
-        try makeClient().send(req).validate().void().wait()
+        let req = try ClientRequest(method: .POST, to: resetUrl, body: content)
+        let _ = try Web.send(req)//.validate().void().wait()
     }
 }
