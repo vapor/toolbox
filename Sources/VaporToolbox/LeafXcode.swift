@@ -222,16 +222,60 @@ struct LeafRenderFolder: Command {
         // MARK: Compile Package
         let seedPath = path.finished(with: "/") + "leaf.seed"
         let contents = try Shell.readFile(path: seedPath)
-        let data = Data(bytes: contents.utf8)
+        let rawseed = Data(bytes: contents.utf8)
         let decoder = JSONDecoder()
-        let seed = try decoder.decode(Seed.self, from: data)
+        let seed = try decoder.decode(Seed.self, from: rawseed)
         let answers = try ctx.console.answer(seed.questions)
+        
+        // assemble package
         let package = answers.package()
-
+        var data: [String: LeafData] = [:]
+        package.forEach { key, val in
+            data[key] = .string(val)
+        }
+        print("assembled data: \(data)")
         // MARK: Collect Paths
-        let all = try FileManager.default.allFiles(at: path)
+        let files = try FileManager.default.allFiles(at: path)
+            .filter { !seed.excludes.shouldExclude(path: $0) }
 
-        todo()
+        let config = LeafConfig(rootDirectory: path)
+        let threadPool = NIOThreadPool(numberOfThreads: 1)
+        threadPool.start()
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        let renderer = LeafRenderer(config: config, threadPool: threadPool, eventLoop: group.next())
+        // MARK: Render Files
+        var renders: [String: ByteBuffer] = [:]
+        for file in files {
+            //            let contents = try Shell.readFile(path: path)
+            //            let data = Data(bytes: contents.utf8)
+            let (buffer, name) = try renderer.render(path: file, context: data).and(value: file).wait()
+            renders[name] = buffer
+        }
+        
+        // write the files to be rendered
+        for (path, render) in renders {
+            var render = render
+            let url = URL(fileURLWithPath: path)
+//            let str = render.readString(length: render.readableBytes)
+            guard let str = render.readString(length: render.readableBytes) else {
+                fatalError("unable to create string") }
+            if str.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                try Shell.delete(path)
+            } else {
+                try str.write(to: url, atomically: true, encoding: .utf8)
+            }
+        }
+        
+        try Shell.delete(seedPath)
+        // TODO: Delete Empty Folders?
+        
+        try seed.conditionalIncludes?.forEach { include in
+            if answers.satisfy(include.condition) { return }
+            else {
+                try include.includes.map { path.finished(with: "/") + $0 } .forEach(Shell.delete)
+            }
+        }
+        
 //        let config = LeafConfig(rootDirectory: path)
 //        let threadPool = NIOThreadPool(numberOfThreads: 1)
 //        threadPool.start()
@@ -254,7 +298,7 @@ struct LeafRenderFolder: Command {
 //        }
 
         // MARK: Write Files
-                todo()
+                
 //        let flat = renders.flatten(on: ctx.container)
 //        return flat.map { views in
 //            for (view, path) in views {
