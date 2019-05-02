@@ -91,6 +91,8 @@ extension CommandContext {
     }
     
     public func flag(_ opt: Option<Bool>) -> Bool {
+        let found = self.options[opt.name]
+        print("found flag: \(found)")
         return self.options[opt.name].flatMap(Bool.init) ?? false
     }
 }
