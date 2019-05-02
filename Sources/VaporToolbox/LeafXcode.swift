@@ -233,7 +233,7 @@ struct LeafRenderFolder: Command {
         package.forEach { key, val in
             data[key] = .string(val)
         }
-        print("assembled data: \(data)")
+        
         // MARK: Collect Paths
         let files = try FileManager.default.allFiles(at: path)
             .filter { !seed.excludes.shouldExclude(path: $0) }

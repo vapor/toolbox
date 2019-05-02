@@ -18,8 +18,13 @@ struct XcodeCommand: Command {
     /// See `Command`.
     func run(using ctx: Context) throws {
         ctx.console.output("generating xcodeproj..")
-        todo()
 
+//        let process = try Process.run("/usr/bin/swift", args: ["package", "generate-xcodeproj"])
+//        let process = try Process.run("/usr/bin/swift", args: ["build"])
+        let process = try Process._execute("swift", arguments: ["build"], updates: { (update) in
+            print("got update: \(update)")
+        })
+        print("ran xcode process: \(process)")
 //        let generateProcess = Process.asyncExecute(
 //            "swift",
 //            ["package", "generate-xcodeproj"],
