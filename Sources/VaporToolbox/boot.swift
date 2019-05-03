@@ -22,7 +22,36 @@ public func testExample() throws {
         }.wait()
 }
 
+final class Main: CommandGroup {
+    struct Signature: CommandSignature {}
+    
+    let signature: Signature = Signature()
+    
+    let commands: Commands = [
+        "clean": CleanCommand(),
+        "linus-main": GenerateLinuxMain(),
+        "cloud": CloudGroup(),
+        "new": New(),
+        "drop": PrintDroplet(),
+        "test": Test(),
+        "xcode": XcodeCommand(),
+        "build": BuildCommand(),
+        "leaf": LeafGroup()
+    ]
+    
+    let help: String? = "main"
+    
+    func run(using context: CommandContext<Main>) throws {
+        print("RUNNNNIGNIGNIGNG")
+    }
+}
+
 /// Creates an Application to run.
+public func _boot() throws {
+    var input = CommandInput(arguments: CommandLine.arguments)
+    try Terminal().run(Main(), input: &input)
+}
+
 public func boot() -> Application {
     var services = Services.default()
 

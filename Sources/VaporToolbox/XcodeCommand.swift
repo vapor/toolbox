@@ -1,4 +1,5 @@
-import Vapor
+import ConsoleKit
+import Foundation
 import Globals
 
 extension Option where Value == Bool {

@@ -1,4 +1,5 @@
-import Vapor
+import NIO
+import Foundation
 
 public func todo(file: StaticString = #file) -> Never {
     let file = file.description.split(separator: "/").last ?? "<>"
@@ -17,7 +18,7 @@ public struct Shell {
     }
 
     public static func cwd() throws -> String {
-        return try Environment.get("TEST_DIRECTORY") ?? bash("dirs -l")
+        return try ProcessInfo.processInfo.environment["TEST_DIRECTORY"] ?? bash("dirs -l")
     }
 
     public static func allFiles(in dir: String? = nil) throws -> String {
@@ -36,8 +37,6 @@ public struct Shell {
         return try bash("echo $HOME").trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
-
-import NIO
 
 /// Different types of process output.
 public enum ProcessOutput {

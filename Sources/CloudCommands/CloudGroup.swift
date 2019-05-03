@@ -1,4 +1,5 @@
-import Vapor
+import Foundation
+import ConsoleKit
 import CloudAPI
 import Globals
 

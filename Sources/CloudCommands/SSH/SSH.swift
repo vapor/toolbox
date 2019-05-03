@@ -1,4 +1,4 @@
-import Vapor
+import ConsoleKit
 
 public struct SSHGroup: CommandGroup {
     // empty sig

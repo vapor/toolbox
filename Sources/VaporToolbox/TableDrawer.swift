@@ -1,4 +1,4 @@
-import Vapor
+import ConsoleKit
 
 public func drawTable(with console: Console) {
     let zero: [ConsoleText] = [

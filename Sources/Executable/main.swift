@@ -1,12 +1,13 @@
 import Foundation
 import VaporToolbox
-import Vapor
+import ConsoleKit
 
 //try testExample()
-let app = boot()
+//let app = boot()
 
 do {
-    try app.run()
+    try _boot()
+//    try app.run()
 //    try app.run().wait()
 } catch let error as CommandError {
     let term = Terminal()

@@ -1,4 +1,3 @@
-import Vapor
 import Foundation
 
 public struct CloudReplica: Resource {

@@ -1,5 +1,3 @@
-import Vapor
-
 extension String {
     public var trailingSlash: String {
         return finished(with: "/")

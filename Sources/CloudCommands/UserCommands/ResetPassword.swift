@@ -1,4 +1,3 @@
-import Vapor
 import CloudAPI
 import Globals
 import ConsoleKit

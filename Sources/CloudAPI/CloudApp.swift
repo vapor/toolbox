@@ -1,5 +1,5 @@
-import Vapor
 import Globals
+import Foundation
 
 public struct CloudApp: Resource {
     public let updatedAt: String

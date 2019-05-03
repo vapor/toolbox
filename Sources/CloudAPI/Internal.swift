@@ -1,11 +1,12 @@
-import Vapor
+import NIO
 import Globals
+import Foundation
 
-extension HTTPClient.Response {
-    var toVapor: ClientResponse {
-        return ClientResponse(status: status, headers: headers, body: body)
-    }
-}
+//extension HTTPClient.Response {
+//    var toVapor: ClientResponse {
+//        return ClientResponse(status: status, headers: headers, body: body)
+//    }
+//}
 
 struct Web {
     static func send(_ req: HTTPClient.Request) throws -> HTTPClient.Response {
@@ -71,11 +72,11 @@ struct Web {
 //    }
 }
 
-extension ClientResponse {
-    func become<C: Content>(_ t: C.Type = C.self) throws -> C {
-        return try content.decode(C.self)
-    }
-}
+//extension ClientResponse {
+//    func become<C: Content>(_ t: C.Type = C.self) throws -> C {
+//        return try content.decode(C.self)
+//    }
+//}
 
 import NIOHTTPClient
 
@@ -89,31 +90,31 @@ extension HTTPClient.Response {
 }
 
 
-private extension URLRequest {
-    init(client request: ClientRequest) {
-        self.init(url: request.url)
-        self.httpMethod = request.method.string
-        if var body = request.body {
-            self.httpBody = body.readData(length: body.readableBytes)
-        }
-        request.headers.forEach { key, val in
-            self.addValue(val, forHTTPHeaderField: key.description)
-        }
-    }
-    
-    init(nioreq request: HTTPClient.Request) {
-        self.init(url: request.url)
-        self.httpMethod = request.method.string
-        self.httpBody = request.body?.raw
-        request.headers.forEach { key, val in
-            self.addValue(val, forHTTPHeaderField: key.description)
-        }
-    }
-}
-
-public func testNioHTTP() {
-    
-}
+//private extension URLRequest {
+//    init(client request: ClientRequest) {
+//        self.init(url: request.url)
+//        self.httpMethod = request.method.string
+//        if var body = request.body {
+//            self.httpBody = body.readData(length: body.readableBytes)
+//        }
+//        request.headers.forEach { key, val in
+//            self.addValue(val, forHTTPHeaderField: key.description)
+//        }
+//    }
+//    
+//    init(nioreq request: HTTPClient.Request) {
+//        self.init(url: request.url)
+//        self.httpMethod = request.method.string
+//        self.httpBody = request.body?.raw
+//        request.headers.forEach { key, val in
+//            self.addValue(val, forHTTPHeaderField: key.description)
+//        }
+//    }
+//}
+//
+//public func testNioHTTP() {
+//    
+//}
 
 extension HTTPClient.Body {
     var raw: Data {
@@ -134,19 +135,19 @@ extension HTTPClient.Body {
     }
 }
 
-private extension ClientResponse {
-    init(foundation: HTTPURLResponse, data: Data? = nil) {
-        self.init(status: .init(statusCode: foundation.statusCode))
-        if let data = data, !data.isEmpty {
-            var buffer = ByteBufferAllocator().buffer(capacity: data.count)
-            buffer.writeBytes(data)
-            self.body = buffer
-        }
-        for (key, value) in foundation.allHeaderFields {
-            self.headers.replaceOrAdd(name: "\(key)", value: "\(value)")
-        }
-    }
-}
+//private extension ClientResponse {
+//    init(foundation: HTTPURLResponse, data: Data? = nil) {
+//        self.init(status: .init(statusCode: foundation.statusCode))
+//        if let data = data, !data.isEmpty {
+//            var buffer = ByteBufferAllocator().buffer(capacity: data.count)
+//            buffer.writeBytes(data)
+//            self.body = buffer
+//        }
+//        for (key, value) in foundation.allHeaderFields {
+//            self.headers.replaceOrAdd(name: "\(key)", value: "\(value)")
+//        }
+//    }
+//}
 
 
 private struct ResponseError: Resource, Error {

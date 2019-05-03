@@ -1,6 +1,6 @@
-import Vapor
 import ConsoleKit
 import Globals
+import Foundation
 
 extension Option where Value == Bool {
     static var update: Option = .init(name: "update", short: "u", type: .flag, help: "cleans Package.resolved file if it exists.")

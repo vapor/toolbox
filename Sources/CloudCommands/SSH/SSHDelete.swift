@@ -1,4 +1,4 @@
-import Vapor
+import ConsoleKit
 import CloudAPI
 import Globals
 
@@ -52,19 +52,4 @@ struct SSHDeleteRunner {
         
         try self.api.delete(choice)//.wait()
     }
-    
-//    func run() -> EventLoopFuture<Void> {
-//        let list = api.list()
-//        return list.flatMap { list in
-//            guard !list.isEmpty else {
-//                self.ctx.console.output("No SSH keys found. Nothing to delete.")
-//                return self.ctx.done
-//            }
-//
-//            let choice = self.ctx.console.choose("Which Key?", from: list) { key in
-//                return "\(key.name) : \(key.createdAt)".consoleText()
-//            }
-//            return self.api.delete(choice)
-//        }
-//    }
 }

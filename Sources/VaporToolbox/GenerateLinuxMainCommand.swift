@@ -1,4 +1,4 @@
-import Vapor
+import ConsoleKit
 import Globals
 import LinuxTestsGeneration
 

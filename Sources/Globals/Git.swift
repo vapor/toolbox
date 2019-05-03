@@ -1,4 +1,4 @@
-import Vapor
+import Foundation
 
 public struct Git {
     public static func checkout(gitDir: String, workTree: String, checkout: String) throws -> String {

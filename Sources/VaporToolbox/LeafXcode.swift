@@ -1,7 +1,7 @@
-import Vapor
 import Globals
 import LeafKit
 import ConsoleKit
+import Foundation
 
 struct LeafGroup: CommandGroup {
     /// See `CommandRunnable`.
@@ -25,7 +25,7 @@ struct LeafGroup: CommandGroup {
 }
 
 extension Seed {
-    struct Question: Content {
+    struct Question: Codable {
         let `var`: String
         let display: String
         let choices: [String]?
@@ -105,7 +105,7 @@ extension Seed.Exclusion {
     }
 }
 
-struct Seed: Content {
+struct Seed: Codable {
     let name: String
     let excludes: [Exclusion]
     let questions: [Question]

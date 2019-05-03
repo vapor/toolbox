@@ -1,4 +1,4 @@
-import Vapor
+import ConsoleKit
 import CloudAPI
 import Globals
 
@@ -15,24 +15,7 @@ struct CloudDeploy: Command {
     
     let help: String? = "deploy a cloud project."
     
-//    /// See `Command`.
-//    var arguments: [CommandArgument] = []
-//
-//    /// See `Command`.
-//    var options: [CommandOption] = [
-//        .app,
-//        .env,
-//        .branch,
-//        .push,
-//        .force,
-//    ]
-//
-//    /// See `Command`.
-//    var help: [String] = [
-//        "Deploys a Vapory Project"
-//    ]
-
-    /// See `Command`.
+    // command
     func run(using ctx: Context) throws {//} -> EventLoopFuture<Void> {
         let runner = try CloudDeployRunner(ctx: ctx)
         try runner.run()
@@ -51,37 +34,12 @@ struct CloudPush: Command {
     
     let help: String? = "pushes your project to cloud."
     
-//    /// See `Command`.
-//    var arguments: [CommandArgument] = []
-//
-//    /// See `Command`.
-//    var options: [CommandOption] = [
-//        .app,
-//        .env,
-//        .branch,
-//        .force
-//    ]
-//
-//    /// See `Command`.
-//    var help: [String] = [
-//        "Pushes your Vapor project to cloud."
-//    ]
-
     /// See `Command`.
     func run(using ctx: Context) throws {
         let runner = try CloudPushRunner(ctx: ctx)
         try runner.run()
     }
 }
-
-
-//protocol Runner {
-//    var ctx: CommandContext { get }
-//}
-//
-//protocol AuthorizedRunner: Runner {
-//    var token: Token { get }
-//}
 
 extension CommandContext {
     func loadApp(with token: Token) throws -> CloudApp {

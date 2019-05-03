@@ -1,4 +1,4 @@
-import Vapor
+import ConsoleKit
 import Globals
 
 extension Option where Value == Int {

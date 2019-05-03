@@ -1,4 +1,4 @@
-import Vapor
+import ConsoleKit
 
 struct Test: Command {
     struct Signature: CommandSignature {}

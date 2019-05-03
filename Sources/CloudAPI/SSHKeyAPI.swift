@@ -1,4 +1,4 @@
-import Vapor
+import Foundation
 
 public struct SSHKey: Resource {
     public let key: String

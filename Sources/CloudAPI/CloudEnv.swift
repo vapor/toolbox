@@ -1,5 +1,5 @@
-import Vapor
 import Globals
+import Foundation
 import NIOWebSocketClient
 
 public struct Activity: Resource {
