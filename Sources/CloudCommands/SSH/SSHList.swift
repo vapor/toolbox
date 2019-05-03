@@ -36,7 +36,7 @@ struct CloudSSHListRunner<C: CommandRunnable> {
     func log(_ list: [SSHKey]) {
         let long = ctx.flag(.all)
         if list.isEmpty {
-            ctx.console.output("No SSH keys found. Nothing to show.")
+            ctx.console.output("no SSH keys found. nothing to show.")
         }
 
         list.forEach { key in
@@ -44,14 +44,14 @@ struct CloudSSHListRunner<C: CommandRunnable> {
             defer { ctx.console.output("") }
 
             // Basic Key Log
-            ctx.console.output("Name: ", newLine: false)
+            ctx.console.output("name: ", newLine: false)
             ctx.console.output(key.name.consoleText())
-            ctx.console.output("Created At: ", newLine: false)
-            ctx.console.output(key.createdAt.description.consoleText())
+            ctx.console.output("created at: ", newLine: false)
+            ctx.console.output(key.createdAt.consoleText())
 
             // Long Version
             guard long else { return }
-            ctx.console.output("Key: ")
+            ctx.console.output("key: ")
             ctx.console.output(key.key.consoleText())
         }
     }

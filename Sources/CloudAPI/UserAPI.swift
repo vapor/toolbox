@@ -54,11 +54,9 @@ public struct UserApi {
         let headers: HTTPHeaders = [
             "Authorization": "Basic \(encoded)"
         ]
-//        let client = makeClient()
-//        let req = try ClientRequest(method: .POST, to: loginUrl, headers: headers)
         let req = try HTTPClient.Request(url: loginUrl, method: .POST, headers: headers)
         let response = try Web.send(req)
-        return try response.become(Token.self)//.wait()
+        return try response.become(Token.self)
     }
 
     public func me(token: Token) throws -> CloudUser {
@@ -73,7 +71,7 @@ public struct UserApi {
         let content = Package(email: email)
         
         let req = try HTTPClient.Request(url: resetUrl, method: .POST, body: .init(content))
-        let _ = try Web.send(req)//.validate().void().wait()
+        let _ = try Web.send(req)
     }
 }
 

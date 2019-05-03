@@ -81,52 +81,12 @@ extension ResourceAccess {
             headers: headers,
             body: body.flatMap(HTTPClient.Body.data)
         )
-        return try Web.send(req).logged()
+        return try Web.send(req)
     }
 }
-
-//extension HTTPClient.Request {
-//    init<E: Encodable>(url: String, method: HTTPMethod, headers: HTTPHeaders, body: E) throws {
-//        let e = JSONEncoder()
-//        let data = try e.encode(body)
-//        self = try .init(url: url, method: method, headers: headers, body: .data(data))
-//    }
-//}
-
-//extension ClientRequest {
-//    init<C: Content>(method: HTTPMethod, to rep: URLRepresentable, headers: HTTPHeaders = [:], body: C) throws {
-//        guard let url = rep.convertToURL() else { throw "unable to convert \(rep) to url" }
-//        var req = try ClientRequest(method: method, to: url, headers: headers)
-//        try req.content.encode(body)
-//        self = req
-//    }
-//    
-//    init(method: HTTPMethod, to rep: URLRepresentable, headers: HTTPHeaders) throws {
-//        guard let url = rep.convertToURL() else { throw "unable to convert \(rep) to url" }
-//        // weird forwarding to original method, cleanup at some point `to` vs `url` is confusing
-//        self = ClientRequest(method: method, url: url, headers: headers, body: nil)
-//    }
-//}
 
 extension Resource {
     public static func Access(with token: Token, baseUrl url: String) -> ResourceAccess<Self> {
         return ResourceAccess<Self>(token: token, baseUrl: url)
-    }
-}
-
-
-let logResponses = false
-//extension ClientResponse {
-//    func logged() -> ClientResponse {
-//        guard logResponses else { return self }
-//        print("Got response:\n\(self)\n\n")
-//        return self
-//    }
-//}
-extension HTTPClient.Response {
-    func logged() -> HTTPClient.Response {
-        guard logResponses else { return self }
-        print("Got response:\n\(self)\n\n")
-        return self
     }
 }

@@ -46,10 +46,10 @@ extension Activity {
     }
     
     private var host: String {
-        return wssUrl.host! // "api.v2.vapor.cloud"
+        return wssUrl.host!
     }
     private var uri: String {
-        return wssUrl.path // "/v2/activity/activities/\(id.uuidString)/channel"
+        return wssUrl.path
     }
     
     public func listen(_ listener: @escaping (Update) -> Void) throws {

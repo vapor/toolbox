@@ -42,11 +42,11 @@ struct SSHDeleteRunner {
     func run() throws {
         let list = try api.list()//.wait()
         guard !list.isEmpty else {
-            self.ctx.console.output("No SSH keys found. Nothing to delete.")
+            self.ctx.console.output("no ssh keys found. nothing to delete.")
             return
         }
         
-        let choice = self.ctx.console.choose("Which Key?", from: list) { key in
+        let choice = self.ctx.console.choose("which key?", from: list) { key in
             return "\(key.name) : \(key.createdAt)".consoleText()
         }
         

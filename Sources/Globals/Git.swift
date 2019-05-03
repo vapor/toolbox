@@ -113,7 +113,6 @@ public struct Git {
     @discardableResult
     private static func run(_ args: String...) throws -> String {
         return try Process.run("git", args: args)
-//        return try Process.run("/usr/bin/git", args: args)
     }
 }
 

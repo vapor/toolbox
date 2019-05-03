@@ -4,10 +4,7 @@ import PackageDescription
 let package = Package(
     name: "VaporToolbox",
     dependencies: [
-        // 💧 A server-side Swift web framework.
-//        .package(url: "https://github.com/vapor/vapor.git", .branch("master")),
         .package(url: "https://github.com/tanner0101/swift-syntax", .branch("static")),
-//        .package(url: "https://github.com/vapor/leaf.git", from: "3.0.0"),
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.0.0"),
         .package(url: "https://github.com/vapor/leaf-kit.git", from: "0.0.2"),
         .package(url: "git@github.com:vapor/console.git", .branch("master")),
@@ -19,10 +16,9 @@ let package = Package(
         // All of the commands and logic that powers the Vapor toolbox
         .target(name: "VaporToolbox", dependencies: [
             "LinuxTestsGeneration",
-           "ConsoleKit",
-           "CloudCommands",
-           "Globals",
-//           "Leaf",
+            "ConsoleKit",
+            "CloudCommands",
+            "Globals",
             "NIO",
             "NIOHTTPClient",
             "LeafKit",
@@ -39,7 +35,6 @@ let package = Package(
             "Globals",
         ]),
         .target(name: "CloudAPI", dependencies: [
-//            "Vapor",
             "Globals",
             "NIOHTTPClient",
             "NIOWebSocketClient",
