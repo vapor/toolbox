@@ -2,13 +2,6 @@ import Globals
 import CloudAPI
 import Foundation
 
-extension String {
-    func finished(with tail: String) -> String {
-        guard hasSuffix(tail) else { return self + tail }
-        return self
-    }
-}
-
 extension Token {
     /// Save cloud Token
     func save() throws {
@@ -25,7 +18,7 @@ extension Token {
     }
 
     private func makeVaporDirectoryIfNecessary() throws {
-        let vaporDirectory = try Shell.homeDirectory().finished(with: "/") + ".vapor"
+        let vaporDirectory = try Shell.homeDirectory().trailingSlash + ".vapor"
         var isDirectory: ObjCBool = false
         let exists = FileManager.default
             .fileExists(atPath: vaporDirectory, isDirectory: &isDirectory)
@@ -61,7 +54,7 @@ extension Token {
 
     private static func filePath() throws -> String {
         let home = try Shell.homeDirectory()
-        return home.finished(with: "/") + ".vapor/token"
+        return home.trailingSlash + ".vapor/token"
     }
 }
 

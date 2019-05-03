@@ -1,14 +1,6 @@
-import Vapor
 import Globals
 import ConsoleKit
-
-
-extension String {
-    fileprivate func finished(with tail: String) -> String {
-        guard hasSuffix(tail) else { return self + tail }
-        return self
-    }
-}
+import Foundation
 
 extension Argument where Value == String {
     static let name: Argument = .init(name: "name", help: "what to name your project.")
@@ -82,7 +74,7 @@ struct New: Command {
         ctx.console.output("created git repository.")
 
         // if leaf.seed file, render template here
-        let seedPath = workTree.finished(with: "/") + "leaf.seed"
+        let seedPath = workTree.trailingSlash + "leaf.seed"
         if FileManager.default.fileExists(atPath: seedPath) {
             var opts = ctx.options
             opts["path"] = workTree

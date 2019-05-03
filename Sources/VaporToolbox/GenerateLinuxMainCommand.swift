@@ -24,7 +24,7 @@ struct GenerateLinuxMain: Command {
     func run(using ctx: Context) throws {
         let ignoredDirectories = ctx.options.value(.ignoredDirectories)?.components(separatedBy: ",") ?? []
         let cwd = try Shell.cwd()
-        let testsDirectory = cwd.finished(with: "/") + "Tests"
+        let testsDirectory = cwd.trailingSlash + "Tests"
         ctx.console.output("building Tests/LinuxMain.swift..")
         let linuxMain = try LinuxMain(
             testsDirectory: testsDirectory,
@@ -33,12 +33,5 @@ struct GenerateLinuxMain: Command {
         ctx.console.output("writing Tests/LinuxMain.swift..")
         try linuxMain.write()
         ctx.console.success("generated Tests/LinuxMain.swift.")
-    }
-}
-
-extension String {
-    fileprivate func finished(with tail: String) -> String {
-        guard hasSuffix(tail) else { return self + tail }
-        return self
     }
 }

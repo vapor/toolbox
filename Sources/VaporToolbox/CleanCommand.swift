@@ -2,13 +2,6 @@ import Vapor
 import ConsoleKit
 import Globals
 
-extension String {
-    fileprivate func finished(with tail: String) -> String {
-        guard hasSuffix(tail) else { return self + tail }
-        return self
-    }
-}
-
 extension Option where Value == Bool {
     static var update: Option = .init(name: "update", short: "u", type: .flag, help: "cleans Package.resolved file if it exists.")
     static var keepCheckouts: Option = .init(name: "keep-checkouts", short: "k", type: .flag, help: "keep checkouts ")
@@ -39,7 +32,7 @@ class Cleaner<C: CommandRunnable> {
     init(ctx: CommandContext<C>) throws {
         self.ctx = ctx
         let cwd = try Shell.cwd()
-        self.cwd = cwd.finished(with: "/")
+        self.cwd = cwd.trailingSlash
         self.files = try Shell.allFiles(in: cwd)
     }
 
@@ -117,7 +110,7 @@ class Cleaner<C: CommandRunnable> {
 
     private func cleanDefaultDerivedDataLocation() throws -> Bool {
         let defaultLocation = try Shell.homeDirectory()
-            .finished(with: "/")
+            .trailingSlash
             + "Library/Developer/Xcode/DerivedData"
         guard
             FileManager.default.fileExists(atPath: defaultLocation)

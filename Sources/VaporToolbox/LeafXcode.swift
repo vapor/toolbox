@@ -3,13 +3,6 @@ import Globals
 import LeafKit
 import ConsoleKit
 
-extension String {
-    fileprivate func finished(with tail: String) -> String {
-        guard hasSuffix(tail) else { return self + tail }
-        return self
-    }
-}
-
 struct LeafGroup: CommandGroup {
     /// See `CommandRunnable`.
     struct Signature: CommandSignature { }
@@ -103,7 +96,7 @@ extension Seed.Exclusion {
     func matches(path: String) -> Bool {
         switch self {
         case .folder(let f):
-            return path.finished(with: "/").contains(f)
+            return path.trailingSlash.contains(f)
         case .fileType(let t):
             return path.hasSuffix(t)
         case .file(let f):
@@ -227,7 +220,7 @@ struct LeafRenderFolder: Command {
         }
 
         // MARK: Compile Package
-        let seedPath = path.finished(with: "/") + "leaf.seed"
+        let seedPath = path.trailingSlash + "leaf.seed"
         let contents = try Shell.readFile(path: seedPath)
         let rawseed = Data(bytes: contents.utf8)
         let decoder = JSONDecoder()
@@ -279,7 +272,7 @@ struct LeafRenderFolder: Command {
         try seed.conditionalIncludes?.forEach { include in
             if answers.satisfy(include.condition) { return }
             else {
-                try include.includes.map { path.finished(with: "/") + $0 } .forEach(Shell.delete)
+                try include.includes.map { path.trailingSlash + $0 } .forEach(Shell.delete)
             }
         }
         
@@ -347,7 +340,7 @@ extension FileManager {
     }
 
     func allFiles(at path: String) throws -> [String] {
-        let path = path.finished(with: "/")
+        let path = path.trailingSlash
         guard isDirectory(path: path) else { throw path + " is not a directory." }
 
         let excludes = [
