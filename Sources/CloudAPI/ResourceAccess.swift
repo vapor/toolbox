@@ -72,8 +72,8 @@ extension ResourceAccess {
     ) throws -> HTTPClient.Response {
         // Headers
         var headers = HTTPHeaders()
-        headers.add(name: .authorization, value: "Bearer \(token.key)")
-        headers.add(name: .contentType, value: "application/json")
+        headers.add(name: "Authorization", value: "Bearer \(token.key)")
+        headers.add(name: "Content-Type", value: "application/json")
 
         let req = try HTTPClient.Request(
             url: url,

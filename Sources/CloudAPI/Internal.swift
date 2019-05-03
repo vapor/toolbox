@@ -2,6 +2,16 @@ import NIO
 import Globals
 import Foundation
 
+//extension ByteBuffer {
+//    public mutating func readData(length: Int) -> Data? {
+//        return self.getData(at: self.readerIndex, length: length).map {
+//            self.moveReaderIndex(forwardBy: length)
+//            return $0
+//        }
+//    }
+//}
+
+//import NIOFoundationCompat
 //extension HTTPClient.Response {
 //    var toVapor: ClientResponse {
 //        return ClientResponse(status: status, headers: headers, body: body)
@@ -82,8 +92,8 @@ import NIOHTTPClient
 
 extension HTTPClient.Response {
     func become<C: Decodable>(_ t: C.Type = C.self) throws -> C {
-        guard var body = body else { throw "missing body" }
-        guard let data = body.readData(length: body.readableBytes) else { throw "unable to read body" }
+        guard let body = body else { throw "missing body" }
+        let data = body.makeData()
         let decoder = JSONDecoder()
         return try decoder.decode(C.self, from: data)
     }
@@ -116,11 +126,20 @@ extension HTTPClient.Response {
 //    
 //}
 
+extension ByteBuffer {
+    func makeData() -> Data {
+        var copy = self
+        let bytes = copy.readBytes(length: copy.readableBytes) ?? []
+        return Data(bytes: bytes)
+    }
+}
+
 extension HTTPClient.Body {
     var raw: Data {
         switch self {
         case .byteBuffer(var buffer):
-            return buffer.readData(length: buffer.readableBytes)!
+            let bytes = buffer.readBytes(length: buffer.readableBytes) ?? []
+            return Data(bytes: bytes)
         case .data(let data):
             return data
         case .string(let string):

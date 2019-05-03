@@ -5,40 +5,47 @@ let package = Package(
     name: "VaporToolbox",
     dependencies: [
         // 💧 A server-side Swift web framework.
-        .package(url: "https://github.com/vapor/vapor.git", .branch("master")),
+//        .package(url: "https://github.com/vapor/vapor.git", .branch("master")),
         .package(url: "https://github.com/tanner0101/swift-syntax", .branch("static")),
 //        .package(url: "https://github.com/vapor/leaf.git", from: "3.0.0"),
+        .package(url: "https://github.com/apple/swift-nio.git", from: "2.0.0"),
         .package(url: "https://github.com/vapor/leaf-kit.git", from: "0.0.2"),
-        .package(url: "https://github.com/vapor/nio-websocket-client", .branch("master"))
+        .package(url: "git@github.com:vapor/console.git", .branch("master")),
+        .package(url: "https://github.com/vapor/nio-websocket-client", .branch("master")),
+        .package(url: "https://github.com/swift-server/swift-nio-http-client", .branch("master")),
         // ::vapor
     ],
     targets: [
         // All of the commands and logic that powers the Vapor toolbox
         .target(name: "VaporToolbox", dependencies: [
             "LinuxTestsGeneration",
-           "Vapor",
+           "ConsoleKit",
            "CloudCommands",
            "Globals",
 //           "Leaf",
-           "LeafKit",
-           "NIOWebSocketClient",
+            "NIO",
+            "NIOHTTPClient",
+            "LeafKit",
+            "NIOWebSocketClient",
         ]),
         .target(name: "LinuxTestsGeneration", dependencies: [
             "SwiftSyntax",
             "Globals",
         ]),
         .target(name: "CloudCommands", dependencies: [
-            "Vapor",
+            "ConsoleKit",
+            "NIOHTTPClient",
             "CloudAPI",
             "Globals",
         ]),
         .target(name: "CloudAPI", dependencies: [
-            "Vapor",
+//            "Vapor",
             "Globals",
-            "NIOWebSocketClient"
+            "NIOHTTPClient",
+            "NIOWebSocketClient",
         ]),
         .target(name: "Globals", dependencies: [
-            "Vapor",
+            "NIO",
         ]),
         .testTarget(name: "LinuxTestsGenerationTests", dependencies: [
             "LinuxTestsGeneration",
