@@ -6,34 +6,10 @@ public func todo(file: StaticString = #file) -> Never {
     fatalError()
 }
 
-extension Process {
-//    public static func run(_ program: String, args: [String]) throws -> String {
-//        let task = Process()
-//        task.launchPath = program
-//        task.arguments = args
-//
-//        // observers
-//        let output = Pipe()
-//        let error = Pipe()
-//        task.standardOutput = output
-//        task.standardError = error
-//        task.launch()
-//        task.waitUntilExit()
-//
-//        let outputData = output.fileHandleForReading.readDataToEndOfFile()
-//        let errorData = error.fileHandleForReading.readDataToEndOfFile()
-//        let op = String(decoding: outputData, as: UTF8.self)
-//        let err = String(decoding: errorData, as: UTF8.self)
-//        guard err.isEmpty else { throw err }
-//        return op.trimmingCharacters(in: .whitespacesAndNewlines)
-//    }
-}
-
 public struct Shell {
     @discardableResult
     public static func bash(_ input: String) throws -> String {
         return try Process.run("/bin/sh", args: ["-c", input])
-//        return try Process.run("/bin/sh", args: ["-c", input])
     }
 
     public static func delete(_ path: String) throws {
@@ -45,7 +21,7 @@ public struct Shell {
     }
 
     public static func allFiles(in dir: String? = nil) throws -> String {
-        var command = "ls -lah"
+        var command = "ls -a"
         if let dir = dir {
             command += " \(dir)"
         }
@@ -61,7 +37,6 @@ public struct Shell {
     }
 }
 
-#if !os(iOS)
 import NIO
 
 /// Different types of process output.
@@ -83,32 +58,30 @@ public enum ProcessOutput {
     }
 }
 
+extension FileHandle {
+    fileprivate func read() -> String {
+        let data = readDataToEndOfFile()
+        return String(decoding: data, as: UTF8.self)
+    }
+}
+
 extension Process {
     public static func run(_ program: String, args: [String]) throws -> String {
-        let task = Process()
-        task.launchPath = program
-        task.arguments = args
-        
         // observers
-        let output = Pipe()
-        let error = Pipe()
-        task.standardOutput = output
-        task.standardError = error
-        task.launch()
+        let out = Pipe()
+        let err = Pipe()
+        let task = try launchProcess(path: program, args, stdout: out, stderr: err)
         task.waitUntilExit()
         
-        let outputData = output.fileHandleForReading.readDataToEndOfFile()
-        let errorData = error.fileHandleForReading.readDataToEndOfFile()
-        let op = String(decoding: outputData, as: UTF8.self)
-        let err = String(decoding: errorData, as: UTF8.self)
-        guard err.isEmpty else { throw err }
-        return op.trimmingCharacters(in: .whitespacesAndNewlines)
+        // read output
+        let stdout = out.fileHandleForReading.read()
+        let stderr = err.fileHandleForReading.read()
+        guard stderr.isEmpty else { throw stderr }
+        return stdout.trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
     @discardableResult
     public static func run(_ program: String, args: [String], updates: @escaping (ProcessOutput) -> Void) throws -> Int32 {
-        let program = try resolve(program: program)
-        
         let out = Pipe()
         let err = Pipe()
         
@@ -119,21 +92,19 @@ extension Process {
         DispatchQueue.global().async {
             while running {
                 let stdout = out.fileHandleForReading.availableData
-                if !stdout.isEmpty {
-                    updates(.stdout(stdout))
-                }
+                guard !stdout.isEmpty else { return }
+                updates(.stdout(stdout))
             }
         }
         DispatchQueue.global().async {
             while running {
                 let stderr = err.fileHandleForReading.availableData
-                if !stderr.isEmpty {
-                    updates(.stderr(stderr))
-                }
+                guard !stderr.isEmpty else { return }
+                updates(.stderr(stderr))
             }
         }
         
-        let process = launchProcess(path: program, args, stdout: out, stderr: err)
+        let process = try launchProcess(path: program, args, stdout: out, stderr: err)
         process.waitUntilExit()
         running = false
         return process.terminationStatus
@@ -141,14 +112,14 @@ extension Process {
     
     private static func resolve(program: String) throws -> String {
         if program.hasPrefix("/") { return program }
-//        let path = Shell.bash("which \(program)")
-        let path = try run("/bin/sh", args: ["-c", "which \(program)"])
+        let path = try Shell.bash("which \(program)")
         guard path.hasPrefix("/") else { throw "unable to find executable for \(program)" }
         return path
     }
     
     /// Powers `Process.execute(_:_:)` methods. Separated so that `/bin/sh -c which` can run as a separate command.
-    private static func launchProcess(path: String, _ arguments: [String], stdout: Pipe, stderr: Pipe) -> Process {
+    private static func launchProcess(path: String, _ arguments: [String], stdout: Pipe, stderr: Pipe) throws -> Process {
+        let path = try resolve(program: path)
         let process = Process()
         process.environment = ProcessInfo.processInfo.environment
         process.launchPath = path
@@ -158,51 +129,4 @@ extension Process {
         process.launch()
         return process
     }
-    
-//    public static func execute(_ program: String, _ args: [String]) throws -> String {
-//        // observers
-//        let output = Pipe()
-//        let error = Pipe()
-//        let process = launchProcess(path: program, args, stdout: output, stderr: error)
-//        process.waitUntilExit()
-//
-//        // read
-//        let outputData = output.fileHandleForReading.readDataToEndOfFile()
-//        let errorData = error.fileHandleForReading.readDataToEndOfFile()
-//        let op = String(decoding: outputData, as: UTF8.self)
-//        let err = String(decoding: errorData, as: UTF8.self)
-//        guard err.isEmpty else { throw err }
-//        return op.trimmingCharacters(in: .whitespacesAndNewlines)
-//    }
 }
-
-extension Pipe {
-    
-}
-
-
-/// An error that can be thrown while using `Process.execute(_:_:)`
-public struct ProcessExecuteError: Error {
-    /// The exit status
-    public let status: Int32
-    
-    /// Contents of `stderr`
-    public var stderr: String
-    
-    /// Contents of `stdout`
-    public var stdout: String
-}
-
-//extension ProcessExecuteError: Debuggable {
-//    /// See `Debuggable.identifier`.
-//    public var identifier: String {
-//        return status.description
-//    }
-//
-//    /// See `Debuggable.reason`
-//    public var reason: String {
-//        return stderr
-//    }
-//}
-
-#endif

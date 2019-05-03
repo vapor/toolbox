@@ -4,11 +4,13 @@ import Globals
 
 extension Option where Value == Bool {
     static var update: Option = .init(name: "update", short: "u", type: .flag, help: "cleans Package.resolved file if it exists.")
+    static var keepCheckouts: Option = .init(name: "keep-checkouts", short: "k", type: .flag, help: "keep checkouts ")
 }
 /// Cleans temporary files created by Xcode and SPM.
 struct CleanCommand: Command {
     struct Signature: CommandSignature {
         let update: Option = .update
+        let keepCheckouts: Option = .keepCheckouts
     }
     let signature = Signature()
     let help: String? = "cleans temporary files."
@@ -43,18 +45,23 @@ class Cleaner<C: CommandRunnable> {
         ops.append((".build", cleanBuildFolder))
         ops.append(("Package.resolved", cleanPackageResolved))
 
-        for (name, op) in ops {
+        let rows = ops.map { (name, op) -> [ConsoleText] in
+            var row = [ConsoleText]()
             do {
                 let result = try op()
-                let text = name.consoleText(result.style) + ": " + result.report
-                ctx.console.output(text)
+                row.append(name.consoleText(result.style))
+                row.append(result.report)
             } catch {
-                let text = name.consoleText(CleanResult.failure.style)
-                    + ": "
-                    + error.localizedDescription.consoleText()
-                ctx.console.output(text)
+                row.append(name.consoleText(CleanResult.failure.style))
+                row.append(error.localizedDescription.consoleText())
             }
+            return row
         }
+        
+        
+        let drawer = TableDrawer(rows: rows)
+        let text = drawer.drawTable()
+        ctx.console.output(text, newLine: false)
     }
 
     private func cleanPackageResolved() throws -> CleanResult {
@@ -69,7 +76,13 @@ class Cleaner<C: CommandRunnable> {
 
     private func cleanBuildFolder() throws -> CleanResult {
         guard files.contains(".build") else { return .notNecessary }
-        try Shell.delete(".build")
+        var list = try Shell.allFiles(in: ".build").split(separator: "\n")
+        if ctx.flag(.keepCheckouts) {
+            list.removeAll(where: ["checkouts", ".", ".."].contains)
+            try list.map { ".build/" + $0 } .forEach(Shell.delete)
+        } else {
+            try Shell.delete(".build")
+        }
         return .success
     }
 
