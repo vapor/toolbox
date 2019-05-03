@@ -38,11 +38,8 @@ public func boot() -> Application {
     commands.use(XcodeCommand(), as: "xcode")
     commands.use(BuildCommand(), as: "build")
     commands.use(LeafGroup(), as: "leaf")
-//    commands.use(LeafXcodeCommand(), as: "leaf")
-//    commands.use(LoadLeafPackage(), as: "info")
 
     services.register(CommandConfiguration.self, { _ in commands })
 
-//    todo()
     return Application(configure: { services })
 }

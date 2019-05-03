@@ -33,26 +33,13 @@ struct CloudSignup: Command {
             password: p
         )
         ctx.console.output("success. welcome to cloud..".consoleText(.info))
-        
-//        todo()
-//        let api = UserApi(on: ctx.container)
-//        let user = api.signup(
-//            email: e,
-//            firstName: f,
-//            lastName: l,
-//            organizationName: o,
-//            password: p
-//        )
-//        return user.map { _ in
-//            ctx.console.output("Welcome to Cloud".consoleText(.info))
-//        }
     }
 }
 
 extension CommandContext {
     func loadAndDisplay<T: LosslessStringConvertible>(_ opt: Option<T>, secure: Bool = false) throws -> String {
         let val = load(opt, secure: secure).description.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !val.isEmpty else { throw "No value entered for \(opt.name)" }
+        guard !val.isEmpty else { throw "no value entered for \(opt.name)" }
         display(opt, value: val, secure: secure)
         return val
     }

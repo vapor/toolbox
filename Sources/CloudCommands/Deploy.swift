@@ -260,7 +260,7 @@ struct CloudDeployRunner<C: CommandRunnable> {
         let env = try ctx.loadEnv(for: app, with: token)
         let branch = try ctx.loadBranch(with: env, cloudAction: "deploy")
 
-        // If we should push first, insert push operation
+        // ff we should push first, insert push operation
         if ctx.flag(.push) {
             let push = try CloudPushRunner(ctx: ctx)
             try push.push(branch: branch)
@@ -291,7 +291,7 @@ struct CloudDeployRunner<C: CommandRunnable> {
     }
 }
 
-struct CloudPushRunner<C: CommandRunnable> { //}: AuthorizedRunner {
+struct CloudPushRunner<C: CommandRunnable> {
     let ctx: CommandContext<C>
     let token: Token
     let access: ResourceAccess<CloudApp>
@@ -308,7 +308,7 @@ struct CloudPushRunner<C: CommandRunnable> { //}: AuthorizedRunner {
         let app = try ctx.loadApp(with: token)
         let env = try ctx.loadEnv(for: app, with: token)
         let branch = try ctx.loadBranch(with: env, cloudAction: "push")
-        // Deploy
+        // push
         try push(branch: branch)
     }
 
@@ -324,15 +324,6 @@ struct CloudPushRunner<C: CommandRunnable> { //}: AuthorizedRunner {
     }
 }
 
-extension EventLoopFuture {
-    func success(_ run: @escaping (Value) -> Void) {
-        todo()
-//        addAwaiter { (result) in
-//            guard case .success(let val) = result else { return }
-//            run(val)
-//        }
-    }
-}
 extension CommandContext {
     func detectCloudApp(with token: Token) throws -> CloudApp {
         let access = CloudApp.Access(with: token)

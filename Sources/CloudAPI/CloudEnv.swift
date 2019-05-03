@@ -29,9 +29,7 @@ extension CloudEnv {
         ]
 
         let env = try access.update(id: id, with: package)
-        guard let activity = env.activity else {
-            throw "Unable to find deploy activity."
-        }
+        guard let activity = env.activity else { throw "unable to find deploy activity." }
         return activity
     }
 }
