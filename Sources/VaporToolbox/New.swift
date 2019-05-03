@@ -2,6 +2,14 @@ import Vapor
 import Globals
 import ConsoleKit
 
+
+extension String {
+    fileprivate func finished(with tail: String) -> String {
+        guard hasSuffix(tail) else { return self + tail }
+        return self
+    }
+}
+
 extension Argument where Value == String {
     static let name: Argument = .init(name: "name", help: "what to name your project.")
 }

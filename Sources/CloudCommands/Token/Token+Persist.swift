@@ -2,6 +2,13 @@ import Globals
 import CloudAPI
 import Foundation
 
+extension String {
+    func finished(with tail: String) -> String {
+        guard hasSuffix(tail) else { return self + tail }
+        return self
+    }
+}
+
 extension Token {
     /// Save cloud Token
     func save() throws {

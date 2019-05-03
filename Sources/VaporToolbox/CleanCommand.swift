@@ -2,6 +2,13 @@ import Vapor
 import ConsoleKit
 import Globals
 
+extension String {
+    fileprivate func finished(with tail: String) -> String {
+        guard hasSuffix(tail) else { return self + tail }
+        return self
+    }
+}
+
 extension Option where Value == Bool {
     static var update: Option = .init(name: "update", short: "u", type: .flag, help: "cleans Package.resolved file if it exists.")
     static var keepCheckouts: Option = .init(name: "keep-checkouts", short: "k", type: .flag, help: "keep checkouts ")

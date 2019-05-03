@@ -1,13 +1,6 @@
 import Vapor
 import Globals
 
-//let group = MultiThreadedEventLoopGroup(numberOfThreads: { todo() }())
-
-//internal func makeClient() -> Client {
-//    let next = group.next()
-//    return FoundationClient(.shared, on: next)
-//}
-
 struct Web {
     static func send(_ req: ClientRequest) throws -> ClientResponse {
         let (data, resp, err) = _send(.init(client: req))
@@ -72,10 +65,6 @@ private extension ClientResponse {
     }
 }
 
-internal func makeWebSocketClient(url: URLRepresentable) -> WebSocket {
-    todo()
-//    return makeClient(on: container).webSocket(url)
-}
 
 private struct ResponseError: Content {
     let error: Bool

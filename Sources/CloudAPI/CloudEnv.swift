@@ -43,15 +43,15 @@ extension Activity {
         case close
     }
 
-    private var wssUrl: String {
-        return "wss://api.v2.vapor.cloud/v2/activity/activities/\(id.uuidString)/channel"
+    private var wssUrl: URL {
+        return URL(string: "wss://api.v2.vapor.cloud/v2/activity/activities/\(id.uuidString)/channel")!
     }
     
     private var host: String {
-        return "api.v2.vapor.cloud"
+        return wssUrl.host! // "api.v2.vapor.cloud"
     }
     private var uri: String {
-        return "/v2/activity/activities/\(id.uuidString)/channel"
+        return wssUrl.path // "/v2/activity/activities/\(id.uuidString)/channel"
     }
     
     public func listen(_ listener: @escaping (Update) -> Void) throws {
@@ -74,20 +74,5 @@ extension Activity {
             }
         }
         try connection.wait()
-    }
-    
-    public func _listen(_ listener: @escaping (Update) -> Void){
-        let ws = makeWebSocketClient(url: wssUrl)
-        listener(.connected)
-        
-        // Logs
-        ws.onText { ws, text in
-            listener(.message(text))
-        }
-        
-        // Close
-        let _ = ws.onClose.map {
-            listener(.close)
-        }
     }
 }

@@ -3,6 +3,13 @@ import Globals
 import LeafKit
 import ConsoleKit
 
+extension String {
+    fileprivate func finished(with tail: String) -> String {
+        guard hasSuffix(tail) else { return self + tail }
+        return self
+    }
+}
+
 struct LeafGroup: CommandGroup {
     /// See `CommandRunnable`.
     struct Signature: CommandSignature { }
