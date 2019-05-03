@@ -37,7 +37,7 @@ struct GenerateLinuxMain: Command {
 }
 
 extension String {
-    func finished(with tail: String) -> String {
+    fileprivate func finished(with tail: String) -> String {
         guard hasSuffix(tail) else { return self + tail }
         return self
     }

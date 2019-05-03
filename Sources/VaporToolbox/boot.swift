@@ -28,7 +28,7 @@ public func boot() -> Application {
 
     var commands = CommandConfiguration()
     commands.use(CleanCommand(), as: "clean")
-//    commands.use(GenerateLinuxMain(), as: "linux-main")
+    commands.use(GenerateLinuxMain(), as: "linux-main")
     commands.use(CloudCommands.CloudGroup(), as: "cloud")
     commands.use(New(), as: "new")
     commands.use(PrintDroplet(), as: "drop")
