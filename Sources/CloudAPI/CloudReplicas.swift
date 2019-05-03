@@ -8,8 +8,8 @@ public struct CloudReplica: Content {
     public let slug: String
     public let environmentID: UUID
     public let id: UUID
-    public let updatedAt: Date
-    public let createdAt: Date
+    public let updatedAt: String
+    public let createdAt: String
 }
 
 public struct CloudLogs: Content {

@@ -246,8 +246,6 @@ struct LeafRenderFolder: Command {
         // MARK: Render Files
         var renders: [String: ByteBuffer] = [:]
         for file in files {
-            //            let contents = try Shell.readFile(path: path)
-            //            let data = Data(bytes: contents.utf8)
             let (buffer, name) = try renderer.render(path: file, context: data).and(value: file).wait()
             renders[name] = buffer
         }
@@ -256,7 +254,6 @@ struct LeafRenderFolder: Command {
         for (path, render) in renders {
             var render = render
             let url = URL(fileURLWithPath: path)
-//            let str = render.readString(length: render.readableBytes)
             guard let str = render.readString(length: render.readableBytes) else {
                 fatalError("unable to create string") }
             if str.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
@@ -275,60 +272,6 @@ struct LeafRenderFolder: Command {
                 try include.includes.map { path.trailingSlash + $0 } .forEach(Shell.delete)
             }
         }
-        
-//        let config = LeafConfig(rootDirectory: path)
-//        let threadPool = NIOThreadPool(numberOfThreads: 1)
-//        threadPool.start()
-//        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-//        let renderer = LeafRenderer(config: config, threadPool: threadPool, eventLoop: ctx.eventLoop)
-//        let paths = all.filter { !seed.excludes.shouldExclude(path: $0) }
-//
-//        // MARK: Render Files
-//        var renders: [EventLoopFuture<(ByteBuffer, String)>] = []
-//        for path in paths {
-////            let contents = try Shell.readFile(path: path)
-////            let data = Data(bytes: contents.utf8)
-//            var data: [String: LeafData] = [:]
-//            package.forEach { key, val in
-//                data[key] = .string(val)
-//            }
-//            let rendered = renderer.render(path: path, context: data).and(value: path)
-////            let rendered = renderer.render(template: data, package).and(result: path)
-//            renders.append(rendered)
-//        }
-
-        // MARK: Write Files
-                
-//        let flat = renders.flatten(on: ctx.container)
-//        return flat.map { views in
-//            for (view, path) in views {
-//                let url = URL(fileURLWithPath: path)
-//                guard let str = String(bytes: view.data, encoding: .utf8) else {
-//                    fatalError("unable to create string") }
-//                if str.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-//                    try Shell.delete(path)
-//                } else {
-//                    try view.data.write(to: url)
-//                }
-//            }
-//
-//            try Shell.delete(seedPath)
-//            // TODO: Delete Empty Folders?
-//        } .map {
-//            try seed.conditionalIncludes?.forEach { include in
-//                if answers.satisfy(include.condition) { return }
-//                else {
-//                    try include.includes.map { path.finished(with: "/") + $0 } .forEach(Shell.delete)
-//                }
-//            }
-//        }
-    }
-}
-
-extension String {
-    internal var trailSlash: String {
-        if hasSuffix("/") { return self }
-        else { return self + "/" }
     }
 }
 

@@ -9,11 +9,11 @@ public struct Activity: Content {
 public struct CloudEnv: Content {
     public let defaultBranch: String
     public let applicationID: UUID
-    public let createdAt: Date?
+    public let createdAt: String?
     public let id: UUID
     public let slug: String
     public let regionID: UUID
-    public let updatedAt: Date?
+    public let updatedAt: String?
     public let activity: Activity?
 }
 
@@ -23,7 +23,7 @@ extension CloudEnv {
         with token: Token
     ) throws -> Activity {
         let access = CloudEnv.Access(with: token, baseUrl: environmentsUrl)
-        let id = self.id.uuidString.trailSlash + "deploy"
+        let id = self.id.uuidString.trailingSlash + "deploy"
         let package = [
             "branch": branch ?? defaultBranch
         ]

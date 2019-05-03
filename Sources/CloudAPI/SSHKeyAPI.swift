@@ -6,8 +6,8 @@ public struct SSHKey: Content {
     public let userID: UUID
 
     public let id: UUID
-    public let createdAt: Date
-    public let updatedAt: Date
+    public let createdAt: String
+    public let updatedAt: String
 }
 
 public struct SSHKeyApi {

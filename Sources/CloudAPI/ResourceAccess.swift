@@ -1,7 +1,7 @@
 import Vapor
 import Globals
 
-public struct ResourceAccess<T: Content> {
+public struct ResourceAccess<T: Codable> {
     public let token: Token
     public let baseUrl: String
 
@@ -16,7 +16,7 @@ public struct ResourceAccess<T: Content> {
     }
 
     public func view(id: String) throws -> T {
-        let url = self.baseUrl.trailSlash + id
+        let url = self.baseUrl.trailingSlash + id
         let response = try send(.GET, to: url)
         return try response.become(T.self)
     }
@@ -33,47 +33,50 @@ public struct ResourceAccess<T: Content> {
     }
 
     public func update<U: Content>(id: String, with content: U) throws -> T {
-        let url = self.baseUrl.trailSlash + id
+        let url = self.baseUrl.trailingSlash + id
         let response = try send(.PATCH, to: url, with: content)
         return try response.become()
     }
 
     public func replace(id: String, with content: T) throws -> T {
-        let url = self.baseUrl.trailSlash + id
+        let url = self.baseUrl.trailingSlash + id
         let response = try send(.PUT, to: url, with: content)
         return try response.become()
     }
 
     public func delete(id: String) throws {
-        let url = self.baseUrl.trailSlash + id
+        let url = self.baseUrl.trailingSlash + id
         let _ = try send(.DELETE, to: url)
     }
 }
 
 extension ResourceAccess {
-    fileprivate func send<C: Content>(
+    fileprivate func send<C: Encodable>(
         _ method: HTTPMethod,
-        to url: URLRepresentable,
+        to url: String,
         with content: C
-    ) throws -> ClientResponse {
-        return try send(method, to: url) {
-            try $0.content.encode(content)
-        }
+    ) throws -> HTTPClient.Response {
+        let encoder = JSONEncoder()
+        let data = try encoder.encode(content)
+        return try send(method, to: url, body: data)
     }
 
     private func send(
         _ method: HTTPMethod,
-        to url: URLRepresentable,
-        beforeSend: (inout ClientRequest) throws -> () = { _ in }
-    ) throws -> ClientResponse {
+        to url: String,
+        body: Data? = nil
+    ) throws -> HTTPClient.Response {
         // Headers
         var headers = HTTPHeaders()
         headers.add(name: .authorization, value: "Bearer \(token.key)")
         headers.add(name: .contentType, value: "application/json")
 
-        var req = try ClientRequest(method: method, to: url, headers: headers)
-        try beforeSend(&req)
-
+        let req = try HTTPClient.Request(
+            url: url,
+            method: method,
+            headers: headers,
+            body: body.flatMap(HTTPClient.Body.data)
+        )
         return try Web.send(req).logged()
     }
 }
@@ -103,6 +106,13 @@ extension Content {
 let logResponses = false
 extension ClientResponse {
     func logged() -> ClientResponse {
+        guard logResponses else { return self }
+        print("Got response:\n\(self)\n\n")
+        return self
+    }
+}
+extension HTTPClient.Response {
+    func logged() -> HTTPClient.Response {
         guard logResponses else { return self }
         print("Got response:\n\(self)\n\n")
         return self

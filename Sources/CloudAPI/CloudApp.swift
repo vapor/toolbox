@@ -1,10 +1,10 @@
 import Vapor
 import Globals
 
-public struct CloudApp: Content {
-    public let updatedAt: Date
+public struct CloudApp: Codable {
+    public let updatedAt: String
     public let name: String
-    public let createdAt: Date
+    public let createdAt: String
     public let namespace: String
     public let github: String?
     public let slug: String
@@ -21,8 +21,8 @@ extension CloudApp {
 
 extension CloudApp {
     public func environments(with token: Token) throws -> [CloudEnv] {
-        let appEnvsUrl = applicationsUrl.trailSlash
-            + id.uuidString.trailSlash
+        let appEnvsUrl = applicationsUrl.trailingSlash
+            + id.uuidString.trailingSlash
             + "environments"
         let envAccess = CloudEnv.Access(with: token, baseUrl: appEnvsUrl)
         return try envAccess.list()
