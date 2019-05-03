@@ -9,49 +9,51 @@ extension HTTPClient.Response {
 
 struct Web {
     static func send(_ req: HTTPClient.Request) throws -> HTTPClient.Response {
-        print("sending")
         let client = HTTPClient(eventLoopGroupProvider: .createNew)
+        defer { try! client.syncShutdown() }
         let response = try client.execute(request: req).wait()
-        print("got response: \(response)")
-        try client.syncShutdown()
+        // sometimes successful response is actually a cloud error
+        if let err = try? response.become(ResponseError.self) {
+            throw err
+        }
         return response
     }
     
-    static func send(to url: String, method: HTTPMethod, headers: HTTPHeaders, body: Data)
-        throws -> HTTPClient.Response {
-            let client = HTTPClient(eventLoopGroupProvider: .createNew)
-            let req = try HTTPClient.Request(url: url, method: method, headers: headers, body: .data(body))
-            let resp = try client.execute(request: req).wait()
-            try client.syncShutdown()
-            return resp
-    }
-    
-    static func send(to url: String, method: HTTPMethod, headers: HTTPHeaders, body: ByteBuffer)
-        throws -> HTTPClient.Response {
-            var body = body
-            let data = body.readData(length: body.readableBytes)!
-            return try send(to: url, method: method, headers: headers, body: data)
-    }
-    
-    static func send<E: Encodable>(to url: String, method: HTTPMethod, headers: HTTPHeaders, body: E)
-        throws -> HTTPClient.Response {
-            let jsonEncoder = JSONEncoder()
-            let data = try jsonEncoder.encode(body)
-            return try send(to: url, method: method, headers: headers, body: data)
-    }
-    
-    static func send(_ req: ClientRequest) throws -> ClientResponse {
-        let req = try HTTPClient.Request(
-            url: req.url.absoluteString,
-            method: req.method,
-            headers: req.headers,
-            body: req.body.flatMap(HTTPClient.Body.byteBuffer)
-        )
-        let client = HTTPClient(eventLoopGroupProvider: .createNew)
-        let response = try client.execute(request: req).wait()
-        try client.syncShutdown()
-        return ClientResponse(status: response.status, headers: response.headers, body: response.body)
-    }
+//    static func send(to url: String, method: HTTPMethod, headers: HTTPHeaders, body: Data)
+//        throws -> HTTPClient.Response {
+//            let client = HTTPClient(eventLoopGroupProvider: .createNew)
+//            let req = try HTTPClient.Request(url: url, method: method, headers: headers, body: .data(body))
+//            let resp = try client.execute(request: req).wait()
+//            try client.syncShutdown()
+//            return resp
+//    }
+//    
+//    static func send(to url: String, method: HTTPMethod, headers: HTTPHeaders, body: ByteBuffer)
+//        throws -> HTTPClient.Response {
+//            var body = body
+//            let data = body.readData(length: body.readableBytes)!
+//            return try send(to: url, method: method, headers: headers, body: data)
+//    }
+//    
+//    static func send<E: Encodable>(to url: String, method: HTTPMethod, headers: HTTPHeaders, body: E)
+//        throws -> HTTPClient.Response {
+//            let jsonEncoder = JSONEncoder()
+//            let data = try jsonEncoder.encode(body)
+//            return try send(to: url, method: method, headers: headers, body: data)
+//    }
+//    
+//    static func send(_ req: ClientRequest) throws -> ClientResponse {
+//        let req = try HTTPClient.Request(
+//            url: req.url.absoluteString,
+//            method: req.method,
+//            headers: req.headers,
+//            body: req.body.flatMap(HTTPClient.Body.byteBuffer)
+//        )
+//        let client = HTTPClient(eventLoopGroupProvider: .createNew)
+//        let response = try client.execute(request: req).wait()
+//        try client.syncShutdown()
+//        return ClientResponse(status: response.status, headers: response.headers, body: response.body)
+//    }
     
 //    private static func _send(_ req: URLRequest) -> (Data?, URLResponse?, Error?) {
 //        var resp: (Data?, URLResponse?, Error?)? = nil
@@ -147,7 +149,7 @@ private extension ClientResponse {
 }
 
 
-private struct ResponseError: Content {
+private struct ResponseError: Resource, Error {
     let error: Bool
     let reason: String
 }

@@ -1,6 +1,6 @@
 import Vapor
 
-public struct SSHKey: Content {
+public struct SSHKey: Resource {
     public let key: String
     public let name: String
     public let userID: UUID
@@ -20,7 +20,7 @@ public struct SSHKeyApi {
     }
 
     public func add(name: String, key: String) throws -> SSHKey {
-        struct Package: Content {
+        struct Package: Resource {
             let name: String
             let key: String
         }

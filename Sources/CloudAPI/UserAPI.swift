@@ -1,7 +1,9 @@
-import Vapor
+import Foundation
+import NIOHTTP1
+import NIOHTTPClient
 import Globals
 
-public struct CloudUser: Content {
+public struct CloudUser: Resource {
     public let id: UUID
     public let firstName: String
     public let lastName: String
@@ -22,7 +24,7 @@ public struct UserApi {
         organizationName: String,
         password: String
     ) throws -> CloudUser {
-        struct Package: Content {
+        struct Package: Encodable {
             let email: String
             let firstName: String
             let lastName: String
@@ -37,7 +39,7 @@ public struct UserApi {
             password: password
         )
         
-        let req = try ClientRequest(method: .POST, to: userUrl, body: content)
+        let req = try HTTPClient.Request(url: userUrl, method: .POST, body: .init(content))
         return try Web.send(req).become(CloudUser.self)
     }
 
@@ -53,7 +55,8 @@ public struct UserApi {
             "Authorization": "Basic \(encoded)"
         ]
 //        let client = makeClient()
-        let req = try ClientRequest(method: .POST, to: loginUrl, headers: headers)
+//        let req = try ClientRequest(method: .POST, to: loginUrl, headers: headers)
+        let req = try HTTPClient.Request(url: loginUrl, method: .POST, headers: headers)
         let response = try Web.send(req)
         return try response.become(Token.self)//.wait()
     }
@@ -64,12 +67,20 @@ public struct UserApi {
     }
 
     public func reset(email: String) throws {
-        struct Package: Content {
+        struct Package: Codable {
             let email: String
         }
         let content = Package(email: email)
         
-        let req = try ClientRequest(method: .POST, to: resetUrl, body: content)
+        let req = try HTTPClient.Request(url: resetUrl, method: .POST, body: .init(content))
         let _ = try Web.send(req)//.validate().void().wait()
+    }
+}
+
+extension HTTPClient.Body {
+    init<E: Encodable>(_ ob: E) throws {
+        let encoder = JSONEncoder()
+        let data = try encoder.encode(ob)
+        self = .data(data)
     }
 }

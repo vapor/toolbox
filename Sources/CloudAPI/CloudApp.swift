@@ -1,7 +1,7 @@
 import Vapor
 import Globals
 
-public struct CloudApp: Codable {
+public struct CloudApp: Resource {
     public let updatedAt: String
     public let name: String
     public let createdAt: String

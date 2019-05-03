@@ -2,11 +2,11 @@ import Vapor
 import Globals
 import NIOWebSocketClient
 
-public struct Activity: Content {
+public struct Activity: Resource {
     public let id: UUID
 }
 
-public struct CloudEnv: Content {
+public struct CloudEnv: Resource {
     public let defaultBranch: String
     public let applicationID: UUID
     public let createdAt: String?

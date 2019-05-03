@@ -1,7 +1,7 @@
 import Vapor
 import Foundation
 
-public struct CloudReplica: Content {
+public struct CloudReplica: Resource {
     public let planID: UUID
     public let replicas: Int
     public let status: String
@@ -12,7 +12,7 @@ public struct CloudReplica: Content {
     public let createdAt: String
 }
 
-public struct CloudLogs: Content {
+public struct CloudLogs: Resource {
     public let name: String
     public let logs: String
 }

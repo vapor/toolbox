@@ -1,7 +1,9 @@
 import Vapor
 import Globals
 
-public struct ResourceAccess<T: Codable> {
+public protocol Resource: Encodable, Decodable { }
+
+public struct ResourceAccess<T: Resource> {
     public let token: Token
     public let baseUrl: String
 
@@ -27,12 +29,12 @@ public struct ResourceAccess<T: Codable> {
         return try response.become([T].self)
     }
 
-    public func create<U: Content>(_ content: U) throws -> T {
+    public func create<U: Encodable>(_ content: U) throws -> T {
         let response = try send(.POST, to: baseUrl, with: content)
         return try response.become(T.self)
     }
 
-    public func update<U: Content>(id: String, with content: U) throws -> T {
+    public func update<U: Encodable>(id: String, with content: U) throws -> T {
         let url = self.baseUrl.trailingSlash + id
         let response = try send(.PATCH, to: url, with: content)
         return try response.become()
@@ -81,6 +83,14 @@ extension ResourceAccess {
     }
 }
 
+//extension HTTPClient.Request {
+//    init<E: Encodable>(url: String, method: HTTPMethod, headers: HTTPHeaders, body: E) throws {
+//        let e = JSONEncoder()
+//        let data = try e.encode(body)
+//        self = try .init(url: url, method: method, headers: headers, body: .data(data))
+//    }
+//}
+
 extension ClientRequest {
     init<C: Content>(method: HTTPMethod, to rep: URLRepresentable, headers: HTTPHeaders = [:], body: C) throws {
         guard let url = rep.convertToURL() else { throw "unable to convert \(rep) to url" }
@@ -96,7 +106,7 @@ extension ClientRequest {
     }
 }
 
-extension Content {
+extension Resource {
     public static func Access(with token: Token, baseUrl url: String) -> ResourceAccess<Self> {
         return ResourceAccess<Self>(token: token, baseUrl: url)
     }
