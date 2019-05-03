@@ -1,7 +1,8 @@
-import Vapor
 import CloudCommands
 import Globals
 import NIOWebSocketClient
+import ConsoleKit
+import Foundation
 
 var count = 0
 public func testExample() throws {
@@ -41,34 +42,13 @@ final class Main: CommandGroup {
     
     let help: String? = "main"
     
-    func run(using context: CommandContext<Main>) throws {
-        print("RUNNNNIGNIGNIGNG")
+    func run(using ctx: CommandContext<Main>) throws {
+        ctx.console.output("welcome to vapor.")
+        ctx.console.output("use `vapor -h` to see commands")
     }
 }
 
-/// Creates an Application to run.
-public func _boot() throws {
+public func run() throws {
     var input = CommandInput(arguments: CommandLine.arguments)
     try Terminal().run(Main(), input: &input)
-}
-
-public func boot() -> Application {
-    var services = Services.default()
-
-    var commands = CommandConfiguration()
-    commands.use(CleanCommand(), as: "clean")
-    commands.use(GenerateLinuxMain(), as: "linux-main")
-    commands.use(CloudCommands.CloudGroup(), as: "cloud")
-    commands.use(New(), as: "new")
-    commands.use(PrintDroplet(), as: "drop")
-
-    // for running quick exec tests
-    commands.use(Test(), as: "test")
-    commands.use(XcodeCommand(), as: "xcode")
-    commands.use(BuildCommand(), as: "build")
-    commands.use(LeafGroup(), as: "leaf")
-
-    services.register(CommandConfiguration.self, { _ in commands })
-
-    return Application(configure: { services })
 }
