@@ -1,6 +1,5 @@
-import Foundation
-import VaporToolbox
 import ConsoleKit
+import VaporToolbox
 
 do {
     try run()
