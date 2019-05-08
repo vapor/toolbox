@@ -53,6 +53,7 @@ extension Activity {
     }
     
     public func listen(_ listener: @escaping (Update) -> Void) throws {
+        print("will connect to:\n\n\(wssUrl.absoluteString)\n\n")
         let client = WebSocketClient(eventLoopGroupProvider: .createNew)
         defer { try! client.syncShutdown() }
         

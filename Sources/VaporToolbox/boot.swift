@@ -8,7 +8,7 @@ var count = 0
 public func testExample() throws {
     let client = WebSocketClient(eventLoopGroupProvider: .createNew)
     defer { try! client.syncShutdown() }
-    try client.connect(host: "echo.websocket.org", port: 80) { webSocket in
+    try client.connect(host: "echo.websocket.org", port: 80, uri: "echo-test") { webSocket in
         webSocket.send(text: "Hello")
         webSocket.onText { webSocket, string in
             print("\(count): " + string)
@@ -22,6 +22,32 @@ public func testExample() throws {
         }
         }.wait()
 }
+
+var holder: WebSocketClient.Socket? = nil
+public func _testExample() throws {
+    let client = WebSocketClient(eventLoopGroupProvider: .createNew)
+    defer { try! client.syncShutdown() }
+    try client.connect(host: "api-activity.v2.vapor.cloud", port: 80, uri: "echo-test") { webSocket in
+//        holder = webSocket
+        print("connected")
+        webSocket.onCloseCode({ (close) in
+            print("closed w code: \(close)")
+        })
+        webSocket.send(text: "hello")
+        webSocket.onText { webSocket, string in
+            print("\(count): " + string)
+            count += 1
+            guard count > 5 else {
+                sleep(2)
+                webSocket.send(text: "ayo \(count)")
+                return
+            }
+            webSocket.close(promise: nil)
+        }
+    }.wait()
+}
+
+
 
 final class Main: CommandGroup {
     struct Signature: CommandSignature {}

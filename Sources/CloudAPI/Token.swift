@@ -1,7 +1,7 @@
 import Foundation
 
 public struct Token: Resource, Hashable {
-    public let expiresAt: Date
+    public let expiresAt: String
     public let id: UUID
     public let userID: UUID
     private let token: String
