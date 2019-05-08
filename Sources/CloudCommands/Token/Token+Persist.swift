@@ -58,19 +58,11 @@ extension Token {
     }
 }
 
-let dateFormatter: DateFormatter = {
-    let df = DateFormatter()
-    df.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ"
-    return df
-}()
-
 extension Token {
     fileprivate var isValid: Bool {
         return !isExpired
     }
     fileprivate var isExpired: Bool {
-        return dateFormatter.date(from: expiresAt).flatMap { expiration in
-            return expiration < Date()
-        } ?? true
+        return expiresAt < Date().timeIntervalSince1970
     }
 }

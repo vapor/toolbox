@@ -53,9 +53,7 @@ extension Activity {
     }
     
     public func listen(_ listener: @escaping (Update) -> Void) throws {
-        print("will connect to:\n\n\(wssUrl.absoluteString)\n\n")
         let client = WebSocketClient(eventLoopGroupProvider: .createNew)
-        defer { try! client.syncShutdown() }
         
         let connection = client.connect(host: host, port: 80, uri: uri, headers: [:]) { ws in
             listener(.connected)
@@ -64,14 +62,17 @@ extension Activity {
                 listener(.message(text))
             }
             
-            ws.onBinary { ws, binary in
-                print("got binary!!!")
+            ws.onBinary { _, _ in
+                fatalError("not prepared to accept binary")
             }
 
             ws.onCloseCode { _ in
                 listener(.close)
+                _ = ws.close()
             }
         }
         try connection.wait()
+        try client.syncShutdown()
     }
 }
+

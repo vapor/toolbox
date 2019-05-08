@@ -20,7 +20,7 @@ struct LeafGroup: CommandGroup {
 
     /// See `CommandGroup`.
     func run(using ctx: CommandContext<LeafGroup>) throws {
-
+        ctx.console.output("interact with leaf to render the contents of a folder.")
     }
 }
 
