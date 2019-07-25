@@ -8,7 +8,6 @@ class Vapor < Formula
   depends_on :xcode => "10"
   depends_on "libressl"
   depends_on "pkg-config"
-  depends_on "openssl"
 
   def install
     system "swift", "build", "--disable-sandbox"
