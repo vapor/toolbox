@@ -1,7 +1,7 @@
 import Globals
 import Foundation
 import NIOHTTP1
-import NIOHTTPClient
+import AsyncHTTPClient
 
 public protocol Resource: Encodable, Decodable { }
 

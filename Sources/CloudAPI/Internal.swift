@@ -1,7 +1,7 @@
 import NIO
 import Globals
 import Foundation
-import NIOHTTPClient
+import AsyncHTTPClient
 
 struct Web {
     static func send(_ req: HTTPClient.Request) throws -> HTTPClient.Response {

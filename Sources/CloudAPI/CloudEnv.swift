@@ -1,6 +1,6 @@
 import Globals
 import Foundation
-import NIOWebSocketClient
+import AsyncWebSocketClient
 
 public struct Activity: Resource {
     public let id: UUID

@@ -1,6 +1,6 @@
 import Foundation
 import NIOHTTP1
-import NIOHTTPClient
+import AsyncHTTPClient
 import Globals
 
 public struct CloudUser: Resource {
