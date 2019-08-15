@@ -38,7 +38,7 @@ struct New: Command {
         let branch: Option = .branch
     }
     let signature = Signature()
-    let help: String? = "creates a new vapor app from template. use 'vapor new ProjectName'."
+    let help = "creates a new vapor app from template. use 'vapor new ProjectName'."
 
     func run(using ctx: Context) throws {
         let name = try ctx.arg(.name)
@@ -170,7 +170,7 @@ enum Template {
 struct PrintDroplet: Command {
     struct Signature: CommandSignature {}
     let signature = Signature()
-    let help: String? = "prints a droplet."
+    let help = "prints a droplet."
     
     func run(using ctx: Context) throws {
         for line in ctx.console.center(asciiArt) {

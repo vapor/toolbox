@@ -13,7 +13,7 @@ struct CleanCommand: Command {
         let keepCheckouts: Option = .keepCheckouts
     }
     let signature = Signature()
-    let help: String? = "cleans temporary files."
+    let help = "cleans temporary files."
     
     /// See `Command`.
     func run(using ctx: Context) throws {

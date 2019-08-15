@@ -13,7 +13,7 @@ struct CloudDeploy: Command {
     
     let signature = Signature()
     
-    let help: String? = "deploy a cloud project."
+    let help = "deploy a cloud project."
     
     // command
     func run(using ctx: Context) throws {//} -> EventLoopFuture<Void> {
@@ -32,7 +32,7 @@ struct CloudPush: Command {
     
     let signature = Signature()
     
-    let help: String? = "pushes your project to cloud."
+    let help = "pushes your project to cloud."
     
     /// See `Command`.
     func run(using ctx: Context) throws {

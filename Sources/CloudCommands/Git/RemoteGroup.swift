@@ -11,7 +11,7 @@ public struct RemoteGroup: CommandGroup {
         "remove": RemoteRemove(),
     ]
     
-    public let help: String? = "interacts with git remotes on vapor cloud."
+    public let help = "interacts with git remotes on vapor cloud."
 
     public init() {}
 
@@ -25,7 +25,7 @@ public struct RemoteGroup: CommandGroup {
 struct RemoteRemove: Command {
     struct Signature: CommandSignature { }
     let signature = Signature()
-    let help: String? = "unlink your local repository from a vapor cloud app."
+    let help = "unlink your local repository from a vapor cloud app."
     
     
     func run(using ctx: Context) throws {
@@ -52,7 +52,7 @@ struct RemoteSet: Command {
         let app: Option = .app
     }
     let signature = Signature()
-    let help: String? = "link your local repo to a cloud app."
+    let help = "link your local repo to a cloud app."
 
     /// See `Command`.
     func run(using ctx: Context) throws {

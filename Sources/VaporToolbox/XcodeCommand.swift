@@ -14,7 +14,7 @@ struct XcodeCommand: Command {
         let dontOpenXcode: Option = .dontOpenXcode
     }
     let signature = Signature()
-    let help: String? = "generates xcode projects for spm packages."
+    let help = "generates xcode projects for spm packages."
     
     /// See `Command`.
     func run(using ctx: Context) throws {
@@ -44,7 +44,7 @@ struct BuildCommand: Command {
     struct Signature: CommandSignature {
     }
     let signature = Signature()
-    let help: String? = "builds proj"
+    let help = "builds proj"
     
     /// See `Command`.
     func run(using ctx: Context) throws {

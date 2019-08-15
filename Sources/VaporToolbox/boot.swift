@@ -21,7 +21,7 @@ final class Main: CommandGroup {
         "leaf": LeafGroup()
     ]
     
-    let help: String? = "main"
+    let help = "main"
     
     func run(using ctx: CommandContext<Main>) throws {
         ctx.console.output("welcome to vapor.")

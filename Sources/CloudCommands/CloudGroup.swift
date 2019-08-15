@@ -38,7 +38,7 @@ public struct CloudGroup: CommandGroup {
     ]
     
     /// See `CommandGroup`.
-    public var help: String? = "cloouuuddddd"
+    public var help = "cloouuuddddd"
     
     /// Creates a new `BasicCommandGroup`.
     public init() {}
@@ -72,7 +72,7 @@ struct Logs: Command {
     let signature = Signature()
     
     // help
-    let help: String? = "get logs for your application."
+    let help = "get logs for your application."
     
     func run(using ctx: Context) throws {
         let runner = try LogsRunner(ctx: ctx)
@@ -112,7 +112,7 @@ struct LogsRunner<C: CommandRunnable> {//}: AuthorizedRunner {
         // pod -- a specific pod
         // timestamps -- whether to include timestamps
         let timestamps = self.ctx.flag(.showTimestamps)
-        let lines = self.ctx.options.value(.lines) ?? "200"
+        let lines = self.ctx.rawOptions.value(.lines) ?? "200"
         let query = "lines=\(lines)&timestamps=\(timestamps.description)"
         let entries = try logs.list(query: query)
         for log in entries {

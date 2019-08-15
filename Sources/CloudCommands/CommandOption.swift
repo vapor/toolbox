@@ -80,7 +80,7 @@ extension Option {
 
 extension CommandContext {
     public func load<V: LosslessStringConvertible>(_ opt: Option<V>, _ message: String? = nil, secure: Bool = false) -> V {
-        if let raw = self.options[opt.name] ?? opt.default {
+        if let raw = self.rawOptions.value(opt) ?? opt.default {
             return V.convertOrFail(raw)
         }
         let msg = message ?? opt.name
@@ -91,7 +91,7 @@ extension CommandContext {
     }
     
     public func flag(_ opt: Option<Bool>) -> Bool {
-        return self.options[opt.name].flatMap(Bool.init) ?? false
+        return self.rawOptions.value(opt).flatMap(Bool.init) ?? false
     }
 }
 

@@ -14,7 +14,7 @@ struct LeafGroup: CommandGroup {
         "render": LeafRenderFolder()
     ]
 
-    let help: String? = "commands for interacting with leaf."
+    let help = "commands for interacting with leaf."
 
     init() {}
 
@@ -205,7 +205,7 @@ struct LeafRenderFolder: Command {
         let path: Option = .path
     }
     let signature = Signature()
-    let help: String? = "render a leaf template."
+    let help = "render a leaf template."
 
     /// See `Command`.
     func run(using ctx: Context) throws {
