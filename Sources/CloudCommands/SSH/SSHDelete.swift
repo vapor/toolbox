@@ -8,7 +8,7 @@ struct SSHDelete: Command {
     /// See `Command`.
     let signature = Signature()
     
-    let help: String? = "delete an ssh key from vapor cloud."
+    let help: String = "delete an ssh key from vapor cloud."
 
     /// See `Command`.
     func run(using ctx: Context) throws {

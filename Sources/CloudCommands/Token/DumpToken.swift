@@ -5,7 +5,7 @@ struct DumpToken: Command {
     struct Signature: CommandSignature {}
     let signature = Signature()
     
-    let help: String? = "dump token data. (usually for debugging)"
+    let help = "dump token data. (usually for debugging)"
 
     func run(using ctx: Context) throws {
         let token = try Token.load()

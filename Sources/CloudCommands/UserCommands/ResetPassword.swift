@@ -10,7 +10,7 @@ struct ResetPassword: Command {
     /// See `Command`.
     public let signature = Signature()
     
-    var help: String? = "resets your account's password."
+    let help = "resets your account's password."
 
     /// See `Command`.
     func run(using ctx: CommandContext<ResetPassword>) throws {

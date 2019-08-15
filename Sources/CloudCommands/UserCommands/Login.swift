@@ -15,7 +15,7 @@ struct CloudLogin: Command {
     /// See `Command`.
     let signature = Signature()
 
-    let help: String? = "logs into vapor cloud."
+    let help = "logs into vapor cloud."
 
     /// See `Command`.
     func run(using ctx: Context) throws {

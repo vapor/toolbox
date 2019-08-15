@@ -9,7 +9,7 @@ struct SSHList: Command {
     
     let signature = Signature()
     
-    let help: String? = "lists the ssh keys that you have pushed to cloud."
+    let help: String = "lists the ssh keys that you have pushed to cloud."
 
     func run(using ctx: Context) throws {
         let runner = try CloudSSHListRunner(ctx: ctx)

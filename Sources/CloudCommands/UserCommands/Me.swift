@@ -10,7 +10,7 @@ struct Me: Command {
     /// See `Command`.
     let signature = Signature()
     
-    let help: String? = "shows information about logged in user."
+    let help = "shows information about logged in user."
 
     func run(using ctx: Context) throws {
         let token = try Token.load()

@@ -42,26 +42,6 @@ extension ByteBuffer {
     }
 }
 
-extension HTTPClient.Body {
-    var raw: Data {
-        switch self {
-        case .byteBuffer(var buffer):
-            let bytes = buffer.readBytes(length: buffer.readableBytes) ?? []
-            return Data(bytes: bytes)
-        case .data(let data):
-            return data
-        case .string(let string):
-            return Data(string.utf8)
-        }
-    }
-    
-    var buffer: ByteBuffer {
-        var buf = ByteBufferAllocator().buffer(capacity: 0)
-        buf.writeBytes(raw)
-        return buf
-    }
-}
-
 private struct ResponseError: Resource, Error {
     let error: Bool
     let reason: String

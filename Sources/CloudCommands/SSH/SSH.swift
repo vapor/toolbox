@@ -11,7 +11,7 @@ public struct SSHGroup: CommandGroup {
         "delete": SSHDelete(),
     ]
 
-    public let help: String? = "interacts with ssh keys on vapor cloud."
+    public let help: String = "interacts with ssh keys on vapor cloud."
 
     public init() {}
 

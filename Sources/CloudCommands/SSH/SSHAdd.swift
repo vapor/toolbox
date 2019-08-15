@@ -12,7 +12,7 @@ struct SSHAdd: Command {
     
     let signature = Signature()
     
-    let help: String? = "add an ssh key to cloud."
+    let help: String = "add an ssh key to cloud."
 
     func run(using ctx: Context) throws {
         let runner = try CloudSSHAddRunner(ctx: ctx)
@@ -46,7 +46,7 @@ struct CloudSSHAddRunner<C: CommandRunnable> {
     }
 
     func key() throws -> String {
-        guard let key = ctx.options.value(.key) else { return try loadKey() }
+        guard let key = ctx.rawOptions.value(.key) else { return try loadKey() }
         return key
     }
 
@@ -59,7 +59,7 @@ struct CloudSSHAddRunner<C: CommandRunnable> {
     }
 
     func path() throws -> String {
-        if let path = ctx.options.value(.path) { return path }
+        if let path = ctx.rawOptions.value(.path) { return path }
         let allKeys = try Shell.bash("ls  ~/.ssh/*.pub")
         let separated = allKeys.split(separator: "\n").map(String.init)
         let term = Terminal()
