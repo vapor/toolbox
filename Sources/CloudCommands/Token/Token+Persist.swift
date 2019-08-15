@@ -63,6 +63,6 @@ extension Token {
         return !isExpired
     }
     fileprivate var isExpired: Bool {
-        return expiresAt < Date().timeIntervalSince1970
+        return expiresAt < Date()
     }
 }
