@@ -8,7 +8,7 @@ extension Argument where Value == String {
 
 extension CommandContext {
     func arg<V: LosslessStringConvertible>(_ arg: Argument<V>) throws -> String {
-        guard let val = arguments[arg.name] else { throw "missing value for argument '\(arg.name)'" }
+        guard let val = rawArguments[arg.name] else { throw "missing value for argument '\(arg.name)'" }
         return val
     }
 }
@@ -58,7 +58,7 @@ struct New: Command {
         let workTree = "./\(name)"
 
         // Prioritize tag over branch
-        let checkout = ctx.options.value(.tag) ?? ctx.options.value(.branch)
+        let checkout = ctx.rawOptions.value(.tag) ?? ctx.rawOptions.value(.branch)
         if let checkout = checkout {
             let _ = try Git.checkout(
                 gitDir: gitDir,
@@ -76,9 +76,9 @@ struct New: Command {
         // if leaf.seed file, render template here
         let seedPath = workTree.trailingSlash + "leaf.seed"
         if FileManager.default.fileExists(atPath: seedPath) {
-            var opts = ctx.options
+            var opts = ctx.rawOptions
             opts["path"] = workTree
-            let next = AnyCommandContext(console: ctx.console, arguments: ctx.arguments, options: opts)
+            let next = AnyCommandContext(console: ctx.console, arguments: ctx.rawArguments, options: opts)
             try LeafRenderFolder().run(using: next)
         }
 
@@ -91,7 +91,7 @@ struct New: Command {
         ctx.console.output("initialized project.")
         
         // print the Droplet
-        let next = AnyCommandContext(console: ctx.console, arguments: ctx.arguments, options: ctx.options)
+        let next = AnyCommandContext(console: ctx.console, arguments: ctx.rawArguments, options: ctx.rawOptions)
         try PrintDroplet().run(using: next)
         
         // print next info
@@ -120,7 +120,7 @@ struct New: Command {
 
 extension CommandContext {
     func template() -> Template {
-        guard let chosen = options["template"] else { return .default }
+        guard let chosen = rawOptions["template"] else { return .default }
         switch chosen {
         case "web": return .web
         case "api": return .api

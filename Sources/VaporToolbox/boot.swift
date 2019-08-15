@@ -1,6 +1,6 @@
 import CloudCommands
 import Globals
-import NIOWebSocketClient
+import AsyncWebSocketClient
 import ConsoleKit
 import Foundation
 

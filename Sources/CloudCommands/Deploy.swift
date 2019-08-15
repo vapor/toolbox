@@ -50,7 +50,7 @@ extension CommandContext {
     
     private func loadCloudApp(with token: Token) throws -> CloudApp {
         let access = CloudApp.Access(with: token)
-        if let slug = self.options.value(.app) {
+        if let slug = self.rawOptions.value(.app) {
             return try access.matching(slug: slug)
         } else if Git.isGitRepository() {
             return try getAppFromRepository(with: token)
@@ -74,7 +74,7 @@ extension CommandContext {
         // call this again to trigger same error
         guard setNow else { return try detectCloudApp(with: token) }
         
-        let ctx = AnyCommandContext(console: console, arguments: arguments, options: options)
+        let ctx = AnyCommandContext(console: console, arguments: rawArguments, options: rawOptions)
         let setter = RemoteSet()
         try setter.run(using: ctx)
         return try detectCloudApp(with: token)
@@ -94,7 +94,7 @@ extension CommandContext {
     }
     
     private func choose(from envs: [CloudEnv]) throws -> CloudEnv {
-        let envSlug = options.value(.env)
+        let envSlug = rawOptions.value(.env)
         if let envSlug = envSlug {
             let possible = envs.first { $0.slug == envSlug }
             guard let env = possible else { throw "no environment found matching \(envSlug)." }
@@ -117,7 +117,7 @@ extension CommandContext {
     }
     
     private func getCloudInteractionBranch(with env: CloudEnv) -> String {
-        if let branch = options.value(.branch) { return branch }
+        if let branch = rawOptions.value(.branch) { return branch }
         else { return env.defaultBranch }
     }
     
