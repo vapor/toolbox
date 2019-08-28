@@ -16,7 +16,7 @@ struct CloudDeploy: Command {
     let help = "deploy a cloud project."
     
     // command
-    func run(using ctx: Context) throws {//} -> EventLoopFuture<Void> {
+    func run(using ctx: CommandContext, signature: Signature) throws {//} -> EventLoopFuture<Void> {
         let runner = try CloudDeployRunner(ctx: ctx)
         try runner.run()
     }
@@ -35,7 +35,7 @@ struct CloudPush: Command {
     let help = "pushes your project to cloud."
     
     /// See `Command`.
-    func run(using ctx: Context) throws {
+    func run(using ctx: CommandContext, signature: Signature) throws {
         let runner = try CloudPushRunner(ctx: ctx)
         try runner.run()
     }

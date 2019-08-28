@@ -12,7 +12,7 @@ struct Me: Command {
     
     let help = "shows information about logged in user."
 
-    func run(using ctx: Context) throws {
+    func run(using ctx: CommandContext, signature: Signature) throws {
         let token = try Token.load()
         let me = try UserApi().me(token: token)
         // name

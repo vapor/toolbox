@@ -17,7 +17,7 @@ struct CloudSignup: Command {
     let help = "creates a new account for vapor cloud."
     
     /// See `Command`.
-    func run(using ctx: Context) throws {
+    func run(using ctx: CommandContext, signature: Signature) throws {
         let f = try ctx.loadAndDisplay(.firstName)
         let l = try ctx.loadAndDisplay(.lastName)
         let o = try ctx.loadAndDisplay(.org)

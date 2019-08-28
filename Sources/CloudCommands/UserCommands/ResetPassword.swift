@@ -3,20 +3,28 @@ import Globals
 import ConsoleKit
 
 struct ResetPassword: Command {
+
     public struct Signature: CommandSignature {
-        public let email: Option = .email
+        @Option(name: "email", short: "e")
+        var email: String
     }
-    
-    /// See `Command`.
-    public let signature = Signature()
-    
+
     let help = "resets your account's password."
 
-    /// See `Command`.
-    func run(using ctx: CommandContext<ResetPassword>) throws {
-        let e = ctx.load(.email)
+    func run(using ctx: CommandContext, signature: Signature) throws {
+        let e = ctx._load(signature.$email)
         try UserApi().reset(email: e)
         ctx.console.output("password has been reset.".consoleText())
         ctx.console.output("check emaail: \(e).".consoleText())
+    }
+}
+extension CommandContext {
+        public func _load<V: LosslessStringConvertible>(_ opt: Option<V>, _ message: String? = nil, secure: Bool = false) -> V {
+        if let raw = opt.wrappedValue { return raw }
+        let msg = message ?? opt.name
+        console.pushEphemeral()
+        let answer = console.ask(msg.consoleText(), isSecure: secure)
+        console.popEphemeral()
+        return V.convertOrFail(answer)
     }
 }

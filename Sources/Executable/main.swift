@@ -6,9 +6,11 @@ do {
 } catch let error as CommandError {
     let term = Terminal()
     term.error("error:")
-    term.output(error.reason.consoleText())
+    term.output("reason: " + error.reason.consoleText())
+    term.output(error.description.consoleText())
 } catch {
     let term = Terminal()
     term.error("error:")
+    term.output("type: \(type(of: error))".consoleText())
     term.output("\(error)".consoleText())
 }

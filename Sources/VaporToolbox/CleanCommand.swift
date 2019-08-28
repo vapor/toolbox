@@ -16,7 +16,7 @@ struct CleanCommand: Command {
     let help = "cleans temporary files."
     
     /// See `Command`.
-    func run(using ctx: Context) throws {
+    func run(using ctx: CommandContext, signature: Signature) throws {
         let cleaner = try Cleaner(ctx: ctx)
         try cleaner.run()
     }

@@ -208,7 +208,7 @@ struct LeafRenderFolder: Command {
     let help = "render a leaf template."
 
     /// See `Command`.
-    func run(using ctx: Context) throws {
+    func run(using ctx: CommandContext, signature: Signature) throws {
         var raw = ctx.load(.path)
         if raw == "./" {
             raw = Process().currentDirectoryPath

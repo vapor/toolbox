@@ -11,7 +11,7 @@ struct SSHList: Command {
     
     let help: String = "lists the ssh keys that you have pushed to cloud."
 
-    func run(using ctx: Context) throws {
+    func run(using ctx: CommandContext, signature: Signature) throws {
         let runner = try CloudSSHListRunner(ctx: ctx)
         try runner.run()
     }

@@ -74,7 +74,7 @@ struct Logs: Command {
     // help
     let help = "get logs for your application."
     
-    func run(using ctx: Context) throws {
+    func run(using ctx: CommandContext, signature: Signature) throws {
         let runner = try LogsRunner(ctx: ctx)
         return try runner.run()
     }

@@ -40,7 +40,7 @@ struct New: Command {
     let signature = Signature()
     let help = "creates a new vapor app from template. use 'vapor new ProjectName'."
 
-    func run(using ctx: Context) throws {
+    func run(using ctx: CommandContext, signature: Signature) throws {
         let name = try ctx.arg(.name)
         let template = ctx.template()
         let gitUrl = try template.fullUrl()
@@ -48,7 +48,7 @@ struct New: Command {
         // Cloning
         ctx.console.pushEphemeral()
         ctx.console.output("cloning `\(gitUrl)`...".consoleText())
-        let _ = try Git.clone(repo: gitUrl, toFolder: name)
+        let _ = try! Git.clone(repo: gitUrl, toFolder: "./" + name)
         ctx.console.popEphemeral()
         ctx.console.output("cloned `\(gitUrl)`.".consoleText())
 
@@ -172,7 +172,7 @@ struct PrintDroplet: Command {
     let signature = Signature()
     let help = "prints a droplet."
     
-    func run(using ctx: Context) throws {
+    func run(using ctx: CommandContext, signature: Signature) throws {
         for line in ctx.console.center(asciiArt) {
             for character in line {
                 let style: ConsoleStyle

@@ -2,25 +2,20 @@ import ConsoleKit
 import CloudAPI
 import Globals
 
-extension Command {
-    public typealias Context = CommandContext<Self>
-}
-
 struct CloudLogin: Command {
     struct Signature: CommandSignature {
-        let email: Option = .email
-        let password: Option = .password
+        @Option(name: "email", short: "e")
+        var email: String
+        @Option(name: "password", short: "p")
+        var password: String
     }
-    
-    /// See `Command`.
-    let signature = Signature()
 
     let help = "logs into vapor cloud."
 
     /// See `Command`.
-    func run(using ctx: Context) throws {
-        let e = ctx.load(.email)
-        let p = ctx.load(.password, secure: true)
+    func run(using ctx: CommandContext, signature: Signature) throws {
+        let e = ctx._load(signature.$email)
+        let p = ctx._load(signature.$password, secure: true)
         let token = try UserApi().login(email: e, password: p)
         try token.save()
         ctx.console.output("cloud is ready.".consoleText(.info))

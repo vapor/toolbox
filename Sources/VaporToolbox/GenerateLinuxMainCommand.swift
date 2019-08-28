@@ -21,7 +21,7 @@ struct GenerateLinuxMain: Command {
     let help = "generates LinuxMain.swift file."
 
     /// See `Command`.
-    func run(using ctx: Context) throws {
+    func run(using ctx: CommandContext, signature: Signature) throws {
         let ignoredDirectories = ctx.rawOptions.value(.ignoredDirectories)?.components(separatedBy: ",") ?? []
         let cwd = try Shell.cwd()
         let testsDirectory = cwd.trailingSlash + "Tests"

@@ -7,7 +7,7 @@ struct Test: Command {
     let signature = Signature()
     let help = "quick tests. probably don't call this. you shouldn't see it."
 
-    func run(using ctx: Context) throws {
+    func run(using ctx: CommandContext, signature: Signature) throws {
         print("testing..")
     }
 }

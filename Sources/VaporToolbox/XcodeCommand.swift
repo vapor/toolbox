@@ -17,7 +17,7 @@ struct XcodeCommand: Command {
     let help = "generates xcode projects for spm packages."
     
     /// See `Command`.
-    func run(using ctx: Context) throws {
+    func run(using ctx: CommandContext, signature: Signature) throws {
         ctx.console.output("generating xcodeproj..")
         
         // execute
@@ -47,7 +47,7 @@ struct BuildCommand: Command {
     let help = "builds proj"
     
     /// See `Command`.
-    func run(using ctx: Context) throws {
+    func run(using ctx: CommandContext, signature: Signature) throws {
         ctx.console.output("building..")
         // execute
         let result = try Process.run("swift", args: ["build"]) { update in

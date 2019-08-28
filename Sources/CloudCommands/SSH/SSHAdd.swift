@@ -14,7 +14,7 @@ struct SSHAdd: Command {
     
     let help: String = "add an ssh key to cloud."
 
-    func run(using ctx: Context) throws {
+    func run(using ctx: CommandContext, signature: Signature) throws {
         let runner = try CloudSSHAddRunner(ctx: ctx)
         try runner.run()
     }

@@ -20,6 +20,7 @@ public struct Git {
     }
 
     public static func clone(repo: String, toFolder folder: String) throws -> String {
+        print("cloning")
         return try run("clone", repo, folder)
     }
 
@@ -112,7 +113,13 @@ public struct Git {
 
     @discardableResult
     private static func run(_ args: String...) throws -> String {
-        return try Process.run("git", args: args)
+        print("running")
+        do {
+            return try Process.run("git", args: args)
+        } catch {
+            print("runningn error \(error)")
+            throw error
+        }
     }
 }
 

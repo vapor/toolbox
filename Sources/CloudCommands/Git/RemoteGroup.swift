@@ -28,7 +28,7 @@ struct RemoteRemove: Command {
     let help = "unlink your local repository from a vapor cloud app."
     
     
-    func run(using ctx: Context) throws {
+    func run(using ctx: CommandContext, signature: Signature) throws {
         try checkGit()
         try Git.removeRemote(named: "cloud")
         ctx.console.output("removed cloud repository.")
@@ -55,7 +55,7 @@ struct RemoteSet: Command {
     let help = "link your local repo to a cloud app."
 
     /// See `Command`.
-    func run(using ctx: Context) throws {
+    func run(using ctx: CommandContext, signature: Signature) throws {
         try checkGit()
 
         let token = try Token.load()

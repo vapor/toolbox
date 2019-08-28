@@ -7,7 +7,7 @@ struct DumpToken: Command {
     
     let help = "dump token data. (usually for debugging)"
 
-    func run(using ctx: Context) throws {
+    func run(using ctx: CommandContext, signature: Signature) throws {
         let token = try Token.load()
         ctx.console.info("expires at: ", newLine: false)
         ctx.console.output(token.expiresAt.description.consoleText())
