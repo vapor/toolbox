@@ -2,10 +2,11 @@ import ConsoleKit
 
 public struct SSHGroup: CommandGroup {
     // empty sig
-    public struct Signature: CommandSignature { }
-    public let signature = Signature()
+    public struct Signature: CommandSignature {
+        public init() {}
+    }
     
-    public let commands: Commands = [
+    public let commands: [String : AnyCommand] = [
         "add": SSHAdd(),
         "list": SSHList(),
         "delete": SSHDelete(),
@@ -15,7 +16,7 @@ public struct SSHGroup: CommandGroup {
 
     public init() {}
 
-    public func run(using ctx: CommandContext<SSHGroup>) throws {
+    public func run(using ctx: inout CommandContext) throws {
         ctx.console.info("interact with SSH Keys on vapor cloud.")
         ctx.console.output("use `vapor cloud ssh -h` to see commands.")
     }

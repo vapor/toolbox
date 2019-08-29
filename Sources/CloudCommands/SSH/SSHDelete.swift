@@ -5,35 +5,32 @@ import Globals
 struct SSHDelete: Command {
     struct Signature: CommandSignature {}
     
-    /// See `Command`.
-    let signature = Signature()
-    
     let help: String = "delete an ssh key from vapor cloud."
 
     /// See `Command`.
     func run(using ctx: CommandContext, signature: Signature) throws {
-        let runner = try SSHDeleteRunner(ctx: ctx.any)
+        let runner = try SSHDeleteRunner(ctx: ctx)
         try runner.run()
     }
 }
 
-struct AnyContext {
-    let console: Console
-    init<C>(ctx: CommandContext<C>) {
-        self.console = ctx.console
-    }
-}
-
-extension CommandContext {
-    var any: AnyContext { return .init(ctx: self) }
-}
+//struct AnyContext {
+//    let console: Console
+//    init<C>(ctx: CommandContext<C>) {
+//        self.console = ctx.console
+//    }
+//}
+//
+//extension CommandContext {
+//    var any: AnyContext { return .init(ctx: self) }
+//}
 
 struct SSHDeleteRunner {
-    let ctx: AnyContext
+    let ctx: CommandContext
     let token: Token
     let api: SSHKeyApi
 
-    init(ctx: AnyContext) throws {
+    init(ctx: CommandContext) throws {
         self.token = try Token.load()
         self.api = SSHKeyApi(with: token)
         self.ctx = ctx

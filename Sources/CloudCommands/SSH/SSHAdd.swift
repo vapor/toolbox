@@ -5,30 +5,33 @@ import CloudAPI
 
 struct SSHAdd: Command {
     struct Signature: CommandSignature {
-        let readableName: Option = .readableName
-        let path: Option = .path
-        let key: Option = .key
+        @Option(name: "readable-name", short: "n")
+        var readableName: String
+        @Option(name: "path", short: "p")
+        var path: String
+        @Option(name: "key", short: "k")
+        var key: String
     }
     
-    let signature = Signature()
-    
-    let help: String = "add an ssh key to cloud."
+    let help = "add an ssh key to cloud."
 
     func run(using ctx: CommandContext, signature: Signature) throws {
-        let runner = try CloudSSHAddRunner(ctx: ctx)
+        let runner = try CloudSSHAddRunner(ctx: ctx, signature: signature)
         try runner.run()
     }
 }
 
-struct CloudSSHAddRunner<C: CommandRunnable> {
-    let ctx: CommandContext<C>
+struct CloudSSHAddRunner {
+    let ctx: CommandContext
+    let signature: SSHAdd.Signature
     let token: Token
     let api: SSHKeyApi
 
-    init(ctx: CommandContext<C>) throws {
+    init(ctx: CommandContext, signature: SSHAdd.Signature) throws {
         self.token = try Token.load()
         self.api = SSHKeyApi(with: token)
         self.ctx = ctx
+        self.signature = signature
     }
 
     func run() throws {
@@ -37,8 +40,6 @@ struct CloudSSHAddRunner<C: CommandRunnable> {
         ctx.console.output("pushing ssh key...")
         let created = try api.add(name: n, key: k)
         self.ctx.console.output("pushed key as \(created.name).".consoleText())
-//        return created.map { created in
-//        }
     }
 
     func name() -> String {
@@ -46,7 +47,7 @@ struct CloudSSHAddRunner<C: CommandRunnable> {
     }
 
     func key() throws -> String {
-        guard let key = ctx.rawOptions.value(.key) else { return try loadKey() }
+        guard let key = signature.key else { return try loadKey() }
         return key
     }
 
@@ -59,7 +60,7 @@ struct CloudSSHAddRunner<C: CommandRunnable> {
     }
 
     func path() throws -> String {
-        if let path = ctx.rawOptions.value(.path) { return path }
+        if let path = signature.path { return path }
         let allKeys = try Shell.bash("ls  ~/.ssh/*.pub")
         let separated = allKeys.split(separator: "\n").map(String.init)
         let term = Terminal()

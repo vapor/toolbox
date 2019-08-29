@@ -7,25 +7,25 @@ struct SSHList: Command {
         let all: Option = .all
     }
     
-    let signature = Signature()
-    
     let help: String = "lists the ssh keys that you have pushed to cloud."
 
     func run(using ctx: CommandContext, signature: Signature) throws {
-        let runner = try CloudSSHListRunner(ctx: ctx)
+        let runner = try CloudSSHListRunner<SSHList>(ctx: ctx, signature: signature)
         try runner.run()
     }
 }
 
-struct CloudSSHListRunner<C: CommandRunnable> {
-    let ctx: CommandContext<C>
+struct CloudSSHListRunner<C: Command> {
+    let ctx: CommandContext
+    let signature: C.Signature
     let token: Token
     let api: SSHKeyApi
 
-    init(ctx: CommandContext<C>) throws {
+    init(ctx: CommandContext, signature: C.Signature) throws {
         self.token = try Token.load()
         self.api = SSHKeyApi(with: token)
         self.ctx = ctx
+        self.signature = signature
     }
 
     func run() throws {

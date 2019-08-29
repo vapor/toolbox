@@ -18,6 +18,8 @@ struct ResetPassword: Command {
         ctx.console.output("check emaail: \(e).".consoleText())
     }
 }
+
+// TODO: move
 extension CommandContext {
         public func _load<V: LosslessStringConvertible>(_ opt: Option<V>, _ message: String? = nil, secure: Bool = false) -> V {
         if let raw = opt.wrappedValue { return raw }

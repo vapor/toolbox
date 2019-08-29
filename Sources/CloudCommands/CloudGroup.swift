@@ -4,14 +4,8 @@ import CloudAPI
 import Globals
 
 public struct CloudGroup: CommandGroup {
-    /// See `CommandRunnable`.
-    public struct Signature: CommandSignature { }
-    
-    /// See `CommandRunnable`.
-    public let signature = Signature()
-    
     /// See `CommandGroup`.
-    public var commands: Commands = [
+    public var commands: [String : AnyCommand] = [
         // USER COMMANDS
         "login": CloudLogin(),
         "signup": CloudSignup(),
@@ -38,13 +32,13 @@ public struct CloudGroup: CommandGroup {
     ]
     
     /// See `CommandGroup`.
-    public var help = "cloouuuddddd"
+    public let help = "cloouuuddddd"
     
     /// Creates a new `BasicCommandGroup`.
     public init() {}
     
     /// See `CommandGroup`.
-    public func run(using ctx: CommandContext<CloudGroup>) throws {
+    public func run(using ctx: CommandContext) throws {
         ctx.console.info("welcome to cloud.")
         ctx.console.output("use `vapor cloud -h` to see commands.")
         let cloud = [
@@ -62,29 +56,31 @@ public struct CloudGroup: CommandGroup {
 struct Logs: Command {
     // definition
     struct Signature: CommandSignature {
-        let app: Option = .app
-        let env: Option = .env
-        let lines: Option = .lines
-        let timestamps: Option = .showTimestamps
+        @Option(name: "app", short: "a")
+        var app: String
+        @Option(name: "env", short: "e")
+        var env: String
+        @Option(name: "lines", short: "l")
+        var lines: Int
+        @Flag(name: "show-timestamps", short: "t")
+        var showTimestamps: Bool
     }
-    
-    // signature
-    let signature = Signature()
-    
+
     // help
     let help = "get logs for your application."
     
     func run(using ctx: CommandContext, signature: Signature) throws {
-        let runner = try LogsRunner(ctx: ctx)
+        let runner = try LogsRunner(ctx: ctx, signature: signature)
         return try runner.run()
     }
 }
 
-struct LogsRunner<C: CommandRunnable> {//}: AuthorizedRunner {
-    let ctx: CommandContext<C>
+struct LogsRunner {
+    let ctx: CommandContext
+    let signature: Logs.Signature
     let token: Token
 
-    init(ctx: CommandContext<C>) throws {
+    init(ctx: CommandContext, signature: Logs.Signature) throws {
         let token = try Token.load()
 
         self.ctx = ctx
@@ -112,7 +108,7 @@ struct LogsRunner<C: CommandRunnable> {//}: AuthorizedRunner {
         // pod -- a specific pod
         // timestamps -- whether to include timestamps
         let timestamps = self.ctx.flag(.showTimestamps)
-        let lines = self.ctx.rawOptions.value(.lines) ?? "200"
+        let lines = self.signature.lines?.description ?? "200"
         let query = "lines=\(lines)&timestamps=\(timestamps.description)"
         let entries = try logs.list(query: query)
         for log in entries {
