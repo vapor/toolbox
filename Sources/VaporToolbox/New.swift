@@ -46,7 +46,7 @@ struct New: Command {
 
     func run(using ctx: CommandContext, signature: Signature) throws {
         let name = signature.name
-        let template = signature.expanedTemplate()
+        let template = signature.expandedTemplate()
         let gitUrl = try template.fullUrl()
 
         // Cloning
@@ -124,7 +124,7 @@ struct New: Command {
 }
 
 extension New.Signature {
-    func expanedTemplate() -> Template {
+    func expandedTemplate() -> Template {
         guard let chosen = self.template else { return .default }
         switch chosen {
         case "web": return .web

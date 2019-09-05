@@ -221,11 +221,11 @@ struct LeafRenderFolder: Command {
         // MARK: Compile Package
         let seedPath = path.trailingSlash + "leaf.seed"
         let contents = try Shell.readFile(path: seedPath)
-        let rawseed = Data(bytes: contents.utf8)
+        let rawseed = Data(contents.utf8)
         let decoder = JSONDecoder()
         let seed = try decoder.decode(Seed.self, from: rawseed)
         let answers = try ctx.console.answer(seed.questions)
-        
+
         // assemble package
         let package = answers.package()
         var data: [String: LeafData] = [:]
@@ -245,6 +245,7 @@ struct LeafRenderFolder: Command {
         // MARK: Render Files
         var renders: [String: ByteBuffer] = [:]
         for file in files {
+            print("rendering: \(file)")
             let (buffer, name) = try renderer.render(path: file, context: data).and(value: file).wait()
             renders[name] = buffer
         }
