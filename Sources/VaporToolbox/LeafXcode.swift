@@ -245,8 +245,12 @@ struct LeafRenderFolder: Command {
         // MARK: Render Files
         var renders: [String: ByteBuffer] = [:]
         for file in files {
-            print("rendering: \(file)")
-            let (buffer, name) = try renderer.render(path: file, context: data).and(value: file).wait()
+            do {
+                let (buffer, name) = try renderer.render(path: file, context: data).and(value: file).wait()
+            } catch {
+                ctx.console.error("file: \(file)", newLine: true)
+                throw error
+            }
             renders[name] = buffer
         }
         
