@@ -16,7 +16,7 @@ public struct SSHGroup: CommandGroup {
 
     public init() {}
 
-    public func run(using ctx: inout CommandContext) throws {
+    public func outputHelp(using ctx: inout CommandContext) throws {
         ctx.console.info("interact with SSH Keys on vapor cloud.")
         ctx.console.output("use `vapor cloud ssh -h` to see commands.")
     }

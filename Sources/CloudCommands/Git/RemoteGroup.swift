@@ -18,7 +18,7 @@ public struct RemoteGroup: CommandGroup {
 
     /// See `CommandGroup`.
 
-    public func run(using ctx: inout CommandContext) throws {
+    public func outputHelp(using ctx: inout CommandContext) throws {
         ctx.console.info("interact with git remotes on vapor cloud.")
         ctx.console.output("use `vapor cloud remote -h` to see commands.")
     }

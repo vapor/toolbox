@@ -13,10 +13,7 @@ struct LeafGroup: CommandGroup {
 
     let help = "commands for interacting with leaf."
 
-    init() {}
-
-    /// See `CommandGroup`.
-    func run(using ctx: inout CommandContext) throws {
+    func outputHelp(using ctx: inout CommandContext) throws {
         ctx.console.output("interact with leaf to render the contents of a folder.")
     }
 }
@@ -208,14 +205,17 @@ struct LeafRenderFolder: Command {
 
     /// See `Command`.
     func run(using ctx: CommandContext, signature: Signature) throws {
-        var raw = signature.path
-        if raw == "./" {
+        print("current: \(Process().currentDirectoryPath)")
+        var raw = signature.path ?? "./"
+        if raw == "./" || raw.isEmpty {
             raw = Process().currentDirectoryPath
         }
+        print("raw0: \(raw)")
         // expand `~` for example
         let path = try Shell.bash("echo \(raw)")
+        print("raw1: \(raw)")
         guard FileManager.default.isDirectory(path: path) else {
-            throw "expected a directory, got \(path)"
+            throw "expected a directory, got '\(path)'"
         }
 
         // MARK: Compile Package

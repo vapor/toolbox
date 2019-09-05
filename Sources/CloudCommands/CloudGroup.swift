@@ -38,7 +38,7 @@ public struct CloudGroup: CommandGroup {
     public init() {}
     
     /// See `CommandGroup`.
-    public func run(using ctx: CommandContext) throws {
+    public func outputHelp(using ctx: inout CommandContext) throws {
         ctx.console.info("welcome to cloud.")
         ctx.console.output("use `vapor cloud -h` to see commands.")
         let cloud = [
