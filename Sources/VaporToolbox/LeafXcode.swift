@@ -200,14 +200,15 @@ extension Option where Value == String {
 struct LeafRenderFolder: Command {
     struct Signature: CommandSignature {
         @Option(name: "path", short: "p", help: "path to use")
-        let path: Option = .path
+        var path: String
     }
+
     let signature = Signature()
     let help = "render a leaf template."
 
     /// See `Command`.
     func run(using ctx: CommandContext, signature: Signature) throws {
-        var raw = ctx.load(.path)
+        var raw = signature.path
         if raw == "./" {
             raw = Process().currentDirectoryPath
         }
