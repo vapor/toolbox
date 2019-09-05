@@ -7,9 +7,7 @@ import Foundation
 final class Main: CommandGroup {
     struct Signature: CommandSignature {}
     
-    let signature: Signature = Signature()
-    
-    let commands: Commands = [
+    let commands: [String: AnyCommand] = [
         "clean": CleanCommand(),
         "linus-main": GenerateLinuxMain(),
         "cloud": CloudGroup(),
@@ -23,13 +21,13 @@ final class Main: CommandGroup {
     
     let help = "main"
     
-    func run(using ctx: CommandContext<Main>) throws {
+    func run(using ctx: inout CommandContext) throws {
         ctx.console.output("welcome to vapor.")
         ctx.console.output("use `vapor -h` to see commands")
     }
 }
 
 public func run() throws {
-    var input = CommandInput(arguments: CommandLine.arguments)
-    try Terminal().run(Main(), input: &input)
+    let input = CommandInput(arguments: CommandLine.arguments)
+    try Terminal().run(Main(), input: input)
 }

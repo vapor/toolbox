@@ -85,9 +85,10 @@ struct LogsRunner {
 
         self.ctx = ctx
         self.token = token
+        self.signature = signature
     }
 
-    func run() throws { // -> EventLoopFuture<Void> {
+    func run() throws {
         let app = try ctx.loadApp(with: token)
         let env = try ctx.loadEnv(for: app, with: token)
         let url = replicasUrl(with: env)
@@ -107,7 +108,7 @@ struct LogsRunner {
         // lines -- default 200
         // pod -- a specific pod
         // timestamps -- whether to include timestamps
-        let timestamps = self.ctx.flag(.showTimestamps)
+        let timestamps = signature.showTimestamps
         let lines = self.signature.lines?.description ?? "200"
         let query = "lines=\(lines)&timestamps=\(timestamps.description)"
         let entries = try logs.list(query: query)

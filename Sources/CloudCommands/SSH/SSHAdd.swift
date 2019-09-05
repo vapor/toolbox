@@ -43,7 +43,7 @@ struct CloudSSHAddRunner {
     }
 
     func name() -> String {
-        return ctx.load(.readableName, "give your key a readable name")
+        return ctx.load(signature.$readableName, "give your key a readable name")
     }
 
     func key() throws -> String {

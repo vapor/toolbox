@@ -7,10 +7,7 @@ struct LeafGroup: CommandGroup {
     /// See `CommandRunnable`.
     struct Signature: CommandSignature { }
 
-    /// See `CommandRunnable`.
-    let signature = Signature()
-
-    let commands: Commands = [
+    let commands: [String: AnyCommand] = [
         "render": LeafRenderFolder()
     ]
 
@@ -19,7 +16,7 @@ struct LeafGroup: CommandGroup {
     init() {}
 
     /// See `CommandGroup`.
-    func run(using ctx: CommandContext<LeafGroup>) throws {
+    func run(using ctx: inout CommandContext) throws {
         ctx.console.output("interact with leaf to render the contents of a folder.")
     }
 }
@@ -188,7 +185,7 @@ extension Array where Element == Seed.Answer {
 }
 
 extension Option where Value == String {
-    static let path: Option = .init(name: "path", short: "p", type: .value(default: "./"), help: "the path to the folder that should be rendered. defaults to working directory.")
+//    static let path: Option = .init(name: "path", short: "p", type: .value(default: "./"), help: "the path to the folder that should be rendered. defaults to working directory.")
 }
 
 //extension CommandOption {
@@ -202,6 +199,7 @@ extension Option where Value == String {
 
 struct LeafRenderFolder: Command {
     struct Signature: CommandSignature {
+        @Option(name: "path", short: "p", help: "path to use")
         let path: Option = .path
     }
     let signature = Signature()

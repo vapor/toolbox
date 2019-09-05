@@ -2,35 +2,40 @@ import ConsoleKit
 import Globals
 import Foundation
 
-extension Option where Value == Bool {
-    static var update: Option = .init(name: "update", short: "u", type: .flag, help: "cleans Package.resolved file if it exists.")
-    static var keepCheckouts: Option = .init(name: "keep-checkouts", short: "k", type: .flag, help: "keep checkouts ")
-}
+//extension Option where Value == Bool {
+//    static var update: Option = .init(name: "update", short: "u", type: .flag, help: "cleans Package.resolved file if it exists.")
+//    static var keepCheckouts: Option = .init(name: "keep-checkouts", short: "k", type: .flag, help: "keep checkouts ")
+//}
+
 /// Cleans temporary files created by Xcode and SPM.
 struct CleanCommand: Command {
     struct Signature: CommandSignature {
-        let update: Option = .update
-        let keepCheckouts: Option = .keepCheckouts
+        @Flag(name: "update", short: "u", help: "cleans Package.resolved file if it exists.")
+        var update: Bool
+        @Flag(name: "keep-checkouts", short: "k", help: "keep git checkouts of dependencies.")
+        var keepCheckouts: Bool
     }
     let signature = Signature()
     let help = "cleans temporary files."
     
     /// See `Command`.
     func run(using ctx: CommandContext, signature: Signature) throws {
-        let cleaner = try Cleaner(ctx: ctx)
+        let cleaner = try Cleaner(ctx: ctx, sig: signature)
         try cleaner.run()
     }
 }
 
-class Cleaner<C: CommandRunnable> {
-    let ctx: CommandContext<C>
+class Cleaner {
+    let ctx: CommandContext
+    let sig: CleanCommand.Signature
     let cwd: String
     let files: String
 
     var operations: [String: CleanResult] = [:]
 
-    init(ctx: CommandContext<C>) throws {
+    init(ctx: CommandContext, sig: CleanCommand.Signature) throws {
         self.ctx = ctx
+        self.sig = sig
         let cwd = try Shell.cwd()
         self.cwd = cwd.trailingSlash
         self.files = try Shell.allFiles(in: cwd)
@@ -66,7 +71,7 @@ class Cleaner<C: CommandRunnable> {
 
     private func cleanPackageResolved() throws -> CleanResult {
         guard files.contains("Package.resolved") else { return .notNecessary }
-        if ctx.flag(.update) {
+        if sig.update {
             try Shell.delete("Package.resolved")
             return .success
         } else {
@@ -77,7 +82,7 @@ class Cleaner<C: CommandRunnable> {
     private func cleanBuildFolder() throws -> CleanResult {
         guard files.contains(".build") else { return .notNecessary }
         var list = try Shell.allFiles(in: ".build").split(separator: "\n")
-        if ctx.flag(.keepCheckouts) {
+        if sig.keepCheckouts {
             list.removeAll(where: ["checkouts", ".", ".."].contains)
             try list.map { ".build/" + $0 } .forEach(Shell.delete)
         } else {

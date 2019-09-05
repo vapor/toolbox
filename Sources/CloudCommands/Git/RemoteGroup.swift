@@ -3,10 +3,11 @@ import CloudAPI
 import Globals
 
 public struct RemoteGroup: CommandGroup {
-    public struct Signature: CommandSignature { }
-    public let signature = Signature()
+    public struct Signature: CommandSignature {
+        public init() {}
+    }
     
-    public let commands: Commands = [
+    public let commands: [String : AnyCommand] = [
         "set": RemoteSet(),
         "remove": RemoteRemove(),
     ]
@@ -16,7 +17,8 @@ public struct RemoteGroup: CommandGroup {
     public init() {}
 
     /// See `CommandGroup`.
-    public func run(using ctx: CommandContext<RemoteGroup>) throws {
+
+    public func run(using ctx: inout CommandContext) throws {
         ctx.console.info("interact with git remotes on vapor cloud.")
         ctx.console.output("use `vapor cloud remote -h` to see commands.")
     }
@@ -49,9 +51,10 @@ struct RemoteRemove: Command {
 
 struct RemoteSet: Command {
     struct Signature: CommandSignature {
-        let app: Option = .app
+        @Option(name: "app", short: "a", help: "the app to set")
+        var app: String
     }
-    let signature = Signature()
+
     let help = "link your local repo to a cloud app."
 
     /// See `Command`.

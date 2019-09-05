@@ -7,10 +7,10 @@ extension Argument where Value == String {
 }
 
 extension CommandContext {
-    func arg<V: LosslessStringConvertible>(_ arg: Argument<V>) throws -> String {
-        guard let val = rawArguments[arg.name] else { throw "missing value for argument '\(arg.name)'" }
-        return val
-    }
+//    func arg<V: LosslessStringConvertible>(_ arg: Argument<V>) throws -> String {
+//        guard let val = rawArguments[arg.name] else { throw "missing value for argument '\(arg.name)'" }
+//        return val
+//    }
 }
 
 let templateHelp = [
@@ -23,26 +23,30 @@ let templateHelp = [
 ] .joined(separator: "\n")
 
 extension Option where Value == String {
-    static let template: Option = .init(name: "template", short: "t", type: .value, help: templateHelp)
-    static let tag: Option = .init(name: "tag", short: "T", type: .value, help: "a specific template tag to use.")
-    static let branch: Option = .init(name: "branch", short: "b", type: .value, help: "a specific template branch to use.")
+//    static let template: Option = .init(name: "template", short: "t", type: .value, help: templateHelp)
+//    static let tag: Option = .init(name: "tag", short: "T", type: .value, help: "a specific template tag to use.")
+//    static let branch: Option = .init(name: "branch", short: "b", type: .value, help: "a specific template branch to use.")
 }
 
 struct New: Command {
     struct Signature: CommandSignature {
-        let name: Argument = .name
+        @Argument(name: "name", help: "the name for the project")
+        var name: String
         
         // options
-        let template: Option = .template
-        let tag: Option = .tag
-        let branch: Option = .branch
+        @Option(name: "template", short: "t", help: templateHelp)
+        var template: String
+        @Option(name: "tag", short: "t", help: "a specific tag to use, if desired.")
+        var tag: String
+        @Option(name: "branch", short: "b", help: "a specific branch to use, if desired.")
+        var branch: String
     }
     let signature = Signature()
     let help = "creates a new vapor app from template. use 'vapor new ProjectName'."
 
     func run(using ctx: CommandContext, signature: Signature) throws {
-        let name = try ctx.arg(.name)
-        let template = ctx.template()
+        let name = signature.name
+        let template = signature.expanedTemplate()
         let gitUrl = try template.fullUrl()
 
         // Cloning
@@ -58,7 +62,7 @@ struct New: Command {
         let workTree = "./\(name)"
 
         // Prioritize tag over branch
-        let checkout = ctx.rawOptions.value(.tag) ?? ctx.rawOptions.value(.branch)
+        let checkout = signature.tag ?? signature.branch
         if let checkout = checkout {
             let _ = try Git.checkout(
                 gitDir: gitDir,
@@ -76,10 +80,10 @@ struct New: Command {
         // if leaf.seed file, render template here
         let seedPath = workTree.trailingSlash + "leaf.seed"
         if FileManager.default.fileExists(atPath: seedPath) {
-            var opts = ctx.rawOptions
-            opts["path"] = workTree
-            let next = AnyCommandContext(console: ctx.console, arguments: ctx.rawArguments, options: opts)
-            try LeafRenderFolder().run(using: next)
+            let raw = ctx.input.arguments + ["-path", workTree]
+            var input = CommandInput(arguments: raw)
+            let renderSignature = try LeafRenderFolder.Signature.init(from: &input)
+            try LeafRenderFolder().run(using: ctx, signature: renderSignature)
         }
 
         // initialize
@@ -91,8 +95,9 @@ struct New: Command {
         ctx.console.output("initialized project.")
         
         // print the Droplet
-        let next = AnyCommandContext(console: ctx.console, arguments: ctx.rawArguments, options: ctx.rawOptions)
-        try PrintDroplet().run(using: next)
+
+        var copy = ctx
+        try PrintDroplet().run(using: &copy)
         
         // print next info
         let info = [
@@ -118,9 +123,9 @@ struct New: Command {
 
 }
 
-extension CommandContext {
-    func template() -> Template {
-        guard let chosen = rawOptions["template"] else { return .default }
+extension New.Signature {
+    func expanedTemplate() -> Template {
+        guard let chosen = self.template else { return .default }
         switch chosen {
         case "web": return .web
         case "api": return .api

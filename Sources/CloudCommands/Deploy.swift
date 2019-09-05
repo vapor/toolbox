@@ -58,23 +58,31 @@ protocol BranchSignature {
     var branch: String? { get }
 }
 
-struct _AppSignature: CommandSignature {
+fileprivate struct _AppSignature: CommandSignature {
     @Option(name: "app", short: "a")
     var app: String
 }
 
 
-struct _EnvSignature: CommandSignature {
+fileprivate struct _EnvSignature: CommandSignature {
     @Option(name: "env", short: "e")
     var env: String
 }
 
 
-struct _BranchSignature: CommandSignature {
+fileprivate struct _BranchSignature: CommandSignature {
     @Option(name: "branch", short: "b")
     var branch: String
 }
 
+fileprivate struct _ForceSignature: CommandSignature {
+    @Flag(name: "force", short: "f")
+    var force: Bool
+}
+fileprivate struct _PushSignature: CommandSignature {
+    @Flag(name: "push", short: "p")
+    var push: Bool
+}
 
 extension CommandContext {
     var enteredApp: String? {
@@ -87,6 +95,14 @@ extension CommandContext {
 
     var enteredBranch: String? {
         return try? input.make(_EnvSignature.self).env
+    }
+
+    var force: Bool {
+        return (try? input.make(_ForceSignature.self).force) ?? false
+    }
+
+    var push: Bool {
+        return (try? input.make(_PushSignature.self).push) ?? false
     }
 }
 
@@ -282,7 +298,7 @@ struct CloudDeployRunner {
         let branch = try ctx.loadBranch(with: env, cloudAction: "deploy")
 
         // ff we should push first, insert push operation
-        if ctx.flag(.push) {
+        if ctx.push {
             let push = try CloudPushRunner(ctx: ctx)
             try push.push(branch: branch)
         }
@@ -341,7 +357,7 @@ struct CloudPushAction {
         guard  try Git.isCloudConfigured() else { throw "cloud remote not configured." }
         ctx.console.pushEphemeral()
         ctx.console.output("pushing \(branch)...".consoleText())
-        let force = ctx.flag(.force)
+        let force = ctx.force
         try Git.pushCloud(branch: branch, force: force)
         ctx.console.popEphemeral()
         ctx.console.output("pushed \(branch).".consoleText())
@@ -374,7 +390,7 @@ struct CloudPushRunner {
         guard  try Git.isCloudConfigured() else { throw "cloud remote not configured." }
         ctx.console.pushEphemeral()
         ctx.console.output("pushing \(branch)...".consoleText())
-        let force = ctx.flag(.force)
+        let force = ctx.force
         try Git.pushCloud(branch: branch, force: force)
         ctx.console.popEphemeral()
         ctx.console.output("pushed \(branch).".consoleText())

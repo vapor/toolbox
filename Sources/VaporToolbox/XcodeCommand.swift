@@ -2,18 +2,19 @@ import ConsoleKit
 import Foundation
 import Globals
 
-extension Option where Value == Bool {
-    static var dontOpenXcode: Option {
-        return .init(name: "dont-open-xcode", short: "d", type: .flag, help: "use this flag to NOT open xcode after generation.")
-    }
-}
+//extension Option where Value == Bool {
+//    static var dontOpenXcode: Option {
+//        return .init(name: "dont-open-xcode", short: "d", type: .flag, help: "use this flag to NOT open xcode after generation.")
+//    }
+//}
 
 // Generates an Xcode project
 struct XcodeCommand: Command {
     struct Signature: CommandSignature {
-        let dontOpenXcode: Option = .dontOpenXcode
+        @Flag(name: "suppress-xcode", short: "s", help: "use this flat to suppress xcode from opening after generation.")
+        var supressXcode: Bool
     }
-    let signature = Signature()
+
     let help = "generates xcode projects for spm packages."
     
     /// See `Command`.
@@ -33,7 +34,7 @@ struct XcodeCommand: Command {
         guard result == 0 else { throw "failed to generate xcodeproj." }
         ctx.console.output("generated xcodeproj.")
         
-        let openXcode = !ctx.flag(.dontOpenXcode)
+        let openXcode = !signature.supressXcode
         guard openXcode else { return }
         try Shell.bash("open *.xcodeproj")
     }
@@ -43,7 +44,7 @@ struct XcodeCommand: Command {
 struct BuildCommand: Command {
     struct Signature: CommandSignature {
     }
-    let signature = Signature()
+    
     let help = "builds proj"
     
     /// See `Command`.
