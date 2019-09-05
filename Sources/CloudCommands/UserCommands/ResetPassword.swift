@@ -12,16 +12,28 @@ struct ResetPassword: Command {
     let help = "resets your account's password."
 
     func run(using ctx: CommandContext, signature: Signature) throws {
-        let e = ctx._load(signature.$email)
+        let e = signature.$email.load(with: ctx)
         try UserApi().reset(email: e)
         ctx.console.output("password has been reset.".consoleText())
         ctx.console.output("check emaail: \(e).".consoleText())
     }
 }
 
+
+extension Option {
+    func load(with ctx: CommandContext, _ message: String? = nil, secure: Bool = false) -> Value {
+        if let raw = self.wrappedValue { return raw }
+        let msg = message ?? self.name
+        ctx.console.pushEphemeral()
+        let answer = ctx.console.ask(msg.consoleText(), isSecure: secure)
+        ctx.console.popEphemeral()
+        return Value.convertOrFail(answer)
+    }
+}
+
 // TODO: move
 extension CommandContext {
-        public func _load<V: LosslessStringConvertible>(_ opt: Option<V>, _ message: String? = nil, secure: Bool = false) -> V {
+    public func _load<V: LosslessStringConvertible>(_ opt: Option<V>, _ message: String? = nil, secure: Bool = false) -> V {
         if let raw = opt.wrappedValue { return raw }
         let msg = message ?? opt.name
         console.pushEphemeral()

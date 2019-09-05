@@ -14,8 +14,8 @@ struct CloudLogin: Command {
 
     /// See `Command`.
     func run(using ctx: CommandContext, signature: Signature) throws {
-        let e = ctx._load(signature.$email)
-        let p = ctx._load(signature.$password, secure: true)
+        let e = signature.$email.load(with: ctx)
+        let p = signature.$password.load(with: ctx)
         let token = try UserApi().login(email: e, password: p)
         try token.save()
         ctx.console.output("cloud is ready.".consoleText(.info))

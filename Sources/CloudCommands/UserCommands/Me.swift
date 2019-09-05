@@ -4,11 +4,9 @@ import Globals
 
 struct Me: Command {
     struct Signature: CommandSignature {
-        let all: Option = .all
+        @Flag(name: "all", short: "a", help: "show all data")
+        var all: Bool
     }
-    
-    /// See `Command`.
-    let signature = Signature()
     
     let help = "shows information about logged in user."
 
@@ -23,7 +21,7 @@ struct Me: Command {
         ctx.console.output(me.email.consoleText())
         
         // id (future others)
-        guard ctx.flag(.all) else { return }
+        guard signature.all else { return }
         ctx.console.output("user-id: ", newLine: false)
         ctx.console.output(me.id.uuidString.consoleText())
     }

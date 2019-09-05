@@ -4,24 +4,25 @@ import Globals
 
 struct SSHList: Command {
     struct Signature: CommandSignature {
-        let all: Option = .all
+        @Flag(name: "all", short: "a", help: "shows all")
+        var all: Bool
     }
     
     let help: String = "lists the ssh keys that you have pushed to cloud."
 
     func run(using ctx: CommandContext, signature: Signature) throws {
-        let runner = try CloudSSHListRunner<SSHList>(ctx: ctx, signature: signature)
+        let runner = try CloudSSHListRunner(ctx: ctx, signature: signature)
         try runner.run()
     }
 }
 
-struct CloudSSHListRunner<C: Command> {
+struct CloudSSHListRunner {
     let ctx: CommandContext
-    let signature: C.Signature
+    let signature: SSHList.Signature
     let token: Token
     let api: SSHKeyApi
 
-    init(ctx: CommandContext, signature: C.Signature) throws {
+    init(ctx: CommandContext, signature: SSHList.Signature) throws {
         self.token = try Token.load()
         self.api = SSHKeyApi(with: token)
         self.ctx = ctx
@@ -34,7 +35,7 @@ struct CloudSSHListRunner<C: Command> {
     }
 
     func log(_ list: [SSHKey]) {
-        let long = ctx.flag(.all)
+        let long = signature.all
         if list.isEmpty {
             ctx.console.output("no SSH keys found. nothing to show.")
         }
