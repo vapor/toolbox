@@ -21,10 +21,10 @@ final class Main: CommandGroup {
     
     let help = "main"
     
-    func run(using ctx: inout CommandContext) throws {
-        ctx.console.output("welcome to vapor.")
-        ctx.console.output("use `vapor -h` to see commands")
-    }
+//    func run(using ctx: inout CommandContext) throws {
+//        ctx.console.output("welcome to vapor.")
+//        ctx.console.output("use `vapor -h` to see commands")
+//    }
 }
 
 public func run() throws {
