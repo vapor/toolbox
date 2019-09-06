@@ -205,7 +205,6 @@ struct LeafRenderFolder: Command {
 
     /// See `Command`.
     func run(using ctx: CommandContext, signature: Signature) throws {
-        print("current: \(Process().currentDirectoryPath)")
         var raw = signature.path ?? "./"
         if raw == "./" || raw.isEmpty {
             raw = Process().currentDirectoryPath
