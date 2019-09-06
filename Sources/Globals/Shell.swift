@@ -78,7 +78,7 @@ extension Process {
         guard stderr.isEmpty else { throw stderr }
         return stdout.trimmingCharacters(in: .whitespacesAndNewlines)
     }
-    
+
     @discardableResult
     public static func run(_ program: String, args: [String], updates: @escaping (ProcessOutput) -> Void) throws -> Int32 {
         let out = Pipe()
@@ -109,7 +109,7 @@ extension Process {
         return process.terminationStatus
     }
     
-    private static func resolve(program: String) throws -> String {
+    static func resolve(program: String) throws -> String {
         if program.hasPrefix("/") { return program }
         let path = try Shell.bash("which \(program)")
         guard path.hasPrefix("/") else { throw "unable to find executable for \(program)" }
@@ -117,15 +117,15 @@ extension Process {
     }
     
     /// Powers `Process.execute(_:_:)` methods. Separated so that `/bin/sh -c which` can run as a separate command.
-    private static func launchProcess(path: String, _ arguments: [String], stdout: Pipe, stderr: Pipe) throws -> Process {
-        let path = try resolve(program: path)
-        let process = Process()
-        process.environment = ProcessInfo.processInfo.environment
-        process.launchPath = path
-        process.arguments = arguments
-        process.standardOutput = stdout
-        process.standardError = stderr
-        process.launch()
-        return process
-    }
+        private static func launchProcess(path: String, _ arguments: [String], stdout: Pipe, stderr: Pipe) throws -> Process {
+            let path = try resolve(program: path)
+            let process = Process()
+            process.environment = ProcessInfo.processInfo.environment
+            process.launchPath = path
+            process.arguments = arguments
+            process.standardOutput = stdout
+            process.standardError = stderr
+            process.launch()
+            return process
+        }
 }

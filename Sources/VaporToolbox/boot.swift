@@ -28,6 +28,8 @@ final class Main: CommandGroup {
 }
 
 public func run() throws {
+//    let result = try Process.run("git", args: ["status"])
+//    print("result: \(result)")
     let input = CommandInput(arguments: CommandLine.arguments)
     try Terminal().run(Main(), input: input)
 }

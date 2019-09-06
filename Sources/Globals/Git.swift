@@ -20,8 +20,25 @@ public struct Git {
     }
 
     public static func clone(repo: String, toFolder folder: String) throws -> String {
-        print("cloning")
-        return try run("clone", repo, folder)
+//        return try Process.run("git", args: ["clone", repo, folder])
+
+        var ret = ""
+        let closeCode = try Process.run("git", args: ["clone", repo, folder]) { (output) in
+            switch output {
+            case .stderr(let err):
+                let str = String(bytes: err, encoding: .utf8) ?? "<unknown>"
+                ret += str
+                print("err: \(str)**")
+            case .stdout(let out):
+                let str = String(bytes: out, encoding: .utf8) ?? "<unknown>"
+                ret += str
+                print("out: \(str)")
+            }
+        }
+        print("asdf")
+        print("close code: \(closeCode)")
+        print("above isn't prinnting wtf")
+        return ret
     }
 
     public static func isGitRepository() -> Bool {
@@ -113,9 +130,12 @@ public struct Git {
 
     @discardableResult
     private static func run(_ args: String...) throws -> String {
-        print("running")
+        print("running git \(args.joined(separator: " "))")
         do {
-            return try Process.run("git", args: args)
+//            let resolved = try Process.resolve(program: "git")
+//            print("resolved \(resolved)")
+            return try Shell.bash("git \(args.joined(separator: " "))")
+//            return try Process.run("git", args: args)
         } catch {
             print("runningn error \(error)")
             throw error

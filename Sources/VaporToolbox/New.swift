@@ -52,7 +52,7 @@ struct New: Command {
         // Cloning
         ctx.console.pushEphemeral()
         ctx.console.output("cloning `\(gitUrl)`...".consoleText())
-        let _ = try! Git.clone(repo: gitUrl, toFolder: "./" + name)
+        let _ = try Git.clone(repo: gitUrl, toFolder: "./" + name)
         ctx.console.popEphemeral()
         ctx.console.output("cloned `\(gitUrl)`.".consoleText())
 
@@ -80,8 +80,8 @@ struct New: Command {
         // if leaf.seed file, render template here
         let seedPath = workTree.trailingSlash + "leaf.seed"
         if FileManager.default.fileExists(atPath: seedPath) {
-            let raw = ctx.input.arguments + ["-path", workTree]
-            var input = CommandInput(arguments: raw)
+            let raw = ctx.input.arguments + ["-p", workTree]
+            var input = CommandInput(arguments: [ctx.input.executable] + raw)
             let renderSignature = try LeafRenderFolder.Signature.init(from: &input)
             try LeafRenderFolder().run(using: ctx, signature: renderSignature)
         }
