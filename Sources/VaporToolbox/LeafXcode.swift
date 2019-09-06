@@ -210,10 +210,8 @@ struct LeafRenderFolder: Command {
         if raw == "./" || raw.isEmpty {
             raw = Process().currentDirectoryPath
         }
-        print("raw0: \(raw)")
         // expand `~` for example
         let path = try Shell.bash("echo \(raw)")
-        print("raw1: \(raw)")
         guard FileManager.default.isDirectory(path: path) else {
             throw "expected a directory, got '\(path)'"
         }
