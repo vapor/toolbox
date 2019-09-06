@@ -9,7 +9,7 @@ final class Main: CommandGroup {
     
     let commands: [String: AnyCommand] = [
         "clean": CleanCommand(),
-        "linus-main": GenerateLinuxMain(),
+        "linux-main": GenerateLinuxMain(),
         "cloud": CloudGroup(),
         "new": New(),
         "drop": PrintDroplet(),
