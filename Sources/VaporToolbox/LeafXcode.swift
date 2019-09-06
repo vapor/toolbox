@@ -247,11 +247,11 @@ struct LeafRenderFolder: Command {
         for file in files {
             do {
                 let (buffer, name) = try renderer.render(path: file, context: data).and(value: file).wait()
+                renders[name] = buffer
             } catch {
                 ctx.console.error("file: \(file)", newLine: true)
                 throw error
             }
-            renders[name] = buffer
         }
         
         // write the files to be rendered
