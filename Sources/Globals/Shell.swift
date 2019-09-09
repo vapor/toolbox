@@ -117,15 +117,15 @@ extension Process {
     }
     
     /// Powers `Process.execute(_:_:)` methods. Separated so that `/bin/sh -c which` can run as a separate command.
-        private static func launchProcess(path: String, _ arguments: [String], stdout: Pipe, stderr: Pipe) throws -> Process {
-            let path = try resolve(program: path)
-            let process = Process()
-            process.environment = ProcessInfo.processInfo.environment
-            process.launchPath = path
-            process.arguments = arguments
-            process.standardOutput = stdout
-            process.standardError = stderr
-            process.launch()
-            return process
-        }
+    private static func launchProcess(path: String, _ arguments: [String], stdout: Pipe, stderr: Pipe) throws -> Process {
+        let path = try resolve(program: path)
+        let process = Process()
+        process.environment = ProcessInfo.processInfo.environment
+        process.launchPath = path
+        process.arguments = arguments
+        process.standardOutput = stdout
+        process.standardError = stderr
+        process.launch()
+        return process
+    }
 }

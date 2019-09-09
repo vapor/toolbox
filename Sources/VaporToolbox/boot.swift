@@ -28,6 +28,8 @@ final class Main: CommandGroup {
 }
 
 public func run() throws {
+    let isGit = Git.isGitRepository()
+    print("is git: \(isGit)")
 //    let result = try Process.run("git", args: ["status"])
 //    print("result: \(result)")
     let input = CommandInput(arguments: CommandLine.arguments)

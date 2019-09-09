@@ -20,30 +20,12 @@ public struct Git {
     }
 
     public static func clone(repo: String, toFolder folder: String) throws -> String {
-//        return try Process.run("git", args: ["clone", repo, folder])
-
-        var ret = ""
-        let closeCode = try Process.run("git", args: ["clone", repo, folder]) { (output) in
-            switch output {
-            case .stderr(let err):
-                let str = String(bytes: err, encoding: .utf8) ?? "<unknown>"
-                ret += str
-                print("err: \(str)**")
-            case .stdout(let out):
-                let str = String(bytes: out, encoding: .utf8) ?? "<unknown>"
-                ret += str
-                print("out: \(str)")
-            }
-        }
-        print("asdf")
-        print("close code: \(closeCode)")
-        print("above isn't prinnting wtf")
-        return ret
+        return try run("clone", repo, folder)
     }
 
     public static func isGitRepository() -> Bool {
         do {
-            let _ =  try run("status", "--porcelain")
+            let _ = try run("status", "--porcelain")
             return true
         } catch {
             return false
@@ -129,17 +111,15 @@ public struct Git {
     }
 
     @discardableResult
-    private static func run(_ args: String...) throws -> String {
-        print("running git \(args.joined(separator: " "))")
-        do {
-//            let resolved = try Process.resolve(program: "git")
-//            print("resolved \(resolved)")
-            return try Shell.bash("git \(args.joined(separator: " "))")
-//            return try Process.run("git", args: args)
-        } catch {
-            print("runningn error \(error)")
-            throw error
-        }
+    public static func run(_ args: String...) throws -> String {
+        var err = ""
+        var out = ""
+        let code = try Process.run("git", args: args, updates: { (output) in
+            err += output.err ?? ""
+            out += output.out ?? ""
+        })
+        guard code == 0 else { throw err }
+        return out
     }
 }
 
