@@ -30,15 +30,3 @@ extension Option {
         return Value.convertOrFail(answer)
     }
 }
-
-// TODO: move
-extension CommandContext {
-    public func _load<V: LosslessStringConvertible>(_ opt: Option<V>, _ message: String? = nil, secure: Bool = false) -> V {
-        if let raw = opt.wrappedValue { return raw }
-        let msg = message ?? opt.name
-        console.pushEphemeral()
-        let answer = console.ask(msg.consoleText(), isSecure: secure)
-        console.popEphemeral()
-        return V.convertOrFail(answer)
-    }
-}
