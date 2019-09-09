@@ -9,14 +9,14 @@ final class Main: ToolboxGroup {
     
     let commands: [String: AnyCommand] = [
         "clean": CleanCommand(),
-        "linux-main": GenerateLinuxMain(),
         "cloud": CloudGroup(),
         "new": New(),
         "drop": PrintDroplet(),
-        "test": Test(),
         "xcode": XcodeCommand(),
         "build": BuildCommand(),
-        "leaf": LeafGroup()
+        "leaf": LeafGroup(),
+//        "linuxmain": GenerateLinuxMain(),
+//        "test": Test(),
     ]
     
     let help = "welcome to vapor"

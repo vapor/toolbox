@@ -2,12 +2,6 @@ import ConsoleKit
 import Foundation
 import Globals
 
-//extension Option where Value == Bool {
-//    static var dontOpenXcode: Option {
-//        return .init(name: "dont-open-xcode", short: "d", type: .flag, help: "use this flag to NOT open xcode after generation.")
-//    }
-//}
-
 // Generates an Xcode project
 struct XcodeCommand: Command {
     struct Signature: CommandSignature {
@@ -42,8 +36,7 @@ struct XcodeCommand: Command {
 
 // Generates an Xcode project
 struct BuildCommand: Command {
-    struct Signature: CommandSignature {
-    }
+    struct Signature: CommandSignature {}
     
     let help = "builds proj"
     
@@ -51,7 +44,8 @@ struct BuildCommand: Command {
     func run(using ctx: CommandContext, signature: Signature) throws {
         ctx.console.output("building..")
         // execute
-        let result = try Process.run("swift", args: ["build"]) { update in
+        print("args: \(ctx.input.arguments.joined(separator: ", "))")
+        let result = try Process.run("swift", args: ["build"] + ctx.input.arguments) { update in
             if let err = update.err {
                 ctx.console.output(err, style: .error, newLine: false)
             }

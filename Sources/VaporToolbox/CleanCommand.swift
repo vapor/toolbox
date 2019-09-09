@@ -2,11 +2,6 @@ import ConsoleKit
 import Globals
 import Foundation
 
-//extension Option where Value == Bool {
-//    static var update: Option = .init(name: "update", short: "u", type: .flag, help: "cleans Package.resolved file if it exists.")
-//    static var keepCheckouts: Option = .init(name: "keep-checkouts", short: "k", type: .flag, help: "keep checkouts ")
-//}
-
 /// Cleans temporary files created by Xcode and SPM.
 struct CleanCommand: Command {
     struct Signature: CommandSignature {

@@ -146,12 +146,6 @@ extension CommandContext {
         // call this again to trigger same error
         guard setNow else { return try detectCloudApp(with: token) }
 
-//        let sig = RemoteSet.Signature()
-//
-//        var opt: CommandContext! = nil
-//        RemoteSet.Signature.init(from: &opt)
-//        self.input.arguments
-
         var copy = self
         let setter = RemoteSet()
         try setter.run(using: &copy)

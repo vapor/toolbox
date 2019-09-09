@@ -2,17 +2,6 @@ import Globals
 import ConsoleKit
 import Foundation
 
-extension Argument where Value == String {
-    static let name: Argument = .init(name: "name", help: "what to name your project.")
-}
-
-extension CommandContext {
-//    func arg<V: LosslessStringConvertible>(_ arg: Argument<V>) throws -> String {
-//        guard let val = rawArguments[arg.name] else { throw "missing value for argument '\(arg.name)'" }
-//        return val
-//    }
-}
-
 let templateHelp = [
     "a specific template to use.",
     "-t repo/template for github templates",
@@ -21,12 +10,6 @@ let templateHelp = [
     "-t auth to create a new authenticated API app",
     "-t api (default) to create a new API"
 ] .joined(separator: "\n")
-
-extension Option where Value == String {
-//    static let template: Option = .init(name: "template", short: "t", type: .value, help: templateHelp)
-//    static let tag: Option = .init(name: "tag", short: "T", type: .value, help: "a specific template tag to use.")
-//    static let branch: Option = .init(name: "branch", short: "b", type: .value, help: "a specific template branch to use.")
-}
 
 struct New: Command {
     struct Signature: CommandSignature {
@@ -41,7 +24,7 @@ struct New: Command {
         @Option(name: "branch", short: "b", help: "a specific branch to use, if desired.")
         var branch: String
     }
-    let signature = Signature()
+
     let help = "creates a new vapor app from template. use 'vapor new ProjectName'."
 
     func run(using ctx: CommandContext, signature: Signature) throws {

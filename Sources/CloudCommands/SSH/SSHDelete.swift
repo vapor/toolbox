@@ -14,17 +14,6 @@ struct SSHDelete: Command {
     }
 }
 
-//struct AnyContext {
-//    let console: Console
-//    init<C>(ctx: CommandContext<C>) {
-//        self.console = ctx.console
-//    }
-//}
-//
-//extension CommandContext {
-//    var any: AnyContext { return .init(ctx: self) }
-//}
-
 struct SSHDeleteRunner {
     let ctx: CommandContext
     let token: Token

@@ -181,19 +181,6 @@ extension Array where Element == Seed.Answer {
     }
 }
 
-extension Option where Value == String {
-//    static let path: Option = .init(name: "path", short: "p", type: .value(default: "./"), help: "the path to the folder that should be rendered. defaults to working directory.")
-}
-
-//extension CommandOption {
-//    static let path: CommandOption = .value(
-//        name: "path",
-//        short: "p",
-//        default: "./",
-//        help: ["the path to the folder that should be rendered. defaults to current path"]
-//    )
-//}
-
 struct LeafRenderFolder: Command {
     struct Signature: CommandSignature {
         @Option(name: "path", short: "p", help: "path to use")
