@@ -2,7 +2,7 @@ import ConsoleKit
 import CloudAPI
 import Globals
 
-public struct RemoteGroup: CommandGroup {
+public struct RemoteGroup: ToolboxGroup {
     public struct Signature: CommandSignature {
         public init() {}
     }
@@ -18,7 +18,7 @@ public struct RemoteGroup: CommandGroup {
 
     /// See `CommandGroup`.
 
-    public func outputHelp(using ctx: inout CommandContext) throws {
+    public func fallback(using ctx: inout CommandContext) throws {
         ctx.console.info("interact with git remotes on vapor cloud.")
         ctx.console.output("use `vapor cloud remote -h` to see commands.")
     }

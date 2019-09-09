@@ -3,7 +3,7 @@ import LeafKit
 import ConsoleKit
 import Foundation
 
-struct LeafGroup: CommandGroup {
+struct LeafGroup: ToolboxGroup {
     /// See `CommandRunnable`.
     struct Signature: CommandSignature { }
 
@@ -13,7 +13,7 @@ struct LeafGroup: CommandGroup {
 
     let help = "commands for interacting with leaf."
 
-    func outputHelp(using ctx: inout CommandContext) throws {
+    func fallback(using ctx: inout CommandContext) throws {
         ctx.console.output("interact with leaf to render the contents of a folder.")
     }
 }

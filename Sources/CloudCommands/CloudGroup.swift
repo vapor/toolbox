@@ -3,7 +3,7 @@ import ConsoleKit
 import CloudAPI
 import Globals
 
-public struct CloudGroup: CommandGroup {
+public struct CloudGroup: ToolboxGroup {
     /// See `CommandGroup`.
     public var commands: [String : AnyCommand] = [
         // USER COMMANDS
@@ -38,7 +38,7 @@ public struct CloudGroup: CommandGroup {
     public init() {}
     
     /// See `CommandGroup`.
-    public func outputHelp(using ctx: inout CommandContext) throws {
+    public func fallback(using ctx: inout CommandContext) throws {
         ctx.console.info("welcome to cloud.")
         ctx.console.output("use `vapor cloud -h` to see commands.")
         let cloud = [

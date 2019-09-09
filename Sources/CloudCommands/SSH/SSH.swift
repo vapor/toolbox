@@ -1,6 +1,7 @@
+import Globals
 import ConsoleKit
 
-public struct SSHGroup: CommandGroup {
+public struct SSHGroup: ToolboxGroup {
     // empty sig
     public struct Signature: CommandSignature {
         public init() {}
@@ -16,7 +17,7 @@ public struct SSHGroup: CommandGroup {
 
     public init() {}
 
-    public func outputHelp(using ctx: inout CommandContext) throws {
+    public func fallback(using ctx: inout CommandContext) throws {
         ctx.console.info("interact with SSH Keys on vapor cloud.")
         ctx.console.output("use `vapor cloud ssh -h` to see commands.")
     }
