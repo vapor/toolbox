@@ -61,7 +61,7 @@ extension ByteBuffer {
     func makeData() -> Data {
         var copy = self
         let bytes = copy.readBytes(length: copy.readableBytes) ?? []
-        return Data(bytes: bytes)
+        return Data(bytes)
     }
 }
 

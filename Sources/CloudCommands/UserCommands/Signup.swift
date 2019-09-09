@@ -40,7 +40,7 @@ struct CloudSignup: Command {
 
 extension CommandContext {
     func loadAndDisplay<T: LosslessStringConvertible>(_ opt: Option<T>, secure: Bool = false) throws -> String {
-        let val = load(opt, secure: secure).description.trimmingCharacters(in: .whitespacesAndNewlines)
+        let val = opt.load(with: self, secure: secure).description.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !val.isEmpty else { throw "no value entered for \(opt.name)" }
         display(opt, value: val, secure: secure)
         return val

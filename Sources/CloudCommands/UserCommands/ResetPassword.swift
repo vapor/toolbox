@@ -18,15 +18,3 @@ struct ResetPassword: Command {
         ctx.console.output("check emaail: \(e).".consoleText())
     }
 }
-
-
-extension Option {
-    func load(with ctx: CommandContext, _ message: String? = nil, secure: Bool = false) -> Value {
-        if let raw = self.wrappedValue { return raw }
-        let msg = message ?? self.name
-        ctx.console.pushEphemeral()
-        let answer = ctx.console.ask(msg.consoleText(), isSecure: secure)
-        ctx.console.popEphemeral()
-        return Value.convertOrFail(answer)
-    }
-}
