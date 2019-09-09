@@ -2,15 +2,6 @@ import ConsoleKit
 import Globals
 import LinuxTestsGeneration
 
-//extension Option where Value == String {
-//    static let ignoredDirectories: Option = .init(
-//        name: "ignored-directories",
-//        short: "i",
-//        type: .value,
-//        help: "use this to ignore a tests directory."
-//    )
-//}
-
 /// Cleans temporary files created by Xcode and SPM.
 struct GenerateLinuxMain: Command {
     struct Signature: CommandSignature {
