@@ -44,7 +44,6 @@ struct BuildCommand: Command {
     func run(using ctx: CommandContext, signature: Signature) throws {
         ctx.console.output("building..")
         // execute
-        print("args: \(ctx.input.arguments.joined(separator: ", "))")
         let result = try Process.run("swift", args: ["build"] + ctx.input.arguments) { update in
             if let err = update.err {
                 ctx.console.output(err, style: .error, newLine: false)
