@@ -15,7 +15,6 @@ final class Main: ToolboxGroup {
         "xcode": XcodeCommand(),
         "build": BuildCommand(),
         "leaf": LeafGroup(),
-//        "linuxmain": GenerateLinuxMain(),
 //        "test": Test(),
     ]
     
