@@ -4,8 +4,8 @@ import PackageDescription
 let package = Package(
     name: "VaporToolbox",
     dependencies: [
-        .package(url: "https://github.com/apple/swift-nio.git", from: "2.0.0"),
-        .package(url: "https://github.com/vapor/leaf-kit.git", .branch("file-in-error")),
+        .package(url: "https://github.com/apple/swift-nio.git", from: "2.2.0"),
+        .package(url: "https://github.com/vapor/leaf-kit.git", .branch("master")),
         .package(url: "git@github.com:vapor/console.git", .branch("master")),
         .package(url: "https://github.com/loganwright/async-websocket-client.git", .branch("master")),
         .package(url: "https://github.com/swift-server/swift-nio-http-client.git", .branch("master")),
