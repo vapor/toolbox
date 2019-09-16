@@ -120,3 +120,25 @@ struct LogsRunner {
         }
     }
 }
+
+struct CloudRunCommand: Command {
+    struct Signature: CommandSignature {
+        @Option(name: "app", short: "a")
+        var app: String
+        @Option(name: "env", short: "e")
+        var env: String
+    }
+
+    let help = "run commands on your cloud app."
+
+    /// See `Command`.
+    func run(using ctx: CommandContext, signature: Signature) throws {
+        let token = try Token.load()
+        let app = try ctx.loadApp(with: token)
+        let env = try ctx.loadEnv(for: app, with: token)
+        let command = ctx.console.ask("enter command: ").trimmingCharacters(in: .whitespacesAndNewlines)
+        let api = CloudRunCommandAPI(with: token)
+        let result = try api.run(command: command, env: env.id)
+        print("should now subscribe to ws for commmand id: \(result.id)")
+    }
+}
