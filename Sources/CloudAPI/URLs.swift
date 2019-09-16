@@ -1,4 +1,5 @@
 import Globals
+import Foundation
 
 let cloudBaseUrl = "https://api.v2.vapor.cloud/v2/"
 let gitUrl = cloudBaseUrl.trailingSlash + "git"
@@ -36,3 +37,7 @@ let regionsUrl = appsUrl.trailingSlash + "regions"
 let plansUrl = appsUrl.trailingSlash + "plans"
 let productsUrl = appsUrl.trailingSlash + "products"
 let activitiesUrl = cloudBaseUrl.trailingSlash + "activity/activities"
+let commandsUrl = appsUrl.trailingSlash + "commands"
+public func commandsWssUrl(id: UUID, token: Token) -> String {
+    return "wss://service.v2.vapor.cloud/v2/command/logs/" + id.uuidString + "?token=" + token.key
+}
