@@ -28,7 +28,10 @@ public struct CloudGroup: ToolboxGroup {
         "remote": RemoteGroup(),
         
         // LOGS
-        "logs": Logs()
+        "logs": Logs(),
+
+        // RUN REMOTE COMMANDS
+        "command": CloudRunCommand()
     ]
     
     /// See `CommandGroup`.

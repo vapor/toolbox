@@ -6,7 +6,7 @@ fileprivate struct CloudRunCommandCreate: Encodable {
 }
 
 public struct CloudRunCommand: Resource {
-    let id: UUID
+    public let id: UUID
 }
 
 public struct CloudRunCommandAPI {
