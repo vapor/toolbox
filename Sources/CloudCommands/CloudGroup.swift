@@ -143,5 +143,55 @@ struct CloudRunCommand: Command {
         let api = CloudRunCommandAPI(with: token)
         let result = try api.run(command: command, env: env.id)
         print("should now subscribe to ws for commmand id: \(result.id)")
+        try result.listen(token: token) { (update) in
+            switch update {
+            case .connected:
+                print("connected")
+            case .message(let msg):
+                print("got update: \(msg)")
+            case .close:
+                print("closed")
+            }
+        }
+        print("all done")
+    }
+}
+
+import AsyncWebSocketClient
+
+extension CloudRunCommandObject {
+    public enum Update {
+        case connected
+        case message(String)
+        case close
+    }
+
+    public func listen(token: Token, _ listener: @escaping (Update) -> Void) throws {
+        let raw = commandsWssUrl(id: id, token: token)
+        let url = URL(string: raw)!
+        print("connecting to: \(url)")
+        let host = url.host!
+        let uri = url.path + "?token=\(token.key)"
+        print("h: \(host)\nuri: \(uri)")
+        let client = WebSocketClient(eventLoopGroupProvider: .createNew)
+        let connection = client.connect(host: host, port: 80, uri: uri, headers: [:]) { ws in
+            listener(.connected)
+
+            ws.onText { ws, text in
+                listener(.message(text))
+            }
+
+            ws.onBinary { _, _ in
+                fatalError("not prepared to accept binary")
+            }
+
+            ws.onCloseCode { _ in
+                listener(.close)
+                _ = ws.close()
+            }
+        }
+        print("finished")
+        try connection.wait()
+        try client.syncShutdown()
     }
 }
