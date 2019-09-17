@@ -39,5 +39,5 @@ let productsUrl = appsUrl.trailingSlash + "products"
 let activitiesUrl = cloudBaseUrl.trailingSlash + "activity/activities"
 let commandsUrl = appsUrl.trailingSlash + "commands"
 public func commandsWssUrl(id: UUID, token: Token) -> String {
-    return "wss://service.v2.vapor.cloud/v2/command/logs/" + id.uuidString + "?token=" + token.key
+    return "wss://service.v2.vapor.cloud/v2/replica/command/logs/" + id.uuidString + "?token=" + token.key
 }
