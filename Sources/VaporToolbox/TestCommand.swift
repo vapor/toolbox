@@ -13,32 +13,65 @@ struct Test: Command {
 
     func run(using ctx: CommandContext, signature: Signature) throws {
         ctx.console.output("testing...")
-        let url = URL(string: signature.url)!
-        print("connecting to: \(url)")
-        let host = url.host!
-//        let token = try Token.load()
-        let uri = url.path + (url.query.flatMap { "?" + $0 } ?? "")
-        print("h: \(host)\nuri: \(uri)")
+        let sock = Sock(signature.url)
+        try sock.listen { update in
+            switch update {
+            case .connected:
+                ctx.console.output("connect")
+                sock.ws?.send(text: "heyyyyyyyy")
+            case .message(let msg):
+                ctx.console.output("got message: " + msg.consoleText())
+            case .close:
+                ctx.console.output("closedd")
+            }
+        }
+    }
+}
+
+final class Sock {
+    public enum Update {
+        case connected
+        case message(String)
+        case close
+    }
+
+    private(set) var ws: WebSocketClient.Socket?
+
+    private var wssUrl: URL
+
+    private var host: String {
+        return wssUrl.host!
+    }
+    private var uri: String {
+        let query = wssUrl.query.flatMap { "?" + $0 } ?? ""
+        return wssUrl.path + query
+    }
+
+    init(_ url: String) {
+        wssUrl = URL(string: url)!
+    }
+
+    public func listen(_ listener: @escaping (Update) -> Void) throws {
         let client = WebSocketClient(eventLoopGroupProvider: .createNew)
-        let connection = client.connect(host: host, port: 443, uri: uri, headers: [:]) { ws in
-            print("connected")
+
+        let connection = client.connect(host: host, port: 80, uri: uri, headers: [:]) { [weak self] ws in
+            self?.ws = ws
+            listener(.connected)
 
             ws.onText { ws, text in
-                print("on text " + text)
-                sleep(1)
-                ws.send(text: "yoyo")
+                listener(.message(text))
             }
 
             ws.onBinary { _, _ in
                 fatalError("not prepared to accept binary")
             }
 
-            ws.onCloseCode { _ in
-                print("closing")
+            ws.onCloseCode { [weak self] _ in
+                listener(.close)
                 _ = ws.close()
+                self?.ws = nil
             }
         }
-        print("finished")
         try connection.wait()
         try client.syncShutdown()
     }
