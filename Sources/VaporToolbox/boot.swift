@@ -15,7 +15,7 @@ final class Main: ToolboxGroup {
         "xcode": XcodeCommand(),
         "build": BuildCommand(),
         "leaf": LeafGroup(),
-//        "test": Test(),
+        "test": Test(),
     ]
     
     let help = "welcome to vapor"

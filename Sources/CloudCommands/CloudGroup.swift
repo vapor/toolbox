@@ -174,7 +174,7 @@ extension CloudRunCommandObject {
         let uri = url.path + "?token=\(token.key)"
         print("h: \(host)\nuri: \(uri)")
         let client = WebSocketClient(eventLoopGroupProvider: .createNew)
-        let connection = client.connect(host: host, port: 80, uri: uri, headers: [:]) { ws in
+        let connection = client.connect(host: host, port: 443, uri: uri, headers: [:]) { ws in
             listener(.connected)
 
             ws.onText { ws, text in
