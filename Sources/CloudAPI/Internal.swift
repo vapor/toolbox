@@ -1,60 +1,71 @@
-import Vapor
+import NIO
 import Globals
+import Foundation
+import AsyncHTTPClient
 
-internal func makeClient(on container: Container) -> Client {
-    return FoundationClient.default(on: container)
+struct Web {
+    static func send(_ req: HTTPClient.Request) throws -> HTTPClient.Response {
+        let client = HTTPClient(eventLoopGroupProvider: .createNew)
+        defer { try! client.syncShutdown() }
+        let response = try client.execute(request: req).wait()
+        // sometimes successful response is actually a cloud error
+        if let err = try? response.become(ResponseError.self) {
+            throw err
+        }
+        return response.logged()
+    }
 }
 
-internal func makeWebSocketClient(url: URLRepresentable, on container: Container) -> Future<WebSocket> {
-    return makeClient(on: container).webSocket(url)
+
+let logResponses = false
+extension HTTPClient.Response {
+    fileprivate func logged() -> HTTPClient.Response {
+        guard logResponses else { return self }
+        print("Got response:\n\(self)\n\n")
+        return self
+    }
 }
 
-private struct ResponseError: Content {
+extension JSONDecoder {
+    static var decoder: JSONDecoder {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let value = try decoder.singleValueContainer()
+            if let timestamp = try? value.decode(Double.self) {
+                return Date(timeIntervalSince1970: timestamp)
+            } else if let iso8601 = try? value.decode(String.self) {
+                if #available(OSX 10.12, *) {
+                    if let date = ISO8601DateFormatter().date(from: iso8601) {
+                        return date
+                    } else {
+                        throw "unable to convert date string '\(iso8601)'"
+                    }
+                } else {
+                    fatalError("unsupported version")
+                }
+            }
+            throw "unexpected type for expiresAt \(decoder)"
+        }
+        return decoder
+    }
+}
+
+extension HTTPClient.Response {
+    func become<C: Decodable>(_ t: C.Type = C.self) throws -> C {
+        guard let data = body?.makeData() else { throw "missing body" }
+        return try JSONDecoder.decoder.decode(C.self, from: data)
+    }
+}
+
+extension ByteBuffer {
+    func makeData() -> Data {
+        var copy = self
+        let bytes = copy.readBytes(length: copy.readableBytes) ?? []
+        return Data(bytes)
+    }
+}
+
+private struct ResponseError: Resource, Error {
     let error: Bool
     let reason: String
-}
-
-extension Future where T == Response {
-
-    /// Clear the response
-    /// Should ALWAYS (until you don't want to) call `validate()`
-    /// first
-    internal func void() -> Future<Void> {
-        return map { _ in }
-    }
-
-    /// Use this to parse out error responses
-    /// they return 200, but contents are an error
-    /// otherwise error is decoding and unclear
-    ///
-    /// this logic is a bit unclear,
-    /// but I don't have a better way to map where
-    /// contents might be A or B and need to move on
-    /// will think about and revisit
-    internal func become<C: Content>(_ type: C.Type) -> Future<C> {
-        return validate().flatMap { try $0.content.decode(C.self) }
-    }
-
-    /// Use this to parse out error responses
-    /// they return 200, but contents are an error
-    /// otherwise error is decoding and unclear
-    ///
-    /// this logic is a bit unclear,
-    /// but I don't have a better way to map where
-    /// contents might be A or B and need to move on
-    /// will think about and revisit
-    internal func validate() -> Future<Response> {
-        return flatMap { response in
-            // Check if ErrorResponse (returns 200, but is error)
-            let cloudError = try response.content.decode(ResponseError.self)
-            return cloudError.mapIfError { cloudError in
-                // if UNABLE to map ResponseError
-                // then it is our object
-                return ResponseError(error: false, reason: "")
-            } .map { cloudError in
-                if cloudError.error { throw cloudError.reason }
-                return response
-            }
-        }
-    }
 }

@@ -1,39 +1,36 @@
-import Vapor
+import Globals
+import Foundation
+import AsyncWebSocketClient
 
-public struct Activity: Content {
+public struct Activity: Resource {
     public let id: UUID
 }
 
-public struct CloudEnv: Content {
+public struct CloudEnv: Resource {
     public let defaultBranch: String
     public let applicationID: UUID
-    public let createdAt: Date?
+    public let createdAt: String?
     public let id: UUID
     public let slug: String
     public let regionID: UUID
-    public let updatedAt: Date?
+    public let updatedAt: String?
     public let activity: Activity?
 }
 
 extension CloudEnv {
     public func deploy(
         branch: String? = nil,
-        with token: Token,
-        on container: Container
-    ) throws -> Future<Activity> {
-        let access = CloudEnv.Access(with: token, baseUrl: environmentsUrl, on: container)
-        let id = self.id.uuidString.trailSlash + "deploy"
+        with token: Token
+    ) throws -> Activity {
+        let access = CloudEnv.Access(with: token, baseUrl: environmentsUrl)
+        let id = self.id.uuidString.trailingSlash + "deploy"
         let package = [
             "branch": branch ?? defaultBranch
         ]
 
-        let deploy = access.update(id: id, with: package)
-        return deploy.map { env in
-            guard let activity = env.activity else {
-                throw "Unable to find deploy activity."
-            }
-            return activity
-        }
+        let env = try access.update(id: id, with: package)
+        guard let activity = env.activity else { throw "unable to find deploy activity." }
+        return activity
     }
 }
 
@@ -44,24 +41,38 @@ extension Activity {
         case close
     }
 
-    private var wssUrl: String {
-        return "wss://api.v2.vapor.cloud/v2/activity/activities/\(id.uuidString)/channel"
+    private var wssUrl: URL {
+        return URL(string: "wss://api.v2.vapor.cloud/v2/activity/activities/\(id.uuidString)/channel")!
     }
-
-    public func listen(on container: Container, _ listener: @escaping (Update) -> Void) -> Future<Void> {
-        let ws = makeWebSocketClient(url: wssUrl, on: container)
-        return ws.flatMap { ws in
+    
+    private var host: String {
+        return wssUrl.host!
+    }
+    private var uri: String {
+        return wssUrl.path
+    }
+    
+    public func listen(_ listener: @escaping (Update) -> Void) throws {
+        let client = WebSocketClient(eventLoopGroupProvider: .createNew)
+        
+        let connection = client.connect(host: host, port: 80, uri: uri, headers: [:]) { ws in
             listener(.connected)
 
-            // Logs
             ws.onText { ws, text in
                 listener(.message(text))
             }
+            
+            ws.onBinary { _, _ in
+                fatalError("not prepared to accept binary")
+            }
 
-            // Close
-            return ws.onClose.map {
+            ws.onCloseCode { _ in
                 listener(.close)
+                _ = ws.close()
             }
         }
+        try connection.wait()
+        try client.syncShutdown()
     }
 }
+

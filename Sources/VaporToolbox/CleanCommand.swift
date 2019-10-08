@@ -1,41 +1,38 @@
-import Vapor
+import ConsoleKit
 import Globals
+import Foundation
 
 /// Cleans temporary files created by Xcode and SPM.
 struct CleanCommand: Command {
+    struct Signature: CommandSignature {
+        @Flag(name: "update", short: "u", help: "cleans Package.resolved file if it exists.")
+        var update: Bool
+        @Flag(name: "keep-checkouts", short: "k", help: "keep git checkouts of dependencies.")
+        var keepCheckouts: Bool
+    }
+    let signature = Signature()
+    let help = "cleans temporary files."
+    
     /// See `Command`.
-    var arguments: [CommandArgument] = []
-
-    /// See `Command`.
-    var options: [CommandOption] = [
-        .flag(name: "update", short: "u", help: [
-            "Cleans the Package.resolved file if it exists",
-            "This is equivalent to doing `swift package update`"
-        ])
-    ]
-
-    /// See `Command`.
-    var help: [String] = ["Cleans temporary files."]
-
-    /// See `Command`.
-    func run(using ctx: CommandContext) throws -> Future<Void> {
-        let cleaner = try Cleaner(ctx: ctx)
+    func run(using ctx: CommandContext, signature: Signature) throws {
+        let cleaner = try Cleaner(ctx: ctx, sig: signature)
         try cleaner.run()
-        return .done(on: ctx.container)
     }
 }
 
 class Cleaner {
     let ctx: CommandContext
+    let sig: CleanCommand.Signature
     let cwd: String
     let files: String
 
     var operations: [String: CleanResult] = [:]
 
-    init(ctx: CommandContext) throws {
+    init(ctx: CommandContext, sig: CleanCommand.Signature) throws {
         self.ctx = ctx
+        self.sig = sig
         let cwd = try Shell.cwd()
-        self.cwd = cwd.finished(with: "/")
+        self.cwd = cwd.trailingSlash
         self.files = try Shell.allFiles(in: cwd)
     }
 
@@ -48,23 +45,28 @@ class Cleaner {
         ops.append((".build", cleanBuildFolder))
         ops.append(("Package.resolved", cleanPackageResolved))
 
-        for (name, op) in ops {
+        let rows = ops.map { (name, op) -> [ConsoleText] in
+            var row = [ConsoleText]()
             do {
                 let result = try op()
-                let text = name.consoleText(result.style) + ": " + result.report
-                ctx.console.output(text)
+                row.append(name.consoleText(result.style))
+                row.append(result.report)
             } catch {
-                let text = name.consoleText(CleanResult.failure.style)
-                    + ": "
-                    + error.localizedDescription.consoleText()
-                ctx.console.output(text)
+                row.append(name.consoleText(CleanResult.failure.style))
+                row.append(error.localizedDescription.consoleText())
             }
+            return row
         }
+        
+        
+        let drawer = TableDrawer(rows: rows)
+        let text = drawer.drawTable()
+        ctx.console.output(text, newLine: false)
     }
 
     private func cleanPackageResolved() throws -> CleanResult {
         guard files.contains("Package.resolved") else { return .notNecessary }
-        if ctx.options["update"]?.bool == true {
+        if sig.update {
             try Shell.delete("Package.resolved")
             return .success
         } else {
@@ -74,7 +76,13 @@ class Cleaner {
 
     private func cleanBuildFolder() throws -> CleanResult {
         guard files.contains(".build") else { return .notNecessary }
-        try Shell.delete(".build")
+        var list = try Shell.allFiles(in: ".build").split(separator: "\n")
+        if sig.keepCheckouts {
+            list.removeAll(where: ["checkouts", ".", ".."].contains)
+            try list.map { ".build/" + $0 } .forEach(Shell.delete)
+        } else {
+            try Shell.delete(".build")
+        }
         return .success
     }
 
@@ -102,7 +110,7 @@ class Cleaner {
 
     private func cleanDefaultDerivedDataLocation() throws -> Bool {
         let defaultLocation = try Shell.homeDirectory()
-            .finished(with: "/")
+            .trailingSlash
             + "Library/Developer/Xcode/DerivedData"
         guard
             FileManager.default.fileExists(atPath: defaultLocation)

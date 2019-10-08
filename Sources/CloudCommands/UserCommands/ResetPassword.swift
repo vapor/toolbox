@@ -1,24 +1,20 @@
-import Vapor
 import CloudAPI
+import Globals
+import ConsoleKit
 
 struct ResetPassword: Command {
-    /// See `Command`.
-    var arguments: [CommandArgument] = []
 
-    /// See `Command`.
-    var options: [CommandOption] = [
-        .email
-    ]
+    public struct Signature: CommandSignature {
+        @Option(name: "email", short: "e")
+        var email: String
+    }
 
-    /// See `Command`.
-    var help: [String] = ["Resets your account's password."]
+    let help = "resets your account's password."
 
-    /// See `Command`.
-    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
-        let e = ctx.load(.email)
-        return UserApi(on: ctx.container).reset(email: e).map { _ in
-            ctx.console.output("Password has been reset.".consoleText())
-            ctx.console.output("Check: \(e).".consoleText())
-        }
+    func run(using ctx: CommandContext, signature: Signature) throws {
+        let e = signature.$email.load(with: ctx)
+        try UserApi().reset(email: e)
+        ctx.console.output("password has been reset.".consoleText())
+        ctx.console.output("check emaail: \(e).".consoleText())
     }
 }

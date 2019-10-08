@@ -1,29 +1,25 @@
-import Vapor
 import Globals
-import Leaf
+import LeafKit
+import ConsoleKit
+import Foundation
 
-public struct LeafGroup: CommandGroup {
-    public let commands: Commands = [
+struct LeafGroup: ToolboxGroup {
+    /// See `CommandRunnable`.
+    struct Signature: CommandSignature { }
+
+    let commands: [String: AnyCommand] = [
         "render": LeafRenderFolder()
     ]
 
-    public let options: [CommandOption] = []
+    let help = "commands for interacting with leaf."
 
-    /// See `CommandGroup`.
-    public var help: [String] = [
-        "commands for interacting with leaf"
-    ]
-
-    public init() {}
-
-    /// See `CommandGroup`.
-    public func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
-        return ctx.done
+    func fallback(using ctx: inout CommandContext) throws {
+        ctx.console.output("interact with leaf to render the contents of a folder.")
     }
 }
 
 extension Seed {
-    struct Question: Content {
+    struct Question: Codable {
         let `var`: String
         let display: String
         let choices: [String]?
@@ -94,7 +90,7 @@ extension Seed.Exclusion {
     func matches(path: String) -> Bool {
         switch self {
         case .folder(let f):
-            return path.finished(with: "/").contains(f)
+            return path.trailingSlash.contains(f)
         case .fileType(let t):
             return path.hasSuffix(t)
         case .file(let f):
@@ -103,7 +99,7 @@ extension Seed.Exclusion {
     }
 }
 
-struct Seed: Content {
+struct Seed: Codable {
     let name: String
     let excludes: [Exclusion]
     let questions: [Question]
@@ -152,7 +148,7 @@ extension Console {
             let question = question.display + " (\(def) is default)"
             let answer =  ask(question.consoleText())
             if answer.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return def }
-            else { return def }
+            else { return answer }
         } else {
             return ask(question.display.consoleText())
         }
@@ -185,83 +181,83 @@ extension Array where Element == Seed.Answer {
     }
 }
 
-extension CommandOption {
-    static let path: CommandOption = .value(
-        name: "path",
-        short: "p",
-        default: "./",
-        help: ["the path to the folder that should be rendered. defaults to current path"]
-    )
-}
-
 struct LeafRenderFolder: Command {
-    /// See `Command`.
-    var arguments: [CommandArgument] = []
+    struct Signature: CommandSignature {
+        @Option(name: "path", short: "p", help: "path to use")
+        var path: String
+    }
+
+    let signature = Signature()
+    let help = "render a leaf template."
 
     /// See `Command`.
-    var options: [CommandOption] = [
-        .path
-    ]
-
-    /// See `Command`.
-    var help: [String] = ["leaf package stuff"]
-
-    /// See `Command`.
-    func run(using ctx: CommandContext) throws -> Future<Void> {
-        let raw = ctx.options.value(.path) ?? "./"
-        
+    func run(using ctx: CommandContext, signature: Signature) throws {
+        var raw = signature.path ?? "./"
+        if raw == "./" || raw.isEmpty {
+            raw = Process().currentDirectoryPath
+        }
         // expand `~` for example
         let path = try Shell.bash("echo \(raw)")
         guard FileManager.default.isDirectory(path: path) else {
-            throw "expected a directory, got \(path)"
+            throw "expected a directory, got '\(path)'"
         }
 
         // MARK: Compile Package
-        let seedPath = path.finished(with: "/") + "leaf.seed"
+        let seedPath = path.trailingSlash + "leaf.seed"
         let contents = try Shell.readFile(path: seedPath)
-        let data = Data(bytes: contents.utf8)
+        let rawseed = Data(contents.utf8)
         let decoder = JSONDecoder()
-        let seed = try decoder.decode(Seed.self, from: data)
+        let seed = try decoder.decode(Seed.self, from: rawseed)
         let answers = try ctx.console.answer(seed.questions)
+
+        // assemble package
         let package = answers.package()
-
-        // MARK: Collect Paths
-        let all = try FileManager.default.allFiles(at: path)
-        let config = LeafConfig(tags: .default(), viewsDir: path, shouldCache: false)
-        let renderer = LeafRenderer(config: config, using: ctx.container)
-        let paths = all.filter { !seed.excludes.shouldExclude(path: $0) }
-       
-        // MARK: Render Files
-        var views: [Future<(View, String)>] = []
-        for path in paths {
-            let contents = try Shell.readFile(path: path)
-            let data = Data(bytes: contents.utf8)
-            let rendered = renderer.render(template: data, package).and(result: path)
-            views.append(rendered)
+        var data: [String: LeafData] = [:]
+        package.forEach { key, val in
+            data[key] = .string(val)
         }
+        
+        // MARK: Collect Paths
+        let files = try FileManager.default.allFiles(at: path)
+            .filter { !seed.excludes.shouldExclude(path: $0) }
 
-        // MARK: Write Files
-        let flat = views.flatten(on: ctx.container)
-        return flat.map { views in
-            for (view, path) in views {
-                let url = URL(fileURLWithPath: path)
-                guard let str = String(bytes: view.data, encoding: .utf8) else {
-                    fatalError("unable to create string") }
-                if str.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    try Shell.delete(path)
-                } else {
-                    try view.data.write(to: url)
-                }
+        let config = LeafConfig(rootDirectory: path)
+        let threadPool = NIOThreadPool(numberOfThreads: 1)
+        threadPool.start()
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        let renderer = LeafRenderer(config: config, threadPool: threadPool, eventLoop: group.next())
+        // MARK: Render Files
+        var renders: [String: ByteBuffer] = [:]
+        for file in files {
+            do {
+                let (buffer, name) = try renderer.render(path: file, context: data).and(value: file).wait()
+                renders[name] = buffer
+            } catch {
+                ctx.console.error("file: \(file)", newLine: true)
+                throw error
             }
-            
-            try Shell.delete(seedPath)
-            // TODO: Delete Empty Folders?
-        } .map {
-            try seed.conditionalIncludes?.forEach { include in
-                if answers.satisfy(include.condition) { return }
-                else {
-                    try include.includes.map { path.finished(with: "/") + $0 } .forEach(Shell.delete)
-                }
+        }
+        
+        // write the files to be rendered
+        for (path, render) in renders {
+            var render = render
+            let url = URL(fileURLWithPath: path)
+            guard let str = render.readString(length: render.readableBytes) else {
+                fatalError("unable to create string") }
+            if str.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                try Shell.delete(path)
+            } else {
+                try str.write(to: url, atomically: true, encoding: .utf8)
+            }
+        }
+        
+        try Shell.delete(seedPath)
+        // TODO: Delete Empty Folders?
+        
+        try seed.conditionalIncludes?.forEach { include in
+            if answers.satisfy(include.condition) { return }
+            else {
+                try include.includes.map { path.trailingSlash + $0 } .forEach(Shell.delete)
             }
         }
     }
@@ -270,12 +266,12 @@ struct LeafRenderFolder: Command {
 extension FileManager {
     func isDirectory(path: String) -> Bool {
         var isDirectory: ObjCBool = false
-        fileExists(atPath: path, isDirectory: &isDirectory)
+        let _ = fileExists(atPath: path, isDirectory: &isDirectory)
         return isDirectory.boolValue
     }
 
     func allFiles(at path: String) throws -> [String] {
-        let path = path.finished(with: "/")
+        let path = path.trailingSlash
         guard isDirectory(path: path) else { throw path + " is not a directory." }
 
         let excludes = [

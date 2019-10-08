@@ -1,4 +1,5 @@
 import Foundation
+import Globals
 
 /// A simple structure to model out the LinuxMain
 public struct LinuxMain {
@@ -22,7 +23,7 @@ public struct LinuxMain {
         self.extensions = modules.extensions()
         self.testRunner = modules.testRunner()
 
-        self.testsDirectory = testsDirectory.finished(with: "/")
+        self.testsDirectory = testsDirectory.trailingSlash
         self.ignoredDirectories = ignoredDirectories
     }
 
@@ -99,7 +100,7 @@ extension SimpleTestCase {
 }
 
 private func loadModules(in testDirectory: String, ignoring: [String]) throws -> [Module] {
-    let testDirectory = testDirectory.finished(with: "/")
+    let testDirectory = testDirectory.trailingSlash
     guard isDirectory(in: testDirectory) else { throw "no test directory found" }
     let testModules = try findTestModules(in: testDirectory)
         .filter { !ignoring.contains($0) }
@@ -111,14 +112,14 @@ private func loadModules(in testDirectory: String, ignoring: [String]) throws ->
 }
 
 private func isDirectory(in parentDirectory: String) -> Bool {
-    let parentDirectory = parentDirectory.finished(with: "/")
+    let parentDirectory = parentDirectory.trailingSlash
     var isDir: ObjCBool = false
     let _ = FileManager.default.fileExists(atPath: parentDirectory, isDirectory: &isDir)
     return isDir.boolValue
 }
 
 private func findTestModules(in directory: String) throws -> [String] {
-    let directory = directory.finished(with: "/")
+    let directory = directory.trailingSlash
     return try FileManager.default
         .contentsOfDirectory(atPath: directory)
         .filter { isDirectory(in: directory + $0) }
@@ -126,7 +127,7 @@ private func findTestModules(in directory: String) throws -> [String] {
 }
 
 private func loadTestSuite(in directory: String) throws -> TestSuite {
-    let directory = directory.finished(with: "/")
+    let directory = directory.trailingSlash
     return try FileManager.default
         .contentsOfDirectory(atPath: directory)
         .filter { $0.hasSuffix(".swift") }

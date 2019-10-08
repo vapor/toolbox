@@ -1,6 +1,9 @@
-import Vapor
+import Foundation
+import NIOHTTP1
+import AsyncHTTPClient
+import Globals
 
-public struct CloudUser: Content {
+public struct CloudUser: Resource {
     public let id: UUID
     public let firstName: String
     public let lastName: String
@@ -12,10 +15,7 @@ public struct CloudUser: Content {
 /// functionality
 public struct UserApi {
 
-    public let container: Container
-    public init(on container: Container) {
-        self.container = container
-    }
+    public init() {}
 
     public func signup(
         email: String,
@@ -23,8 +23,8 @@ public struct UserApi {
         lastName: String,
         organizationName: String,
         password: String
-    ) -> Future<CloudUser> {
-        struct Package: Content {
+    ) throws -> CloudUser {
+        struct Package: Encodable {
             let email: String
             let firstName: String
             let lastName: String
@@ -38,16 +38,15 @@ public struct UserApi {
             organizationName: organizationName,
             password: password
         )
-
-        let client = makeClient(on: container)
-        let response = client.send(.POST, to: userUrl) { try $0.content.encode(content) }
-        return response.become(CloudUser.self)
+        
+        let req = try HTTPClient.Request(url: userUrl, method: .POST, body: .init(content))
+        return try Web.send(req).become(CloudUser.self)
     }
 
     public func login(
         email: String,
         password: String
-    ) -> Future<Token> {
+    ) throws -> Token {
         let combination = email + ":" + password
         let data = combination.data(using: .utf8)!
         let encoded = data.base64EncodedString()
@@ -55,23 +54,31 @@ public struct UserApi {
         let headers: HTTPHeaders = [
             "Authorization": "Basic \(encoded)"
         ]
-        let client = makeClient(on: container)
-        let response = client.send(.POST, headers: headers, to: loginUrl)
-        return response.become(Token.self)
+        let req = try HTTPClient.Request(url: loginUrl, method: .POST, headers: headers)
+        let response = try Web.send(req)
+        return try response.become(Token.self)
     }
 
-    public func me(token: Token) -> Future<CloudUser> {
-        let access = CloudUser.Access(with: token, baseUrl: meUrl, on: container)
-        return access.view()
+    public func me(token: Token) throws -> CloudUser {
+        let access = CloudUser.Access(with: token, baseUrl: meUrl)
+        return try access.view()
     }
 
-    public func reset(email: String) -> Future<Void> {
-        struct Package: Content {
+    public func reset(email: String) throws {
+        struct Package: Codable {
             let email: String
         }
         let content = Package(email: email)
-        let client = makeClient(on: container)
-        let response = client.send(.POST, to: resetUrl) { try $0.content.encode(content) }
-        return response.validate().void()
+        
+        let req = try HTTPClient.Request(url: resetUrl, method: .POST, body: .init(content))
+        let _ = try Web.send(req)
+    }
+}
+
+extension HTTPClient.Body {
+    init<E: Encodable>(_ ob: E) throws {
+        let encoder = JSONEncoder()
+        let data = try encoder.encode(ob)
+        self = .data(data)
     }
 }

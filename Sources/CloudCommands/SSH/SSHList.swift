@@ -1,47 +1,43 @@
-import Vapor
+import ConsoleKit
 import CloudAPI
+import Globals
 
 struct SSHList: Command {
-    /// See `Command`.
-    var arguments: [CommandArgument] = []
+    struct Signature: CommandSignature {
+        @Flag(name: "all", short: "a", help: "shows all")
+        var all: Bool
+    }
+    
+    let help: String = "lists the ssh keys that you have pushed to cloud."
 
-    /// See `Command`.
-    var options: [CommandOption] = [
-        .all
-    ]
-
-    /// See `Command`.
-    var help: [String] = ["Lists the SSH keys that you have pushed to cloud"]
-
-    /// See `Command`.
-    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
-        let runner = try CloudSSHListRunner(ctx: ctx)
-        return runner.run()
+    func run(using ctx: CommandContext, signature: Signature) throws {
+        let runner = try CloudSSHListRunner(ctx: ctx, signature: signature)
+        try runner.run()
     }
 }
 
 struct CloudSSHListRunner {
     let ctx: CommandContext
+    let signature: SSHList.Signature
     let token: Token
     let api: SSHKeyApi
 
-    init(ctx: CommandContext) throws {
+    init(ctx: CommandContext, signature: SSHList.Signature) throws {
         self.token = try Token.load()
-        self.api = SSHKeyApi(with: token, on: ctx.container)
+        self.api = SSHKeyApi(with: token)
         self.ctx = ctx
+        self.signature = signature
     }
 
-    func run() -> Future<Void> {
-        let list = api.list()
-        return list.map {
-            self.log($0)
-        }
+    func run() throws {
+        let list = try api.list()
+        log(list)
     }
 
     func log(_ list: [SSHKey]) {
-        let long = ctx.flag(.all)
+        let long = signature.all
         if list.isEmpty {
-            ctx.console.output("No SSH keys found. Nothing to show.")
+            ctx.console.output("no SSH keys found. nothing to show.")
         }
 
         list.forEach { key in
@@ -49,14 +45,14 @@ struct CloudSSHListRunner {
             defer { ctx.console.output("") }
 
             // Basic Key Log
-            ctx.console.output("Name: ", newLine: false)
+            ctx.console.output("name: ", newLine: false)
             ctx.console.output(key.name.consoleText())
-            ctx.console.output("Created At: ", newLine: false)
-            ctx.console.output(key.createdAt.description.consoleText())
+            ctx.console.output("created at: ", newLine: false)
+            ctx.console.output(key.createdAt.consoleText())
 
             // Long Version
             guard long else { return }
-            ctx.console.output("Key: ")
+            ctx.console.output("key: ")
             ctx.console.output(key.key.consoleText())
         }
     }

@@ -1,40 +1,38 @@
-import Vapor
+import Foundation
 
-public struct SSHKey: Content {
+public struct SSHKey: Resource {
     public let key: String
     public let name: String
     public let userID: UUID
 
     public let id: UUID
-    public let createdAt: Date
-    public let updatedAt: Date
+    public let createdAt: String
+    public let updatedAt: String
 }
 
 public struct SSHKeyApi {
     public let token: Token
-    public let container: Container
     private let access: ResourceAccess<SSHKey>
 
-    public init(with token: Token, on container: Container) {
+    public init(with token: Token) {
         self.token = token
-        self.container = container
-        self.access = SSHKey.Access(with: token, baseUrl: gitSSHKeysUrl, on: container)
+        self.access = SSHKey.Access(with: token, baseUrl: gitSSHKeysUrl)
     }
 
-    public func add(name: String, key: String) -> Future<SSHKey> {
-        struct Package: Content {
+    public func add(name: String, key: String) throws -> SSHKey {
+        struct Package: Resource {
             let name: String
             let key: String
         }
         let package = Package(name: name, key: key)
-        return access.create(package)
+        return try access.create(package)
     }
 
-    public func list() -> Future<[SSHKey]> {
-        return access.list()
+    public func list() throws -> [SSHKey] {
+        return try access.list()
     }
 
-    public func delete(_ key: SSHKey) -> Future<Void> {
-        return access.delete(id: key.id.uuidString)
+    public func delete(_ key: SSHKey) throws {
+        return try access.delete(id: key.id.uuidString)
     }
 }

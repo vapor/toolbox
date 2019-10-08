@@ -18,7 +18,7 @@ extension Token {
     }
 
     private func makeVaporDirectoryIfNecessary() throws {
-        let vaporDirectory = try Shell.homeDirectory().finished(with: "/") + ".vapor"
+        let vaporDirectory = try Shell.homeDirectory().trailingSlash + ".vapor"
         var isDirectory: ObjCBool = false
         let exists = FileManager.default
             .fileExists(atPath: vaporDirectory, isDirectory: &isDirectory)
@@ -54,7 +54,7 @@ extension Token {
 
     private static func filePath() throws -> String {
         let home = try Shell.homeDirectory()
-        return home.finished(with: "/") + ".vapor/token"
+        return home.trailingSlash + ".vapor/token"
     }
 }
 

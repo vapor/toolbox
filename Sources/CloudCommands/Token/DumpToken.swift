@@ -1,27 +1,21 @@
-import Vapor
+import ConsoleKit
 import CloudAPI
 
 struct DumpToken: Command {
-    /// See `Command`.
-    var arguments: [CommandArgument] = []
+    struct Signature: CommandSignature {}
+    let signature = Signature()
+    
+    let help = "dump token data. (usually for debugging)"
 
-    /// See `Command`.
-    var options: [CommandOption] = []
-
-    /// See `Command`.
-    var help: [String] = ["Dump token data"]
-
-    /// See `Command`.
-    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
+    func run(using ctx: CommandContext, signature: Signature) throws {
         let token = try Token.load()
-        ctx.console.info("Expires At: ", newLine: false)
+        ctx.console.info("expires at: ", newLine: false)
         ctx.console.output(token.expiresAt.description.consoleText())
-        ctx.console.info("User ID:", newLine: false)
+        ctx.console.info("user id:", newLine: false)
         ctx.console.output(token.userID.uuidString.description.consoleText())
-        ctx.console.info("ID: ", newLine: false)
+        ctx.console.info("token id: ", newLine: false)
         ctx.console.output(token.id.uuidString.consoleText())
-        ctx.console.info("Token: ", newLine: false)
+        ctx.console.info("token: ", newLine: false)
         ctx.console.output(token.key.consoleText())
-        return .done(on: ctx.container)
     }
 }

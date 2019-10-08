@@ -1,33 +1,28 @@
-import Vapor
+import ConsoleKit
 import CloudAPI
+import Globals
 
 struct Me: Command {
-    /// See `Command`.
-    var arguments: [CommandArgument] = []
+    struct Signature: CommandSignature {
+        @Flag(name: "all", short: "a", help: "show all data")
+        var all: Bool
+    }
+    
+    let help = "shows information about logged in user."
 
-    /// See `Command`.
-    var options: [CommandOption] = [
-        .all
-    ]
-
-    /// See `Command`.
-    var help: [String] = ["Shows information about user."]
-
-    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
+    func run(using ctx: CommandContext, signature: Signature) throws {
         let token = try Token.load()
-        let me = UserApi(on: ctx.container).me(token: token)
-        return me.map { me in
-            // name
-            let name = me.firstName + " " + me.lastName
-            ctx.console.output(name.consoleText())
-
-            // email
-            ctx.console.output(me.email.consoleText())
-
-            // id (future others)
-            guard ctx.flag(.all) else { return }
-            ctx.console.output("ID: ", newLine: false)
-            ctx.console.output(me.id.uuidString.consoleText())
-        }
+        let me = try UserApi().me(token: token)
+        // name
+        let name = me.firstName + " " + me.lastName
+        ctx.console.output(name.consoleText())
+        
+        // email
+        ctx.console.output(me.email.consoleText())
+        
+        // id (future others)
+        guard signature.all else { return }
+        ctx.console.output("user-id: ", newLine: false)
+        ctx.console.output(me.id.uuidString.consoleText())
     }
 }

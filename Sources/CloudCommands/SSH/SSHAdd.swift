@@ -1,55 +1,53 @@
-import Vapor
+import ConsoleKit
+import Foundation
 import Globals
 import CloudAPI
 
 struct SSHAdd: Command {
-    /// See `Command`.
-    var arguments: [CommandArgument] = []
+    struct Signature: CommandSignature {
+        @Option(name: "readable-name", short: "n")
+        var readableName: String
+        @Option(name: "path", short: "p")
+        var path: String
+        @Option(name: "key", short: "k")
+        var key: String
+    }
+    
+    let help = "add an ssh key to cloud."
 
-    /// See `Command`.
-    var options: [CommandOption] = [
-        .readableName,
-        .path,
-        .key,
-    ]
-
-    /// See `Command`.
-    var help: [String] = ["Add an SSH key to cloud."]
-
-    /// See `Command`.
-    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
-        let runner = try CloudSSHAddRunner(ctx: ctx)
-        return try runner.run()
+    func run(using ctx: CommandContext, signature: Signature) throws {
+        let runner = try CloudSSHAddRunner(ctx: ctx, signature: signature)
+        try runner.run()
     }
 }
 
 struct CloudSSHAddRunner {
     let ctx: CommandContext
+    let signature: SSHAdd.Signature
     let token: Token
     let api: SSHKeyApi
 
-    init(ctx: CommandContext) throws {
+    init(ctx: CommandContext, signature: SSHAdd.Signature) throws {
         self.token = try Token.load()
-        self.api = SSHKeyApi(with: token, on: ctx.container)
+        self.api = SSHKeyApi(with: token)
         self.ctx = ctx
+        self.signature = signature
     }
 
-    func run() throws -> Future<Void> {
+    func run() throws {
         let k = try key()
         let n = name()
-        ctx.console.output("Pushing SSH key...")
-        let created = api.add(name: n, key: k)
-        return created.map { created in
-            self.ctx.console.output("Pushed key as \(created.name).".consoleText())
-        }
+        ctx.console.output("pushing ssh key...")
+        let created = try api.add(name: n, key: k)
+        self.ctx.console.output("pushed key as \(created.name).".consoleText())
     }
 
     func name() -> String {
-        return ctx.load(.readableName, "Give your key a readable name")
+        return signature.$readableName.load(with: ctx, "give your key a readable name")
     }
 
     func key() throws -> String {
-        guard let key = ctx.options.value(.key) else { return try loadKey() }
+        guard let key = signature.key else { return try loadKey() }
         return key
     }
 
@@ -62,10 +60,10 @@ struct CloudSSHAddRunner {
     }
 
     func path() throws -> String {
-        if let path = ctx.options.value(.path) { return path }
+        if let path = signature.path { return path }
         let allKeys = try Shell.bash("ls  ~/.ssh/*.pub")
         let separated = allKeys.split(separator: "\n").map(String.init)
         let term = Terminal()
-        return term.choose("Which key would you like to push?", from: separated)
+        return term.choose("which key would you like to push?", from: separated)
     }
 }

@@ -1,211 +1,249 @@
-import Vapor
+import ConsoleKit
 import CloudAPI
 import Globals
 
 struct CloudDeploy: Command {
-    /// See `Command`.
-    var arguments: [CommandArgument] = []
-
-    /// See `Command`.
-    var options: [CommandOption] = [
-        .app,
-        .env,
-        .branch,
-        .push,
-        .force,
-    ]
-
-    /// See `Command`.
-    var help: [String] = [
-        "Deploys a Vapory Project"
-    ]
-
-    /// See `Command`.
-    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
-        let runner = try CloudDeployRunner(ctx: ctx)
-        return try runner.run()
+    struct Signature: CommandSignature {
+        @Option(name: "app", short: "a")
+        var app: String
+        @Option(name: "env", short: "e")
+        var env: String
+        @Option(name: "branch", short: "b")
+        var branch: String
+        @Flag(name: "force", short: "f")
+        var force: Bool
+        @Flag(name: "push", short: "p")
+        var push: Bool
+    }
+    
+    let signature = Signature()
+    
+    let help = "deploy a cloud project."
+    
+    // command
+    func run(using ctx: CommandContext, signature: Signature) throws {//} -> EventLoopFuture<Void> {
+        let runner = try CloudDeployRunner(ctx: ctx, sig: signature)
+        try runner.run()
     }
 }
 
 struct CloudPush: Command {
-    /// See `Command`.
-    var arguments: [CommandArgument] = []
+    struct Signature: CommandSignature {
+        @Option(name: "app", short: "a")
+        var app: String
+        @Option(name: "env", short: "e")
+        var env: String
+        @Option(name: "branch", short: "b")
+        var branch: String
+        @Flag(name: "force", short: "f")
+        var force: Bool
+    }
 
+    let help = "pushes your project to cloud."
+    
     /// See `Command`.
-    var options: [CommandOption] = [
-        .app,
-        .env,
-        .branch,
-        .force
-    ]
-
-    /// See `Command`.
-    var help: [String] = [
-        "Pushes your Vapor project to cloud."
-    ]
-
-    /// See `Command`.
-    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
+    func run(using ctx: CommandContext, signature: Signature) throws {
         let runner = try CloudPushRunner(ctx: ctx)
-        return try runner.run()
+        try runner.run()
     }
 }
 
-
-protocol Runner {
-    var ctx: CommandContext { get }
+protocol AppSignature {
+    var app: String? { get }
+}
+protocol EnvSignature {
+    var env: String? { get }
+}
+protocol BranchSignature {
+    var branch: String? { get }
 }
 
-protocol AuthorizedRunner: Runner {
-    var token: Token { get }
+fileprivate struct _AppSignature: CommandSignature {
+    @Option(name: "app", short: "a")
+    var app: String
 }
 
-extension AuthorizedRunner {
 
-    // Get App
+fileprivate struct _EnvSignature: CommandSignature {
+    @Option(name: "env", short: "e")
+    var env: String
+}
 
-    func loadApp() throws -> Future<CloudApp> {
-        let app = try loadCloudApp()
-        app.success { app in
-            self.ctx.console.output("App: " + app.name.consoleText() + ".")
-        }
+
+fileprivate struct _BranchSignature: CommandSignature {
+    @Option(name: "branch", short: "b")
+    var branch: String
+}
+
+fileprivate struct _ForceSignature: CommandSignature {
+    @Flag(name: "force", short: "f")
+    var force: Bool
+}
+fileprivate struct _PushSignature: CommandSignature {
+    @Flag(name: "push", short: "p")
+    var push: Bool
+}
+
+extension CommandContext {
+    var enteredApp: String? {
+        return try? input.make(_AppSignature.self).app
+    }
+
+    var enteredEnv: String? {
+        return try? input.make(_EnvSignature.self).env
+    }
+
+    var enteredBranch: String? {
+        return try? input.make(_EnvSignature.self).env
+    }
+
+    var force: Bool {
+        return (try? input.make(_ForceSignature.self).force) ?? false
+    }
+
+    var push: Bool {
+        return (try? input.make(_PushSignature.self).push) ?? false
+    }
+}
+
+extension CommandInput {
+    func make<S: CommandSignature>(_ type: S.Type = S.self) throws -> S {
+        var copy = self
+        return try S(from: &copy)
+    }
+}
+
+extension CommandContext {
+    func loadApp(with token: Token) throws -> CloudApp {
+        let app = try loadCloudApp(with: token)
+        console.output("app: " + app.name.consoleText() + ".")
         return app
     }
-
-    private func loadCloudApp() throws -> Future<CloudApp> {
-        let access = CloudApp.Access(with: token, on: ctx.container)
-
-        if let slug = ctx.options.value(.app) {
-            return access.matching(slug: slug)
+    
+    private func loadCloudApp(with token: Token) throws -> CloudApp {
+        let access = CloudApp.Access(with: token)
+        if let slug = self.enteredApp {
+            return try access.matching(slug: slug)
         } else if Git.isGitRepository() {
-            return try getAppFromRepository()
+            return try getAppFromRepository(with: token)
         } else {
-            let apps = access.list()
-            return ctx.select(from: apps)
+            let list = try access.list()
+            return try select(from: list)
         }
     }
-
-    private func getAppFromRepository() throws -> Future<CloudApp> {
+    
+    private func getAppFromRepository(with token: Token) throws -> CloudApp {
         if try Git.isCloudConfigured() {
-            return try ctx.detectCloudApp(with: token)
+            return try detectCloudApp(with: token)
         }
-
+        
         // Configure App if it Hasn't already
-        ctx.console.pushEphemeral()
-        var prompt = "There is no cloud app configured with git.\n"
-        prompt += "Would you like to set it now?"
-        let setNow = ctx.console.confirm(prompt.consoleText())
-        ctx.console.popEphemeral()
+        console.pushEphemeral()
+        var prompt = "there is no cloud app configured with git.\n"
+        prompt += "would you like to set it now?"
+        let setNow = console.confirm(prompt.consoleText())
+        console.popEphemeral()
         // call this again to trigger same error
-        guard setNow else { return try ctx.detectCloudApp(with: token) }
+        guard setNow else { return try detectCloudApp(with: token) }
 
-        return try RemoteSet().run(using: ctx).flatMap { return try self.ctx.detectCloudApp(with: self.token) }
+        var copy = self
+        let setter = RemoteSet()
+        try setter.run(using: &copy)
+        return try detectCloudApp(with: token)
     }
-
+    
     // Environment
-
-    func loadEnv(for app: Future<CloudApp>) throws -> Future<CloudEnv> {
-        let env = app.flatMap(getDeployEnv)
-        env.success { env in
-            self.ctx.console.output("Environment: " + env.slug.consoleText() + ".")
-        }
+    
+    func loadEnv(for app: CloudApp, with token: Token) throws -> CloudEnv {
+        let env = try getDeployEnv(for: app, with: token)
+        console.output("environment: " + env.slug.consoleText() + ".")
         return env
     }
-
-    private func getDeployEnv(for app: CloudApp) throws -> Future<CloudEnv> {
-        let envs = app.environments(with: token, on: ctx.container)
-        return envs.map(self.choose)
+    
+    private func getDeployEnv(for app: CloudApp, with token: Token) throws -> CloudEnv {
+        let envs = try app.environments(with: token)
+        return try self.choose(from: envs)
     }
-
+    
     private func choose(from envs: [CloudEnv]) throws -> CloudEnv {
-        let envSlug = ctx.options.value(.env)
-        if let envSlug = envSlug {
+        if let envSlug = self.enteredEnv {
             let possible = envs.first { $0.slug == envSlug }
-            guard let env = possible else {
-                throw "No environment found matching \(envSlug)."
-            }
+            guard let env = possible else { throw "no environment found matching \(envSlug)." }
             return env
         } else if envs.count == 1 {
             return envs[0]
         } else {
-            return ctx.console.choose("Which Env?", from: envs) { env in
+            return console.choose("which env?", from: envs) { env in
                 return env.slug.consoleText()
             }
         }
     }
-
+    
     // Branch
-    func loadBranch(with env: Future<CloudEnv>, cloudAction: String) throws -> Future<String> {
-        let branch = env.map { env -> String in
-            let branch = self.getCloudInteractionBranch(with: env)
-            try self.confirm(branch: branch, cloudAction: cloudAction)
-            return branch
-        }
-
-        branch.success { branch in
-            self.ctx.console.output("Branch: " + branch.consoleText() + ".")
-        }
-
+    func loadBranch(with env: CloudEnv, cloudAction: String) throws -> String {
+        let branch = getCloudInteractionBranch(with: env)
+        try confirm(branch: branch, cloudAction: cloudAction)
+        console.output("branch: " + branch.consoleText() + ".")
         return branch
     }
-
+    
     private func getCloudInteractionBranch(with env: CloudEnv) -> String {
-        if let branch = ctx.options.value(.branch) { return branch }
+        if let branch = self.enteredBranch { return branch }
         else { return env.defaultBranch }
     }
-
+    
     private func confirm(branch: String, cloudAction: String) throws {
         guard Git.isGitRepository() else { return }
-        ctx.console.pushEphemeral()
-        defer { ctx.console.popEphemeral() }
-
+        console.pushEphemeral()
+        defer { console.popEphemeral() }
+        
         // Check uncomitted changes
         try confirmLocalBranch(branch: branch, cloudAction: cloudAction)
-
+        
         // TODO: Make Enum
         // If we're pushing, obviously don't do this
         guard cloudAction == "deploy" else { return }
-
+        
         // Check Cloud Upstream
         do {
             let (ahead, behind) = try Git.branch(branch, matchesRemote: "cloud")
             guard ahead || behind else { return }
             var prompt = "".consoleText()
             if ahead && behind {
-                prompt += "Local branch "
+                prompt += "local branch "
                 prompt += branch.consoleText(.warning)
                 prompt += " does NOT MATCH "
                 prompt += "cloud/\(branch)".consoleText(.warning)
                 prompt += "."
             } else if ahead {
-                prompt += "Local branch "
+                prompt += "local branch "
                 prompt += branch.consoleText(.warning)
                 prompt += " is AHEAD of "
                 prompt += "cloud/\(branch)".consoleText(.warning)
                 prompt += "."
             } else if behind {
-                prompt += "Local branch "
+                prompt += "local branch "
                 prompt += branch.consoleText(.warning)
                 prompt += " is BEHIND "
                 prompt += "cloud/\(branch)".consoleText(.warning)
                 prompt += "."
             } else { return }
-
+            
             prompt += "\n"
-            prompt += "Continue?"
-            guard ctx.console.confirm(prompt) else { throw "cancelled" }
+            prompt += "continue?"
+            guard console.confirm(prompt) else { throw "cancelled" }
         } catch {
-            var prompt = "Unable to determine if remote ".consoleText()
+            var prompt = "unable to determine if remote ".consoleText()
             prompt += branch.consoleText(.warning)
             prompt += " matches "
             prompt += "cloud/\(branch)".consoleText(.warning)
             prompt += "."
             prompt += "\n"
-            prompt += "Continue?"
-            guard ctx.console.confirm(prompt) else { throw "cancelled" }
+            prompt += "continue?"
+            guard console.confirm(prompt) else { throw "cancelled" }
         }
     }
-
+    
     func confirmLocalBranch(branch: String, cloudAction: String) throws {
         // Check uncomitted changes
         let currentBranch = try Git.currentBranch()
@@ -214,88 +252,113 @@ extension AuthorizedRunner {
             // other branches can't have uncommitted changes
             let isClean = try Git.isClean()
             if !isClean {
-                var prompt = "Branch `\(branch)` has uncommitted changes.".consoleText(.warning)
+                var prompt = "branch `\(branch)` has uncommitted changes.".consoleText(.warning)
                 prompt += "\n"
-                prompt += "Continue?"
-                guard ctx.console.confirm(prompt) else { throw "cancelled" }
+                prompt += "continue?"
+                guard console.confirm(prompt) else { throw "cancelled" }
             }
         } else {
-            var prompt = "Cloud will \(cloudAction): ".consoleText()
+            var prompt = "cloud will \(cloudAction): ".consoleText()
             prompt += "\(branch)".consoleText(.warning)
             prompt += "\n"
-            prompt += "You are currently on branch ".consoleText()
+            prompt += "you are currently on branch ".consoleText()
             prompt += "\(currentBranch)".consoleText(.warning)
             prompt += "."
             prompt += "\n"
-            prompt += "Continue?"
-            guard ctx.console.confirm(prompt) else { throw "cancelled" }
+            prompt += "continue?"
+            guard console.confirm(prompt) else { throw "cancelled" }
         }
     }
 }
 
-struct CloudDeployRunner: AuthorizedRunner {
+struct CloudDeployRunner {
     let ctx: CommandContext
+    let signature: CloudDeploy.Signature
     let token: Token
     let access: ResourceAccess<CloudApp>
 
-    init(ctx: CommandContext) throws {
+    init(ctx: CommandContext, sig: CloudDeploy.Signature) throws {
         let token = try Token.load()
 
         self.ctx = ctx
         self.token = token
-        self.access = CloudApp.Access(
-            with: token,
-            on: ctx.container
-        )
+        self.signature = sig
+        self.access = CloudApp.Access(with: token)
     }
 
-    func run() throws -> Future<Void> {
-        let app = try loadApp()
-        let env = try loadEnv(for: app)
-        let branch = try loadBranch(with: env, cloudAction: "deploy")
+    func run() throws {
+        let app = try ctx.loadApp(with: token)
+        let env = try ctx.loadEnv(for: app, with: token)
+        let branch = try ctx.loadBranch(with: env, cloudAction: "deploy")
 
-        // If we should push first, insert push operation
-        let operation: Future<Void>
-        if ctx.flag(.push) {
+        // ff we should push first, insert push operation
+        if ctx.push {
             let push = try CloudPushRunner(ctx: ctx)
-            operation = branch.map(push.push)
-        } else {
-            operation = Future.map(on: ctx.container) { }
+            try push.push(branch: branch)
         }
 
-        // Deploy
-        let deploy = operation.flatMap { env.and(branch).flatMap(self.createDeploy) }
-        return deploy.flatMap(monitor)
+        let deploy = try createDeploy((env, branch))
+        try monitor(deploy)
     }
 
-    private func monitor(_ activity: Activity) throws -> Future<Void> {
-        ctx.console.output("Connecting to deploy...")
-        return activity.listen(on: ctx.container) { update in
+    private func monitor(_ activity: Activity) throws {
+        ctx.console.output("connecting to deploy...")
+        try activity.listen { update in
             switch update {
             case .connected:
                 // clear connecting
                 self.ctx.console.clear(.line)
-                self.ctx.console.output("Connected to deploy.")
+                self.ctx.console.output("connected to deploy.")
             case .message(let msg):
                 self.ctx.console.output(msg.consoleText())
             case .close:
-                self.ctx.console.output("Disconnected.")
+                self.ctx.console.output("disconnected.")
             }
         }
     }
 
-    private func createDeploy(_ val: (env: CloudEnv, branch: String)) throws -> Future<Activity> {
-        return try val.env.deploy(branch: val.branch, with: token, on: ctx.container)
+    private func createDeploy(_ val: (env: CloudEnv, branch: String)) throws -> Activity {
+        return try val.env.deploy(branch: val.branch, with: token)
     }
 }
 
-extension CommandContext {
-    func confirmBranchClean(branch: String) {
-        
+
+struct CloudPushAction {
+    let ctx: CommandContext
+    let signature: CloudPush.Signature
+    let token: Token
+    let access: ResourceAccess<CloudApp>
+
+    init(ctx: CommandContext, signature: CloudPush.Signature) throws {
+        let token = try Token.load()
+
+        self.ctx = ctx
+        self.signature = signature
+        self.token = token
+        self.access = CloudApp.Access(with: token)
+    }
+
+    func run() throws {
+        let app = try ctx.loadApp(with: token)
+        let env = try ctx.loadEnv(for: app, with: token)
+        let branch = try ctx.loadBranch(with: env, cloudAction: "push")
+        // push
+        try push(branch: branch)
+    }
+
+    func push(branch: String) throws {
+        // TODO: Look for uncommitted changes
+        guard  try Git.isCloudConfigured() else { throw "cloud remote not configured." }
+        ctx.console.pushEphemeral()
+        ctx.console.output("pushing \(branch)...".consoleText())
+        let force = ctx.force
+        try Git.pushCloud(branch: branch, force: force)
+        ctx.console.popEphemeral()
+        ctx.console.output("pushed \(branch).".consoleText())
     }
 }
 
-struct CloudPushRunner: AuthorizedRunner {
+struct CloudPushRunner {
     let ctx: CommandContext
     let token: Token
     let access: ResourceAccess<CloudApp>
@@ -305,45 +368,33 @@ struct CloudPushRunner: AuthorizedRunner {
 
         self.ctx = ctx
         self.token = token
-        self.access = CloudApp.Access(
-            with: token,
-            on: ctx.container
-        )
+        self.access = CloudApp.Access(with: token)
     }
 
-    func run() throws -> Future<Void> {
-        let app = try loadApp()
-        let env = try loadEnv(for: app)
-        let branch = try loadBranch(with: env, cloudAction: "push")
-        // Deploy
-        return branch.map(push)
+    func run() throws {
+        let app = try ctx.loadApp(with: token)
+        let env = try ctx.loadEnv(for: app, with: token)
+        let branch = try ctx.loadBranch(with: env, cloudAction: "push")
+        // push
+        try push(branch: branch)
     }
 
     func push(branch: String) throws {
         // TODO: Look for uncommitted changes
-        guard  try Git.isCloudConfigured() else { throw "Cloud remote not configured." }
+        guard  try Git.isCloudConfigured() else { throw "cloud remote not configured." }
         ctx.console.pushEphemeral()
-        ctx.console.output("Pushing \(branch)...".consoleText())
-        let force = ctx.flag(.force)
+        ctx.console.output("pushing \(branch)...".consoleText())
+        let force = ctx.force
         try Git.pushCloud(branch: branch, force: force)
         ctx.console.popEphemeral()
-        ctx.console.output("Pushed \(branch).".consoleText())
+        ctx.console.output("pushed \(branch).".consoleText())
     }
 }
 
-extension Future {
-    func success(_ run: @escaping (T) -> Void) {
-        addAwaiter { (result) in
-            guard case .success(let val) = result else { return }
-            run(val)
-        }
-    }
-}
 extension CommandContext {
-    func detectCloudApp(with token: Token) throws -> Future<CloudApp> {
-        let access = CloudApp.Access(with: token, on: container)
-
+    func detectCloudApp(with token: Token) throws -> CloudApp {
+        let access = CloudApp.Access(with: token)
         let cloudGitUrl = try Git.cloudUrl()
-        return access.matching(cloudGitUrl: cloudGitUrl)
+        return try access.matching(cloudGitUrl: cloudGitUrl)
     }
 }

@@ -1,4 +1,5 @@
 import Foundation
+import Globals
 
 struct XcodeBuild {
     static func derivedDataLocation(forProject project: String? = nil) throws -> String {
@@ -8,21 +9,20 @@ struct XcodeBuild {
             args.append(project)
         }
         args.append("-showBuildSettings")
-        let raw = try Process.execute("xcodebuild", args)
+        let raw = try Process.run("xcodebuild", args: args)
         let buildSettings = raw.buildSettingsDictionary()
         guard let config = buildSettings["CONFIGURATION_BUILD_DIR"] else {
-            throw "Unable to find value for CONFIGURATION_BUILD_DIR"
+            throw "unable to find value for CONFIGURATION_BUILD_DIR"
         }
 
-        var derivedDataPath = "/"
-        for component in config.components(separatedBy: "/") {
-            if component == "DerivedData" {
-                derivedDataPath.append("DerivedData")
-                break
-            }
-            derivedDataPath.append(component + "/")
-        }
-        return derivedDataPath
+        return config.components(separatedBy: "/")
+            .split(separator: "DerivedData")
+            .dropLast()
+            // in case this was somehow the name of a more global
+            // directory nested under DerivedData
+            .joined(separator: ["DerivedData"])
+            .joined(separator: "/")
+            + "/DerivedData" // append the last
     }
 }
 

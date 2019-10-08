@@ -1,9 +1,10 @@
-import Vapor
+import Globals
+import Foundation
 
-public struct CloudApp: Content {
-    public let updatedAt: Date
+public struct CloudApp: Resource {
+    public let updatedAt: String
     public let name: String
-    public let createdAt: Date
+    public let createdAt: String
     public let namespace: String
     public let github: String?
     public let slug: String
@@ -13,37 +14,32 @@ public struct CloudApp: Content {
 }
 
 extension CloudApp {
-    public static func Access(with token: Token, on container: Container) -> ResourceAccess<CloudApp> {
-        return .init(token: token, baseUrl: applicationsUrl, on: container)
+    public static func Access(with token: Token) -> ResourceAccess<CloudApp> {
+        return .init(token: token, baseUrl: applicationsUrl)
     }
 }
 
 extension CloudApp {
-    public func environments(with token: Token, on container: Container) -> Future<[CloudEnv]> {
-        let appEnvsUrl = applicationsUrl.trailSlash
-            + id.uuidString.trailSlash
+    public func environments(with token: Token) throws -> [CloudEnv] {
+        let appEnvsUrl = applicationsUrl.trailingSlash
+            + id.uuidString.trailingSlash
             + "environments"
-        let envAccess = CloudEnv.Access(with: token, baseUrl: appEnvsUrl, on: container)
-        return envAccess.list()
+        let envAccess = CloudEnv.Access(with: token, baseUrl: appEnvsUrl)
+        return try envAccess.list()
     }
 }
 
 extension ResourceAccess where T == CloudApp {
-    public func matching(slug: String) -> Future<CloudApp> {
-        return list(query: "slug=\(slug)&exact=true").map { apps in
-            guard apps.count == 1 else {
-                throw "Unable to find app matching slug: \(slug)."
-            }
-            return apps[0]
-        }
+    public func matching(slug: String) throws -> CloudApp {
+        let apps = try list(query: "slug=\(slug)&exact=true")
+        guard apps.count == 1 else { throw "unable to find app matching slug: \(slug)" }
+        return apps[0]
     }
 
-    public func matching(cloudGitUrl: String) -> Future<CloudApp> {
-        let apps = list(query: "gitURL=\(cloudGitUrl)")
-        return apps.map { apps in
-            guard apps.count == 1 else { throw "No app found at \(cloudGitUrl)." }
-            return apps[0]
-        }
+    public func matching(cloudGitUrl: String) throws -> CloudApp {
+        let apps = try list(query: "gitURL=\(cloudGitUrl)")
+        guard apps.count == 1 else { throw "No app found at \(cloudGitUrl)." }
+        return apps[0]
     }
 }
 

@@ -1,4 +1,4 @@
-import Vapor
+import Foundation
 
 public struct Git {
     public static func checkout(gitDir: String, workTree: String, checkout: String) throws -> String {
@@ -25,8 +25,7 @@ public struct Git {
 
     public static func isGitRepository() -> Bool {
         do {
-            let _ =  try run("status", "--porcelain")
-                .trimmingCharacters(in: .whitespacesAndNewlines)
+            let _ = try run("status", "--porcelain")
             return true
         } catch {
             return false
@@ -112,8 +111,15 @@ public struct Git {
     }
 
     @discardableResult
-    private static func run(_ args: String...) throws -> String {
-        return try Process.execute("git", args)
+    public static func run(_ args: String...) throws -> String {
+        var err = ""
+        var out = ""
+        let code = try Process.run("git", args: args) { output in
+            err += output.err ?? ""
+            out += output.out ?? ""
+        }
+        guard code == 0 else { throw err }
+        return out
     }
 }
 

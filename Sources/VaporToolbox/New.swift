@@ -1,41 +1,41 @@
-import Vapor
 import Globals
+import ConsoleKit
+import Foundation
+
+let templateHelp = [
+    "a specific template to use.",
+    "-t repo/template for github templates",
+    "-t full-url-here.git for non github templates",
+    "-t web to create a new web app",
+    "-t auth to create a new authenticated API app",
+    "-t api (default) to create a new API"
+] .joined(separator: "\n")
 
 struct New: Command {
-    var arguments: [CommandArgument] = [
-        .argument(name: "name", help: ["What to name your project."])
-    ]
+    struct Signature: CommandSignature {
+        @Argument(name: "name", help: "the name for the project")
+        var name: String
+        
+        // options
+        @Option(name: "template", short: "t", help: templateHelp)
+        var template: String
+        @Option(name: "tag", short: "t", help: "a specific tag to use, if desired.")
+        var tag: String
+        @Option(name: "branch", short: "b", help: "a specific branch to use, if desired.")
+        var branch: String
+    }
 
-    /// See `Command`.
-    var options: [CommandOption] = [
-        .value(name: "template", short: "t", default: nil, help: [
-            "a specific template to use.",
-            "-t repo/template for github templates",
-            "-t full-url-here.git for non github templates",
-            "-t web to create a new web app",
-            "-t auth to create a new authenticated API app",
-            "-t api (default) to create a new API"
-        ]),
-        .value(name: "tag", short: nil, default: nil, help: ["a specific tag to use."]),
-        .value(name: "branch", short: "b", default: nil, help: ["a specific brach to use."]),
+    let help = "creates a new vapor app from template. use 'vapor new ProjectName'."
 
-    ]
-
-    /// See `Command`.
-    var help: [String] = [
-        "creates a new vapor application from a template.",
-        "use `vapor new NameOfYourApp`",
-    ]
-
-    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
-        let name = try ctx.argument("name")
-        let template = ctx.template()
+    func run(using ctx: CommandContext, signature: Signature) throws {
+        let name = signature.name
+        let template = signature.expandedTemplate()
         let gitUrl = try template.fullUrl()
 
         // Cloning
         ctx.console.pushEphemeral()
         ctx.console.output("cloning `\(gitUrl)`...".consoleText())
-        let _ = try Git.clone(repo: gitUrl, toFolder: name)
+        let _ = try Git.clone(repo: gitUrl, toFolder: "./" + name)
         ctx.console.popEphemeral()
         ctx.console.output("cloned `\(gitUrl)`.".consoleText())
 
@@ -45,7 +45,7 @@ struct New: Command {
         let workTree = "./\(name)"
 
         // Prioritize tag over branch
-        let checkout = ctx.options["tag"] ?? ctx.options["branch"]
+        let checkout = signature.tag ?? signature.branch
         if let checkout = checkout {
             let _ = try Git.checkout(
                 gitDir: gitDir,
@@ -59,62 +59,56 @@ struct New: Command {
         try Shell.delete("./\(name)/.git")
         let _ = try Git.create(gitDir: gitDir)
         ctx.console.output("created git repository.")
-        
+
         // if leaf.seed file, render template here
-        let seedPath = workTree.finished(with: "/") + "leaf.seed"
-        
-        let next: Future<Void>
+        let seedPath = workTree.trailingSlash + "leaf.seed"
         if FileManager.default.fileExists(atPath: seedPath) {
-            let renderContext = CommandContext(console: ctx.console, arguments: [:], options: ["path": workTree], on: ctx.container)
-            next = try LeafRenderFolder().run(using: renderContext)
-        } else {
-            next = Future.map(on: ctx.container) {}
+            let raw = ctx.input.arguments + ["-p", workTree]
+            var input = CommandInput(arguments: [ctx.input.executable] + raw)
+            let renderSignature = try LeafRenderFolder.Signature.init(from: &input)
+            try LeafRenderFolder().run(using: ctx, signature: renderSignature)
         }
 
-        return next.flatMap {
-            // initialize
-            try Git.commit(
-                gitDir: gitDir,
-                workTree: workTree,
-                msg: "created new vapor project from template `\(gitUrl)`"
-            )
-            ctx.console.output("initialized project.")
-            
-            // print the Droplet
-            return try PrintDroplet().run(using: ctx).flatMap {
-                let info = [
-                    "project \"\(name)\" has been created.",
-                    "type `cd \(name)` to enter the project directory.",
-                    "use `vapor cloud deploy` and put your project LIVE!",
-                    "enjoy!",
-                    ]
+        // initialize
+        try Git.commit(
+            gitDir: gitDir,
+            workTree: workTree,
+            msg: "created new vapor project from template `\(gitUrl)`"
+        )
+        ctx.console.output("initialized project.")
+        
+        // print the Droplet
+
+        var copy = ctx
+        try PrintDroplet().run(using: &copy)
+        
+        // print next info
+        let info = [
+            "project \"\(name)\" has been created.",
+            "type `cd \(name)` to enter the project directory.",
+            "use `vapor cloud deploy` and put your project LIVE!",
+            "enjoy!",
+        ]
+        info.forEach { line in
+            var command = false
+            for c in line {
+                if c == "`" { command = !command }
                 
-                //ctx.console.center(info)
-                info.forEach { line in
-                    var command = false
-                    for c in line {
-                        if c == "`" { command = !command }
-                        
-                        ctx.console.output(
-                            c.description,
-                            style: command && c != "`" ? .info : .plain,
-                            newLine: false
-                        )
-                    }
-                    ctx.console.output("", style: .plain, newLine: true)
-                }
-                
-                
-                return ctx.done
+                ctx.console.output(
+                    c.description,
+                    style: command && c != "`" ? .info : .plain,
+                    newLine: false
+                )
             }
+            ctx.console.output("", style: .plain, newLine: true)
         }
     }
 
 }
 
-extension CommandContext {
-    func template() -> Template {
-        guard let chosen = options["template"] else { return .default }
+extension New.Signature {
+    func expandedTemplate() -> Template {
+        guard let chosen = self.template else { return .default }
         switch chosen {
         case "web": return .web
         case "api": return .api
@@ -162,15 +156,11 @@ enum Template {
 }
 
 struct PrintDroplet: Command {
-    var arguments: [CommandArgument] = []
-
-    /// See `Command`.
-    var options: [CommandOption] = []
-
-    /// See `Command`.
-    var help: [String] = ["Prints a droplet."]
-
-    func run(using ctx: CommandContext) throws -> EventLoopFuture<Void> {
+    struct Signature: CommandSignature {}
+    let signature = Signature()
+    let help = "prints a droplet."
+    
+    func run(using ctx: CommandContext, signature: Signature) throws {
         for line in ctx.console.center(asciiArt) {
             for character in line {
                 let style: ConsoleStyle
@@ -183,7 +173,6 @@ struct PrintDroplet: Command {
             }
             ctx.console.output("", style: .plain, newLine: true)
         }
-        return ctx.done
     }
 
 
