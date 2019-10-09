@@ -15,7 +15,7 @@ import Yams
 
 struct New: Command {
     struct Signature: CommandSignature {
-        @Argument(name: "name", help: "the name for the project")
+        @Argument(name: "name", help: "new folder to be created")
         var name: String
         
         // options
@@ -27,22 +27,18 @@ struct New: Command {
         var branch: String
     }
 
-    let help = "creates a new vapor app from template. use 'vapor new ProjectName'."
+    let help = "creates a new vapor app from template. use 'vapor new project-name'."
 
     func run(using ctx: CommandContext, signature: Signature) throws {
         let name = signature.name
         let template = signature.expandedTemplate()
         let gitUrl = try template.fullUrl()
 
-        #warning("TODO: remove this")
-        try Shell.delete("./\(name)")
-
         // Cloning
         ctx.console.pushEphemeral()
-        ctx.console.output("cloning `\(gitUrl)`...".consoleText())
+        ctx.console.output("Fetching \(gitUrl)...".consoleText())
         let _ = try Git.clone(repo: gitUrl, toFolder: "./" + name)
         ctx.console.popEphemeral()
-        ctx.console.output("cloned `\(gitUrl)`.".consoleText())
 
         // used to work on a git repository
         // outside of current path
@@ -69,6 +65,7 @@ struct New: Command {
             let cwd = try Shell.cwd()
             let scaffolder = TemplateScaffolder(console: ctx.console, manifest: manifest)
             try scaffolder.scaffold(
+                name: name,
                 from: cwd.trailingSlash + ".vapor-template",
                 to: cwd.trailingSlash + name
             )
@@ -82,43 +79,36 @@ struct New: Command {
         }
 
         // clear existing git history
+        ctx.console.pushEphemeral()
+        ctx.console.output("Creating git repository")
         try Shell.delete("./\(name)/.git")
         let _ = try Git.create(gitDir: gitDir)
-        ctx.console.output("created git repository.")
+        ctx.console.popEphemeral()
+
 
         // initialize
+        ctx.console.pushEphemeral()
+        ctx.console.output("Adding first commit")
         try Git.commit(
             gitDir: gitDir,
             workTree: workTree,
-            msg: "created new vapor project from template `\(gitUrl)`"
+            msg: "created new vapor project from template: \(gitUrl)"
         )
-        ctx.console.output("initialized project.")
+        ctx.console.popEphemeral()
         
         // print the Droplet
 
         var copy = ctx
         try PrintDroplet().run(using: &copy)
         
-        // print next info
-        let info = [
-            "project \"\(name)\" has been created.",
-            "type `cd \(name)` to enter the project directory.",
-            "use `vapor cloud deploy` and put your project LIVE!",
-            "enjoy!",
-        ]
-        info.forEach { line in
-            var command = false
-            for c in line {
-                if c == "`" { command = !command }
-                
-                ctx.console.output(
-                    c.description,
-                    style: command && c != "`" ? .info : .plain,
-                    newLine: false
-                )
-            }
-            ctx.console.output("", style: .plain, newLine: true)
-        }
+        // print info
+        ctx.console.center([
+            "Project " + name.consoleText(.info) + " has been created!",
+            "",
+            "Use " + "cd \(name)".consoleText(.info) + " to enter the project directory",
+            "Use " + "open Package.swift".consoleText(.info) + " to open the project in Xcode",
+            "Use " + "vapor cloud deploy".consoleText(.info) + " to deploy to the Internet"
+        ]).forEach { ctx.console.output($0) }
     }
 
 }
@@ -234,3 +224,36 @@ struct PrintDroplet: Command {
         ")": .magenta // Title
     ]
 }
+
+extension Console {
+    func center(_ strings: [ConsoleText], padding: String = " ") -> [ConsoleText] {
+        var lines = strings
+
+        // Make sure there's more than one line
+        guard lines.count > 0 else {
+            return []
+        }
+
+        // Find the longest line
+        var longestLine = 0
+        for line in lines {
+            if line.description.count > longestLine {
+                longestLine = line.description.count
+            }
+        }
+
+        // Calculate the padding and make sure it's greater than or equal to 0
+        let minPaddingCount = max(0, (size.width - longestLine) / 2)
+
+        // Apply the padding to each line
+        for i in 0..<lines.count {
+            let diff = (longestLine - lines[i].description.count) / 2
+            for _ in 0..<(minPaddingCount + diff) {
+                lines[i].fragments.insert(.init(string: padding), at: 0)
+            }
+        }
+
+        return lines
+    }
+}
+

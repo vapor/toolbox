@@ -10,7 +10,6 @@ public func todo(file: StaticString = #file) -> Never {
 public struct Shell {
     @discardableResult
     public static func bash(_ input: String) throws -> String {
-        print("bash: \(input)")
         return try Process.run("/bin/sh", args: ["-c", input])
     }
 

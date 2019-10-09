@@ -13,14 +13,17 @@ struct TemplateScaffolder {
         self.manifest = manifest
     }
 
-    func scaffold(from source: String, to destination: String) throws {
+    func scaffold(name: String, from source: String, to destination: String) throws {
         assert(source.hasPrefix("/"))
         assert(destination.hasPrefix("/"))
         var context: [String: Any] = [:]
+        context["name"] = name
+        self.console.output(key: "name", value: name)
         for variable in self.manifest.variables {
             try self.ask(variable: variable, to: &context)
         }
-        print(context)
+        self.console.pushEphemeral()
+        self.console.output("Generating project files...")
         for file in self.manifest.files {
             try self.scaffold(
                 file: file,
@@ -29,6 +32,7 @@ struct TemplateScaffolder {
                 context: context
             )
         }
+        self.console.popEphemeral()
     }
 
     private func ask(
@@ -37,23 +41,36 @@ struct TemplateScaffolder {
     ) throws {
         switch variable.type {
         case .string:
+            self.console.pushEphemeral()
             let value = self.console.ask(variable.description.consoleText())
             context[variable.name] = value
+            self.console.popEphemeral()
+            self.console.output(key: variable.name, value: value)
         case .bool:
+        self.console.pushEphemeral()
             let value = self.console.confirm(variable.description.consoleText())
             context[variable.name] = value
+            self.console.popEphemeral()
+            self.console.output(key: variable.name, value: value ? "Yes" : "No")
         case .options(let options):
             let option = self.console.choose(variable.description.consoleText(), from: options, display: { option in
-                return option.name.consoleText(.info) + "\n" + option.description.consoleText()
+                return option.name.consoleText()
             })
+            self.console.output(key: variable.name, value: option.name)
             context[variable.name] = option.data
         case .variables(let variables):
+            console.pushEphemeral()
             if self.console.confirm(variable.description.consoleText()) {
+                console.popEphemeral()
+                self.console.output(key: variable.name, value: "Yes")
                 var nested: [String: Any] = [:]
                 for child in variables {
                     try self.ask(variable: child, to: &nested)
                 }
                 context[variable.name] = nested
+            } else {
+                self.console.popEphemeral()
+                self.console.output(key: variable.name, value: "No")
             }
         }
     }
@@ -78,6 +95,7 @@ struct TemplateScaffolder {
         
         switch file.type {
         case .file(let dynamic):
+            self.console.output("+ " + file.name.consoleText())
             if dynamic {
                 try Mustache.Template(path: source + file.name).render(context)
                     .write(to: URL(fileURLWithPath: destination + file.name), atomically: true, encoding: .utf8)
@@ -96,6 +114,12 @@ struct TemplateScaffolder {
                 )
             }
         }
+    }
+}
+
+extension Console {
+    func output(key: String, value: String) {
+        self.output(key.consoleText() + ": " + value.consoleText(.info))
     }
 }
 
