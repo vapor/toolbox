@@ -11,6 +11,8 @@ let templateHelp = [
     "-t api (default) to create a new API"
 ] .joined(separator: "\n")
 
+import Yams
+
 struct New: Command {
     struct Signature: CommandSignature {
         @Argument(name: "name", help: "the name for the project")
@@ -31,6 +33,9 @@ struct New: Command {
         let name = signature.name
         let template = signature.expandedTemplate()
         let gitUrl = try template.fullUrl()
+
+        #warning("TODO: remove this")
+        try Shell.delete("./\(name)")
 
         // Cloning
         ctx.console.pushEphemeral()
@@ -55,19 +60,31 @@ struct New: Command {
             ctx.console.output("checked out `\(checkout)`.".consoleText())
         }
 
-        // clear existing git history
-        try Shell.delete("./\(name)/.git")
-        let _ = try Git.create(gitDir: gitDir)
-        ctx.console.output("created git repository.")
-
-        // if leaf.seed file, render template here
-        let seedPath = workTree.trailingSlash + "leaf.seed"
-        if FileManager.default.fileExists(atPath: seedPath) {
+        if FileManager.default.fileExists(atPath: workTree.trailingSlash + "manifest.yml") {
+            try? Shell.delete(".vapor-template")
+            try Shell.move(name, to: ".vapor-template")
+            try Shell.makeDirectory(name)
+            let yaml = try Shell.readFile(path: ".vapor-template/manifest.yml")
+            let manifest = try YAMLDecoder().decode(TemplateManifest.self, from: yaml)
+            let cwd = try Shell.cwd()
+            let scaffolder = TemplateScaffolder(console: ctx.console, manifest: manifest)
+            try scaffolder.scaffold(
+                from: cwd.trailingSlash + ".vapor-template",
+                to: cwd.trailingSlash + name
+            )
+            try Shell.delete(".vapor-template")
+        } else if FileManager.default.fileExists(atPath: workTree.trailingSlash + "leaf.seed") {
+            // if leaf.seed file, render template here
             let raw = ctx.input.arguments + ["-p", workTree]
             var input = CommandInput(arguments: [ctx.input.executable] + raw)
             let renderSignature = try LeafRenderFolder.Signature.init(from: &input)
             try LeafRenderFolder().run(using: ctx, signature: renderSignature)
         }
+
+        // clear existing git history
+        try Shell.delete("./\(name)/.git")
+        let _ = try Git.create(gitDir: gitDir)
+        ctx.console.output("created git repository.")
 
         // initialize
         try Git.commit(

@@ -9,6 +9,8 @@ let package = Package(
         .package(url: "https://github.com/vapor/console-kit.git", .branch("master")),
         .package(url: "https://github.com/loganwright/async-websocket-client.git", .branch("master")),
         .package(url: "https://github.com/swift-server/async-http-client.git", .branch("master")),
+        .package(url: "https://github.com/jpsim/Yams.git", from: "2.0.0"),
+        .package(url: "https://github.com/groue/GRMustache.swift", from: "4.0.0"),
     ],
     targets: [
         // All of the commands and logic that powers the Vapor toolbox
@@ -20,6 +22,8 @@ let package = Package(
             "AsyncHTTPClient",
             "LeafKit",
             "AsyncWebSocketClient",
+            "Yams",
+            "Mustache"
         ]),
         .target(name: "CloudCommands", dependencies: [
             "ConsoleKit",

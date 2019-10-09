@@ -10,11 +10,20 @@ public func todo(file: StaticString = #file) -> Never {
 public struct Shell {
     @discardableResult
     public static func bash(_ input: String) throws -> String {
+        print("bash: \(input)")
         return try Process.run("/bin/sh", args: ["-c", input])
     }
 
     public static func delete(_ path: String) throws {
         try bash("rm -rf \(path)")
+    }
+
+    public static func move(_ source: String, to destination: String) throws {
+        try bash("mv \(source) \(destination)")
+    }
+
+    public static func makeDirectory(_ name: String) throws {
+        try bash("mkdir -p \(name)")
     }
 
     public static func cwd() throws -> String {
