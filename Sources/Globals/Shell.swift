@@ -17,6 +17,14 @@ public struct Shell {
         try bash("rm -rf \(path)")
     }
 
+    public static func move(_ source: String, to destination: String) throws {
+        try bash("mv \(source) \(destination)")
+    }
+
+    public static func makeDirectory(_ name: String) throws {
+        try bash("mkdir -p \(name)")
+    }
+
     public static func cwd() throws -> String {
         return try ProcessInfo.processInfo.environment["TEST_DIRECTORY"] ?? bash("dirs -l")
     }
