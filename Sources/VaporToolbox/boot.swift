@@ -13,8 +13,7 @@ final class Main: ToolboxGroup {
         "new": New(),
         "drop": PrintDroplet(),
         "xcode": XcodeCommand(),
-        "build": BuildCommand(),
-        "leaf": LeafGroup(),
+        "build": BuildCommand()
 //        "test": Test(),
     ]
     

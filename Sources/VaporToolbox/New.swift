@@ -70,21 +70,14 @@ struct New: Command {
                 to: cwd.trailingSlash + name
             )
             try Shell.delete(".vapor-template")
-        } else if FileManager.default.fileExists(atPath: workTree.trailingSlash + "leaf.seed") {
-            // if leaf.seed file, render template here
-            let raw = ctx.input.arguments + ["-p", workTree]
-            var input = CommandInput(arguments: [ctx.input.executable] + raw)
-            let renderSignature = try LeafRenderFolder.Signature.init(from: &input)
-            try LeafRenderFolder().run(using: ctx, signature: renderSignature)
         }
-
+        
         // clear existing git history
         ctx.console.pushEphemeral()
         ctx.console.output("Creating git repository")
         try Shell.delete("./\(name)/.git")
         let _ = try Git.create(gitDir: gitDir)
         ctx.console.popEphemeral()
-
 
         // initialize
         ctx.console.pushEphemeral()
