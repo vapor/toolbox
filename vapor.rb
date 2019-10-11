@@ -13,7 +13,7 @@ class Vapor < Formula
 
   def install
     system "swift", "build", "--disable-sandbox"
-    system "mv", ".build/debug/vapor", "."
+    system "mv", ".build/debug/Executable", "vapor"
     bin.install "vapor"
   end
 end
