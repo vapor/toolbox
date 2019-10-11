@@ -16,8 +16,8 @@ struct TemplateScaffolder {
     func scaffold(name: String, from source: String, to destination: String) throws {
         assert(source.hasPrefix("/"))
         assert(destination.hasPrefix("/"))
-        var context: [String: Any] = [:]
-        context["name"] = name
+        var context: [String: MustacheData] = [:]
+        context["name"] = .string(name)
         self.console.output(key: "name", value: name)
         for variable in self.manifest.variables {
             try self.ask(variable: variable, to: &context)
@@ -37,19 +37,19 @@ struct TemplateScaffolder {
 
     private func ask(
         variable: TemplateManifest.Variable,
-        to context: inout [String: Any]
+        to context: inout [String: MustacheData]
     ) throws {
         switch variable.type {
         case .string:
             self.console.pushEphemeral()
             let value = self.console.ask(variable.description.consoleText())
-            context[variable.name] = value
+            context[variable.name] = .string(value)
             self.console.popEphemeral()
             self.console.output(key: variable.name, value: value)
         case .bool:
         self.console.pushEphemeral()
             let value = self.console.confirm(variable.description.consoleText())
-            context[variable.name] = value
+        context[variable.name] = .string(value.description)
             self.console.popEphemeral()
             self.console.output(key: variable.name, value: value ? "Yes" : "No")
         case .options(let options):
@@ -57,17 +57,17 @@ struct TemplateScaffolder {
                 return option.name.consoleText()
             })
             self.console.output(key: variable.name, value: option.name)
-            context[variable.name] = option.data
+            context[variable.name] = .dictionary(option.data.mapValues { .string($0) })
         case .variables(let variables):
             console.pushEphemeral()
             if self.console.confirm(variable.description.consoleText()) {
                 console.popEphemeral()
                 self.console.output(key: variable.name, value: "Yes")
-                var nested: [String: Any] = [:]
+                var nested: [String: MustacheData] = [:]
                 for child in variables {
                     try self.ask(variable: child, to: &nested)
                 }
-                context[variable.name] = nested
+                context[variable.name] = .dictionary(nested)
             } else {
                 self.console.popEphemeral()
                 self.console.output(key: variable.name, value: "No")
@@ -79,7 +79,7 @@ struct TemplateScaffolder {
         file: TemplateManifest.File,
         from source: String,
         to destination: String,
-        context: [String: Any]
+        context: [String: MustacheData]
     ) throws {
         assert(source.hasSuffix("/"))
         assert(destination.hasSuffix("/"))
@@ -97,7 +97,8 @@ struct TemplateScaffolder {
         case .file(let dynamic):
             self.console.output("+ " + file.name.consoleText())
             if dynamic {
-                try Mustache.Template(path: source + file.name).render(context)
+                let template = try Shell.readFile(path: source + file.name)
+                try MustacheRenderer().render(template: template, data: context)
                     .write(to: URL(fileURLWithPath: destination + file.name), atomically: true, encoding: .utf8)
             } else {
                 try Shell.move(source + file.name, to: destination + file.name)

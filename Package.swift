@@ -3,6 +3,9 @@ import PackageDescription
 
 let package = Package(
     name: "VaporToolbox",
+    platforms: [
+       .macOS(.v10_15)
+    ],
     products: [
         .executable(name: "vapor", targets: ["Executable"])
     ],
@@ -12,7 +15,7 @@ let package = Package(
         .package(url: "https://github.com/loganwright/async-websocket-client.git", .branch("master")),
         .package(url: "https://github.com/swift-server/async-http-client.git", .branch("master")),
         .package(url: "https://github.com/jpsim/Yams.git", from: "2.0.0"),
-        .package(url: "https://github.com/groue/GRMustache.swift", from: "4.0.0"),
+        .package(url: "https://github.com/tanner0101/mustache.git", .branch("master")),
     ],
     targets: [
         .target(name: "VaporToolbox", dependencies: [
