@@ -3,6 +3,9 @@ import PackageDescription
 
 let package = Package(
     name: "VaporToolbox",
+    products: [
+        .executable(name: "vapor", targets: ["Executable"])
+    ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.2.0"),
         .package(url: "https://github.com/vapor/console-kit.git", .branch("master")),
