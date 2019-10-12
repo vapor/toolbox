@@ -7,6 +7,6 @@ inputs:
     default: '--help'
 runs:
   using: 'docker'
-  image: 'Dockerfile'
+  image: 'action.Dockerfile'
   args:
     - ${{ inputs.command }}
