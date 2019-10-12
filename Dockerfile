@@ -1,6 +1,11 @@
-FROM swift:5.1
+FROM swift:5.1 as build
 WORKDIR /toolbox
 COPY . .
-RUN swift build
-RUN mv /toolbox/.build/debug/vapor /usr/bin
+RUN mkdir -p /build/lib && cp -R /usr/lib/swift/linux/*.so* /build/lib
+RUN swift build -c release && mv `swift build -c release --show-bin-path` /build/bin
+
+FROM swift:5.1-slim
+WORKDIR /toolbox
+COPY --from=build /build/bin/vapor /usr/bin
+COPY --from=build /build/lib/* /usr/lib/
 ENTRYPOINT ["vapor"]
