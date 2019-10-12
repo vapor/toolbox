@@ -8,6 +8,5 @@ inputs:
 runs:
   using: 'docker'
   image: 'docker://vapor/toolbox:18'
-  entrypoint: sh -c "vapor $*"
   args:
     - ${{ inputs.command }}

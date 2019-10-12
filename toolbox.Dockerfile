@@ -3,4 +3,4 @@ WORKDIR /toolbox
 COPY . .
 RUN swift build
 RUN mv /toolbox/.build/debug/vapor /usr/bin
-ENTRYPOINT ["vapor"]
+ENTRYPOINT ["/toolbox/entrypoint.sh"]
