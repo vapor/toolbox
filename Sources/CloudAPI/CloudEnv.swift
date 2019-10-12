@@ -1,6 +1,6 @@
 import Globals
 import Foundation
-import AsyncWebSocketClient
+import WebSocketKit
 
 public struct Activity: Resource {
     public let id: UUID
@@ -55,23 +55,22 @@ extension Activity {
     public func listen(_ listener: @escaping (Update) -> Void) throws {
         let client = WebSocketClient(eventLoopGroupProvider: .createNew)
         
-        let connection = client.connect(host: host, port: 80, uri: uri, headers: [:]) { ws in
-            listener(.connected)
+        let ws = try client.connect(scheme: "ws", host: host, port: 80, path: uri, headers: [:]).wait()
+        listener(.connected)
 
-            ws.onText { ws, text in
-                listener(.message(text))
-            }
-            
-            ws.onBinary { _, _ in
-                fatalError("not prepared to accept binary")
-            }
-
-            ws.onCloseCode { _ in
-                listener(.close)
-                _ = ws.close()
-            }
+        ws.onText { ws, text in
+            listener(.message(text))
         }
-        try connection.wait()
+
+        ws.onBinary { _, _ in
+            fatalError("not prepared to accept binary")
+        }
+
+        ws.onCloseCode { _ in
+            listener(.close)
+            _ = ws.close()
+        }
+        try ws.onClose.wait()
         try client.syncShutdown()
     }
 }

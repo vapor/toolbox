@@ -1,5 +1,5 @@
 import ConsoleKit
-import AsyncWebSocketClient
+import WebSocketKit
 import Foundation
 
 struct Test: Command {

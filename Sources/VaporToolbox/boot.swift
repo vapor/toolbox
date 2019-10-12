@@ -1,6 +1,5 @@
 import CloudCommands
 import Globals
-import AsyncWebSocketClient
 import ConsoleKit
 import Foundation
 
