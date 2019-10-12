@@ -7,6 +7,7 @@ inputs:
     default: '--help'
 runs:
   using: 'docker'
-  image: 'action.Dockerfile'
+  image: 'docker://vapor/toolbox:18'
+  entrypoint: entrypoint.sh
   args:
     - ${{ inputs.command }}
