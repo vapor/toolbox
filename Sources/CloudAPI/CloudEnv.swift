@@ -54,23 +54,26 @@ extension Activity {
     
     public func listen(_ listener: @escaping (Update) -> Void) throws {
         let client = WebSocketClient(eventLoopGroupProvider: .createNew)
-        
-        let ws = try client.connect(scheme: "ws", host: host, port: 80, path: uri, headers: [:]).wait()
-        listener(.connected)
 
-        ws.onText { ws, text in
-            listener(.message(text))
-        }
+        var webSocket: WebSocket?
+        try client.connect(scheme: "ws", host: host, port: 80, path: uri, headers: [:]) { ws in
+            webSocket = ws
+            listener(.connected)
 
-        ws.onBinary { _, _ in
-            fatalError("not prepared to accept binary")
-        }
+            ws.onText { ws, text in
+                listener(.message(text))
+            }
 
-        ws.onCloseCode { _ in
-            listener(.close)
-            _ = ws.close()
-        }
-        try ws.onClose.wait()
+            ws.onBinary { _, _ in
+                fatalError("not prepared to accept binary")
+            }
+
+            ws.onClose.whenComplete { _ in
+                listener(.close)
+            }
+        }.wait()
+
+        try webSocket!.onClose.wait()
         try client.syncShutdown()
     }
 }
