@@ -1,0 +1,12 @@
+name: 'Vapor'
+description: 'Vapor Toolbox'
+inputs:
+  command:
+    description: 'Command to run'
+    required: true
+    default: '--help'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.command }}
