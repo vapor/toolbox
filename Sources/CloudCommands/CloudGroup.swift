@@ -32,7 +32,7 @@ public struct CloudGroup: ToolboxGroup {
     ]
     
     /// See `CommandGroup`.
-    public let help = "cloouuuddddd"
+    public let help = "cloud"
     
     /// Creates a new `BasicCommandGroup`.
     public init() {}
