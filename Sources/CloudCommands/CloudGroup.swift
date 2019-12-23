@@ -57,11 +57,11 @@ struct Logs: Command {
     // definition
     struct Signature: CommandSignature {
         @Option(name: "app", short: "a")
-        var app: String
+        var app: String?
         @Option(name: "env", short: "e")
-        var env: String
+        var env: String?
         @Option(name: "lines", short: "l")
-        var lines: Int
+        var lines: Int?
         @Flag(name: "show-timestamps", short: "t")
         var showTimestamps: Bool
     }

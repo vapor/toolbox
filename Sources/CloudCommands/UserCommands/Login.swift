@@ -5,9 +5,9 @@ import Globals
 struct CloudLogin: Command {
     struct Signature: CommandSignature {
         @Option(name: "email", short: "e")
-        var email: String
+        var email: String?
         @Option(name: "password", short: "p")
-        var password: String
+        var password: String?
     }
 
     let help = "logs into vapor cloud."

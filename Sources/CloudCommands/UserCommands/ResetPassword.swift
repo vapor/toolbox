@@ -6,7 +6,7 @@ struct ResetPassword: Command {
 
     public struct Signature: CommandSignature {
         @Option(name: "email", short: "e")
-        var email: String
+        var email: String?
     }
 
     let help = "resets your account's password."

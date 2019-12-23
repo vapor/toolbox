@@ -6,11 +6,11 @@ import CloudAPI
 struct SSHAdd: Command {
     struct Signature: CommandSignature {
         @Option(name: "readable-name", short: "n")
-        var readableName: String
+        var readableName: String?
         @Option(name: "path", short: "p")
-        var path: String
+        var path: String?
         @Option(name: "key", short: "k")
-        var key: String
+        var key: String?
     }
     
     let help = "add an ssh key to cloud."
