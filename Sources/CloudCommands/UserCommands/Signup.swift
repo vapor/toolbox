@@ -5,15 +5,15 @@ import Globals
 struct CloudSignup: Command {
     struct Signature: CommandSignature {
         @Option(name: "first-name", short: "f", help: "your first name")
-        var first: String
+        var first: String?
         @Option(name: "last-name", short: "l", help: "your last name")
-        var last: String
+        var last: String?
         @Option(name: "org", short: "o", help: "name of your organization ('MyOrg')")
-        var org: String
+        var org: String?
         @Option(name: "email", short: "e", help: "email to signup with")
-        var email: String
+        var email: String?
         @Option(name: "password", short: "p", help: "the password to signupt with")
-        var password: String
+        var password: String?
     }
     
     let help = "creates a new account for vapor cloud."

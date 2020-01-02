@@ -20,11 +20,11 @@ struct New: Command {
         
         // options
         @Option(name: "template", short: "t", help: templateHelp)
-        var template: String
+        var template: String?
         @Option(name: "tag", short: "t", help: "a specific tag to use, if desired.")
-        var tag: String
+        var tag: String?
         @Option(name: "branch", short: "b", help: "a specific branch to use, if desired.")
-        var branch: String
+        var branch: String?
     }
 
     let help = "creates a new vapor app from template. use 'vapor new project-name'."

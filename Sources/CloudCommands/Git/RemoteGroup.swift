@@ -52,7 +52,7 @@ struct RemoteRemove: Command {
 struct RemoteSet: Command {
     struct Signature: CommandSignature {
         @Option(name: "app", short: "a", help: "the app to set")
-        var app: String
+        var app: String?
     }
 
     let help = "link your local repo to a cloud app."

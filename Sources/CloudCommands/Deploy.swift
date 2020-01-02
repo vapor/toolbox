@@ -5,11 +5,11 @@ import Globals
 struct CloudDeploy: Command {
     struct Signature: CommandSignature {
         @Option(name: "app", short: "a")
-        var app: String
+        var app: String?
         @Option(name: "env", short: "e")
-        var env: String
+        var env: String?
         @Option(name: "branch", short: "b")
-        var branch: String
+        var branch: String?
         @Flag(name: "force", short: "f")
         var force: Bool
         @Flag(name: "push", short: "p")
@@ -30,11 +30,11 @@ struct CloudDeploy: Command {
 struct CloudPush: Command {
     struct Signature: CommandSignature {
         @Option(name: "app", short: "a")
-        var app: String
+        var app: String?
         @Option(name: "env", short: "e")
-        var env: String
+        var env: String?
         @Option(name: "branch", short: "b")
-        var branch: String
+        var branch: String?
         @Flag(name: "force", short: "f")
         var force: Bool
     }
@@ -60,19 +60,19 @@ protocol BranchSignature {
 
 fileprivate struct _AppSignature: CommandSignature {
     @Option(name: "app", short: "a")
-    var app: String
+    var app: String?
 }
 
 
 fileprivate struct _EnvSignature: CommandSignature {
     @Option(name: "env", short: "e")
-    var env: String
+    var env: String?
 }
 
 
 fileprivate struct _BranchSignature: CommandSignature {
     @Option(name: "branch", short: "b")
-    var branch: String
+    var branch: String?
 }
 
 fileprivate struct _ForceSignature: CommandSignature {
