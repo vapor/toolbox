@@ -100,7 +100,6 @@ struct New: Command {
             "",
             "Use " + "cd \(name)".consoleText(.info) + " to enter the project directory",
             "Use " + "open Package.swift".consoleText(.info) + " to open the project in Xcode",
-            "Use " + "vapor cloud deploy".consoleText(.info) + " to deploy to the Internet"
         ]).forEach { ctx.console.output($0) }
     }
 

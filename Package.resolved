@@ -2,15 +2,6 @@
   "object": {
     "pins": [
       {
-        "package": "async-http-client",
-        "repositoryURL": "https://github.com/swift-server/async-http-client.git",
-        "state": {
-          "branch": "master",
-          "revision": "871c655a1abf148eac7e2fc5743bd1397d789a0f",
-          "version": null
-        }
-      },
-      {
         "package": "console-kit",
         "repositoryURL": "https://github.com/vapor/console-kit.git",
         "state": {
@@ -24,7 +15,7 @@
         "repositoryURL": "https://github.com/tanner0101/mustache.git",
         "state": {
           "branch": "master",
-          "revision": "2169b3a2ba3add4957faaa1bdaa0b7b1e0013b08",
+          "revision": "e39aa74a1e0715deab2b78ab403fb930bb381021",
           "version": null
         }
       },
@@ -42,34 +33,7 @@
         "repositoryURL": "https://github.com/apple/swift-nio.git",
         "state": {
           "branch": "master",
-          "revision": "653492753c817bdb5a4fe28370819f1a7450c90d",
-          "version": null
-        }
-      },
-      {
-        "package": "swift-nio-extras",
-        "repositoryURL": "https://github.com/apple/swift-nio-extras.git",
-        "state": {
-          "branch": null,
-          "revision": "53808818c2015c45247cad74dc05c7a032c96a2f",
-          "version": "1.3.2"
-        }
-      },
-      {
-        "package": "swift-nio-ssl",
-        "repositoryURL": "https://github.com/apple/swift-nio-ssl.git",
-        "state": {
-          "branch": null,
-          "revision": "b75ffaba05b2cffdb1420d558f1a90b4e6c46dcc",
-          "version": "2.5.0"
-        }
-      },
-      {
-        "package": "websocket-kit",
-        "repositoryURL": "https://github.com/vapor/websocket-kit.git",
-        "state": {
-          "branch": "master",
-          "revision": "4c9da4fe7d8186243418254031288ab5ee0202e4",
+          "revision": "5c7a4553e1ae033b700eed8280998c50ecdb4e74",
           "version": null
         }
       },

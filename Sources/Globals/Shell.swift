@@ -8,6 +8,8 @@ public func todo(file: StaticString = #file) -> Never {
 }
 
 public struct Shell {
+    private init() {}
+    
     @discardableResult
     public static func bash(_ input: String) throws -> String {
         return try Process.run("/bin/sh", args: ["-c", input])
@@ -44,6 +46,12 @@ public struct Shell {
     public static func homeDirectory() throws -> String {
         return try bash("echo $HOME").trimmingCharacters(in: .whitespacesAndNewlines)
     }
+
+    @discardableResult
+    public static func programExists(_ prgrm: String) throws -> Bool {
+        _ = try Process.resolve(program: prgrm)
+        return true
+    }
 }
 
 /// Different types of process output.
@@ -79,13 +87,14 @@ extension Process {
         let err = Pipe()
         let task = try launchProcess(path: program, args, stdout: out, stderr: err)
         task.waitUntilExit()
-        
+
         // read output
         let stdout = out.fileHandleForReading.read()
         let stderr = err.fileHandleForReading.read()
         guard stderr.isEmpty else { throw stderr }
         return stdout.trimmingCharacters(in: .whitespacesAndNewlines)
     }
+
 
     @discardableResult
     public static func run(_ program: String, args: [String], updates: @escaping (ProcessOutput) -> Void) throws -> Int32 {

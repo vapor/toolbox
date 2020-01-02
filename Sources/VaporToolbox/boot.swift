@@ -1,4 +1,3 @@
-import CloudCommands
 import Globals
 import ConsoleKit
 import Foundation
@@ -8,11 +7,11 @@ final class Main: ToolboxGroup {
     
     let commands: [String: AnyCommand] = [
         "clean": CleanCommand(),
-        "cloud": CloudGroup(),
         "new": New(),
         "drop": PrintDroplet(),
         "xcode": XcodeCommand(),
-        "build": BuildCommand()
+        "build": BuildCommand(),
+        "heroku": Heroku(),
 //        "test": Test(),
     ]
     
