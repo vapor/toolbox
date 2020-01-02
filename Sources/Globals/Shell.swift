@@ -89,7 +89,8 @@ extension Process {
         // observers
         let out = Pipe()
         let err = Pipe()
-        let task = try launchProcess(path: program, args, stdout: out, stderr: err)
+        let `in` = Pipe()
+        let task = try launchProcess(path: program, args, stdout: out, stderr: err, stdin: `in`)
         task.waitUntilExit()
 
         // read output
@@ -102,32 +103,16 @@ extension Process {
 
     @discardableResult
     public static func run(_ program: String, args: [String], updates: @escaping (ProcessOutput) -> Void) throws -> Int32 {
-        let out = Pipe()
-        let err = Pipe()
-        
-        // will be set to false when the program is done
-        var running = true
-        
-        // readabilityHandler doesn't work on linux, so we are left with this hack
-        DispatchQueue.global().async {
-            while running {
-                let stdout = out.fileHandleForReading.availableData
-                guard !stdout.isEmpty else { return }
-                updates(.stdout(stdout))
-            }
-        }
-        DispatchQueue.global().async {
-            while running {
-                let stderr = err.fileHandleForReading.availableData
-                guard !stderr.isEmpty else { return }
-                updates(.stderr(stderr))
-            }
-        }
-        
-        let process = try launchProcess(path: program, args, stdout: out, stderr: err)
+        print("\(program) \(args.joined(separator: " "))")
+        let process = try launchProcess(
+            path: program,
+            args,
+            stdout: FileHandle.standardOutput,
+            stderr: FileHandle.standardError,
+            stdin: FileHandle.standardInput
+        )
         Process.running = process
         process.waitUntilExit()
-        running = false
         Process.running = nil
         return process.terminationStatus
     }
@@ -140,7 +125,7 @@ extension Process {
     }
     
     /// Powers `Process.execute(_:_:)` methods. Separated so that `/bin/sh -c which` can run as a separate command.
-    private static func launchProcess(path: String, _ arguments: [String], stdout: Pipe, stderr: Pipe) throws -> Process {
+    private static func launchProcess(path: String, _ arguments: [String], stdout: Any, stderr: Any, stdin: Any) throws -> Process {
         let path = try resolve(program: path)
         let process = Process()
         process.environment = ProcessInfo.processInfo.environment
@@ -148,6 +133,7 @@ extension Process {
         process.arguments = arguments
         process.standardOutput = stdout
         process.standardError = stderr
+        process.standardInput = stdin
         process.launch()
         return process
     }
