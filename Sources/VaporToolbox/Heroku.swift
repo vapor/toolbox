@@ -11,7 +11,7 @@ struct Heroku: Command {
         var keepCheckouts: Bool
     }
     let signature = Signature()
-    let help = "cleans temporary files."
+    let help = "Configures app for deployment to Heroku."
 
     /// See `Command`.
     func run(using ctx: CommandContext, signature: Signature) throws {

@@ -81,6 +81,10 @@ extension FileHandle {
 }
 
 extension Process {
+    public static var running: Process?
+}
+
+extension Process {
     public static func run(_ program: String, args: [String]) throws -> String {
         // observers
         let out = Pipe()
@@ -121,8 +125,10 @@ extension Process {
         }
         
         let process = try launchProcess(path: program, args, stdout: out, stderr: err)
+        Process.running = process
         process.waitUntilExit()
         running = false
+        Process.running = nil
         return process.terminationStatus
     }
     

@@ -8,22 +8,26 @@ final class Main: ToolboxGroup {
     let commands: [String: AnyCommand] = [
         "clean": CleanCommand(),
         "new": New(),
-        "drop": PrintDroplet(),
         "xcode": XcodeCommand(),
         "build": BuildCommand(),
         "heroku": Heroku(),
-//        "test": Test(),
+        "run": RunCommand(),
     ]
     
-    let help = "welcome to vapor"
+    let help = "Vapor Toolbox (Server-side Swift web framework)"
 
     func fallback(using ctx: inout CommandContext) throws {
-        ctx.console.output("welcome to vapor.")
-        ctx.console.output("use `vapor -h` to see commands")
+        ctx.console.output("Welcome to vapor.")
+        ctx.console.output("Use `vapor -h` to see commands.")
     }
 }
 
 public func run() throws {
+    signal(SIGINT) { code in
+        if let running = Process.running {
+            running.interrupt()
+        }
+    }
     let input = CommandInput(arguments: CommandLine.arguments)
     try Terminal().run(Main(), input: input)
 }
