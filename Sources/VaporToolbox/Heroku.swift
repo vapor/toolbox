@@ -95,10 +95,6 @@ struct Heroku: Command {
             vaporAppName = "Run"
         }
 
-        // required to downgrade from 18
-        // is this still required w vapor 4?
-        _ = try HerokuInterface.run("stack:set", "heroku-16")
-
         ctx.console.info("setting procfile...")
         let procContents = "web: \(vaporAppName) serve --env production --hostname 0.0.0.0 --port \\$PORT"
         do {
