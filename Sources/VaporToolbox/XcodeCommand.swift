@@ -10,6 +10,6 @@ struct XcodeCommand: Command {
     
     /// See `Command`.
     func run(using ctx: CommandContext, signature: Signature) throws {
-        try Shell.bash("open Package.siwft")
+        try Shell.bash("open Package.swift")
     }
 }
