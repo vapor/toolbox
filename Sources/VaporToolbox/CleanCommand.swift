@@ -5,13 +5,13 @@ import Foundation
 /// Cleans temporary files created by Xcode and SPM.
 struct CleanCommand: Command {
     struct Signature: CommandSignature {
-        @Flag(name: "update", short: "u", help: "cleans Package.resolved file if it exists.")
+        @Flag(name: "update", short: "u", help: "Cleans Package.resolved file if it exists.")
         var update: Bool
-        @Flag(name: "keep-checkouts", short: "k", help: "keep git checkouts of dependencies.")
+        @Flag(name: "keep-checkouts", short: "k", help: "Keep git checkouts of dependencies.")
         var keepCheckouts: Bool
     }
     let signature = Signature()
-    let help = "cleans temporary files."
+    let help = "Cleans temporary files."
     
     /// See `Command`.
     func run(using ctx: CommandContext, signature: Signature) throws {
