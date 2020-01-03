@@ -12,7 +12,7 @@ public struct Shell {
     
     @discardableResult
     public static func bash(_ input: String) throws -> String {
-        return try Process.run("/bin/sh", args: ["-c", input])
+        return try Process.backgroundRun("/bin/sh", args: ["-c", input])
     }
 
     public static func delete(_ path: String) throws {
@@ -85,7 +85,7 @@ extension Process {
 }
 
 extension Process {
-    public static func run(_ program: String, args: [String]) throws -> String {
+    public static func backgroundRun(_ program: String, args: [String]) throws -> String {
         // observers
         let out = Pipe()
         let err = Pipe()
@@ -96,13 +96,15 @@ extension Process {
         // read output
         let stdout = out.fileHandleForReading.read()
         let stderr = err.fileHandleForReading.read()
-        guard stderr.isEmpty else { throw stderr }
+        guard task.terminationStatus == 0 else {
+            throw stderr
+        }
         return stdout.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
 
     @discardableResult
-    public static func run(_ program: String, args: [String], updates: @escaping (ProcessOutput) -> Void) throws -> Int32 {
+    public static func run(_ program: String, args: [String]) throws -> Int32 {
         print("\(program) \(args.joined(separator: " "))")
         let process = try launchProcess(
             path: program,

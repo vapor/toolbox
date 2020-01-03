@@ -13,15 +13,7 @@ struct RunCommand: AnyCommand {
         let ctx = ctx
 
         // execute
-        let result = try Process.run("swift", args: ["run", "Run"] + ctx.input.arguments) { update in
-            if let err = update.err {
-                ctx.console.output(err, style: .plain, newLine: false)
-            }
-            if let out = update.out {
-                ctx.console.output(out, style: .plain, newLine: false)
-            }
-        }
-
+        let result = try Process.run("swift", args: ["run", "Run"] + ctx.input.arguments)
         guard result == 0 else { throw "Run failed." }
     }
 }

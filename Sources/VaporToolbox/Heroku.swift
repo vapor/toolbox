@@ -46,62 +46,64 @@ struct Heroku: Command {
             """
         }
 
+        do {
+            let user = try HerokuInterface.run("auth:whoami")
+            ctx.console.output("Logged in as ".consoleText(.plain) + user.consoleText(.info))
+        } catch {
+            ctx.console.info("Use heroku auth:login")
+            throw "Not logged in to Heroku"
+        }
+
         let name: String
-        if ctx.console.confirm("should we use a custom heroku app identifier?") {
-            name = ctx.console.ask("custom app identifier:")
+        if ctx.console.confirm("Use a custom Heroku app identifier?") {
+            name = ctx.console.ask("Custom app identifier:")
         } else {
             name = ""
         }
 
         let region: String
-        if ctx.console.confirm("should we deploy to a region other than the us?") {
-            region = ctx.console.ask("custom region (ie: us, eu):")
+        if ctx.console.confirm("Deploy to a region other than the us?") {
+            region = ctx.console.ask("Custom region (ie: us, eu):")
         } else {
             region = "us"
         }
-
-
         let url: String
         do {
             url = try HerokuInterface.run("create", name, "--region", region)
-            ctx.console.info("heroku app created at:")
-            ctx.console.info(url)
+            ctx.console.output("Heroku app created at: ".consoleText() + url.consoleText(.info))
         } catch {
-            ctx.console.error("unable to create heroku app:")
-            throw error
+            throw "Unable to create heroku app: \(error)"
         }
 
         let buildpack: String
-        if ctx.console.confirm("should we use a custom Heroku buildpack?") {
-            buildpack = ctx.console.ask("custom buildpack url:")
+        if ctx.console.confirm("Use a custom Heroku buildpack?") {
+            buildpack = ctx.console.ask("Custom buildpack url:")
         } else {
             buildpack = "https://github.com/vapor-community/heroku-buildpack"
         }
 
-        ctx.console.info("setting buildpack...")
+        ctx.console.info("Setting buildpack...")
 
         do {
             _ = try HerokuInterface.run("buildpacks:set", buildpack)
         } catch {
-            ctx.console.error("unable to set buildpack \(buildpack):")
-            throw error
+            throw "Unable to set buildpack \(buildpack): \(error)"
         }
 
 
         let vaporAppName: String
-        if ctx.console.confirm("is your vapor app using a custom executable name?") {
-            vaporAppName = ctx.console.ask("executable name:")
+        if ctx.console.confirm("Use a custom executable name?") {
+            vaporAppName = ctx.console.ask("Executable name:")
         } else {
             vaporAppName = "Run"
         }
 
-        ctx.console.info("setting procfile...")
+        ctx.console.info("Creating procfile...")
         let procContents = "web: \(vaporAppName) serve --env production --hostname 0.0.0.0 --port \\$PORT"
         do {
-            try Shell.bash("echo \(procContents) >> ./Procfile")
+            try Shell.bash("echo \(procContents) > ./Procfile")
         } catch {
-            ctx.console.error("unable to make procfile")
-            throw error
+            throw "unable to make procfile: \(error)"
         }
 
         guard !(try Git.isClean()) else {
@@ -113,13 +115,12 @@ struct Heroku: Command {
 //        ctx.console.info("committing procfile...")
         try Git.commitChanges(msg: "adding heroku procfile")
 
-        let swiftVersion = ctx.console.ask("which swift version should we use (ie: 5.1)?")
-        ctx.console.info("setting swift version...")
+        let swiftVersion = ctx.console.ask("Which swift version (ie: 5.1)?")
+        ctx.console.info("Setting swift version...")
         do {
-            try Shell.bash("echo \(swiftVersion) >> ./.swift-version")
+            try Shell.bash("echo \(swiftVersion) > ./.swift-version")
         } catch {
-            ctx.console.error("unable to set swift versiono")
-            throw error
+            throw "Unable to set swift version: \(error)"
         }
 
         guard !(try Git.isClean()) else {
@@ -349,13 +350,6 @@ struct Heroku: Command {
 struct HerokuInterface {
     @discardableResult
     public static func run(_ args: String...) throws -> String {
-        var err = ""
-        var out = ""
-        let code = try Process.run("heroku", args: args) { output in
-            err += output.err ?? ""
-            out += output.out ?? ""
-        }
-        guard code == 0 else { throw err }
-        return out
+        return try Process.backgroundRun("heroku", args: args)
     }
 }

@@ -27,6 +27,7 @@ public func run() throws {
         if let running = Process.running {
             running.interrupt()
         }
+        exit(code)
     }
     let input = CommandInput(arguments: CommandLine.arguments)
     try Terminal().run(Main(), input: input)
