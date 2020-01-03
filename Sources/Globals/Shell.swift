@@ -28,7 +28,7 @@ public struct Shell {
     }
 
     public static func cwd() throws -> String {
-        return try ProcessInfo.processInfo.environment["TEST_DIRECTORY"] ?? bash("dirs -l")
+        return try ProcessInfo.processInfo.environment["TEST_DIRECTORY"] ?? bash("pwd")
     }
 
     public static func allFiles(in dir: String? = nil) throws -> String {
