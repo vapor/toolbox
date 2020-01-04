@@ -13,6 +13,8 @@ struct XcodeCommand: Command {
         do {
             let xcodeproj = try findFirstXcodeprojFile(with: URL(fileURLWithPath: ".", isDirectory: true))
             let environmentVariablesByScheme = try getEnvironmentVariablesByScheme(with: xcodeproj)
+            // This `run` function used to wipe out the xcodeproj here, so this would preserve and then re-set the environment variables
+            // Since this is using Package.swift now is this no longer necessary? Is there a separate command that generates the xcodeproj?
             try updateEnvironmentVariablesForSchemes(environmentVariablesByScheme, with: xcodeproj)
         } catch { }
         try Shell.bash("open Package.swift")
