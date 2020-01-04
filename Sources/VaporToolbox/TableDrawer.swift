@@ -1,6 +1,6 @@
-import Vapor
+import ConsoleKit
 
-public func drawTable(with ctx: CommandContext) {
+public func drawTable(with console: Console) {
     let zero: [ConsoleText] = [
         "x",
         "xcodeproj",
@@ -19,7 +19,7 @@ public func drawTable(with ctx: CommandContext) {
 
     let drawer = TableDrawer(rows: [zero, one, two])
     let table = drawer.drawTable()
-    ctx.console.output(table)
+    console.output(table)
 }
 
 class TableDrawer {
@@ -71,7 +71,7 @@ class TableDrawer {
     }
 
     func drawRow(with row: [ConsoleText]) -> ConsoleText {
-        var drawn: ConsoleText = "|"
+        var drawn: ConsoleText = separator
 
         for idx in 0..<numberOfColumns {
             let column = row[safe: idx]
@@ -80,7 +80,7 @@ class TableDrawer {
             while padded.length < desiredWidth {
                 padded += " "
             }
-            drawn += padded + "|"
+            drawn += padded + separator
         }
 
         return drawn
@@ -90,19 +90,23 @@ class TableDrawer {
         var columnPads: [ConsoleText] = []
         for i in 0..<numberOfColumns {
             let width = widthOfColumn(at: i)
-            let pad = width.repeat(char: "-")
+            let pad = width.repeat(char: topBottom)
             let text = pad.consoleText()
             columnPads.append(text)
         }
 
-        var border: ConsoleText = "+"
+        var border: ConsoleText = cornerChar
         columnPads.forEach { pad in
             border += pad
-            border += "+"
+            border += cornerChar
         }
         return border
     }
 }
+
+let topBottom: Character = " "//"-"
+let cornerChar: ConsoleText = " "//"+"
+let separator: ConsoleText = " "//"|"
 
 extension ConsoleText {
     var length: Int {

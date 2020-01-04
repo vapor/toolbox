@@ -1,44 +1,32 @@
-// swift-tools-version:4.2
+// swift-tools-version:5.1
 import PackageDescription
 
 let package = Package(
-    name: "VaporToolbox",
+    name: "toolbox",
+    platforms: [
+       .macOS(.v10_15)
+    ],
+    products: [
+        .executable(name: "vapor", targets: ["Executable"])
+    ],
     dependencies: [
-        // 💧 A server-side Swift web framework.
-        .package(url: "https://github.com/vapor/vapor.git", from: "3.0.0"),
-        .package(url: "https://github.com/tanner0101/swift-syntax", .branch("static")),
-        .package(url: "https://github.com/vapor/leaf.git", from: "3.0.0"),
-        // ::vapor
+        .package(url: "https://github.com/apple/swift-nio.git", .branch("master")),
+        .package(url: "https://github.com/jpsim/Yams.git", .branch("master")),
+        .package(url: "https://github.com/tanner0101/mustache.git", .branch("master")),
+        .package(url: "https://github.com/vapor/console-kit.git", .branch("master")),
     ],
     targets: [
-        // All of the commands and logic that powers the Vapor toolbox
         .target(name: "VaporToolbox", dependencies: [
-            "LinuxTestsGeneration",
-           "Vapor",
-           "CloudCommands",
-           "Globals",
-           "Leaf",
-        ]),
-        .target(name: "LinuxTestsGeneration", dependencies: [
-            "SwiftSyntax",
+            "ConsoleKit",
             "Globals",
-        ]),
-        .target(name: "CloudCommands", dependencies: [
-            "Vapor",
-            "CloudAPI",
-            "Globals",
-        ]),
-        .target(name: "CloudAPI", dependencies: [
-            "Vapor",
-            "Globals",
+            "Mustache",
+            "NIO",
+            "Yams"
         ]),
         .target(name: "Globals", dependencies: [
-            "Vapor",
+            "ConsoleKit",
+            "NIO"
         ]),
-        .testTarget(name: "LinuxTestsGenerationTests", dependencies: [
-            "LinuxTestsGeneration",
-        ]),
-        // Runnable module, executes the main command group.
         .target(name: "Executable", dependencies: ["VaporToolbox"]),
     ]
 )

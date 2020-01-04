@@ -1,4 +1,4 @@
-import Vapor
+import Foundation
 
 public struct Git {
     public static func checkout(gitDir: String, workTree: String, checkout: String) throws -> String {
@@ -25,8 +25,7 @@ public struct Git {
 
     public static func isGitRepository() -> Bool {
         do {
-            let _ =  try run("status", "--porcelain")
-                .trimmingCharacters(in: .whitespacesAndNewlines)
+            let _ = try run("status", "--porcelain")
             return true
         } catch {
             return false
@@ -40,10 +39,9 @@ public struct Git {
                 $0.trimmingCharacters(in: .whitespacesAndNewlines)
             }
             .first { $0.hasPrefix("* ") }
-            // drop '* '
-            .flatMap { $0.dropFirst(2) }
-            .flatMap(String.init)
-
+            .flatMap {
+                $0.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+            }
         guard let value = branch else { throw "unable to detect git branch" }
         return value
     }
@@ -72,11 +70,11 @@ public struct Git {
         return (ahead, behind)
     }
 
-    public static func pushCloud(branch: String, force: Bool) throws {
+    public static func push(branch: String, remote: String, force: Bool) throws {
         if force {
-            try run("push", "cloud", branch, "-f")
+            try run("push", remote, branch, "-f")
         } else {
-            try run("push", "cloud", branch)
+            try run("push", remote, branch)
         }
     }
 
@@ -88,12 +86,24 @@ public struct Git {
         try run("remote", "remove", name)
     }
 
+    public static func hasRemote(named name: String) -> Bool {
+        do {
+            try run("remote", "get-url", name)
+            return true
+        } catch {
+            return false
+        }
+    }
+
     public static func isClean() throws -> Bool {
         return try run("status", "--porcelain")
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .isEmpty
     }
 
+    public static func addChanges() throws {
+        try run ("add", ".")
+    }
     public static func commitChanges(msg: String) throws {
         try run("commit", "-m", msg)
     }
@@ -112,8 +122,15 @@ public struct Git {
     }
 
     @discardableResult
-    private static func run(_ args: String...) throws -> String {
-        return try Process.execute("git", args)
+    public static func run(_ args: String...) throws -> String {
+        var err = ""
+        var out = ""
+        let code = try Process.run("git", args: args) { output in
+            err += output.err ?? ""
+            out += output.out ?? ""
+        }
+        guard code == 0 else { throw err }
+        return out
     }
 }
 

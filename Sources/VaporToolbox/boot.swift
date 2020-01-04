@@ -1,25 +1,33 @@
-import Vapor
-import CloudCommands
+import Globals
+import ConsoleKit
+import Foundation
 
-/// Creates an Application to run.
-public func boot() -> Future<Application> {
-    var services = Services.default()
+final class Main: ToolboxGroup {
+    struct Signature: CommandSignature {}
+    
+    let commands: [String: AnyCommand] = [
+        "clean": CleanCommand(),
+        "new": New(),
+        "xcode": XcodeCommand(),
+        "build": BuildCommand(),
+        "heroku": Heroku(),
+        "run": RunCommand(),
+    ]
+    
+    let help = "Vapor Toolbox (Server-side Swift web framework)"
 
-    var commands = CommandConfig()
-    commands.use(CleanCommand(), as: "clean")
-    commands.use(GenerateLinuxMain(), as: "linux-main")
-    commands.use(CloudCommands.CloudGroup(), as: "cloud")
-    commands.use(New(), as: "new")
-    commands.use(PrintDroplet(), as: "drop")
+    func fallback(using ctx: inout CommandContext) throws {
+        ctx.console.output("Welcome to vapor.")
+        ctx.console.output("Use `vapor -h` to see commands.")
+    }
+}
 
-    // for running quick exec tests
-    commands.use(Test(), as: "test")
-    commands.use(XcodeCommand(), as: "xcode")
-    commands.use(LeafGroup(), as: "leaf")
-//    commands.use(LeafXcodeCommand(), as: "leaf")
-//    commands.use(LoadLeafPackage(), as: "info")
-
-    services.register(commands)
-
-    return Application.asyncBoot(services: services)
+public func run() throws {
+    signal(SIGINT) { code in
+        if let running = Process.running {
+            running.interrupt()
+        }
+    }
+    let input = CommandInput(arguments: CommandLine.arguments)
+    try Terminal().run(Main(), input: input)
 }

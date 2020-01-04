@@ -3,3 +3,6 @@
 DerivedData
 Package.resolved
 *.xcodeproj
+.swiftpm
+.ship
+

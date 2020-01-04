@@ -1,27 +1,15 @@
-import Vapor
+import ConsoleKit
+import Foundation
 import Globals
 
-// TODO: Xcode Additions
-// automatically add xcconfig
-// swift package generate-xcodeproj --xcconfig-overrides Sandbox.xcconfig
-//
-// automatically add environment variables to project file, more work,
-// but would be nice
-//
-//
 // Generates an Xcode project
 struct XcodeCommand: Command {
-    /// See `Command`.
-    var arguments: [CommandArgument] = []
+    struct Signature: CommandSignature { }
 
+    let help = "Opens a Vapor project in Xcode."
+    
     /// See `Command`.
-    var options: [CommandOption] = []
-
-    /// See `Command`.
-    var help: [String] = ["generates xcode projects for spm packages."]
-
-    /// See `Command`.
-    func run(using ctx: CommandContext) throws -> Future<Void> {
+    func run(using ctx: CommandContext, signature: Signature) throws {
         let environmentVariablesByScheme: [String: XMLElement]
         do {
             let xcodeproj = try findFirstXcodeprojFile(with: URL(fileURLWithPath: ".", isDirectory: true))
@@ -29,43 +17,7 @@ struct XcodeCommand: Command {
         } catch {
             environmentVariablesByScheme = [:]
         }
-        ctx.console.output("generating xcodeproj...")
-        let generateProcess = Process.asyncExecute(
-            "swift",
-            ["package", "generate-xcodeproj"],
-            on: ctx.container
-        ) { output in
-            switch output {
-            case .stderr(let err):
-                let str = String(bytes: err, encoding: .utf8) ?? "error"
-                ctx.console.output("error:", style: .error, newLine: true)
-                ctx.console.output(str, style: .error, newLine: false)
-            case .stdout(let out):
-                let str = String(bytes: out, encoding: .utf8) ?? ""
-                ctx.console.output(str.consoleText(), newLine: false)
-            }
-        }
-
-        return generateProcess.map { val in
-            if val == 0 {
-                ctx.console.output(
-                    "success.",
-                    style: .info,
-                    newLine: true
-                )
-                do {
-                    let xcodeproj = try self.findFirstXcodeprojFile(with: URL(fileURLWithPath: ".", isDirectory: true))
-                    try self.updateEnvironmentVariablesForSchemes(environmentVariablesByScheme, with: xcodeproj)
-                } catch { }
-                try Shell.bash("open *.xcodeproj")
-            } else {
-                ctx.console.output(
-                    "failed to generate xcodeproj.",
-                    style: .error,
-                    newLine: true
-                )
-            }
-        }
+        try Shell.bash("open Package.swift")
     }
     
     func findFirstXcodeprojFile(with directory: URL) throws -> URL {
