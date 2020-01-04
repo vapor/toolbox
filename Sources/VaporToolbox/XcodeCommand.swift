@@ -10,13 +10,11 @@ struct XcodeCommand: Command {
     
     /// See `Command`.
     func run(using ctx: CommandContext, signature: Signature) throws {
-        let environmentVariablesByScheme: [String: XMLElement]
         do {
             let xcodeproj = try findFirstXcodeprojFile(with: URL(fileURLWithPath: ".", isDirectory: true))
-            environmentVariablesByScheme = try getEnvironmentVariablesByScheme(with: xcodeproj)
-        } catch {
-            environmentVariablesByScheme = [:]
-        }
+            let environmentVariablesByScheme = try getEnvironmentVariablesByScheme(with: xcodeproj)
+            try updateEnvironmentVariablesForSchemes(environmentVariablesByScheme, with: xcodeproj)
+        } catch { }
         try Shell.bash("open Package.swift")
     }
     
