@@ -22,8 +22,7 @@ struct TemplateScaffolder {
         for variable in self.manifest.variables {
             try self.ask(variable: variable, to: &context)
         }
-        self.console.pushEphemeral()
-        self.console.output("Generating project files...")
+        self.console.info("Generating project files")
         for file in self.manifest.files {
             try self.scaffold(
                 file: file,
@@ -32,7 +31,6 @@ struct TemplateScaffolder {
                 context: context
             )
         }
-        self.console.popEphemeral()
     }
 
     private func ask(
@@ -41,16 +39,12 @@ struct TemplateScaffolder {
     ) throws {
         switch variable.type {
         case .string:
-            self.console.pushEphemeral()
             let value = self.console.ask(variable.description.consoleText())
             context[variable.name] = .string(value)
-            self.console.popEphemeral()
             self.console.output(key: variable.name, value: value)
         case .bool:
-        self.console.pushEphemeral()
             let value = self.console.confirm(variable.description.consoleText())
         context[variable.name] = .string(value.description)
-            self.console.popEphemeral()
             self.console.output(key: variable.name, value: value ? "Yes" : "No")
         case .options(let options):
             let option = self.console.choose(variable.description.consoleText(), from: options, display: { option in
@@ -59,9 +53,7 @@ struct TemplateScaffolder {
             self.console.output(key: variable.name, value: option.name)
             context[variable.name] = .dictionary(option.data.mapValues { .string($0) })
         case .variables(let variables):
-            console.pushEphemeral()
             if self.console.confirm(variable.description.consoleText()) {
-                console.popEphemeral()
                 self.console.output(key: variable.name, value: "Yes")
                 var nested: [String: MustacheData] = [:]
                 for child in variables {
@@ -69,7 +61,6 @@ struct TemplateScaffolder {
                 }
                 context[variable.name] = .dictionary(nested)
             } else {
-                self.console.popEphemeral()
                 self.console.output(key: variable.name, value: "No")
             }
         }

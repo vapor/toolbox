@@ -15,7 +15,7 @@
         "repositoryURL": "https://github.com/tanner0101/mustache.git",
         "state": {
           "branch": "master",
-          "revision": "e39aa74a1e0715deab2b78ab403fb930bb381021",
+          "revision": "2169b3a2ba3add4957faaa1bdaa0b7b1e0013b08",
           "version": null
         }
       },
@@ -33,7 +33,7 @@
         "repositoryURL": "https://github.com/apple/swift-nio.git",
         "state": {
           "branch": "master",
-          "revision": "5c7a4553e1ae033b700eed8280998c50ecdb4e74",
+          "revision": "ea5a64978d944567498533a63eb44bf965ba3d45",
           "version": null
         }
       },
@@ -42,7 +42,7 @@
         "repositoryURL": "https://github.com/jpsim/Yams.git",
         "state": {
           "branch": "master",
-          "revision": "9bb6c5de9134b9dfe9698dc62dd57a8bbbf831af",
+          "revision": "5fa313eae1ca127ad3c706e14c564399989cb1b1",
           "version": null
         }
       }

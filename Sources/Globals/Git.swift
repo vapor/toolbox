@@ -123,14 +123,7 @@ public struct Git {
 
     @discardableResult
     public static func run(_ args: String...) throws -> String {
-        var err = ""
-        var out = ""
-        let code = try Process.run("git", args: args) { output in
-            err += output.err ?? ""
-            out += output.out ?? ""
-        }
-        guard code == 0 else { throw err }
-        return out
+        return try Process.runBackground("git", args: args)
     }
 }
 

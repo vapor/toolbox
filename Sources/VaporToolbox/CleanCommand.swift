@@ -5,10 +5,14 @@ import Foundation
 /// Cleans temporary files created by Xcode and SPM.
 struct CleanCommand: Command {
     struct Signature: CommandSignature {
-        @Flag(name: "update", short: "u", help: "Cleans Package.resolved file if it exists.")
+        @Flag(name: "update", short: "u", help: "Delete Package.resolved file if it exists.")
         var update: Bool
         @Flag(name: "keep-checkouts", short: "k", help: "Keep git checkouts of dependencies.")
         var keepCheckouts: Bool
+        @Flag(name: "global", short: "g", help: "Clean Xcode's global DerivedData cache.")
+        var global: Bool
+        @Flag(name: "swiftpm", short: "s", help: "Delete .swiftpm folder.")
+        var swiftPM: Bool
     }
     let signature = Signature()
     let help = "Cleans temporary files."
@@ -38,12 +42,14 @@ class Cleaner {
 
     func run() throws {
         var ops: [(String, () throws -> CleanResult)] = []
-        #if os(macOS)
-        ops.append(("DerivedData", cleanDerived))
-        ops.append(("xcodeproj", cleanXcode))
-        #endif
         ops.append((".build", cleanBuildFolder))
         ops.append(("Package.resolved", cleanPackageResolved))
+        ops.append((".swiftpm", cleanSwiftPM))
+        #if os(macOS)
+        ops.append(("xcodeproj", cleanXcode))
+        ops.append(("Local DerivedData", cleanLocalDerived))
+        ops.append(("Global DerivedData", cleanGlobalDerived))
+        #endif
 
         let rows = ops.map { (name, op) -> [ConsoleText] in
             var row = [ConsoleText]()
@@ -64,13 +70,25 @@ class Cleaner {
         ctx.console.output(text, newLine: false)
     }
 
+    private func cleanSwiftPM() throws -> CleanResult {
+        guard self.sig.swiftPM else {
+            return .ignored("Use [--swiftpm,-s] flag to remove this folder during clean.")
+        }
+        guard files.contains(".swiftpm") else {
+            return .notNecessary
+        }
+        try Shell.delete(".swiftpm")
+        return .success
+    }
+
+
     private func cleanPackageResolved() throws -> CleanResult {
         guard files.contains("Package.resolved") else { return .notNecessary }
         if sig.update {
             try Shell.delete("Package.resolved")
             return .success
         } else {
-            return .ignored("use [--update,-u] flag to remove this file during clean")
+            return .ignored("Use [--update,-u] flag to remove this file during clean.")
         }
     }
 
@@ -92,20 +110,26 @@ class Cleaner {
         return .success
     }
 
-    private func cleanDerived() throws -> CleanResult {
-        let didCleanDefaultLocation = try cleanDefaultDerivedDataLocation()
-        if didCleanDefaultLocation { return .success }
-
+    private func cleanLocalDerived() throws -> CleanResult {
         let didCleanRelativeLocation = try cleanRelativeDerivedDataLocation()
-        if didCleanRelativeLocation { return .success }
-
-        guard files.contains(".xcodeproj") else { return .notNecessary }
-        let derivedLocation = try XcodeBuild.derivedDataLocation()
-        guard FileManager.default.fileExists(atPath: derivedLocation) else {
+        if didCleanRelativeLocation {
+            return .success
+        } else {
             return .notNecessary
         }
-        try FileManager.default.removeItem(atPath: derivedLocation)
-        return .success
+    }
+
+    private func cleanGlobalDerived() throws -> CleanResult {
+        if self.sig.global {
+            let didCleanDefaultLocation = try cleanDefaultDerivedDataLocation()
+            if didCleanDefaultLocation {
+                return .success
+            } else {
+                return .notNecessary
+            }
+        } else {
+            return .ignored("Use [--global,-g] flag to clean all DerivedData caches.")
+        }
     }
 
     private func cleanDefaultDerivedDataLocation() throws -> Bool {
@@ -148,11 +172,11 @@ enum CleanResult {
     var report: ConsoleText {
         switch self {
         case .failure:
-            return "something went wrong"
+            return "Something went wrong."
         case .success:
-            return "cleaned file"
+            return "Removed."
         case .notNecessary:
-            return "nothing to clean"
+            return "Nothing to clean."
         case .ignored(let msg):
             return msg.consoleText()
         }

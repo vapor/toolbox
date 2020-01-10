@@ -9,10 +9,13 @@ public func todo(file: StaticString = #file) -> Never {
 
 public struct Shell {
     private init() {}
-    
-    @discardableResult
-    public static func bash(_ input: String) throws -> String {
-        return try Process.run("/bin/sh", args: ["-c", input])
+
+    public static func bashBackground(_ input: String) throws -> String {
+        return try Process.runBackground("/bin/sh", args: ["-c", input])
+    }
+
+    public static func bash(_ input: String) throws {
+        try Process.run("/bin/sh", args: ["-c", input])
     }
 
     public static func delete(_ path: String) throws {
@@ -28,7 +31,7 @@ public struct Shell {
     }
 
     public static func cwd() throws -> String {
-        return try ProcessInfo.processInfo.environment["TEST_DIRECTORY"] ?? bash("pwd")
+        return try ProcessInfo.processInfo.environment["TEST_DIRECTORY"] ?? bashBackground("pwd")
     }
 
     public static func allFiles(in dir: String? = nil) throws -> String {
@@ -36,15 +39,15 @@ public struct Shell {
         if let dir = dir {
             command += " \(dir)"
         }
-        return try Shell.bash(command)
+        return try Shell.bashBackground(command)
     }
 
     public static func readFile(path: String) throws -> String {
-        return try bash("cat \(path)").trimmingCharacters(in: .whitespacesAndNewlines)
+        return try bashBackground("cat \(path)").trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     public static func homeDirectory() throws -> String {
-        return try bash("echo $HOME").trimmingCharacters(in: .whitespacesAndNewlines)
+        return try bashBackground("echo $HOME").trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     @discardableResult
@@ -85,7 +88,7 @@ extension Process {
 }
 
 extension Process {
-    public static func run(_ program: String, args: [String]) throws -> String {
+    public static func runBackground(_ program: String, args: [String]) throws -> String {
         // observers
         let out = Pipe()
         let err = Pipe()
@@ -96,14 +99,12 @@ extension Process {
         // read output
         let stdout = out.fileHandleForReading.read()
         let stderr = err.fileHandleForReading.read()
-        guard stderr.isEmpty else { throw stderr }
+        guard task.terminationStatus == 0 else { throw stderr }
         return stdout.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
 
-    @discardableResult
-    public static func run(_ program: String, args: [String], updates: @escaping (ProcessOutput) -> Void) throws -> Int32 {
-        print("\(program) \(args.joined(separator: " "))")
+    public static func run(_ program: String, args: [String]) throws {
         let process = try launchProcess(
             path: program,
             args,
@@ -114,12 +115,12 @@ extension Process {
         Process.running = process
         process.waitUntilExit()
         Process.running = nil
-        return process.terminationStatus
+        guard process.terminationStatus == 0 else { throw "code \(process.terminationStatus)." }
     }
     
     static func resolve(program: String) throws -> String {
         if program.hasPrefix("/") { return program }
-        let path = try Shell.bash("which \(program)")
+        let path = try Shell.bashBackground("which \(program)")
         guard path.hasPrefix("/") else { throw "unable to find executable for \(program)" }
         return path
     }

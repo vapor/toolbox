@@ -9,7 +9,7 @@ struct New: Command {
         var name: String
     }
 
-    let help = "Generates a new Vapor app."
+    let help = "Generates a new app."
 
     func run(using ctx: CommandContext, signature: Signature) throws {
         let name = signature.name
@@ -19,10 +19,8 @@ struct New: Command {
 //        let gitUrl = try template.fullUrl()
 
         // Cloning
-        ctx.console.pushEphemeral()
-        ctx.console.output("Fetching \(gitUrl)...".consoleText())
+        ctx.console.info("Cloning template...")
         let _ = try Git.clone(repo: gitUrl, toFolder: "./" + name)
-        ctx.console.popEphemeral()
 
         // used to work on a git repository
         // outside of current path
@@ -46,21 +44,17 @@ struct New: Command {
         }
         
         // clear existing git history
-        ctx.console.pushEphemeral()
-        ctx.console.output("Creating git repository")
+        ctx.console.info("Creating git repository")
         try Shell.delete("./\(name)/.git")
         let _ = try Git.create(gitDir: gitDir)
-        ctx.console.popEphemeral()
 
         // initialize
-        ctx.console.pushEphemeral()
-        ctx.console.output("Adding first commit")
+        ctx.console.info("Adding first commit")
         try Git.commit(
             gitDir: gitDir,
             workTree: workTree,
-            msg: "created new vapor project from template: \(gitUrl)"
+            msg: "first commit"
         )
-        ctx.console.popEphemeral()
         
         // print the Droplet
 
@@ -72,7 +66,7 @@ struct New: Command {
             "Project " + name.consoleText(.info) + " has been created!",
             "",
             "Use " + "cd \(name)".consoleText(.info) + " to enter the project directory",
-            "Use " + "open Package.swift".consoleText(.info) + " to open the project in Xcode",
+            "Use " + "vapor xcode".consoleText(.info) + " to open the project in Xcode",
         ]).forEach { ctx.console.output($0) }
     }
 

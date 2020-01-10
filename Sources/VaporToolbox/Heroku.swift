@@ -11,7 +11,7 @@ struct Heroku: Command {
         var keepCheckouts: Bool
     }
     let signature = Signature()
-    let help = "Configures app for deployment to Heroku."
+    let help = "Configures an app for deployment to Heroku."
 
     /// See `Command`.
     func run(using ctx: CommandContext, signature: Signature) throws {
@@ -349,13 +349,6 @@ struct Heroku: Command {
 struct HerokuInterface {
     @discardableResult
     public static func run(_ args: String...) throws -> String {
-        var err = ""
-        var out = ""
-        let code = try Process.run("heroku", args: args) { output in
-            err += output.err ?? ""
-            out += output.out ?? ""
-        }
-        guard code == 0 else { throw err }
-        return out
+        try Process.runBackground("heroku", args: args)
     }
 }

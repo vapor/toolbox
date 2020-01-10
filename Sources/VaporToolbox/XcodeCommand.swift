@@ -6,10 +6,16 @@ import Globals
 struct XcodeCommand: Command {
     struct Signature: CommandSignature { }
 
-    let help = "Opens a Vapor project in Xcode."
+    let help = "Opens an app in Xcode."
     
     /// See `Command`.
     func run(using ctx: CommandContext, signature: Signature) throws {
-        try Shell.bash("open Package.swift")
+        ctx.console.info("Opening project in Xcode.")
+        do {
+            try Shell.bash("open Package.swift")
+        } catch {
+            ctx.console.output("note: ".consoleText(.warning) + "Call this command from the project's root folder.")
+            throw error
+        }
     }
 }

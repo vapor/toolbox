@@ -3,25 +3,21 @@ import Foundation
 
 // Generates an Xcode project
 struct RunCommand: AnyCommand {
-
     struct Signature: CommandSignature {}
 
-    let help = "Runs Vapor app from CLI."
+    let help = "Runs an app from the console."
 
     /// See `Command`.
     func run(using ctx: inout CommandContext) throws {
-        let ctx = ctx
+        try Process.run("swift", args: ["run", "Run"] + ctx.input.arguments)
+    }
 
-        // execute
-        let result = try Process.run("swift", args: ["run", "Run"] + ctx.input.arguments) { update in
-            if let err = update.err {
-                ctx.console.output(err, style: .plain, newLine: false)
-            }
-            if let out = update.out {
-                ctx.console.output(out, style: .plain, newLine: false)
-            }
+    func outputHelp(using context: inout CommandContext) {
+        do {
+            context.input.arguments.append("--help")
+            try self.run(using: &context)
+        } catch {
+            context.console.output("error: ".consoleText(.error) + "\(error)".consoleText())
         }
-
-        guard result == 0 else { throw "Run failed." }
     }
 }

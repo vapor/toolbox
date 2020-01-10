@@ -5,22 +5,12 @@ import Foundation
 struct BuildCommand: Command {
     struct Signature: CommandSignature {}
 
-    let help = "Builds Vapor app for CLI usage."
+    let help = "Builds an app in the console."
 
     /// See `Command`.
     func run(using ctx: CommandContext, signature: Signature) throws {
         ctx.console.output("Building project..")
-        // execute
-        let result = try Process.run("swift", args: ["build"] + ctx.input.arguments) { update in
-            if let err = update.err {
-                ctx.console.output(err, style: .error, newLine: false)
-            }
-            if let out = update.out {
-                ctx.console.output(out, style: .plain, newLine: false)
-            }
-        }
-
-        guard result == 0 else { throw "Failed to build." }
+        try Process.run("swift", args: ["build"] + ctx.input.arguments)
         ctx.console.output("Project built.")
     }
 }
