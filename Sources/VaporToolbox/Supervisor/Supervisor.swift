@@ -1,10 +1,11 @@
 import ConsoleKit
 
-struct SupervisorCommand: CommandGroup {
+struct Supervisor: CommandGroup {
     var commands: [String : AnyCommand] {
         [
             "init": SupervisorInit(),
             "update": SupervisorUpdate(),
+            "restart": SupervisorRestart(),
         ]
     }
 
