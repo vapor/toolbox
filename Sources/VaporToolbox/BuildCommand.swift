@@ -14,7 +14,7 @@ struct BuildCommand: Command {
         task.onOutput { output in
             ctx.console.output(output.consoleText())
         }
-        try task.run()
+        try task.runUntilExit()
         ctx.console.output("Project built.")
     }
 }

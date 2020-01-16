@@ -54,7 +54,7 @@ extension Process {
     convenience init(program: String, arguments: [String]) {
         self.init()
         self.environment = ProcessInfo.processInfo.environment
-        self.launchPath = program
+        self.executableURL = URL(fileURLWithPath: program)
         self.arguments = arguments
         self.standardInput = Pipe()
         self.standardOutput = Pipe()
@@ -67,9 +67,9 @@ extension Process {
         }
     }
 
-    func run() throws {
+    func runUntilExit() throws {
         Process.running = self
-        self.launch()
+        try self.run()
         self.waitUntilExit()
         Process.running = nil
         guard self.terminationStatus == 0 else {
@@ -93,7 +93,7 @@ extension Process {
     @discardableResult
     static func run(_ program: String, _ arguments: [String]) throws -> String {
         let task = try Self.new(program, arguments)
-        try task.run()
+        try task.runUntilExit()
         return task.stdout.read()
     }
 
