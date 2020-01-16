@@ -5,5 +5,5 @@ do {
     try run()
 } catch {
     let term = Terminal()
-    term.output("error: ".consoleText(.error) + "\(error)".consoleText(), newLine: false)
+    term.output("error: ".consoleText(.error) + "\(error)".consoleText())
 }

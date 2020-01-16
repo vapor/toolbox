@@ -1,29 +1,46 @@
 import Foundation
 
-public struct Git {
-    public static func checkout(gitDir: String, workTree: String, checkout: String) throws -> String {
+extension Process {
+    static var git: Git {
+        .init()
+    }
+    struct Git {
+        @discardableResult
+        func run(_ command: String, _ arguments: String...) throws -> String {
+            try self.run(command, arguments)
+        }
+
+        @discardableResult
+        func run(_ command: String, _ arguments: [String]) throws -> String {
+            try Process.run(Shell.default.which("git"), [command] + arguments)
+        }
+    }
+}
+
+extension Process.Git {
+    func checkout(gitDir: String, workTree: String, checkout: String) throws -> String {
         let gitDir = "--git-dir=\(gitDir)"
         let workTree = "--work-tree=\(workTree)"
         return try run(gitDir, workTree, "checkout", checkout)
     }
 
-    public static func create(gitDir: String) throws -> String {
+    func create(gitDir: String) throws -> String {
         let gitDir = "--git-dir=\(gitDir)"
         return try run(gitDir, "init")
     }
 
-    public static func commit(gitDir: String, workTree: String, msg: String) throws {
+    func commit(gitDir: String, workTree: String, msg: String) throws {
         let gitDir = "--git-dir=\(gitDir)"
         let workTree = "--work-tree=\(workTree)"
         try run(gitDir, workTree, "add", ".")
         try run(gitDir, workTree, "commit", "-m", msg)
     }
 
-    public static func clone(repo: String, toFolder folder: String) throws -> String {
+    func clone(repo: String, toFolder folder: String) throws -> String {
         return try run("clone", repo, folder)
     }
 
-    public static func isGitRepository() -> Bool {
+    func isGitRepository() -> Bool {
         do {
             let _ = try run("status", "--porcelain")
             return true
@@ -32,7 +49,7 @@ public struct Git {
         }
     }
 
-    public static func currentBranch() throws -> String {
+    func currentBranch() throws -> String {
         let branch = try run("branch")
             .split(separator: "\n")
             .map {
@@ -46,7 +63,7 @@ public struct Git {
         return value
     }
 
-    public static func branch(_ branch: String, matchesRemote remote: String) throws -> (ahead: Bool, behind: Bool) {
+    func branch(_ branch: String, matchesRemote remote: String) throws -> (ahead: Bool, behind: Bool) {
         let response = try run(
             "log",
             "--left-right",
@@ -70,7 +87,7 @@ public struct Git {
         return (ahead, behind)
     }
 
-    public static func push(branch: String, remote: String, force: Bool) throws {
+    func push(branch: String, remote: String, force: Bool) throws {
         if force {
             try run("push", remote, branch, "-f")
         } else {
@@ -78,15 +95,15 @@ public struct Git {
         }
     }
 
-    public static func setRemote(named name: String, url: String) throws {
+    func setRemote(named name: String, url: String) throws {
         try run("remote", "add", name, url)
     }
 
-    public static func removeRemote(named name: String) throws {
+    func removeRemote(named name: String) throws {
         try run("remote", "remove", name)
     }
 
-    public static func hasRemote(named name: String) -> Bool {
+    func hasRemote(named name: String) -> Bool {
         do {
             try run("remote", "get-url", name)
             return true
@@ -95,36 +112,29 @@ public struct Git {
         }
     }
 
-    public static func isClean() throws -> Bool {
+    func isClean() throws -> Bool {
         return try run("status", "--porcelain")
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .isEmpty
     }
 
-    public static func addChanges() throws {
+    func addChanges() throws {
         try run ("add", ".")
     }
-    public static func commitChanges(msg: String) throws {
+    func commitChanges(msg: String) throws {
         try run("commit", "-m", msg)
     }
 
-    public static func isCloudConfigured() throws -> Bool {
+    func isCloudConfigured() throws -> Bool {
         return try run("remote")
             .split(separator: "\n")
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .contains("cloud")
     }
 
-    public static func cloudUrl() throws -> String {
+    func cloudUrl() throws -> String {
         let isConfigured = try isCloudConfigured()
         guard isConfigured else { throw "cloud url not yet configured. use `vapor cloud remote set`" }
         return try run("remote", "get-url", "cloud").trimmingCharacters(in: .whitespacesAndNewlines)
     }
-
-    @discardableResult
-    public static func run(_ args: String...) throws -> String {
-        return try Process.runBackground("git", args: args)
-    }
 }
-
-

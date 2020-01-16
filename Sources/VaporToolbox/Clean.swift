@@ -1,9 +1,8 @@
 import ConsoleKit
-import Globals
 import Foundation
 
 /// Cleans temporary files created by Xcode and SPM.
-struct CleanCommand: Command {
+struct Clean: Command {
     struct Signature: CommandSignature {
         @Flag(name: "update", short: "u", help: "Delete Package.resolved file if it exists.")
         var update: Bool
@@ -26,18 +25,18 @@ struct CleanCommand: Command {
 
 class Cleaner {
     let ctx: CommandContext
-    let sig: CleanCommand.Signature
+    let sig: Clean.Signature
     let cwd: String
     let files: String
 
     var operations: [String: CleanResult] = [:]
 
-    init(ctx: CommandContext, sig: CleanCommand.Signature) throws {
+    init(ctx: CommandContext, sig: Clean.Signature) throws {
         self.ctx = ctx
         self.sig = sig
-        let cwd = try Shell.cwd()
+        let cwd = try Shell.default.cwd()
         self.cwd = cwd.trailingSlash
-        self.files = try Shell.allFiles(in: cwd)
+        self.files = try Shell.default.allFiles(in: cwd)
     }
 
     func run() throws {
@@ -77,7 +76,7 @@ class Cleaner {
         guard files.contains(".swiftpm") else {
             return .notNecessary
         }
-        try Shell.delete(".swiftpm")
+        try Shell.default.delete(".swiftpm")
         return .success
     }
 
@@ -85,7 +84,7 @@ class Cleaner {
     private func cleanPackageResolved() throws -> CleanResult {
         guard files.contains("Package.resolved") else { return .notNecessary }
         if sig.update {
-            try Shell.delete("Package.resolved")
+            try Shell.default.delete("Package.resolved")
             return .success
         } else {
             return .ignored("Use [--update,-u] flag to remove this file during clean.")
@@ -94,19 +93,19 @@ class Cleaner {
 
     private func cleanBuildFolder() throws -> CleanResult {
         guard files.contains(".build") else { return .notNecessary }
-        var list = try Shell.allFiles(in: ".build").split(separator: "\n")
+        var list = try Shell.default.allFiles(in: ".build").split(separator: "\n")
         if sig.keepCheckouts {
             list.removeAll(where: ["checkouts", ".", ".."].contains)
-            try list.map { ".build/" + $0 } .forEach(Shell.delete)
+            try list.map { ".build/" + $0 } .forEach(Shell.default.delete)
         } else {
-            try Shell.delete(".build")
+            try Shell.default.delete(".build")
         }
         return .success
     }
 
     private func cleanXcode() throws -> CleanResult {
         guard files.contains(".xcodeproj") else { return .notNecessary }
-        try Shell.delete("*.xcodeproj")
+        try Shell.default.delete("*.xcodeproj")
         return .success
     }
 
@@ -133,7 +132,7 @@ class Cleaner {
     }
 
     private func cleanDefaultDerivedDataLocation() throws -> Bool {
-        let defaultLocation = try Shell.homeDirectory()
+        let defaultLocation = try Shell.default.homeDirectory()
             .trailingSlash
             + "Library/Developer/Xcode/DerivedData"
         guard
