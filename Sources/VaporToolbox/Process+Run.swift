@@ -1,39 +1,5 @@
 import Foundation
 
-struct Shell {
-    static var `default`: Shell {
-        .init(program: "/bin/sh")
-    }
-
-    let program: String
-
-    func which(_ program: String) throws -> String {
-        if program.hasPrefix("/") {
-            return program
-        }
-        let result = try self.run("which", program)
-        guard result.hasPrefix("/") else {
-            throw "unable to find executable for \(program)"
-        }
-        return result
-    }
-
-    @discardableResult
-    func run(_ program: String, _ arguments: String...) throws -> String {
-        try self.run(program, arguments)
-    }
-
-    @discardableResult
-    func run(_ program: String, _ arguments: [String]) throws -> String {
-        let process = Process(
-            program: self.program,
-            arguments: ["-c", program + " " + arguments.joined(separator: " ")]
-        )
-        try process.runUntilExit()
-        return process.stdout.read()
-    }
-}
-
 extension Process {
     static var running: Process?
 
@@ -106,7 +72,7 @@ extension Process {
     }
 }
 
-private extension FileHandle {
+extension FileHandle {
     func read() -> String {
         let data = self.readDataToEndOfFile()
         return String(decoding: data, as: UTF8.self)

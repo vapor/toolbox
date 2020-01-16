@@ -11,7 +11,7 @@ final class Main: ToolboxGroup {
         "xcode": XcodeCommand(),
         "build": BuildCommand(),
         "heroku": Heroku(),
-        "run": RunCommand(),
+        "run": Run(),
         "supervisor": Supervisor(),
     ]
     

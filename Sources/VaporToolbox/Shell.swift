@@ -1,6 +1,12 @@
 import Foundation
 
-extension Shell {
+struct Shell {
+    static var `default`: Shell {
+        .init(program: "/bin/sh")
+    }
+
+    let program: String
+
     func programExists(_ program: String) -> Bool {
         do {
             _ = try self.run("which", program)
@@ -44,5 +50,31 @@ extension Shell {
 
     func homeDirectory() throws -> String {
         try self.run("echo", "$HOME")
+    }
+
+    func which(_ program: String) throws -> String {
+        if program.hasPrefix("/") {
+            return program
+        }
+        let result = try self.run("which", program)
+        guard result.hasPrefix("/") else {
+            throw "unable to find executable for \(program)"
+        }
+        return result
+    }
+
+    @discardableResult
+    func run(_ program: String, _ arguments: String...) throws -> String {
+        try self.run(program, arguments)
+    }
+
+    @discardableResult
+    func run(_ program: String, _ arguments: [String]) throws -> String {
+        let process = Process(
+            program: self.program,
+            arguments: ["-c", program + " " + arguments.joined(separator: " ")]
+        )
+        try process.runUntilExit()
+        return process.stdout.read()
     }
 }
