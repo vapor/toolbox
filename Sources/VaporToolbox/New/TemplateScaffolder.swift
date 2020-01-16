@@ -88,15 +88,15 @@ struct TemplateScaffolder {
         case .file(let dynamic):
             self.console.output("+ " + file.name.consoleText())
             if dynamic {
-                let template = try Shell.readFile(path: source + file.name)
+                let template = try Shell.default.readFile(path: source + file.name)
                 try MustacheRenderer().render(template: template, data: context)
                     .write(to: URL(fileURLWithPath: destination + file.name), atomically: true, encoding: .utf8)
             } else {
-                try Shell.move(source + file.name, to: destination + file.name)
+                try Shell.default.move(source + file.name, to: destination + file.name)
             }
         case .folder(let files):
             let folder = file
-            try Shell.makeDirectory(destination + folder.name)
+            try Shell.default.makeDirectory(destination + folder.name)
             for file in files {
                 try self.scaffold(
                     file: file,

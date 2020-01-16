@@ -9,7 +9,7 @@ struct RunCommand: AnyCommand {
 
     /// See `Command`.
     func run(using ctx: inout CommandContext) throws {
-        try Process.run("swift", args: ["run", "Run"] + ctx.input.arguments)
+        try Shell.default.run("swift", ["run", "Run"] + ctx.input.arguments)
     }
 
     func outputHelp(using context: inout CommandContext) {

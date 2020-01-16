@@ -12,6 +12,7 @@ final class Main: ToolboxGroup {
         "build": BuildCommand(),
         "heroku": Heroku(),
         "run": RunCommand(),
+        "supervisor": SupervisorCommand(),
     ]
     
     let help = "Vapor Toolbox (Server-side Swift web framework)"

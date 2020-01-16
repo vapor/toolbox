@@ -28,24 +28,24 @@ struct New: Command {
         let workTree = "./\(name)"
 
         if FileManager.default.fileExists(atPath: workTree.trailingSlash + "manifest.yml") {
-            try? Shell.delete(".vapor-template")
-            try Shell.move(name, to: ".vapor-template")
-            try Shell.makeDirectory(name)
-            let yaml = try Shell.readFile(path: ".vapor-template/manifest.yml")
+            try? Shell.default.delete(".vapor-template")
+            try Shell.default.move(name, to: ".vapor-template")
+            try Shell.default.makeDirectory(name)
+            let yaml = try Shell.default.readFile(path: ".vapor-template/manifest.yml")
             let manifest = try YAMLDecoder().decode(TemplateManifest.self, from: yaml)
-            let cwd = try Shell.cwd()
+            let cwd = try Shell.default.cwd()
             let scaffolder = TemplateScaffolder(console: ctx.console, manifest: manifest)
             try scaffolder.scaffold(
                 name: name,
                 from: cwd.trailingSlash + ".vapor-template",
                 to: cwd.trailingSlash + name
             )
-            try Shell.delete(".vapor-template")
+            try Shell.default.delete(".vapor-template")
         }
         
         // clear existing git history
         ctx.console.info("Creating git repository")
-        try Shell.delete("./\(name)/.git")
+        try Shell.default.delete("./\(name)/.git")
         let _ = try Git.create(gitDir: gitDir)
 
         // initialize

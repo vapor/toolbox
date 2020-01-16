@@ -10,7 +10,11 @@ struct BuildCommand: Command {
     /// See `Command`.
     func run(using ctx: CommandContext, signature: Signature) throws {
         ctx.console.output("Building project..")
-        try Process.run("swift", args: ["build"] + ctx.input.arguments)
+        let task = try Process.new("swift", ["build"] + ctx.input.arguments)
+        task.onOutput { output in
+            ctx.console.output(output.consoleText())
+        }
+        try task.run()
         ctx.console.output("Project built.")
     }
 }

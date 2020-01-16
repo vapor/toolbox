@@ -9,7 +9,7 @@ struct XcodeBuild {
             args.append(project)
         }
         args.append("-showBuildSettings")
-        let raw = try Process.runBackground("xcodebuild", args: args)
+        let raw = try Shell.default.run("xcodebuild", args)
         let buildSettings = raw.buildSettingsDictionary()
         guard let config = buildSettings["CONFIGURATION_BUILD_DIR"] else {
             throw "unable to find value for CONFIGURATION_BUILD_DIR"
