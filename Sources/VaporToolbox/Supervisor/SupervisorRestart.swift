@@ -11,7 +11,11 @@ struct SupervisorRestart: Command {
 
     func run(using context: CommandContext, signature: Signature) throws {
         let package = try Process.swift.package.dump()
-        try Process.run(Shell.default.which("supervisorctl"), "restart", package.name)
+        let task = try Process.new(Shell.default.which("supervisorctl"), "restart", package.name)
+        task.onOutput {
+            context.console.print($0)
+        }
+        try task.runUntilExit()
         context.console.info("Supervisor restarted \(package.name)")
     }
 }
