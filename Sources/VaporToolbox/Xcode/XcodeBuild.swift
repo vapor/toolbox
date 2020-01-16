@@ -1,5 +1,4 @@
 import Foundation
-import Globals
 
 struct XcodeBuild {
     static func derivedDataLocation(forProject project: String? = nil) throws -> String {

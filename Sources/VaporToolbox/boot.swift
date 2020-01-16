@@ -1,15 +1,14 @@
-import Globals
 import ConsoleKit
 import Foundation
 
-final class Main: ToolboxGroup {
+final class Main: CommandGroup {
     struct Signature: CommandSignature {}
     
     let commands: [String: AnyCommand] = [
-        "clean": CleanCommand(),
+        "clean": Clean(),
         "new": New(),
-        "xcode": XcodeCommand(),
-        "build": BuildCommand(),
+        "xcode": Xcode(),
+        "build": Build(),
         "heroku": Heroku(),
         "run": Run(),
         "supervisor": Supervisor(),
@@ -17,9 +16,9 @@ final class Main: ToolboxGroup {
     
     let help = "Vapor Toolbox (Server-side Swift web framework)"
 
-    func fallback(using ctx: inout CommandContext) throws {
-        ctx.console.output("Welcome to vapor.")
-        ctx.console.output("Use `vapor -h` to see commands.")
+    func run(using context: inout CommandContext) throws {
+        context.console.output("Welcome to vapor.")
+        context.console.output("Use `vapor -h` to see commands.")
     }
 }
 

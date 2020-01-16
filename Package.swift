@@ -18,14 +18,9 @@ let package = Package(
     targets: [
         .target(name: "VaporToolbox", dependencies: [
             "ConsoleKit",
-            "Globals",
             "Mustache",
             "NIO",
             "Yams"
-        ]),
-        .target(name: "Globals", dependencies: [
-            "ConsoleKit",
-            "NIO"
         ]),
         .target(name: "Executable", dependencies: ["VaporToolbox"]),
     ]

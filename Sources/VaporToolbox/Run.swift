@@ -10,7 +10,6 @@ struct Run: AnyCommand {
     /// See `Command`.
     func run(using context: inout CommandContext) throws {
         let context = context
-
         let process = Process()
         process.environment = ProcessInfo.processInfo.environment
         process.executableURL = try URL(fileURLWithPath: Shell.default.which("swift"))

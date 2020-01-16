@@ -1,4 +1,3 @@
-import Globals
 import NIO
 import Foundation
 import ConsoleKit

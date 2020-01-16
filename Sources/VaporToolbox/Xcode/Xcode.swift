@@ -1,9 +1,8 @@
 import ConsoleKit
 import Foundation
-import Globals
 
 // Generates an Xcode project
-struct XcodeCommand: Command {
+struct Xcode: Command {
     struct Signature: CommandSignature { }
 
     let help = "Opens an app in Xcode."

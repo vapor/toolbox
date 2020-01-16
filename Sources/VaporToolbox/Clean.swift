@@ -1,9 +1,8 @@
 import ConsoleKit
-import Globals
 import Foundation
 
 /// Cleans temporary files created by Xcode and SPM.
-struct CleanCommand: Command {
+struct Clean: Command {
     struct Signature: CommandSignature {
         @Flag(name: "update", short: "u", help: "Delete Package.resolved file if it exists.")
         var update: Bool
@@ -26,13 +25,13 @@ struct CleanCommand: Command {
 
 class Cleaner {
     let ctx: CommandContext
-    let sig: CleanCommand.Signature
+    let sig: Clean.Signature
     let cwd: String
     let files: String
 
     var operations: [String: CleanResult] = [:]
 
-    init(ctx: CommandContext, sig: CleanCommand.Signature) throws {
+    init(ctx: CommandContext, sig: Clean.Signature) throws {
         self.ctx = ctx
         self.sig = sig
         let cwd = try Shell.default.cwd()

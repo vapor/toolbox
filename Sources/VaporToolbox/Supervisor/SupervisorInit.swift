@@ -36,7 +36,7 @@ struct SupervisorInit: Command {
         )
         let path = "\(directory)/\(package.name).conf"
         FileManager.default.createFile(atPath: path, contents: .init(config.serialize().utf8))
-        context.console.print("Supervisor configuration created: \(path)")
+        context.console.print("Supervisor configuration created: \(path).")
         try SupervisorUpdate().run(using: context, signature: .init())
     }
 }
