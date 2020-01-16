@@ -20,7 +20,7 @@ struct New: Command {
 
         // Cloning
         ctx.console.info("Cloning template...")
-        let _ = try Git.clone(repo: gitUrl, toFolder: "./" + name)
+        let _ = try Process.git.clone(repo: gitUrl, toFolder: "./" + name)
 
         // used to work on a git repository
         // outside of current path
@@ -46,11 +46,11 @@ struct New: Command {
         // clear existing git history
         ctx.console.info("Creating git repository")
         try Shell.default.delete("./\(name)/.git")
-        let _ = try Git.create(gitDir: gitDir)
+        let _ = try Process.git.create(gitDir: gitDir)
 
         // initialize
         ctx.console.info("Adding first commit")
-        try Git.commit(
+        try Process.git.commit(
             gitDir: gitDir,
             workTree: workTree,
             msg: "first commit"

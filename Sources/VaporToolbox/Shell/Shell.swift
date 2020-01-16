@@ -27,9 +27,9 @@ struct Shell {
     func run(_ program: String, _ arguments: [String]) throws -> String {
         let process = Process(
             program: self.program,
-            arguments: ["-c", program + " " + arguments.joined(separator: "\n")]
+            arguments: ["-c", program + " " + arguments.joined(separator: " ")]
         )
-        try process.run()
+        try process.runUntilExit()
         return process.stdout.read()
     }
 }

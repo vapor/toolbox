@@ -6,6 +6,10 @@ extension Process {
     }
 
     struct Swift {
+        func run(_ command: String, _ arguments: String...) throws -> String {
+            try self.run(command, arguments)
+        }
+        
         func run(_ command: String, _ arguments: [String]) throws -> String {
             try Process.run(Shell.default.which("swift"), [command] + arguments)
         }

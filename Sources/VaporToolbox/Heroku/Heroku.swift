@@ -24,12 +24,12 @@ struct HerokuInit: Command {
 
     /// See `Command`.
     func run(using ctx: CommandContext, signature: Signature) throws {
-        guard try Git.isClean() else {
+        guard try Process.git.isClean() else {
             // force this because we're going to be adding commits
             throw "git status not clean, all changes must be committed before initing heroku."
         }
 
-        let branch = try Git.currentBranch()
+        let branch = try Process.git.currentBranch()
         guard branch == "master" else {
             throw "please checkout master branch before initializing heroku. 'git checkout master'"
 
@@ -40,7 +40,7 @@ struct HerokuInit: Command {
             throw "heroku toolbelt must be installed."
         }
 
-        let herokuExists = Git.hasRemote(named: "heroku")
+        let herokuExists = Process.git.hasRemote(named: "heroku")
         guard !herokuExists else {
             throw """
             this project is already configured to an existing heroku app.
@@ -110,12 +110,12 @@ struct HerokuInit: Command {
             throw error
         }
 
-        guard !(try Git.isClean()) else {
+        guard !(try Process.git.isClean()) else {
             throw "there was an error adding the procfile"
         }
 
-        try Git.addChanges()
-        try Git.commitChanges(msg: "adding heroku procfile")
+        try Process.git.addChanges()
+        try Process.git.commitChanges(msg: "adding heroku procfile")
 
         let swiftVersion = ctx.console.ask("which swift version should we use (ie: 5.1)?")
         ctx.console.info("setting swift version...")
@@ -126,12 +126,12 @@ struct HerokuInit: Command {
             throw error
         }
 
-        guard !(try Git.isClean()) else {
+        guard !(try Process.git.isClean()) else {
             throw "there was an error setting the swift version"
         }
 
-        try Git.addChanges()
-        try Git.commitChanges(msg: "adding swift version")
+        try Process.git.addChanges()
+        try Process.git.commitChanges(msg: "adding swift version")
 
         // todo push to heroku
         ctx.console.success("you are now ready, call `git push heroku master` to deploy.")
