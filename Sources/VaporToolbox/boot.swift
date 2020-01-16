@@ -16,7 +16,7 @@ final class Main: CommandGroup {
     
     let help = "Vapor Toolbox (Server-side Swift web framework)"
 
-    func run(using context: inout CommandContext) throws {
+    func outputHelp(using context: inout CommandContext) throws {
         context.console.output("Welcome to vapor.")
         context.console.output("Use `vapor -h` to see commands.")
     }
