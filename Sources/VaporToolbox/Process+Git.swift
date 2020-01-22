@@ -12,7 +12,7 @@ extension Process {
 
         @discardableResult
         func run(_ command: String, _ arguments: [String]) throws -> String {
-            try Process.run(Shell.default.which("git"), [command] + arguments)
+            try Process.run(Process.shell.which("git"), [command] + arguments)
         }
     }
 }

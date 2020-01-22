@@ -12,8 +12,8 @@ struct SupervisorInit: Command {
 
     func run(using context: CommandContext, signature: Signature) throws {
         let package = try Process.swift.package.dump()
-        let cwd = try Shell.default.cwd()
-        let user = try Shell.default.whoami()
+        let cwd = try Process.shell.cwd()
+        let user = try Process.shell.whoami()
         let config = SupervisorConfiguration(
             program: package.name,
             attributes: [

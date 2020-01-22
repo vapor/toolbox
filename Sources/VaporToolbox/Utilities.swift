@@ -11,3 +11,9 @@ extension String {
 }
 
 extension String: Error { }
+
+extension Console {
+    public func list(_ style: ConsoleStyle = .info, key: String, value: String) {
+        self.output("\(key): ".consoleText(style) + value.consoleText())
+    }
+}

@@ -12,7 +12,7 @@ struct Run: AnyCommand {
         let context = context
         let process = Process()
         process.environment = ProcessInfo.processInfo.environment
-        process.executableURL = try URL(fileURLWithPath: Shell.default.which("swift"))
+        process.executableURL = try URL(fileURLWithPath: Process.shell.which("swift"))
         process.arguments = ["run", "Run"] + context.input.arguments
         Process.running = process
         try process.run()

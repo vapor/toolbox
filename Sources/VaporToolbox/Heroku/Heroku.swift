@@ -3,7 +3,10 @@ import Foundation
 
 struct Heroku: CommandGroup {
     var commands: [String : AnyCommand] {
-        ["init": HerokuInit()]
+        [
+            "init": HerokuInit(),
+            "push": HerokuPush(),
+        ]
     }
 
     var help: String {

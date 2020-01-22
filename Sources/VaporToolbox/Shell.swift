@@ -1,10 +1,11 @@
 import Foundation
 
-struct Shell {
-    static var `default`: Shell {
+extension Process {
+    static var shell: Shell {
         .init(program: "/bin/sh")
     }
-
+}
+struct Shell {
     let program: String
 
     func programExists(_ program: String) -> Bool {
