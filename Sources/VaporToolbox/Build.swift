@@ -12,7 +12,7 @@ struct Build: Command {
         context.console.output("Building project...")
         let process = Process()
         process.environment = ProcessInfo.processInfo.environment
-        process.executableURL = try URL(fileURLWithPath: Shell.default.which("swift"))
+        process.executableURL = try URL(fileURLWithPath: Process.shell.which("swift"))
         process.arguments = ["build"]
         Process.running = process
         try process.run()

@@ -1,129 +1,209 @@
 import ConsoleKit
 import Foundation
 
+let herokuYml = """
+build:
+  docker:
+    web: Dockerfile
+"""
+
+let herokuProcfile = """
+web: Run serve --env production --hostname 0.0.0.0 --port \\$PORT
+"""
+
 struct HerokuInit: Command {
-    struct Signature: CommandSignature {
-        @Flag(name: "update", short: "u", help: "cleans Package.resolved file if it exists.")
-        var update: Bool
-        @Flag(name: "keep-checkouts", short: "k", help: "keep git checkouts of dependencies.")
-        var keepCheckouts: Bool
+    struct Signature: CommandSignature { }
+
+    enum Error: Swift.Error, CustomStringConvertible {
+        case missingToolbelt
+        case remoteAlreadyExists
+
+        var description: String {
+            switch self {
+            case .missingToolbelt:
+                return "Could not find 'heroku' command."
+            case .remoteAlreadyExists:
+                return "Remote branch 'heroku' already exists."
+            }
+        }
     }
+
     let signature = Signature()
-    let help = "Configures an app for deployment to Heroku."
+    let help = "Configures app for deployment to Heroku."
 
-    /// See `Command`.
     func run(using ctx: CommandContext, signature: Signature) throws {
-        guard try Process.git.isClean() else {
-            // force this because we're going to be adding commits
-            throw "git status not clean, all changes must be committed before initing heroku."
+        // Get Swift package name
+        let name = try Process.swift.package.dump().name
+        ctx.console.list(key: "Package", value: name)
+
+        // Check if git is clean.
+        if try !Process.git.isClean() {
+            ctx.console.warning("Git has uncommitted changes.")
         }
 
+        // Check current git branch.
         let branch = try Process.git.currentBranch()
-        guard branch == "master" else {
-            throw "please checkout master branch before initializing heroku. 'git checkout master'"
-
+        ctx.console.list(key: "Git branch", value: branch)
+        if branch != "master" {
+            ctx.console.warning("You are not currently on 'master' branch.")
         }
 
-        guard Shell.default.programExists("heroku") else {
-            ctx.console.info("visit https://toolbelt.heroku.com")
-            throw "heroku toolbelt must be installed."
+        // Check for Heroku toolbelt installtion.
+        guard Process.shell.programExists("heroku") else {
+            ctx.console.list(key: "Install Heroku toolbelt", value: "https://toolbelt.heroku.com")
+            throw Error.missingToolbelt
         }
 
+        // Ensure user is logged into Heroku
+        do {
+            let user = try Process.heroku.run("whoami")
+            ctx.console.list(key: "Heroku user", value: user)
+        } catch {
+            ctx.console.list(.error, key: "Not logged in", value: "Use 'heroku login' to login.")
+            throw error
+        }
+
+        // Check to see if there's already a `heroku` branch.
         let herokuExists = Process.git.hasRemote(named: "heroku")
         guard !herokuExists else {
-            throw """
-            this project is already configured to an existing heroku app.
-            if you'd like to use this project with a new heroku app, use
-
-            'git remote remove heroku'
-
-            and try again.
-            """
+            ctx.console.list(.warning, key: "Remove branch", value: "git remote rm heroku")
+            throw Error.remoteAlreadyExists
         }
 
-        let name: String
-        if ctx.console.confirm("should we use a custom heroku app identifier?") {
-            name = ctx.console.ask("custom app identifier:")
-        } else {
-            name = ""
-        }
-
+        // Ask for deployment region
         let region: String
-        if ctx.console.confirm("should we deploy to a region other than the us?") {
-            region = ctx.console.ask("custom region (ie: us, eu):")
-        } else {
+        if ctx.console.confirm("Deploy to U.S. region?") {
             region = "us"
+        } else {
+            region = ctx.console.ask("Region (e.g., us, eu):")
         }
 
-
+        // Create app and get URL
+        ctx.console.output("Creating Heroku app...")
         let url: String
         do {
-            url = try Process.heroku.run("create", name, "--region", region)
-            ctx.console.info("heroku app created at:")
-            ctx.console.info(url)
+            url = try Process.heroku.run("create", "--region", region)
+                .split(separator: "|")
+                .first
+                .flatMap(String.init) ?? ""
+            ctx.console.output("Heroku app created: ".consoleText(.info) + url.consoleText())
         } catch {
-            ctx.console.error("unable to create heroku app:")
             throw error
         }
 
-        let buildpack: String
-        if ctx.console.confirm("should we use a custom Heroku buildpack?") {
-            buildpack = ctx.console.ask("custom buildpack url:")
-        } else {
-            buildpack = "https://github.com/vapor-community/heroku-buildpack"
+        enum Method: String, CustomStringConvertible {
+            case docker
+            case buildpack
+            var description: String {
+                self.rawValue
+            }
         }
 
-        ctx.console.info("setting buildpack...")
+        var createdFiles: [String] = []
+        let method = ctx.console.choose("Which deploy method?", from: [Method.docker, Method.buildpack])
+        switch method {
+        case .buildpack:
+            // Add .swift-version configuration file
+            if !FileManager.default.fileExists(atPath: "Procfile") {
+                let swiftVersion = ctx.console.ask("Which Swift version? (e.g., 5.1)")
+                FileManager.default.createFile(
+                    atPath: ".swift-version",
+                    contents: .init(swiftVersion.utf8)
+                )
+                createdFiles.append(".swift-version")
+                ctx.console.list(.success, key: ".swift-version", value: "Created.")
+            } else {
+                ctx.console.list(.warning, key: ".swift-version", value: "Already exists.")
+            }
 
-        do {
+            // Add Procfile configuration file
+            if !FileManager.default.fileExists(atPath: "Procfile") {
+                FileManager.default.createFile(
+                    atPath: "Procfile",
+                    contents: .init(herokuProcfile.utf8)
+                )
+                createdFiles.append("Procfile")
+                ctx.console.list(.success, key: "Procfile", value: "Created.")
+            } else {
+                ctx.console.list(.warning, key: "Procfile", value: "Already exists.")
+            }
+
+            // Set buildpack
+            let buildpack: String
+            if ctx.console.confirm("Use default buildpack?") {
+                buildpack = "https://github.com/vapor-community/heroku-buildpack"
+            } else {
+                buildpack = ctx.console.ask("Buildpack URL:")
+            }
+            ctx.console.output("Setting buildpack...")
             _ = try Process.heroku.run("buildpacks:set", buildpack)
-        } catch {
-            ctx.console.error("unable to set buildpack \(buildpack):")
-            throw error
+
+            if FileManager.default.fileExists(atPath: "heroku.yml") {
+                ctx.console.error("heroku.yml file will override Procfile")
+            }
+        case .docker:
+            // Verify that Dockerfile exists
+            if !FileManager.default.fileExists(atPath: "Dockerfile") {
+                ctx.console.warning("No Dockerfile found.")
+            }
+
+            // Add heroku.yml configuration file
+            if !FileManager.default.fileExists(atPath: "heroku.yml") {
+                FileManager.default.createFile(
+                    atPath: "heroku.yml",
+                    contents: .init(herokuYml.utf8)
+                )
+                createdFiles.append("heroku.yml")
+                ctx.console.list(.success, key: "heroku.yml", value: "Created.")
+            } else {
+                ctx.console.list(.warning, key: "heroku.yml", value: "Already exists.")
+            }
+
+            // Configure container stack
+            ctx.console.output("Setting stack...")
+            do {
+                _ = try Process.heroku.run("stack:set", "container")
+            } catch {
+                throw error
+            }
+
+            if FileManager.default.fileExists(atPath: "Procfile") {
+                ctx.console.warning("heroku.yml file will override Procfile")
+            }
+
+            ctx.console.warning("You may need to set your app's default port dynamically")
+            ctx.console.output("""
+            // support heroku port
+            if let port = Environment.get("PORT").flatMap(Int.init) {
+                app.server.configuration.port = port
+            }
+            """)
         }
 
+        if !createdFiles.isEmpty {
+            if ctx.console.confirm("Commit changes?") {
+                try Process.git.run("add", createdFiles)
+                try Process.git.commitChanges(msg: "heroku init")
+            } else {
+                ctx.console.output("Commit changes then use `vapor heroku push` to deploy.".consoleText())
+                return
+            }
+        }
 
-        let vaporAppName: String
-        if ctx.console.confirm("is your vapor app using a custom executable name?") {
-            vaporAppName = ctx.console.ask("executable name:")
+        if ctx.console.confirm("Deploy now?") {
+            let process = Process()
+            process.environment = ProcessInfo.processInfo.environment
+            process.executableURL = try URL(fileURLWithPath: Process.shell.which("git"))
+            process.arguments = ["push", "heroku", branch]
+            Process.running = process
+            try process.run()
+            process.waitUntilExit()
+            Process.running = nil
+            ctx.console.list(.success, key: "Deployed \(name)", value: url)
+            ctx.console.output("Use 'vapor heroku push' to deploy next time.".consoleText())
         } else {
-            vaporAppName = "Run"
+            ctx.console.output("Use 'vapor heroku push' to deploy.".consoleText())
         }
-
-        ctx.console.info("setting procfile...")
-        let procContents = "web: \(vaporAppName) serve --env production --hostname 0.0.0.0 --port \\$PORT"
-        do {
-            _ = try Process.run("echo", "\(procContents) >> ./Procfile")
-        } catch {
-            ctx.console.error("unable to make procfile")
-            throw error
-        }
-
-        guard !(try Process.git.isClean()) else {
-            throw "there was an error adding the procfile"
-        }
-
-        try Process.git.addChanges()
-        try Process.git.commitChanges(msg: "adding heroku procfile")
-
-        let swiftVersion = ctx.console.ask("which swift version should we use (ie: 5.1)?")
-        ctx.console.info("setting swift version...")
-        do {
-            try Process.run("echo", "\(swiftVersion) >> ./.swift-version")
-        } catch {
-            ctx.console.error("unable to set swift versiono")
-            throw error
-        }
-
-        guard !(try Process.git.isClean()) else {
-            throw "there was an error setting the swift version"
-        }
-
-        try Process.git.addChanges()
-        try Process.git.commitChanges(msg: "adding swift version")
-
-        // todo push to heroku
-        ctx.console.success("you are now ready, call `git push heroku master` to deploy.")
     }
 }
 
