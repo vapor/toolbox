@@ -3,21 +3,10 @@ import Foundation
 
 // Generates an Xcode project
 struct Run: AnyCommand {
-    struct Signature: CommandSignature {}
-
     let help = "Runs an app from the console."
 
-    /// See `Command`.
     func run(using context: inout CommandContext) throws {
-        let context = context
-        let process = Process()
-        process.environment = ProcessInfo.processInfo.environment
-        process.executableURL = try URL(fileURLWithPath: Process.shell.which("swift"))
-        process.arguments = ["run", "Run"] + context.input.arguments
-        Process.running = process
-        try process.run()
-        process.waitUntilExit()
-        Process.running = nil
+        try exec("/usr/bin/swift", ["run", "Run"] + context.input.arguments)
     }
 
     func outputHelp(using context: inout CommandContext) {

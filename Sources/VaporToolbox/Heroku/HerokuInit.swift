@@ -191,14 +191,7 @@ struct HerokuInit: Command {
         }
 
         if ctx.console.confirm("Deploy now?") {
-            let process = Process()
-            process.environment = ProcessInfo.processInfo.environment
-            process.executableURL = try URL(fileURLWithPath: Process.shell.which("git"))
-            process.arguments = ["push", "heroku", branch]
-            Process.running = process
-            try process.run()
-            process.waitUntilExit()
-            Process.running = nil
+            try exec(Process.shell.which("git"), "push", "heroku", branch)
             ctx.console.list(.success, key: "Deployed \(name)", value: url)
             ctx.console.output("Use 'vapor heroku push' to deploy next time.".consoleText())
         } else {

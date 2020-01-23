@@ -50,7 +50,6 @@ extension Process {
         }
     }
 
-
     @discardableResult
     static func run(_ program: String, _ arguments: String...) throws -> String {
         try self.run(program, arguments)

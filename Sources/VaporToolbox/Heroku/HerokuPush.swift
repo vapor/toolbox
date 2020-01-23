@@ -24,13 +24,6 @@ struct HerokuPush: Command {
             context.console.warning("You are not currently on 'master' branch.")
         }
 
-        let process = Process()
-        process.environment = ProcessInfo.processInfo.environment
-        process.executableURL = try URL(fileURLWithPath: Process.shell.which("git"))
-        process.arguments = ["push", "heroku", branch]
-        Process.running = process
-        try process.run()
-        process.waitUntilExit()
-        Process.running = nil
+        try exec(Process.shell.which("git"), "push", "heroku", branch)
     }
 }
