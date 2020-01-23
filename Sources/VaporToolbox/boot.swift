@@ -19,9 +19,15 @@ final class Main: CommandGroup {
 
 public func run() throws {
     signal(SIGINT) { code in
+        // kill any background processes running
         if let running = Process.running {
             running.interrupt()
         }
+        // kill any foreground execs running
+        if let running = execPid {
+            kill(running, code)
+        }
+        exit(code)
     }
     let input = CommandInput(arguments: CommandLine.arguments)
     try Terminal().run(Main(), input: input)
