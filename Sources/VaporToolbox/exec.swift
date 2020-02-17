@@ -8,7 +8,7 @@ func exec(_ program: String, _ arguments: String...) throws {
 
 func exec(_ program: String, _ arguments: [String]) throws {
     var pid = pid_t()
-    var fileActions: posix_spawn_file_actions_t?
+    var fileActions: posix_spawn_file_actions_t!
 
     posix_spawn_file_actions_init(&fileActions)
     defer {
