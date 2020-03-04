@@ -5,18 +5,18 @@
         "package": "console-kit",
         "repositoryURL": "https://github.com/vapor/console-kit.git",
         "state": {
-          "branch": "master",
-          "revision": "535874e4654b17cebb422b9e17353e85d421a118",
-          "version": null
+          "branch": null,
+          "revision": "de99d83c9f3c298371002729cc0601e4b5d9e0c9",
+          "version": "4.0.0-rc.1"
         }
       },
       {
         "package": "Mustache",
         "repositoryURL": "https://github.com/tanner0101/mustache.git",
         "state": {
-          "branch": "master",
+          "branch": null,
           "revision": "2169b3a2ba3add4957faaa1bdaa0b7b1e0013b08",
-          "version": null
+          "version": "0.1.0"
         }
       },
       {
@@ -32,18 +32,18 @@
         "package": "swift-nio",
         "repositoryURL": "https://github.com/apple/swift-nio.git",
         "state": {
-          "branch": "master",
-          "revision": "ea5a64978d944567498533a63eb44bf965ba3d45",
-          "version": null
+          "branch": null,
+          "revision": "16ab4d657e1ad4e77bd5f8b94af8538561643053",
+          "version": "2.14.0"
         }
       },
       {
         "package": "Yams",
         "repositoryURL": "https://github.com/jpsim/Yams.git",
         "state": {
-          "branch": "master",
-          "revision": "5fa313eae1ca127ad3c706e14c564399989cb1b1",
-          "version": null
+          "branch": null,
+          "revision": "c947a306d2e80ecb2c0859047b35c73b8e1ca27f",
+          "version": "2.0.0"
         }
       }
     ]
