@@ -73,7 +73,7 @@ struct Shell {
     func run(_ program: String, _ arguments: [String]) throws -> String {
         let process = Process(
             program: self.program,
-            arguments: ["-c", program + " " + arguments.joined(separator: " ")]
+            arguments: ["-c", "'\(program)' \(arguments.map { "'\($0)'" }.joined(separator: " "))"]
         )
         try process.runUntilExit()
         return process.stdout.read()
