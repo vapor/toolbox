@@ -23,12 +23,7 @@ struct TemplateScaffolder {
         }
         self.console.info("Generating project files")
         for file in self.manifest.files {
-            try self.scaffold(
-                file: file,
-                from: source.trailingSlash,
-                to: destination.trailingSlash,
-                context: context
-            )
+            try self.scaffold(file: file, from: source.trailingSlash, to: destination.trailingSlash, context: context)
         }
     }
 
@@ -87,20 +82,22 @@ struct TemplateScaffolder {
         case .file(let dynamic):
             self.console.output("+ " + file.name.consoleText())
             if dynamic {
-                let template = try Process.shell.readFile(path: source + file.name)
+                let template = try String(contentsOf: source.appendingPathComponents(file.name).asFileURL, encoding: .utf8)
                 try MustacheRenderer().render(template: template, data: context)
-                    .write(to: URL(fileURLWithPath: destination + file.name), atomically: true, encoding: .utf8)
+                    .write(to: URL(fileURLWithPath: destination.appendingPathComponents(file.name)), atomically: true, encoding: .utf8)
             } else {
-                try Process.shell.move(source + file.name, to: destination + file.name)
+                try FileManager.default.moveItem(
+                    atPath: source.appendingPathComponents(file.name),
+                    toPath: destination.appendingPathComponents(file.name))
             }
         case .folder(let files):
             let folder = file
-            try Process.shell.makeDirectory(destination + folder.name)
+            try FileManager.default.createDirectory(atPath: destination.appendingPathComponents(folder.name), withIntermediateDirectories: false)
             for file in files {
                 try self.scaffold(
                     file: file,
-                    from: source + folder.name.trailingSlash,
-                    to: destination + folder.name.trailingSlash,
+                    from: source.appendingPathComponents(folder.name).trailingSlash,
+                    to: destination.appendingPathComponents(folder.name).trailingSlash,
                     context: context
                 )
             }
