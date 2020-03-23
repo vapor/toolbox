@@ -6,8 +6,6 @@ struct Clean: Command {
     struct Signature: CommandSignature {
         @Flag(name: "update", short: "u", help: "Delete Package.resolved file if it exists.")
         var update: Bool
-        @Flag(name: "keep-checkouts", short: "k", help: "Keep git checkouts of dependencies.")
-        var keepCheckouts: Bool
         @Flag(name: "global", short: "g", help: "Clean Xcode's global DerivedData cache.")
         var global: Bool
         @Flag(name: "swiftpm", short: "s", help: "Delete .swiftpm folder.")
@@ -93,13 +91,7 @@ class Cleaner {
 
     private func cleanBuildFolder() throws -> CleanResult {
         guard files.contains(".build") else { return .notNecessary }
-        var list = try Process.shell.allFiles(in: ".build").split(separator: "\n")
-        if sig.keepCheckouts {
-            list.removeAll(where: ["checkouts", ".", ".."].contains)
-            try list.map { ".build/" + $0 } .forEach(Process.shell.delete)
-        } else {
-            try Process.shell.delete(".build")
-        }
+        try FileManager.default.removeItem(atPath: self.cwd.appendingPathComponents(".build"))
         return .success
     }
 
