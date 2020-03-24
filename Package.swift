@@ -22,6 +22,7 @@ let package = Package(
             .product(name: "NIO", package: "swift-nio"),
             .product(name: "Yams", package: "Yams"),
         ]),
+        .testTarget(name: "VaporToolboxTests", dependencies: ["VaporToolbox"]),
         .target(name: "Executable", dependencies: [
             .target(name: "VaporToolbox"),
         ]),
