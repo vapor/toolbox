@@ -6,7 +6,7 @@ struct Run: AnyCommand {
     let help = "Runs an app from the console."
 
     func run(using context: inout CommandContext) throws {
-        try exec("/usr/bin/swift", ["run", "Run"] + context.input.arguments)
+        try exec("/usr/bin/swift", ["run", "--enable-test-discovery", "Run"] + context.input.arguments)
     }
 
     func outputHelp(using context: inout CommandContext) {
