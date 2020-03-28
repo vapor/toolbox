@@ -10,8 +10,8 @@
     <a href="LICENSE">
         <img src="http://img.shields.io/badge/license-MIT-brightgreen.svg" alt="MIT License">
     </a>
-    <a href="https://circleci.com/gh/vapor/toolbox">
-        <img src="https://circleci.com/gh/vapor/toolbox.svg?style=shield" alt="Continuous Integration">
+    <a href="https://github.com/vapor/toolbox/actions?query=workflow%3Atest">
+        <img src="https://github.com/vapor/toolbox/workflows/test/badge.svg?event=pull_request" alt="Continuous Integration via GitHub">
     </a>
     <a href="https://swift.org">
         <img src="http://img.shields.io/badge/swift-4.1-brightgreen.svg" alt="Swift 4.1">
