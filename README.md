@@ -1,7 +1,7 @@
 # Vapor Toolbox
 
 <p align="center">
-    <a href="https://docs.vapor.codes/3.0/">
+    <a href="https://docs.vapor.codes/4.0/">
         <img src="http://img.shields.io/badge/read_the-docs-2196f3.svg" alt="Documentation">
     </a>
     <a href="https://discord.gg/vapor">
@@ -14,6 +14,6 @@
         <img src="https://github.com/vapor/toolbox/workflows/test/badge.svg?event=pull_request" alt="Continuous Integration via GitHub">
     </a>
     <a href="https://swift.org">
-        <img src="http://img.shields.io/badge/swift-4.1-brightgreen.svg" alt="Swift 4.1">
+        <img src="http://img.shields.io/badge/swift-5.2-brightgreen.svg" alt="Swift 5.2">
     </a>
 </center>
