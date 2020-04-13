@@ -173,9 +173,9 @@ struct HerokuInit: Command {
 
             ctx.console.warning("You may need to set your app's default port dynamically")
             ctx.console.output("""
-            // support heroku port
+            // Support Heroku port
             if let port = Environment.get("PORT").flatMap(Int.init) {
-                app.server.configuration.port = port
+                app.http.server.configuration.port = port
             }
             """)
         }
