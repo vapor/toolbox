@@ -8,7 +8,12 @@ func exec(_ program: String, _ arguments: String...) throws {
 
 func exec(_ program: String, _ arguments: [String]) throws {
     var pid = pid_t()
+
+    #if os(Linux)
+    var fileActions = posix_spawn_file_actions_t()
+    #else
     var fileActions: posix_spawn_file_actions_t!
+    #endif
 
     posix_spawn_file_actions_init(&fileActions)
     defer {
@@ -19,7 +24,7 @@ func exec(_ program: String, _ arguments: [String]) throws {
     posix_spawn_file_actions_adddup2(&fileActions, FileHandle.standardOutput.fileDescriptor, 1)
     posix_spawn_file_actions_adddup2(&fileActions, FileHandle.standardError.fileDescriptor, 2)
 
-    let argv = ([program] + arguments).map {
+    let argv = ([program] + arguments).compactMap {
         $0.withCString(strdup)
     }
     defer {
