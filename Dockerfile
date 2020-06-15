@@ -1,11 +1,11 @@
-FROM swift:5.2 as build
-WORKDIR /toolbox
+FROM swift:5.2-bionic as build
+WORKDIR /build
 COPY . .
-RUN mkdir -p /build/lib && cp -R /usr/lib/swift/linux/*.so* /build/lib
-RUN swift build -c release && mv `swift build -c release --show-bin-path` /build/bin
+RUN swift build --build-path /build/.build --enable-test-discovery -c release
 
-FROM swift:5.2-slim
-WORKDIR /toolbox
-COPY --from=build /build/bin/vapor /usr/bin
-COPY --from=build /build/lib/* /usr/lib/
+FROM swift:5.2-bionic-slim
+RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true && \
+    apt-get -q update && apt-get -q upgrade -y && apt-get install -y --no-install-recommends git \
+    && rm -r /var/lib/apt/lists/*
+COPY --from=build /build/.build/release/vapor /usr/bin
 ENTRYPOINT ["vapor"]
