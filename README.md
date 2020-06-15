@@ -2,11 +2,7 @@
 
 <p align="center">
 
-   <img 
-     src="https://repository-images.githubusercontent.com/49910095/8c5be280-5bbd-11ea-83c7-7fb50300e4df" 
-     height="176" 
-     alt="Vapor" 
-   >
+   <img src="https://repository-images.githubusercontent.com/49910095/8c5be280-5bbd-11ea-83c7-7fb50300e4df" height="176" alt="Vapor">
 
    <br>
    <br>
