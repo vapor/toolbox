@@ -10,10 +10,10 @@ let package = Package(
         .executable(name: "vapor", targets: ["Executable"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-nio.git", from: "2.0.0"),
+        .package(url: "https://github.com/apple/swift-nio.git", from: "2.18.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "2.0.0"),
         .package(url: "https://github.com/tanner0101/mustache.git", from: "0.1.0"),
-        .package(url: "https://github.com/vapor/console-kit.git", from: "4.0.0-rc"),
+        .package(url: "https://github.com/vapor/console-kit.git", from: "4.0.0"),
     ],
     targets: [
         .target(name: "VaporToolbox", dependencies: [
@@ -22,7 +22,9 @@ let package = Package(
             .product(name: "NIO", package: "swift-nio"),
             .product(name: "Yams", package: "Yams"),
         ]),
-        .testTarget(name: "VaporToolboxTests", dependencies: ["VaporToolbox"]),
+        .testTarget(name: "VaporToolboxTests", dependencies: [
+            .target(name: "VaporToolbox"),
+        ]),
         .target(name: "Executable", dependencies: [
             .target(name: "VaporToolbox"),
         ]),
