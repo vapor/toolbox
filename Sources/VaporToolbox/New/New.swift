@@ -78,7 +78,7 @@ struct New: Command {
             "Project " + name.consoleText(.info) + " has been created!",
             "",
             "Use " + "cd \(Process.shell.escapeshellarg(cdInstruction))".consoleText(.info) + " to enter the project directory",
-            "Use " + "vapor xcode".consoleText(.info) + " to open the project in Xcode",
+            "Use " + "\(CommandLine.arguments[0]) xcode".consoleText(.info) + " to open the project in Xcode",
         ]).forEach { ctx.console.output($0) }
     }
 

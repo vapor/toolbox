@@ -185,7 +185,7 @@ struct HerokuInit: Command {
                 try Process.git.run("add", createdFiles)
                 try Process.git.commitChanges(msg: "heroku init")
             } else {
-                ctx.console.output("Commit changes then use `vapor heroku push` to deploy.".consoleText())
+                ctx.console.output("Commit changes then use `\(CommandLine.arguments[0]) heroku push` to deploy.".consoleText())
                 return
             }
         }
@@ -193,9 +193,9 @@ struct HerokuInit: Command {
         if ctx.console.confirm("Deploy now?") {
             try exec(Process.shell.which("git"), "push", "heroku", branch)
             ctx.console.list(.success, key: "Deployed \(name)", value: url)
-            ctx.console.output("Use 'vapor heroku push' to deploy next time.".consoleText())
+            ctx.console.output("Use '\(CommandLine.arguments[0]) heroku push' to deploy next time.".consoleText())
         } else {
-            ctx.console.output("Use 'vapor heroku push' to deploy.".consoleText())
+            ctx.console.output("Use '\(CommandLine.arguments[0]) heroku push' to deploy.".consoleText())
         }
     }
 }

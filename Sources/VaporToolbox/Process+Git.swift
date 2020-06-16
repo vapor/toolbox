@@ -124,17 +124,4 @@ extension Process.Git {
     func commitChanges(msg: String) throws {
         try run("commit", "-m", msg)
     }
-
-    func isCloudConfigured() throws -> Bool {
-        return try run("remote")
-            .split(separator: "\n")
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .contains("cloud")
-    }
-
-    func cloudUrl() throws -> String {
-        let isConfigured = try isCloudConfigured()
-        guard isConfigured else { throw "cloud url not yet configured. use `vapor cloud remote set`" }
-        return try run("remote", "get-url", "cloud").trimmingCharacters(in: .whitespacesAndNewlines)
-    }
 }
