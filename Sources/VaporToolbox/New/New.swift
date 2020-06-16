@@ -10,8 +10,11 @@ struct New: Command {
         @Option(name: "template", short: "T", help: "The URL of a Git repository to use as a template.")
         var templateURL: String?
         
-        @Option(name: "outputDirectory", short: "o", help: "The directory to place the new project in.")
+        @Option(name: "output-directory", short: "o", help: "The directory to place the new project in.")
         var outputDirectory: String?
+
+        @Flag(name: "no-commit", help: "Skips adding a first commit to the newly created repo.")
+        var noCommit: Bool
     }
 
     let help = "Generates a new app."
@@ -47,9 +50,11 @@ struct New: Command {
         }
         _ = try Process.git.create(gitDir: gitDir)
 
-        // initialize
-        ctx.console.info("Adding first commit")
-        try Process.git.commit(gitDir: gitDir, workTree: workTree, msg: "first commit")
+        // first commit
+        if !signature.noCommit {
+            ctx.console.info("Adding first commit")
+            try Process.git.commit(gitDir: gitDir, workTree: workTree, msg: "first commit")
+        }
         
         // print the Droplet
         var copy = ctx
