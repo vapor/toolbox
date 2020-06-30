@@ -29,6 +29,17 @@ public func run() throws {
         }
         exit(code)
     }
+    let console = Terminal()
     let input = CommandInput(arguments: CommandLine.arguments)
-    try Terminal().run(Main(), input: input)
+    do {
+        try console.run(Main(), input: input)
+    }
+    // Handle deprecated commands. Done this way instead of by implementing them as Commands because otherwise
+    // there's no way to avoid them showing up in the --help, which is exactly the opposite of what we want.
+    catch CommandError.unknownCommand(let command, _) where command == "update" {
+        console.output(
+            "\("Error:", style: .error) The \"\("update", style: .warning)\" command has been removed. " +
+            "Use \"\("swift package update", style: .success)\" instead."
+        )
+    }
 }
