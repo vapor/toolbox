@@ -13,7 +13,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.18.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "2.0.0"),
         .package(url: "https://github.com/tanner0101/mustache.git", from: "0.1.0"),
-        .package(url: "https://github.com/vapor/console-kit.git", .branch("tn-signature-help")),
+        .package(url: "https://github.com/vapor/console-kit.git", from: "4.2.0"),
     ],
     targets: [
         .target(name: "VaporToolbox", dependencies: [
