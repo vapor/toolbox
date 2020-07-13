@@ -5,9 +5,9 @@
         "package": "console-kit",
         "repositoryURL": "https://github.com/vapor/console-kit.git",
         "state": {
-          "branch": null,
-          "revision": "4ffc23dd1d6454228f78194ef68d8b20fca9390a",
-          "version": "4.1.1"
+          "branch": "tn-signature-help",
+          "revision": "65f986733e4fb93efa8ab15c6dd1d1df454831be",
+          "version": null
         }
       },
       {
@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/tanner0101/mustache.git",
         "state": {
           "branch": null,
-          "revision": "94104a84964fabb9c4b2dfb792ea6e655e79a0bf",
-          "version": "0.1.0"
+          "revision": "d98546e8b8d3287d69391ecddeb5732980986eef",
+          "version": "0.1.1"
         }
       },
       {
@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/apple/swift-log.git",
         "state": {
           "branch": null,
-          "revision": "74d7b91ceebc85daf387ebb206003f78813f71aa",
-          "version": "1.2.0"
+          "revision": "57c6bd04256ba47590ee2285e208f731210c5c10",
+          "version": "1.3.0"
         }
       },
       {
@@ -33,8 +33,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio.git",
         "state": {
           "branch": null,
-          "revision": "120acb15c39aa3217e9888e515de160378fbcc1e",
-          "version": "2.18.0"
+          "revision": "8a865bd15e69526cbdfcfd7c47698eb20b2ba951",
+          "version": "2.19.0"
         }
       },
       {
