@@ -1,13 +1,11 @@
-name: Test Matrix
-
+name: test
 on:
   pull_request:
   push:
     branches:
-    - master
-    
+    - master 
 jobs:
-  integration:
+  new:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -28,6 +26,9 @@ jobs:
       - name: New project
         run: vapor new foo ${{ matrix.flags }} --no-commit
         working-directory: /tmp
+      - name: Install SQLite
+        if: ${{ contains(matrix.flags, 'sqlite') }}
+        run: apt-get -q update && apt-get -q install -y libsqlite3-dev
       - name: Test new project
         run: swift test --enable-test-discovery
         working-directory: /tmp/foo
