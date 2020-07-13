@@ -30,23 +30,25 @@ struct TemplateScaffolder {
     private func ask(
         variable: TemplateManifest.Variable,
         to context: inout [String: MustacheData], 
-        using input: inout CommandInput
+        using input: inout CommandInput,
+        prefix: String = ""
     ) throws {
+        let optionName = prefix + variable.name
         switch variable.type {
         case .string:
-            let value = self.console.ask(variable.description.consoleText())
+            let value = self.console.ask("\(variable.description) \("(--\(optionName))", style: .info)")
             context[variable.name] = .string(value)
             self.console.output(key: variable.name, value: value)
         case .bool:
-            let value = self.console.confirm(variable.description.consoleText())
-        context[variable.name] = .string(value.description)
+            let value = self.console.confirm("\(variable.description) \("(--\(optionName))", style: .info)")
+            context[variable.name] = .string(value.description)
             self.console.output(key: variable.name, value: value ? "Yes" : "No")
         case .options(let options):
             let option: TemplateManifest.Variable.Option
-            if let index = input.arguments.firstIndex(where: { $0.hasPrefix("--\(variable.name)") }) {
+            if let index = input.arguments.firstIndex(where: { $0.hasPrefix("--\(optionName)") }) {
                 let next = input.arguments.index(after: index)
                 guard next < input.arguments.endIndex else {
-                    fatalError("--\(variable.name) needs a value")
+                    throw "Option --\(optionName) requires a value"
                 }
                 let name = input.arguments[next]
                 input.arguments.remove(at: next)
@@ -54,11 +56,11 @@ struct TemplateScaffolder {
                 guard let found = options.filter({ 
                     $0.name.lowercased().hasPrefix(name.lowercased())
                 }).first else {
-                    throw "No option for '\(variable.name)' matching '\(name)'"
+                    throw "No --\(optionName) option matching '\(name)'"
                 }
                 option = found
             } else {
-                option = self.console.choose(variable.description.consoleText(), from: options, display: { option in
+                option = self.console.choose("\(variable.description) \("(--\(optionName))", style: .info)", from: options, display: { option in
                     option.name.consoleText()
                 })
             }
@@ -66,22 +68,19 @@ struct TemplateScaffolder {
             context[variable.name] = .dictionary(option.data.mapValues { .string($0) })
         case .variables(let variables):
             var confirm: Bool
-            if input.arguments.contains(where: { $0.hasPrefix("--\(variable.name)." )}) {
-                input.arguments = input.arguments.map({ 
-                    $0.replacingOccurrences(of: "--\(variable.name).", with: "--")
-                })
+            if input.arguments.contains(where: { $0.hasPrefix("--\(optionName)." )}) {
                 confirm = true
-            } else if let index = input.arguments.firstIndex(where: { $0.hasPrefix("--\(variable.name)" )}) {
+            } else if let index = input.arguments.firstIndex(where: { $0.hasPrefix("--\(optionName)" )}) {
                 input.arguments.remove(at: index)
                 confirm = true
             } else {
-                confirm = self.console.confirm(variable.description.consoleText())
+                confirm = self.console.confirm("\(variable.description) \("(--\(optionName))", style: .info)")
             }
             if confirm {
                 self.console.output(key: variable.name, value: "Yes")
                 var nested: [String: MustacheData] = [:]
                 for child in variables {
-                    try self.ask(variable: child, to: &nested, using: &input)
+                    try self.ask(variable: child, to: &nested, using: &input, prefix: "\(variable.name).")
                 }
                 context[variable.name] = .dictionary(nested)
             } else {

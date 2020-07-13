@@ -15,7 +15,7 @@ struct New: AnyCommand {
         
         @Option(name: "output", short: "o", help: "The directory to place the new project in.")
         var outputDirectory: String?
-
+        
         @Flag(name: "no-commit", help: "Skips adding a first commit to the newly created repo.")
         var noCommit: Bool
     }
@@ -36,7 +36,8 @@ struct New: AnyCommand {
 
         context.console.info("Cloning template...")
         try? FileManager.default.removeItem(atPath: templateTree)
-        _ = try Process.git.clone(repo: gitUrl, toFolder: templateTree, branch: signature.templateBranch ?? "master")
+        let gitBranch = signature.templateBranch ?? "master"
+        _ = try Process.git.clone(repo: gitUrl, toFolder: templateTree, branch: gitBranch)
 
         if FileManager.default.fileExists(atPath: templateTree.appendingPathComponents("manifest.yml")) {
             try FileManager.default.createDirectory(atPath: workTree, withIntermediateDirectories: false, attributes: nil)

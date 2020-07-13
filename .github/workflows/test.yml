@@ -9,6 +9,14 @@ on:
 jobs:
   integration:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        flags:
+          - --fluent.db mysql
+          - --fluent.db postgres
+          - --fluent.db sqlite
+          - --fluent.db mongo
     container: swift:5.2-focal
     steps:
       - name: Check out code
@@ -18,7 +26,11 @@ jobs:
       - name: Install toolbox
         run: mv .build/debug/vapor /usr/bin/vapor
       - name: New project
-        run: vapor new foo --fluent.db postgres; cd foo; swift build --enable-test-discovery
+        run: vapor new foo ${{flags}} --no-commit
+        working-directory: /tmp
+      - name: Test new project
+        run: swift test --enable-test-discovery
+        working-directory: /tmp/foo
   linux:
     runs-on: ubuntu-latest
     strategy:
