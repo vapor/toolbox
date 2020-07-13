@@ -2,7 +2,7 @@ import ConsoleKit
 import Foundation
 import Yams
 
-struct New: Command {
+struct New: AnyCommand {
     struct Signature: CommandSignature {
         @Argument(name: "name", help: "Name of project and folder.")
         var name: String
@@ -10,7 +10,10 @@ struct New: Command {
         @Option(name: "template", short: "T", help: "The URL of a Git repository to use as a template.")
         var templateURL: String?
         
-        @Option(name: "output-directory", short: "o", help: "The directory to place the new project in.")
+        @Option(name: "branch", help: "Template repository branch to use.")
+        var templateBranch: String?
+        
+        @Option(name: "output", short: "o", help: "The directory to place the new project in.")
         var outputDirectory: String?
 
         @Flag(name: "no-commit", help: "Skips adding a first commit to the newly created repo.")
@@ -19,32 +22,46 @@ struct New: Command {
 
     let help = "Generates a new app."
 
-    func run(using ctx: CommandContext, signature: Signature) throws {
+    func outputHelp(using context: inout CommandContext) {
+        Signature().outputHelp(help: self.help, using: &context)
+    }
+
+    func run(using context: inout CommandContext) throws {
+        let signature = try Signature(from: &context.input)
         let name = signature.name
         let gitUrl = signature.templateURL ?? "https://github.com/vapor/template"
         let cwd = FileManager.default.currentDirectoryPath
         let workTree = signature.outputDirectory?.asDirectoryURL.path ?? cwd.appendingPathComponents(name)
         let templateTree = workTree.deletingLastPathComponents().appendingPathComponents(".vapor-template")
 
-        ctx.console.info("Cloning template...")
+        context.console.info("Cloning template...")
         try? FileManager.default.removeItem(atPath: templateTree)
-        _ = try Process.git.clone(repo: gitUrl, toFolder: templateTree)
+        _ = try Process.git.clone(repo: gitUrl, toFolder: templateTree, branch: signature.templateBranch ?? "master")
 
         if FileManager.default.fileExists(atPath: templateTree.appendingPathComponents("manifest.yml")) {
             try FileManager.default.createDirectory(atPath: workTree, withIntermediateDirectories: false, attributes: nil)
             let yaml = try String(contentsOf: templateTree.appendingPathComponents("manifest.yml").asFileURL, encoding: .utf8)
             let manifest = try YAMLDecoder().decode(TemplateManifest.self, from: yaml)
-            let scaffolder = TemplateScaffolder(console: ctx.console, manifest: manifest)
-            try scaffolder.scaffold(name: name, from: templateTree.trailingSlash, to: workTree.trailingSlash)
+            let scaffolder = TemplateScaffolder(console: context.console, manifest: manifest)
+            try scaffolder.scaffold(
+                name: name, 
+                from: templateTree.trailingSlash, 
+                to: workTree.trailingSlash,
+                using: &context.input
+            )
             try FileManager.default.removeItem(atPath: templateTree)
         } else {
             try FileManager.default.moveItem(atPath: templateTree, toPath: workTree)
+        }
+
+        guard context.input.arguments.isEmpty else {
+            throw "Too many arguments: \(context.input.arguments.joined(separator: " "))"
         }
         
         // clear existing git history
         let gitDir = workTree.appendingPathComponents(".git")
 
-        ctx.console.info("Creating git repository")
+        context.console.info("Creating git repository")
         if FileManager.default.fileExists(atPath: gitDir) {
             try FileManager.default.removeItem(atPath: gitDir)
         }
@@ -52,12 +69,12 @@ struct New: Command {
 
         // first commit
         if !signature.noCommit {
-            ctx.console.info("Adding first commit")
+            context.console.info("Adding first commit")
             try Process.git.commit(gitDir: gitDir, workTree: workTree, msg: "first commit")
         }
         
         // print the Droplet
-        var copy = ctx
+        var copy = context
         try PrintDroplet().run(using: &copy)
         
         // figure out the shortest relative path to the new project
@@ -74,12 +91,12 @@ struct New: Command {
         }
         
         // print info
-        ctx.console.center([
+        context.console.center([
             "Project " + name.consoleText(.info) + " has been created!",
             "",
             "Use " + "cd \(Process.shell.escapeshellarg(cdInstruction))".consoleText(.info) + " to enter the project directory",
             "Use " + "\(CommandLine.arguments[0]) xcode".consoleText(.info) + " to open the project in Xcode",
-        ]).forEach { ctx.console.output($0) }
+        ]).forEach { context.console.output($0) }
     }
 
 }

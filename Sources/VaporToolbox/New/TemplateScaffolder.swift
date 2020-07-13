@@ -12,14 +12,14 @@ struct TemplateScaffolder {
         self.manifest = manifest
     }
 
-    func scaffold(name: String, from source: String, to destination: String) throws {
+    func scaffold(name: String, from source: String, to destination: String, using input: inout CommandInput) throws {
         assert(source.hasPrefix("/"))
         assert(destination.hasPrefix("/"))
         var context: [String: MustacheData] = [:]
         context["name"] = .string(name)
         self.console.output(key: "name", value: name)
         for variable in self.manifest.variables {
-            try self.ask(variable: variable, to: &context)
+            try self.ask(variable: variable, to: &context, using: &input)
         }
         self.console.info("Generating project files")
         for file in self.manifest.files {
@@ -29,7 +29,8 @@ struct TemplateScaffolder {
 
     private func ask(
         variable: TemplateManifest.Variable,
-        to context: inout [String: MustacheData]
+        to context: inout [String: MustacheData], 
+        using input: inout CommandInput
     ) throws {
         switch variable.type {
         case .string:
@@ -41,17 +42,46 @@ struct TemplateScaffolder {
         context[variable.name] = .string(value.description)
             self.console.output(key: variable.name, value: value ? "Yes" : "No")
         case .options(let options):
-            let option = self.console.choose(variable.description.consoleText(), from: options, display: { option in
-                return option.name.consoleText()
-            })
+            let option: TemplateManifest.Variable.Option
+            if let index = input.arguments.firstIndex(where: { $0.hasPrefix("--\(variable.name)") }) {
+                let next = input.arguments.index(after: index)
+                guard next < input.arguments.endIndex else {
+                    fatalError("--\(variable.name) needs a value")
+                }
+                let name = input.arguments[next]
+                input.arguments.remove(at: next)
+                input.arguments.remove(at: index)
+                guard let found = options.filter({ 
+                    $0.name.lowercased().hasPrefix(name.lowercased())
+                }).first else {
+                    throw "No option for '\(variable.name)' matching '\(name)'"
+                }
+                option = found
+            } else {
+                option = self.console.choose(variable.description.consoleText(), from: options, display: { option in
+                    option.name.consoleText()
+                })
+            }
             self.console.output(key: variable.name, value: option.name)
             context[variable.name] = .dictionary(option.data.mapValues { .string($0) })
         case .variables(let variables):
-            if self.console.confirm(variable.description.consoleText()) {
+            var confirm: Bool
+            if input.arguments.contains(where: { $0.hasPrefix("--\(variable.name)." )}) {
+                input.arguments = input.arguments.map({ 
+                    $0.replacingOccurrences(of: "--\(variable.name).", with: "--")
+                })
+                confirm = true
+            } else if let index = input.arguments.firstIndex(where: { $0.hasPrefix("--\(variable.name)" )}) {
+                input.arguments.remove(at: index)
+                confirm = true
+            } else {
+                confirm = self.console.confirm(variable.description.consoleText())
+            }
+            if confirm {
                 self.console.output(key: variable.name, value: "Yes")
                 var nested: [String: MustacheData] = [:]
                 for child in variables {
-                    try self.ask(variable: child, to: &nested)
+                    try self.ask(variable: child, to: &nested, using: &input)
                 }
                 context[variable.name] = .dictionary(nested)
             } else {

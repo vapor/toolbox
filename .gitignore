@@ -7,4 +7,4 @@
 Package.pins
 DerivedData
 .swiftpm
-
+Tests/LinuxMain.swift

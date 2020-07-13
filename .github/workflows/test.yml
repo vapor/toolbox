@@ -7,8 +7,19 @@ on:
     - master
     
 jobs:
-
-  Linux:
+  integration:
+    runs-on: ubuntu-latest
+    container: swift:5.2-focal
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Build toolbox
+        run: swift build --enable-test-discovery
+      - name: Install toolbox
+        run: mv .build/debug/vapor /usr/bin/vapor
+      - name: New project
+        run: vapor new foo --fluent.db postgres; cd foo; swift build --enable-test-discovery
+  linux:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -38,7 +49,6 @@ jobs:
         uses: actions/checkout@v2
       - name: Run tests with Thread Sanitizer
         run: swift test --enable-test-discovery --sanitize=thread
-
   macOS:
     runs-on: macos-latest
     steps:
@@ -49,4 +59,3 @@ jobs:
         uses: actions/checkout@v2
       - name: Run tests with Thread Sanitizer
         run: swift test --enable-test-discovery --sanitize=thread
-
