@@ -12,14 +12,14 @@ struct TemplateScaffolder {
         self.manifest = manifest
     }
 
-    func scaffold(name: String, from source: String, to destination: String) throws {
+    func scaffold(name: String, from source: String, to destination: String, using input: inout CommandInput) throws {
         assert(source.hasPrefix("/"))
         assert(destination.hasPrefix("/"))
         var context: [String: MustacheData] = [:]
         context["name"] = .string(name)
         self.console.output(key: "name", value: name)
         for variable in self.manifest.variables {
-            try self.ask(variable: variable, to: &context)
+            try self.ask(variable: variable, to: &context, using: &input)
         }
         self.console.info("Generating project files")
         for file in self.manifest.files {
@@ -29,29 +29,58 @@ struct TemplateScaffolder {
 
     private func ask(
         variable: TemplateManifest.Variable,
-        to context: inout [String: MustacheData]
+        to context: inout [String: MustacheData], 
+        using input: inout CommandInput,
+        prefix: String = ""
     ) throws {
+        let optionName = prefix + variable.name
         switch variable.type {
         case .string:
-            let value = self.console.ask(variable.description.consoleText())
+            let value = self.console.ask("\(variable.description) \("(--\(optionName))", style: .info)")
             context[variable.name] = .string(value)
             self.console.output(key: variable.name, value: value)
         case .bool:
-            let value = self.console.confirm(variable.description.consoleText())
-        context[variable.name] = .string(value.description)
+            let value = self.console.confirm("\(variable.description) \("(--\(optionName))", style: .info)")
+            context[variable.name] = .string(value.description)
             self.console.output(key: variable.name, value: value ? "Yes" : "No")
         case .options(let options):
-            let option = self.console.choose(variable.description.consoleText(), from: options, display: { option in
-                return option.name.consoleText()
-            })
+            let option: TemplateManifest.Variable.Option
+            if let index = input.arguments.firstIndex(where: { $0.hasPrefix("--\(optionName)") }) {
+                let next = input.arguments.index(after: index)
+                guard next < input.arguments.endIndex else {
+                    throw "Option --\(optionName) requires a value"
+                }
+                let name = input.arguments[next]
+                input.arguments.remove(at: next)
+                input.arguments.remove(at: index)
+                guard let found = options.filter({ 
+                    $0.name.lowercased().hasPrefix(name.lowercased())
+                }).first else {
+                    throw "No --\(optionName) option matching '\(name)'"
+                }
+                option = found
+            } else {
+                option = self.console.choose("\(variable.description) \("(--\(optionName))", style: .info)", from: options, display: { option in
+                    option.name.consoleText()
+                })
+            }
             self.console.output(key: variable.name, value: option.name)
             context[variable.name] = .dictionary(option.data.mapValues { .string($0) })
         case .variables(let variables):
-            if self.console.confirm(variable.description.consoleText()) {
+            var confirm: Bool
+            if input.arguments.contains(where: { $0.hasPrefix("--\(optionName)." )}) {
+                confirm = true
+            } else if let index = input.arguments.firstIndex(where: { $0.hasPrefix("--\(optionName)" )}) {
+                input.arguments.remove(at: index)
+                confirm = true
+            } else {
+                confirm = self.console.confirm("\(variable.description) \("(--\(optionName))", style: .info)")
+            }
+            if confirm {
                 self.console.output(key: variable.name, value: "Yes")
                 var nested: [String: MustacheData] = [:]
                 for child in variables {
-                    try self.ask(variable: child, to: &nested)
+                    try self.ask(variable: child, to: &nested, using: &input, prefix: "\(variable.name).")
                 }
                 context[variable.name] = .dictionary(nested)
             } else {

@@ -36,8 +36,12 @@ extension Process.Git {
         try run(gitDir, workTree, "commit", "-m", msg)
     }
 
-    func clone(repo: String, toFolder folder: String) throws -> String {
-        return try run("clone", repo, folder)
+    func clone(repo: String, toFolder folder: String, branch: String? = nil) throws -> String {
+        if let branch = branch {
+            return try run("clone", "--branch", branch, repo, folder)
+        } else {
+            return try run("clone", repo, folder)
+        }
     }
 
     func isGitRepository() -> Bool {

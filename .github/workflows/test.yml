@@ -1,14 +1,39 @@
-name: Test Matrix
-
+name: test
 on:
   pull_request:
   push:
     branches:
-    - master
-    
+    - master 
 jobs:
-
-  Linux:
+  new:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        flags:
+          - -n
+          - --fluent.db mysql
+          - --fluent.db postgres
+          - --fluent.db sqlite
+          - --fluent.db mongo
+    container: swift:5.2-focal
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Build toolbox
+        run: swift build --enable-test-discovery
+      - name: Install toolbox
+        run: mv .build/debug/vapor /usr/bin/vapor
+      - name: New project
+        run: vapor new foo ${{ matrix.flags }} --no-commit
+        working-directory: /tmp
+      - name: Install SQLite
+        if: ${{ contains(matrix.flags, 'sqlite') }}
+        run: apt-get -q update && apt-get -q install -y libsqlite3-dev
+      - name: Test new project
+        run: swift test --enable-test-discovery
+        working-directory: /tmp/foo
+  linux:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -38,7 +63,6 @@ jobs:
         uses: actions/checkout@v2
       - name: Run tests with Thread Sanitizer
         run: swift test --enable-test-discovery --sanitize=thread
-
   macOS:
     runs-on: macos-latest
     steps:
@@ -49,4 +73,3 @@ jobs:
         uses: actions/checkout@v2
       - name: Run tests with Thread Sanitizer
         run: swift test --enable-test-discovery --sanitize=thread
-
