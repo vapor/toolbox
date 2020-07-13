@@ -26,7 +26,7 @@ jobs:
       - name: Install toolbox
         run: mv .build/debug/vapor /usr/bin/vapor
       - name: New project
-        run: vapor new foo ${{flags}} --no-commit
+        run: vapor new foo ${{ matrix.flags }} --no-commit
         working-directory: /tmp
       - name: Test new project
         run: swift test --enable-test-discovery
