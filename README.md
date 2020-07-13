@@ -1,5 +1,3 @@
-# Vapor Toolbox
-
 <p align="center">
     <img 
         src="https://user-images.githubusercontent.com/1342803/87364900-cf9e6880-c542-11ea-9cdf-9621a11925e1.png" 
