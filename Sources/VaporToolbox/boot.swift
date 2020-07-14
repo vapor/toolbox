@@ -2,7 +2,10 @@ import ConsoleKit
 import Foundation
 
 final class Main: CommandGroup {
-    struct Signature: CommandSignature {}
+    struct Signature: CommandSignature {
+        @Flag(name: "version", help: "Prints Vapor toolbox and framework versions.")
+        var version: Bool
+    }
     
     let commands: [String: AnyCommand] = [
         "clean": Clean(),
@@ -15,6 +18,48 @@ final class Main: CommandGroup {
     ]
     
     let help = "Vapor Toolbox (Server-side Swift web framework)"
+
+    func run(using context: inout CommandContext) throws {
+        let signature = try Signature(from: &context.input)
+        if signature.version {
+            do {
+                let packageString = try Process.shell.run("cat", "Package.resolved")
+                let package = try JSONDecoder().decode(PackageResolved.self, from: .init(packageString.utf8))
+                if let vapor = package.object.pins.filter({ $0.package == "vapor" }).first {
+                    context.console.output(key: "framework", value: vapor.state.version)
+                } else {
+                    context.console.output("\("note:", style: .warning) this Swift project does not depend on Vapor.")
+                    context.console.output(key: "framework", value: "not found")
+                }
+            } catch {
+                context.console.output("\("note:", style: .warning) no Package.resolved file was found.")
+                context.console.output(key: "framework", value: "not found")
+            }
+            do {
+                let brewString = try Process.shell.run("brew", "info", "vapor")
+                context.console.output(key: "toolbox", value: "\(brewString.split(separator: "\n")[0])")
+            } catch {
+                context.console.output("\("note:", style: .warning) could not determine toolbox version.")
+                context.console.output(key: "toolbox", value: "not found")
+            }
+        } else {
+            try self.outputHelp(using: &context)
+        }
+    }
+}
+
+private struct PackageResolved: Codable {
+    struct Object: Codable {
+        struct Pin: Codable {
+            struct State: Codable {
+                var version: String
+            }
+            var package: String
+            var state: State
+        }
+        var pins: [Pin]
+    }
+    var object: Object
 }
 
 public func run() throws {
