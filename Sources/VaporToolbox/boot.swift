@@ -39,7 +39,8 @@ final class Main: CommandGroup {
                 let brewString = try Process.shell.run("brew", "info", "vapor")
                 let versionFinder = try NSRegularExpression(pattern: #"(\d+\.)(\d+\.)(\d)"#)
                 let versionString = String(brewString.split(separator: "\n")[0])
-                if let version = versionFinder.firstMatch(in: versionString, options: [], range: .init(location: 0, length: versionString.utf16.count)) {
+                if let match = versionFinder.firstMatch(in: versionString, options: [], range: .init(location: 0, length: versionString.utf16.count)) {
+                    let version = versionString[Range(match.range, in: versionString)!]
                     context.console.output(key: "toolbox", value: "\(version)")
                 } else {
                     context.console.output(key: "toolbox", value: versionString)
