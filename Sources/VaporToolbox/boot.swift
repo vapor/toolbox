@@ -49,8 +49,28 @@ final class Main: CommandGroup {
                 context.console.output("\("note:", style: .warning) could not determine toolbox version.")
                 context.console.output(key: "toolbox", value: "not found")
             }
+        } else if let command = try self.commmand(using: &context) {
+            try command.run(using: &context)
+        } else if let `default` = self.defaultCommand {
+            return try `default`.run(using: &context)
         } else {
             try self.outputHelp(using: &context)
+            throw CommandError.missingCommand
+        }
+    }
+
+    private func commmand(using context: inout CommandContext) throws -> AnyCommand? {
+        if let name = context.input.arguments.first {
+            context.input.arguments.removeFirst()
+            guard let command = self.commands[name] else {
+                throw CommandError.unknownCommand(name, available: Array(self.commands.keys))
+            }
+            // executable should include all subcommands
+            // to get to the desired command
+            context.input.executablePath.append(name)
+            return command
+        } else {
+            return nil
         }
     }
 }
