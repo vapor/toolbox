@@ -6,7 +6,11 @@ struct Run: AnyCommand {
     let help = "Runs an app from the console."
 
     func run(using context: inout CommandContext) throws {
-        try exec(Process.shell.which("swift"), ["run", "--enable-test-discovery", "Run"] + context.input.arguments)
+        var extraArguments: [String] = []
+        if let confirmOverride = context.console.confirmOverride {
+            extraArguments.append(confirmOverride ? "--yes" : "--no")
+        }
+        try exec(Process.shell.which("swift"), ["run", "--enable-test-discovery", "Run"] + context.input.arguments + extraArguments)
     }
 
     func outputHelp(using context: inout CommandContext) {
