@@ -37,7 +37,7 @@ final class Main: CommandGroup {
             }
             do {
                 let brewString = try Process.shell.run("brew", "info", "vapor")
-                let versionFinder = try NSRegularExpression(pattern: #"^(\d+\.)?(\d+\.)?(\*|\d+)$"#)
+                let versionFinder = try NSRegularExpression(pattern: #"(\d+\.)(\d+\.)(\d)"#)
                 let versionString = String(brewString.split(separator: "\n")[0])
                 if let version = versionFinder.firstMatch(in: versionString, options: [], range: .init(location: 0, length: versionString.utf16.count)) {
                     context.console.output(key: "toolbox", value: "\(version)")
