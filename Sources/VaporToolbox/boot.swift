@@ -37,7 +37,13 @@ final class Main: CommandGroup {
             }
             do {
                 let brewString = try Process.shell.run("brew", "info", "vapor")
-                context.console.output(key: "toolbox", value: "\(brewString.split(separator: "\n")[0])")
+                let versionFinder = try NSRegularExpression(pattern: #"^(\d+\.)?(\d+\.)?(\*|\d+)$"#)
+                let versionString = String(brewString.split(separator: "\n")[0])
+                if let version = versionFinder.firstMatch(in: versionString, options: [], range: .init(location: 0, length: versionString.utf16.count)) {
+                    context.console.output(key: "toolbox", value: "\(version)")
+                } else {
+                    context.console.output(key: "toolbox", value: versionString)
+                }
             } catch {
                 context.console.output("\("note:", style: .warning) could not determine toolbox version.")
                 context.console.output(key: "toolbox", value: "not found")
