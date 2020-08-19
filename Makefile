@@ -1,4 +1,4 @@
-VERSION := $(shell git symbolic-ref -q --short HEAD || git describe --tags --exact-match)
+VERSION := $(shell ./scripts/current-version.sh)
 
 build:
 	# Set version
