@@ -1,7 +1,7 @@
 import ConsoleKit
 import Foundation
 
-final class Main: CommandGroup {
+final class Toolbox: CommandGroup {
     struct Signature: CommandSignature {
         @Flag(name: "version", help: "Prints Vapor toolbox and framework versions.")
         var version: Bool
@@ -22,33 +22,8 @@ final class Main: CommandGroup {
     func run(using context: inout CommandContext) throws {
         let signature = try Signature(from: &context.input)
         if signature.version {
-            do {
-                let packageString = try Process.shell.run("cat", "Package.resolved")
-                let package = try JSONDecoder().decode(PackageResolved.self, from: .init(packageString.utf8))
-                if let vapor = package.object.pins.filter({ $0.package == "vapor" }).first {
-                    context.console.output(key: "framework", value: vapor.state.version)
-                } else {
-                    context.console.output("\("note:", style: .warning) this Swift project does not depend on Vapor.")
-                    context.console.output(key: "framework", value: "not found")
-                }
-            } catch {
-                context.console.output("\("note:", style: .warning) no Package.resolved file was found.")
-                context.console.output(key: "framework", value: "not found")
-            }
-            do {
-                let brewString = try Process.shell.run("brew", "info", "vapor")
-                let versionFinder = try NSRegularExpression(pattern: #"(\d+\.)(\d+\.)(\d)"#)
-                let versionString = String(brewString.split(separator: "\n")[0])
-                if let match = versionFinder.firstMatch(in: versionString, options: [], range: .init(location: 0, length: versionString.utf16.count)) {
-                    let version = versionString[Range(match.range, in: versionString)!]
-                    context.console.output(key: "toolbox", value: "\(version)")
-                } else {
-                    context.console.output(key: "toolbox", value: versionString)
-                }
-            } catch {
-                context.console.output("\("note:", style: .warning) could not determine toolbox version.")
-                context.console.output(key: "toolbox", value: "not found")
-            }
+            self.outputFrameworkVersion(context: context)
+            self.outputToolboxVersion(context: context)
         } else if let command = try self.commmand(using: &context) {
             try command.run(using: &context)
         } else if let `default` = self.defaultCommand {
@@ -71,6 +46,46 @@ final class Main: CommandGroup {
             return command
         } else {
             return nil
+        }
+    }
+
+
+    private func outputFrameworkVersion(context: CommandContext) {
+        do {
+            let packageString = try Process.shell.run("cat", "Package.resolved")
+            let package = try JSONDecoder().decode(PackageResolved.self, from: .init(packageString.utf8))
+            if let vapor = package.object.pins.filter({ $0.package == "vapor" }).first {
+                context.console.output(key: "framework", value: vapor.state.version)
+            } else {
+                context.console.output("\("note:", style: .warning) this Swift project does not depend on Vapor.")
+                context.console.output(key: "framework", value: "not found")
+            }
+        } catch {
+            context.console.output("\("note:", style: .warning) no Package.resolved file was found.")
+            context.console.output(key: "framework", value: "not found")
+        }
+    }
+
+    private func outputToolboxVersion(context: CommandContext) {
+        do {
+            if let version = staticVersion {
+                // compiled with static version, use that
+                context.console.output(key: "toolbox", value: version)
+            } else {
+                // determine version through homebrew
+                let brewString = try Process.shell.run("brew", "info", "vapor")
+                let versionFinder = try NSRegularExpression(pattern: #"(\d+\.)(\d+\.)(\d)"#)
+                let versionString = String(brewString.split(separator: "\n")[0])
+                if let match = versionFinder.firstMatch(in: versionString, options: [], range: .init(location: 0, length: versionString.utf16.count)) {
+                    let version = versionString[Range(match.range, in: versionString)!]
+                    context.console.output(key: "toolbox", value: "\(version)")
+                } else {
+                    context.console.output(key: "toolbox", value: versionString)
+                }
+            }
+        } catch {
+            context.console.output("\("note:", style: .warning) could not determine toolbox version.")
+            context.console.output(key: "toolbox", value: "not found")
         }
     }
 }
@@ -104,7 +119,7 @@ public func run() throws {
     let console = Terminal()
     let input = CommandInput(arguments: CommandLine.arguments)
     do {
-        try console.run(Main(), input: input)
+        try console.run(Toolbox(), input: input)
     }
     // Handle deprecated commands. Done this way instead of by implementing them as Commands because otherwise
     // there's no way to avoid them showing up in the --help, which is exactly the opposite of what we want.
