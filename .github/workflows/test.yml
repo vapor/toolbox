@@ -10,13 +10,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        image:
+          - swift:5.2-focal
+          - swift:5.3-focal
         flags:
           - -n
           - --fluent.db mysql
           - --fluent.db postgres
           - --fluent.db sqlite
           - --fluent.db mongo
-    container: swift:5.2-focal
+    container: ${{ matrix.image }}
     steps:
       - name: Check out code
         uses: actions/checkout@v2
