@@ -45,9 +45,12 @@ jobs:
           - swift:5.2-focal
           - swift:5.2-centos8
           - swift:5.2-amazonlinux2
-          # 5.2 Unstable
-          - swiftlang/swift:nightly-5.2-xenial
-          - swiftlang/swift:nightly-5.2-bionic
+          # 5.3 Stable
+          - swift:5.3-xenial
+          - swift:5.3-bionic
+          - swift:5.3-focal
+          - swift:5.3-centos8
+          - swift:5.3-amazonlinux2
           # 5.3 Unstable
           - swiftlang/swift:nightly-5.3-xenial
           - swiftlang/swift:nightly-5.3-bionic
