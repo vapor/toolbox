@@ -5,8 +5,9 @@ build:
 	./build
 	rm ./build
 install: build
-	mv .build/release/vapor ${DEST}
+	sudo mv .build/release/vapor ${DEST}
+	sudo chmod 755 ${DEST}
 uninstall:
-	rm ${DEST}
+	sudo rm ${DEST}
 clean:
 	rm -rf .build
