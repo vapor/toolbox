@@ -40,9 +40,23 @@ struct TemplateScaffolder {
             context[variable.name] = .string(value)
             self.console.output(key: variable.name, value: value)
         case .bool:
-            let value = self.console.confirm("\(variable.description) \("(--\(optionName))", style: .info)")
-            context[variable.name] = .string(value.description)
-            self.console.output(key: variable.name, value: value ? "Yes" : "No")
+            let confirm: Bool
+            if let index = input.arguments.firstIndex(where: { $0 == "--\(optionName)" }) {
+                input.arguments.remove(at: index)
+                confirm = true
+            } else if let index = input.arguments.firstIndex(where: { $0 == "--no-\(optionName)" }) {
+                input.arguments.remove(at: index)
+                confirm = false
+            } else {
+                confirm = self.console.confirm("\(variable.description) \("(--\(optionName)/--no-\(optionName))", style: .info)")
+            }
+            
+            if confirm {
+                context[variable.name] = .string(true.description)
+                self.console.output(key: variable.name, value: "Yes")
+            } else {
+                self.console.output(key: variable.name, value: "No")
+            }
         case .options(let options):
             let option: TemplateManifest.Variable.Option
             if let index = input.arguments.firstIndex(where: { $0.hasPrefix("--\(optionName)") }) {
@@ -67,20 +81,23 @@ struct TemplateScaffolder {
             self.console.output(key: variable.name, value: option.name)
             context[variable.name] = .dictionary(option.data.mapValues { .string($0) })
         case .variables(let variables):
-            var confirm: Bool
+            let confirm: Bool
             if input.arguments.contains(where: { $0.hasPrefix("--\(optionName)." )}) {
                 confirm = true
-            } else if let index = input.arguments.firstIndex(where: { $0.hasPrefix("--\(optionName)" )}) {
+            } else if let index = input.arguments.firstIndex(where: { $0.hasPrefix("--\(optionName)") }) {
                 input.arguments.remove(at: index)
                 confirm = true
+            } else if let index = input.arguments.firstIndex(where: { $0 == "--no-\(optionName)" }) {
+                input.arguments.remove(at: index)
+                confirm = false
             } else {
-                confirm = self.console.confirm("\(variable.description) \("(--\(optionName))", style: .info)")
+                confirm = self.console.confirm("\(variable.description) \("(--\(optionName)/--no-\(optionName))", style: .info)")
             }
             if confirm {
                 self.console.output(key: variable.name, value: "Yes")
                 var nested: [String: MustacheData] = [:]
                 for child in variables {
-                    try self.ask(variable: child, to: &nested, using: &input, prefix: "\(variable.name).")
+                    try self.ask(variable: child, to: &nested, using: &input, prefix: "\(prefix)\(variable.name).")
                 }
                 context[variable.name] = .dictionary(nested)
             } else {
