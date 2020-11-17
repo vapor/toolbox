@@ -40,7 +40,7 @@ struct TemplateScaffolder {
             context[variable.name] = .string(value)
             self.console.output(key: variable.name, value: value)
         case .bool:
-            var confirm: Bool
+            let confirm: Bool
             if let index = input.arguments.firstIndex(where: { $0 == "--\(optionName)" }) {
                 input.arguments.remove(at: index)
                 confirm = true
@@ -81,7 +81,7 @@ struct TemplateScaffolder {
             self.console.output(key: variable.name, value: option.name)
             context[variable.name] = .dictionary(option.data.mapValues { .string($0) })
         case .variables(let variables):
-            var confirm: Bool
+            let confirm: Bool
             if input.arguments.contains(where: { $0.hasPrefix("--\(optionName)." )}) {
                 confirm = true
             } else if let index = input.arguments.firstIndex(where: { $0.hasPrefix("--\(optionName)") }) {
