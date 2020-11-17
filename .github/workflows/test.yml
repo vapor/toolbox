@@ -45,8 +45,10 @@ jobs:
         run: swift build --enable-test-discovery -c debug
       - name: Execute new project command
         run: |
-          swift run vapor new toolbox-test --no-commit -o /tmp/toolbox-test \
-            ${{ matrix.fluentflags }} ${{ matrix.leafflags }}
+          swift run --enable-test-discovery \
+            vapor new toolbox-test \
+                --no-commit -o /tmp/toolbox-test \
+                ${{ matrix.fluentflags }} ${{ matrix.leafflags }}
       - name: Test new project
         run: swift test --package-path /tmp/toolbox-test --enable-test-discovery
   
