@@ -1,0 +1,16 @@
+name: Update Homebrew
+on: 
+  release:
+    types: [created]
+
+jobs:
+  update-core:
+    runs-on: macos-latest
+    steps:
+      - name: Update Homebrew formula
+        uses: dawidd6/action-homebrew-bump-formula@v3
+        with:
+          token: ${{secrets.BOT_GITHUB_TOKEN}}
+          formula: vapor
+          tag: ${{github.ref}}
+          revision: ${{github.sha}}
