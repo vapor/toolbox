@@ -14,15 +14,16 @@ struct Run: AnyCommand {
     }
 
     func outputHelp(using context: inout CommandContext) {
-        if context.input.arguments.count < 2 {
+        guard context.input.arguments.count > 1 else {
             context.console.output("\(self.help)")
-        } else {
-            do {
-                context.input.arguments.append("--help")
-                try self.run(using: &context)
-            } catch {
-                context.console.output("error: ".consoleText(.error) + "\(error)".consoleText())
-            }
+            return
+        }
+        
+        do {
+            context.input.arguments.append("--help")
+            try self.run(using: &context)
+        } catch {
+            context.console.output("error: ".consoleText(.error) + "\(error)".consoleText())
         }
     }
 }
