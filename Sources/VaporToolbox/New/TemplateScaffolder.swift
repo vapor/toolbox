@@ -17,6 +17,7 @@ struct TemplateScaffolder {
         assert(destination.hasPrefix("/"))
         var context: [String: MustacheData] = [:]
         context["name"] = .string(name)
+        context["name_lower_kabab"] = .string(name.replacingOccurrences(of: " ", with: "-").lowercased())
         self.console.output(key: "name", value: name)
         for variable in self.manifest.variables {
             try self.ask(variable: variable, to: &context, using: &input)
