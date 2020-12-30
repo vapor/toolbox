@@ -6,7 +6,7 @@ import Mustache
 struct TemplateScaffolder {
     let console: Console
     let manifest: TemplateManifest
-    
+
     init(console: Console, manifest: TemplateManifest) {
         self.console = console
         self.manifest = manifest
@@ -30,7 +30,7 @@ struct TemplateScaffolder {
 
     private func ask(
         variable: TemplateManifest.Variable,
-        to context: inout [String: MustacheData], 
+        to context: inout [String: MustacheData],
         using input: inout CommandInput,
         prefix: String = ""
     ) throws {
@@ -51,7 +51,7 @@ struct TemplateScaffolder {
             } else {
                 confirm = self.console.confirm("\(variable.description) \("(--\(optionName)/--no-\(optionName))", style: .info)")
             }
-            
+
             if confirm {
                 context[variable.name] = .string(true.description)
                 self.console.output(key: variable.name, value: "Yes")
@@ -68,7 +68,7 @@ struct TemplateScaffolder {
                 let name = input.arguments[next]
                 input.arguments.remove(at: next)
                 input.arguments.remove(at: index)
-                guard let found = options.filter({ 
+                guard let found = options.filter({
                     $0.name.lowercased().hasPrefix(name.lowercased())
                 }).first else {
                     throw "No --\(optionName) option matching '\(name)'"
@@ -124,7 +124,7 @@ struct TemplateScaffolder {
                 }
             }
         }
-        
+
         switch file.type {
         case .file(let dynamic):
             self.console.output("+ " + file.name.consoleText())
