@@ -17,7 +17,7 @@ struct TemplateScaffolder {
         assert(destination.hasPrefix("/"))
         var context: [String: MustacheData] = [:]
         context["name"] = .string(name)
-        context["name_lower_kabab"] = .string(name.replacingOccurrences(of: " ", with: "-").lowercased())
+        context["name_kebab"] = .string(name.kebabed())
         self.console.output(key: "name", value: name)
         for variable in self.manifest.variables {
             try self.ask(variable: variable, to: &context, using: &input)
@@ -149,6 +149,22 @@ struct TemplateScaffolder {
                 )
             }
         }
+    }
+}
+
+fileprivate extension StringProtocol {
+    func kebabed() -> String {
+        var output: String = self.first!.lowercased()
+        for char in self.dropFirst() {
+            if char.isWhitespace {
+                output.append("-")
+            } else if char.isUppercase {
+                output.append("-\(char.lowercased())")
+            } else {
+                output.append(char)
+            }
+        }
+        return output
     }
 }
 
