@@ -36,7 +36,7 @@ struct New: AnyCommand {
 
         context.console.info("Cloning template...")
         try? FileManager.default.removeItem(atPath: templateTree)
-        let gitBranch = signature.templateBranch ?? "master"
+        let gitBranch = signature.templateBranch ?? "main"
         _ = try Process.git.clone(repo: gitUrl, toFolder: templateTree, branch: gitBranch)
 
         if FileManager.default.fileExists(atPath: templateTree.appendingPathComponents("manifest.yml")) {
