@@ -6,7 +6,7 @@ import Mustache
 struct TemplateScaffolder {
     let console: Console
     let manifest: TemplateManifest
-    
+
     init(console: Console, manifest: TemplateManifest) {
         self.console = console
         self.manifest = manifest
@@ -17,6 +17,7 @@ struct TemplateScaffolder {
         assert(destination.hasPrefix("/"))
         var context: [String: MustacheData] = [:]
         context["name"] = .string(name)
+        context["name_kebab"] = .string(name.kebabcased())
         self.console.output(key: "name", value: name)
         for variable in self.manifest.variables {
             try self.ask(variable: variable, to: &context, using: &input)
@@ -29,7 +30,7 @@ struct TemplateScaffolder {
 
     private func ask(
         variable: TemplateManifest.Variable,
-        to context: inout [String: MustacheData], 
+        to context: inout [String: MustacheData],
         using input: inout CommandInput,
         prefix: String = ""
     ) throws {
@@ -50,7 +51,7 @@ struct TemplateScaffolder {
             } else {
                 confirm = self.console.confirm("\(variable.description) \("(--\(optionName)/--no-\(optionName))", style: .info)")
             }
-            
+
             if confirm {
                 context[variable.name] = .string(true.description)
                 self.console.output(key: variable.name, value: "Yes")
@@ -67,7 +68,7 @@ struct TemplateScaffolder {
                 let name = input.arguments[next]
                 input.arguments.remove(at: next)
                 input.arguments.remove(at: index)
-                guard let found = options.filter({ 
+                guard let found = options.filter({
                     $0.name.lowercased().hasPrefix(name.lowercased())
                 }).first else {
                     throw "No --\(optionName) option matching '\(name)'"
@@ -123,7 +124,7 @@ struct TemplateScaffolder {
                 }
             }
         }
-        
+
         switch file.type {
         case .file(let dynamic):
             self.console.output("+ " + file.name.consoleText())
@@ -148,6 +149,15 @@ struct TemplateScaffolder {
                 )
             }
         }
+    }
+}
+
+fileprivate extension StringProtocol {
+    func kebabcased() -> String {
+        return .init(self
+            .flatMap { $0.isWhitespace ? "-" : "\($0)" }
+            .enumerated().flatMap { $0 > 0 && $1.isUppercase ? "-\($1.lowercased())" : "\($1.lowercased())" }
+        )
     }
 }
 
