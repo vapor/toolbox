@@ -10,6 +10,6 @@ struct Supervisor: CommandGroup {
     }
 
     var help: String {
-        "Commands for working with Supervisord"
+        "Commands for working with supervisord."
     }
 }
