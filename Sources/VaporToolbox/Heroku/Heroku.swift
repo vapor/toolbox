@@ -10,6 +10,6 @@ struct Heroku: CommandGroup {
     }
 
     var help: String {
-        "Commands for working with Heroku"
+        "Commands for working with Heroku."
     }
 }
