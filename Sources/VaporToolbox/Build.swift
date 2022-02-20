@@ -7,7 +7,7 @@ struct Build: AnyCommand {
 
     func run(using context: inout CommandContext) throws {
         context.console.output("Building project...")
-        try exec(Process.shell.which("swift"), ["build", "--enable-test-discovery"] + context.input.arguments)
+        try exec(Process.shell.which("swift"), ["build"] + context.input.arguments)
         context.console.info("Project built.")
     }
 }
