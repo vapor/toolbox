@@ -3,14 +3,19 @@ import Foundation
 
 // Generates an Xcode project
 struct Run: AnyCommand {
-    let help = "Runs an app from the console.\nEquivalent to `swift run Run`."
+    let help = "Runs an app from the console.\nEquivalent to `swift run Run`.\nThe --enable-test-discovery flag is automatically set if needed."
 
     func run(using context: inout CommandContext) throws {
+        var flags = [String]()
+        if isEnableTestDiscoveryFlagNeeded() {
+            flags.append("--enable-test-discovery")
+        }
+        
         var extraArguments: [String] = []
         if let confirmOverride = context.console.confirmOverride {
             extraArguments.append(confirmOverride ? "--yes" : "--no")
         }
-        try exec(Process.shell.which("swift"), ["run", "Run"] + context.input.arguments + extraArguments)
+        try exec(Process.shell.which("swift"), ["run"] + flags + ["Run"] + context.input.arguments + extraArguments)
     }
 
     func outputHelp(using context: inout CommandContext) {
