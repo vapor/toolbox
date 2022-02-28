@@ -1,5 +1,6 @@
 name: test
-on: { pull_request: {} }
+#on: { pull_request: {} }
+on: workflow_dispatch
 
 jobs:
   #test-new-latest:
