@@ -58,11 +58,11 @@ final class Toolbox: CommandGroup {
                 context.console.output(key: "framework", value: vapor.state.version)
             } else {
                 context.console.output("\("note:", style: .warning) this Swift project does not depend on Vapor.")
-                context.console.output(key: "framework", value: "not found")
+                context.console.output(key: "framework", value: "Vapor framework for this project: this Swift project does not depend on Vapor. Please ensure you are in a Vapor project directory. If you are, ensure you have built the project with `swift build`. You can create a new project with `vapor new MyProject`")
             }
         } catch {
-            context.console.output("\("note:", style: .warning) no Package.resolved file was found.")
-            context.console.output(key: "framework", value: "not found")
+            context.console.output("\("note:", style: .warning) no Package.resolved file was found. Possibly not currently in a Swift package directory")
+            context.console.output(key: "framework", value: "Vapor framework for this project: no Package.resolved file found. Please ensure you are in a Vapor project directory. If you are, ensure you have built the project with `swift build`. You can create a new project with `vapor new MyProject`")
         }
     }
 
