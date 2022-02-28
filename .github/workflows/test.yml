@@ -1,10 +1,10 @@
 name: test
 # TODO: Remove for PR once finished
-#on: 
-#  push:
-#    branches:
-#      - bug/updateCI
-on: { pull_request: {} }
+on: 
+  push:
+    branches:
+      - bug/updateCI
+#on: { pull_request: {} }
 
 
 jobs:  
