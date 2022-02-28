@@ -1,10 +1,5 @@
 name: test
-# TODO: Remove for PR once finished
-on: 
-  push:
-    branches:
-      - bug/updateCI
-#on: { pull_request: {} }
+on: { pull_request: {} }
 
 
 jobs:  
@@ -12,8 +7,6 @@ jobs:
     # Run the workflow on multiple machines
     strategy:
       fail-fast: false
-      # TODO: This produces 40 checks, that's too many
-      # Setup flags to be used in the vapor new command as well as operating systems with images
       matrix:
         fluentflags:
           - --no-fluent
@@ -26,9 +19,8 @@ jobs:
           - --no-leaf
         os: [ubuntu-latest]
         image: ["swift:5.5-focal"]
-    # Run on the given operating system and image
-    runs-on: ${{ matrix.os }} #matrix.env.os }}
-    container: ${{ matrix.image }} #matrix.env.image }}
+    runs-on: ${{ matrix.os }}
+    container: ${{ matrix.image }}
     steps:
       - name: Install SQLite if needed
         if: ${{ contains(matrix.fluentflags, 'sqlite') }}
