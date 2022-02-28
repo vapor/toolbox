@@ -1,14 +1,12 @@
 name: test
+on: 
+  push:
+    branches:
+      - bug/updateCI
 #on: { pull_request: {} }
-on: workflow_dispatch
 
-jobs:
-  #test-new-latest:
-    #runs-on: macOS-latest
-    
-  #test-new-5_2:
-    #runs-on: macOS-latest
-  
+
+jobs:  
   # Get OS and Images from a file in the vapor/ci repository
   getcidata:
     runs-on: ubuntu-latest
