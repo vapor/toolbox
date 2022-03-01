@@ -63,3 +63,54 @@ extension Console {
         self.output("\(key): ".consoleText(style) + value.consoleText())
     }
 }
+
+/// Represents the user's runtime version of Swift (major.minor).
+struct RuntimeSwiftVersion {
+    
+    let major: Int
+    let minor: Int
+    
+    /// Tries to detect the runtime version of Swift.
+    ///
+    /// It may not be possible to do it, that's why the initializer is failable.
+    init?() {
+        guard let rawVersion = Self.getRuntimeSwiftVersion() else { return nil }
+        self.major = rawVersion[0]
+        self.minor = rawVersion[1]
+    }
+    
+    /// Tries to detect the runtime version of Swift.
+    /// - Returns: An array which contains major and minor version numbers.
+    static private func getRuntimeSwiftVersion() -> [Int]? {
+        
+        guard let rawVersionString = try? Process.shell.run(Process.shell.which("swift"), ["-version"])
+        else { return nil }
+
+        // Searching for a string like "Swift version 5.5"
+        let regex = try! NSRegularExpression(pattern: "Swift[[:space:]]version[[:space:]]+[0-9]+.[0-9]+")
+        guard let match = regex.firstMatch(in: rawVersionString, options: [], range: NSRange(location: 0, length: rawVersionString.utf8.count))
+        else { return nil }
+        
+        let swiftVersionString = String(rawVersionString[Range(match.range, in: rawVersionString)!])
+        
+        let words = swiftVersionString.components(separatedBy: .whitespaces).filter { !$0.isEmpty }
+        guard words.count == 3 else { return nil }
+        
+        // Splitting major and minor and assuring they are Int
+        if words.last!.split(separator: ".").reduce(true, { $0 && (Int($1) != nil) }) {
+            return words.last!.split(separator: ".").map { Int($0)! }
+        } else {
+            return nil
+        }
+    }
+}
+
+/// Checks if the *--enable-test-discovery* flag is needed.
+/// This flag is deprecated in newer versions of Swift and it may cause a WARNING.
+///
+/// - Note: In case the version detection fails this function stays conservative and returns **true**.
+func isEnableTestDiscoveryFlagNeeded() -> Bool {
+    guard let version = RuntimeSwiftVersion() else { return true }
+    
+    return !(version.major > 5 || (version.major == 5 && version.minor >= 4)) //https://www.swift.org/blog/swift-5-4-released/
+}
