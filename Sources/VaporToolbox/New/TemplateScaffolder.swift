@@ -124,6 +124,14 @@ struct TemplateScaffolder {
                 }
             }
         }
+        
+        let destinationFileName: String
+        if let dynamicName = file.dynamicName {
+            destinationFileName = try MustacheRenderer().render(template: dynamicName, data: context)
+        } else {
+            destinationFileName = file.name
+        }
+        let destinationPath = destination.appendingPathComponents(destinationFileName)
 
         switch file.type {
         case .file(let dynamic):
@@ -131,20 +139,20 @@ struct TemplateScaffolder {
             if dynamic {
                 let template = try String(contentsOf: source.appendingPathComponents(file.name).asFileURL, encoding: .utf8)
                 try MustacheRenderer().render(template: template, data: context)
-                    .write(to: URL(fileURLWithPath: destination.appendingPathComponents(file.name)), atomically: true, encoding: .utf8)
+                    .write(to: URL(fileURLWithPath: destinationPath), atomically: true, encoding: .utf8)
             } else {
                 try FileManager.default.moveItem(
                     atPath: source.appendingPathComponents(file.name),
-                    toPath: destination.appendingPathComponents(file.name))
+                    toPath: destinationPath)
             }
         case .folder(let files):
             let folder = file
-            try FileManager.default.createDirectory(atPath: destination.appendingPathComponents(folder.name), withIntermediateDirectories: false)
+            try FileManager.default.createDirectory(atPath: destinationPath, withIntermediateDirectories: false)
             for file in files {
                 try self.scaffold(
                     file: file,
                     from: source.appendingPathComponents(folder.name).trailingSlash,
-                    to: destination.appendingPathComponents(folder.name).trailingSlash,
+                    to: destinationPath.trailingSlash,
                     context: context
                 )
             }
@@ -221,6 +229,7 @@ struct TemplateManifest: Decodable {
             case exists(variable: String)
         }
         var name: String
+        var dynamicName: String?
         var condition: Condition?
         var type: Kind
 
@@ -231,6 +240,7 @@ struct TemplateManifest: Decodable {
             case dynamic
             case condition
             case `if`
+            case dynamic_name
         }
 
         init(from decoder: Decoder) throws {
@@ -249,6 +259,7 @@ struct TemplateManifest: Decodable {
                 if let variable = try container.decodeIfPresent(String.self, forKey: .if) {
                     self.condition = .exists(variable: variable)
                 }
+                self.dynamicName = try container.decodeIfPresent(String.self, forKey: .dynamic_name)
             }
         }
     }
