@@ -18,6 +18,9 @@ struct New: AnyCommand {
         
         @Flag(name: "no-commit", help: "Skips adding a first commit to the newly created repo.")
         var noCommit: Bool
+        
+        @Flag(name: "no-git", help: "Skips adding a Git repository to the project folder.")
+        var noGit: Bool
     }
 
     let help = "Generates a new app."
@@ -59,19 +62,21 @@ struct New: AnyCommand {
             throw "Too many arguments: \(context.input.arguments.joined(separator: " "))"
         }
         
-        // clear existing git history
-        let gitDir = workTree.appendingPathComponents(".git")
-
-        context.console.info("Creating git repository")
-        if FileManager.default.fileExists(atPath: gitDir) {
-            try FileManager.default.removeItem(atPath: gitDir)
-        }
-        _ = try Process.git.create(gitDir: gitDir)
-
-        // first commit
-        if !signature.noCommit {
-            context.console.info("Adding first commit")
-            try Process.git.commit(gitDir: gitDir, workTree: workTree, msg: "first commit")
+        if !signature.noGit {
+            // clear existing git history
+            let gitDir = workTree.appendingPathComponents(".git")
+            
+            context.console.info("Creating git repository")
+            if FileManager.default.fileExists(atPath: gitDir) {
+                try FileManager.default.removeItem(atPath: gitDir)
+            }
+            _ = try Process.git.create(gitDir: gitDir)
+            
+            // first commit
+            if !signature.noCommit {
+                context.console.info("Adding first commit")
+                try Process.git.commit(gitDir: gitDir, workTree: workTree, msg: "first commit")
+            }
         }
         
         // print the Droplet
