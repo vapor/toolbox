@@ -125,9 +125,11 @@ struct TemplateScaffolder {
             }
         }
         
+        let renderer = MustacheRenderer()
+        
         let destinationFileName: String
         if let dynamicName = file.dynamicName {
-            destinationFileName = try MustacheRenderer().render(template: dynamicName, data: context)
+            destinationFileName = try renderer.render(template: dynamicName, data: context)
         } else {
             destinationFileName = file.name
         }
@@ -138,7 +140,7 @@ struct TemplateScaffolder {
             self.console.output("+ " + file.name.consoleText())
             if dynamic {
                 let template = try String(contentsOf: source.appendingPathComponents(file.name).asFileURL, encoding: .utf8)
-                try MustacheRenderer().render(template: template, data: context)
+                try renderer.render(template: template, data: context)
                     .write(to: URL(fileURLWithPath: destinationPath), atomically: true, encoding: .utf8)
             } else {
                 try FileManager.default.moveItem(
