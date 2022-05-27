@@ -21,6 +21,6 @@ uninstall:
 		sudo rm ${DEST}
 	else
 		rm ${DEST}
-    endif
+	endif
 clean:
 	rm -rf .build
