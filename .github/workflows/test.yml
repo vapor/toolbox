@@ -37,7 +37,13 @@ jobs:
                 ${{ matrix.fluentflags }} ${{ matrix.leafflags }}
       - name: Test new project
         run: swift test --package-path /tmp/toolbox-test
-      - name: Test make commands
+        
+  testMakeFile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out toolbox
+        uses: actions/checkout@v2
+      - name: TestMakefile
         run: |
           make build
           make install
