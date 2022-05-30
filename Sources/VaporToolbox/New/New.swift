@@ -101,7 +101,7 @@ struct New: AnyCommand {
             "Project " + name.consoleText(.info) + " has been created!",
             "",
             "Use " + "cd \(Process.shell.escapeshellarg(cdInstruction))".consoleText(.info) + " to enter the project directory",
-            "Then use " + "open Package.swift".consoleText(.info) + " to open the project in Xcode",
+            "Then open your project, for example if using Xcode type " + "open Package.swift".consoleText(.info) + "or " + "code .".consoleText(.info) + " if using VSCode",
         ]).forEach { context.console.output($0) }
     }
 
