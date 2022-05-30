@@ -37,6 +37,12 @@ jobs:
                 ${{ matrix.fluentflags }} ${{ matrix.leafflags }}
       - name: Test new project
         run: swift test --package-path /tmp/toolbox-test
+      - name: Test make commands
+        run: |
+          make build
+          make install
+          make uninstall
+          make clean
   
   createJSON:
     runs-on: ubuntu-latest
