@@ -45,9 +45,9 @@ func currentVersion() throws -> String {
 func foregroundShell(_ args: String...) throws {
     print("$", args.joined(separator: " "))
     let task = Process()
-    task.launchPath = "/usr/bin/env"
+    task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
     task.arguments = args
-    task.launch()
+    try task.run()
     task.waitUntilExit()
 
     guard task.terminationStatus == 0 else {
@@ -58,7 +58,7 @@ func foregroundShell(_ args: String...) throws {
 @discardableResult
 func backgroundShell(_ args: String...) throws -> String {
     let task = Process()
-    task.launchPath = "/usr/bin/env"
+    task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
     task.arguments = args
     // grab stdout
     let output = Pipe()
@@ -66,7 +66,7 @@ func backgroundShell(_ args: String...) throws -> String {
     // ignore stderr
     let error = Pipe()
     task.standardError = error
-    task.launch()
+    try task.run()
     task.waitUntilExit()
 
     guard task.terminationStatus == 0 else {
