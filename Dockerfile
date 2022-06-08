@@ -3,7 +3,7 @@ WORKDIR /build
 COPY . .
 RUN swift build --build-path /build/.build --static-swift-stdlib -c release
 
-FROM focal
+FROM ubuntu:focal
 RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true && \
     apt-get -q update && apt-get -q upgrade -y && apt-get install -y --no-install-recommends git \
     && rm -r /var/lib/apt/lists/*
