@@ -28,7 +28,7 @@ jobs:
       - name: Check out toolbox
         uses: actions/checkout@v2
       - name: Build toolbox
-        run: swift build --enable-test-discovery -c debug
+        run: swift build -c debug
       - name: Execute new project command
         run: |
           swift run \
@@ -44,7 +44,7 @@ jobs:
       environments: ${{ steps.output.outputs.environments }}
     steps:
       - id: output
-        run: echo "::set-output name=environments::[{\"os\":\"ubuntu-latest\", \"image\":\"swift:5.2-focal\", \"toolchain\":null},{\"os\":\"ubuntu-latest\", \"image\":\"swift:5.5-focal\", \"toolchain\":null},{\"os\":\"macos-11\", \"image\":null, \"toolchain\":\"latest\"}]"
+        run: echo "::set-output name=environments::[{\"os\":\"ubuntu-latest\", \"image\":\"swift:5.4-focal\", \"toolchain\":null},{\"os\":\"ubuntu-latest\", \"image\":\"swift:5.6-focal\", \"toolchain\":null},{\"os\":\"macos-11\", \"image\":null, \"toolchain\":\"latest\"}]"
   
   test-toolbox:
     needs: createJSON
@@ -64,4 +64,4 @@ jobs:
         uses: actions/checkout@v2
       - name: Run tests with Thread Sanitizer
         timeout-minutes: 20
-        run: swift test --enable-test-discovery --sanitize=thread
+        run: swift test --sanitize=thread
