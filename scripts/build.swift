@@ -9,8 +9,7 @@ func build() throws {
             "swift", "build",
             "--disable-sandbox",
             "--configuration", "release",
-            "-Xswiftc", "-cross-module-optimization",
-            "--enable-test-discovery"
+            "-Xswiftc", "-cross-module-optimization"
         )
     }
 }
