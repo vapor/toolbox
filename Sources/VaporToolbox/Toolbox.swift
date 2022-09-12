@@ -52,7 +52,7 @@ final class Toolbox: CommandGroup {
 
     private func outputFrameworkVersion(context: CommandContext) {
         do {
-            func missingVaporOutput(){
+            func missingVaporOutput() {
                 context.console.output("\("note:", style: .warning) this Swift project does not depend on Vapor.")
                 context.console.output(key: "framework", value: "Vapor framework for this project: this Swift project does not depend on Vapor. Please ensure you are in a Vapor project directory. If you are, ensure you have built the project with `swift build`. You can create a new project with `vapor new MyProject`")
             }
@@ -90,7 +90,7 @@ final class Toolbox: CommandGroup {
                     missingVaporOutput()
                 }
             default:
-                context.console.output(key: "framework", value: "Not supported Package.resolved version")
+                context.console.output(key: "framework", value: "Unsupported Package.resolved version")
             }
         } catch {
             context.console.output("\("note:", style: .warning) no Package.resolved file was found. Possibly not currently in a Swift package directory")
@@ -125,8 +125,6 @@ final class Toolbox: CommandGroup {
 private struct Version: Codable {
     let version: Int
 }
-    
-
     
 private struct PackageResolvedV1: Codable {
     static let version = 1
