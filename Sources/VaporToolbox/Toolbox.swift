@@ -54,8 +54,14 @@ final class Toolbox: CommandGroup {
         do {
             let packageString = try Process.shell.run("cat", "Package.resolved")
             let package = try JSONDecoder().decode(PackageResolved.self, from: .init(packageString.utf8))
-            if let vapor = package.object.pins.filter({ $0.package == "vapor" }).first {
-                context.console.output(key: "framework", value: vapor.state.version)
+            if let vapor = package.object.pins.first(where: { $0.package == "vapor" }) {
+                if let version = vapor.state.version {
+                    context.console.output(key: "framework", value: version)
+                } else if let branch = vapor.state.branch {
+                    context.console.output(key: "framework", value: "Branch-\(branch) Unknown version")
+                } else  {
+                    context.console.output(key: "framework", value: "Revision-\(vapor.state.revision) Unknown version")
+                }
             } else {
                 context.console.output("\("note:", style: .warning) this Swift project does not depend on Vapor.")
                 context.console.output(key: "framework", value: "Vapor framework for this project: this Swift project does not depend on Vapor. Please ensure you are in a Vapor project directory. If you are, ensure you have built the project with `swift build`. You can create a new project with `vapor new MyProject`")
@@ -94,7 +100,9 @@ private struct PackageResolved: Codable {
     struct Object: Codable {
         struct Pin: Codable {
             struct State: Codable {
-                var version: String
+                var branch: String?
+                var revision: String
+                var version: String?
             }
             var package: String
             var state: State
