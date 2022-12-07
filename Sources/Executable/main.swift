@@ -2,8 +2,8 @@ import ConsoleKit
 import VaporToolbox
 
 do {
-    try run()
+  try run()
 } catch {
-    let term = Terminal()
-    term.list(.error, key: "Error", value: "\(error)")
+  let term = Terminal()
+  term.list(.error, key: "Error", value: "\(error)")
 }
