@@ -7,7 +7,7 @@ struct ResourceScaffolder {
 
   init(console: Console, modelName: String) {
     self.console = console
-    self.modelName = modelName.isEmpty ? "Model" : modelName
+    self.modelName = modelName
   }
 
   func generate(escaping: (String, String, String) -> Void) {
@@ -35,14 +35,14 @@ struct ResourceScaffolder {
 
           // Add your fields here
           // Example:
-        // @Field(key: "modelName")
-        // var modelName: String
+          // @Field(key: "modelName")
+          // var modelName: String
 
-            init() {}
+          init() {}
 
-            init(id: UUID? = nil) {
-                self.id = id
-            }
+          init(id: UUID? = nil) {
+              self.id = id
+          }
         }
       """
 
@@ -61,7 +61,7 @@ struct ResourceScaffolder {
 
       struct \(modelName)Controller: RouteCollection {
           func boot(routes: RoutesBuilder) throws {
-              let \(endpoint) = routes.grouped(\(endpoint))
+              let \(endpoint) = routes.grouped("\(endpoint)")
               \(endpoint).get(use: index)
               \(endpoint).post(use: create)
               \(endpoint).group(":\(query)") { \(modelName) in
@@ -71,15 +71,15 @@ struct ResourceScaffolder {
               }
           }
 
-            func index(req: Request) async throws -> [\(modelName)]> {
+            func index(req: Request) async throws -> [\(modelName)] {
                 throw Abort(.notImplemented)
             }
 
-            func create(req: Request) async throws -> \(modelName)> {
+            func create(req: Request) async throws -> \(modelName) {
                 throw Abort(.notImplemented)
             }
 
-            func read(req: Request) async throws -> \(modelName)> {
+            func read(req: Request) async throws -> \(modelName) {
                 guard let id = req.parameters.get("\(query)", as: UUID.self) else {
                     throw Abort(.badRequest)
                 }
@@ -87,7 +87,7 @@ struct ResourceScaffolder {
                 throw Abort(.notImplemented)
             }
 
-            func update(req: Request) async throws -> \(modelName)> {
+            func update(req: Request) async throws -> \(modelName) {
                 guard let id = req.parameters.get("\(query)", as: UUID.self) else {
                     throw Abort(.badRequest)
                 }

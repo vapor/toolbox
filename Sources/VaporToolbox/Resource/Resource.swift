@@ -32,12 +32,14 @@ struct Resource: AnyCommand {
   func run(using context: inout CommandContext) throws {
     let signature = try Signature(from: &context.input)
     let name =
-      signature.name
-      .prefix(1)
-      .uppercased()
-      + signature.name
-      .dropFirst()
-    let force = signature.force ?? false
+      signature.name.isEmpty
+      ? "Model"
+      : signature.name
+        .prefix(1)
+        .uppercased()
+        + signature.name
+        .dropFirst()
+    let force = signature.force
     let cwd = FileManager.default.currentDirectoryPath
     let package = cwd.appendingPathComponents("Package.swift")
 
@@ -45,18 +47,19 @@ struct Resource: AnyCommand {
       throw ResourceError.notValidProject.localizedDescription
     }
 
-    let modelOutputPath = cwd.appendingPathComponents("Sources/App/Models/\(name).swift")
-    let migrationOutputPath = cwd.appendingPathComponents(
-      "Sources/App/Migrations/Create\(name).swift")
-    let controllerOutputPath = cwd.appendingPathComponents(
-      "Sources/App/Controllers/\(name)Migrations.swift")
-
     let resource = ResourceScaffolder(console: context.console, modelName: name)
 
     resource.generate { model, migration, controller in
       //TODO: Check if file exists and ask to overwrite
     }
 
+    let scaffolder = ResourceScaffolder(console: context.console, modelName: name)
+    scaffolder.generate { model, migration, controller in
+      let creator = ResourceCreator(
+        console: context.console, modelName: name, modelFile: model, modelMigrationFile: migration,
+        modelControllerFile: controller, force: force)
+      creator.execute()
+    }
   }
 }
 
