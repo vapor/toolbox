@@ -40,36 +40,27 @@ struct Resource: AnyCommand {
         + signature.name
         .dropFirst()
     let force = signature.force
+
     let cwd = FileManager.default.currentDirectoryPath
     let package = cwd.appendingPathComponents("Package.swift")
 
+    // Checking if the project is a valid Swift Package
     guard FileManager.default.fileExists(atPath: package) else {
       throw ResourceError.notValidProject.localizedDescription
     }
 
-    let resource = ResourceScaffolder(console: context.console, modelName: name)
-
-    resource.generate { model, migration, controller in
-      //TODO: Check if file exists and ask to overwrite
-    }
-
     let scaffolder = ResourceScaffolder(console: context.console, modelName: name)
+
+    // Generating the resource structures from given model name
     scaffolder.generate { model, migration, controller in
+
       let creator = ResourceCreator(
         console: context.console, modelName: name, modelFile: model, modelMigrationFile: migration,
         modelControllerFile: controller, force: force)
+
+      // Executing the resource creation
       creator.execute()
     }
-  }
-}
 
-enum ResourceError: Error {
-  case notValidProject
-
-  var localizedDescription: String {
-    switch self {
-    case .notValidProject:
-      return "No Package.swift found. Are you in a Vapor project?"
-    }
   }
 }

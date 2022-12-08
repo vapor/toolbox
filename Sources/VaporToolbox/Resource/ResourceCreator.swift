@@ -20,6 +20,7 @@ struct ResourceCreator {
     self.modelMigrationFile = modelMigrationFile
     self.modelControllerFile = modelControllerFile
     self.force = force
+
     self.cwd = FileManager.default.currentDirectoryPath
   }
 
@@ -56,11 +57,11 @@ struct ResourceCreator {
 
   private func process(at directory: String, to file: String, with content: String) {
 
-    if !checkDirectoryExist(at: directory) {
+    if !isDirectoryExist(at: directory) {
       createDirectory(at: directory)
     }
 
-    if !checkFileExist(at: file) {
+    if !isFileExist(at: file) {
       createFile(at: file, with: content)
     } else if force {
       createFile(at: file, with: content)
@@ -69,7 +70,7 @@ struct ResourceCreator {
     }
   }
 
-  private func checkDirectoryExist(at path: String) -> Bool {
+  private func isDirectoryExist(at path: String) -> Bool {
     guard FileManager.default.fileExists(atPath: path) else {
       return false
     }
@@ -85,7 +86,7 @@ struct ResourceCreator {
     }
   }
 
-  private func checkFileExist(at path: String) -> Bool {
+  private func isFileExist(at path: String) -> Bool {
     guard FileManager.default.fileExists(atPath: path) else {
       return false
     }

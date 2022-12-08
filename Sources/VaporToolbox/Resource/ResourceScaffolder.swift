@@ -35,8 +35,8 @@ struct ResourceScaffolder {
 
           // Add your fields here
           // Example:
-          // @Field(key: "modelName")
-          // var modelName: String
+          // @Field(key: "name")
+          // var name: String
 
           init() {}
 
