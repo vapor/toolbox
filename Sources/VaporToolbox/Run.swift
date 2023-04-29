@@ -24,14 +24,17 @@ struct Run: AnyCommand {
         let urlString = FileManager.default.currentDirectoryPath.trailingSlash.appendingPathComponents(filename)
         let manifestContents: String
         
-        guard let url = URL(string: urlString) else {
+        guard let url = URL(string: "file://\(urlString)") else {
             throw "Invalid URL: \(urlString)"   
         }
+
+        context.console.info("Reading file at \(urlString)")
         
         do {
             manifestContents = try String(contentsOf: url, encoding: .utf8)
         } catch {
             context.console.error("Failed to read manifest - are you in the correct directory?")
+            context.console.error("\(error)")
             return
         }
 
@@ -40,6 +43,8 @@ struct Run: AnyCommand {
         } else {
             appName = "App"
         }
+
+        context.console.info("Running \(appName)...")
 
         try exec(Process.shell.which("swift"), ["run"] + flags + [appName] + context.input.arguments + extraArguments)
     }
