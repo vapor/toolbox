@@ -18,7 +18,7 @@ jobs:
           - --leaf
           - --no-leaf
         os: [ubuntu-latest]
-        image: ["swift:5.6-focal"]
+        image: ["swift:5.8-focal"]
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.image }}
     steps:
