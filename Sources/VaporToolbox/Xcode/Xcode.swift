@@ -12,6 +12,8 @@ struct Xcode: Command {
     
     /// See `Command`.
     func run(using ctx: CommandContext, signature: Signature) throws {
+        ctx.console.warning("This command is deprecated. Use `open Package.swift` or `code .` instead.")
+
         ctx.console.info("Opening project in Xcode.")
         do {
             #if os(macOS)

@@ -37,6 +37,8 @@ class Cleaner {
     }
 
     func run() throws {
+        ctx.console.warning("This command is deprecated. Use `swift package clean` instead.")
+
         var ops: [(String, () throws -> CleanResult)] = []
         ops.append((".build", cleanBuildFolder))
         ops.append(("Package.resolved", cleanPackageResolved))

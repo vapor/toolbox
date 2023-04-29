@@ -11,13 +11,15 @@ struct SupervisorInit: Command {
     }
 
     func run(using context: CommandContext, signature: Signature) throws {
+        ctx.console.warning("This command is deprecated. Follow the docs for the latest instructions at https://docs.vapor.codes/deploy/supervisor/")
+
         let package = try Process.swift.package.dump()
         let cwd = FileManager.default.currentDirectoryPath
         let user = NSUserName()
         let config = SupervisorConfiguration(
             program: package.name,
             attributes: [
-                "command": "\(cwd)/.build/release/Run serve --env production",
+                "command": "\(cwd)/.build/release/App serve --env production",
                 "directory": cwd,
                 "user": user,
                 "stdout_logfile": "/var/log/supervisor/\(package.name)-stdout.log",

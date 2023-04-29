@@ -3,9 +3,11 @@ import Foundation
 
 // Generates an Xcode project
 struct Run: AnyCommand {
-    let help = "Runs an app from the console.\nEquivalent to `swift run Run`.\nThe --enable-test-discovery flag is automatically set if needed."
+    let help = "Runs an app from the console.\nEquivalent to `swift run App`.\nThe --enable-test-discovery flag is automatically set if needed."
 
     func run(using context: inout CommandContext) throws {
+        ctx.console.warning("This command is deprecated. Use `swift run App` instead.")
+
         var flags = [String]()
         if isEnableTestDiscoveryFlagNeeded() {
             flags.append("--enable-test-discovery")
