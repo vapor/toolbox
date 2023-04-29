@@ -6,7 +6,7 @@ struct Build: AnyCommand {
     let help = "Builds an app in the console."
 
     func run(using context: inout CommandContext) throws {
-        ctx.console.warning("This command is deprecated. Use `swift build` instead.")
+        context.console.warning("This command is deprecated. Use `swift build` instead.")
 
         context.console.output("Building project...")
         

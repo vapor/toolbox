@@ -10,7 +10,7 @@ struct SupervisorRestart: Command {
     }
 
     func run(using context: CommandContext, signature: Signature) throws {
-        ctx.console.warning("This command is deprecated. Use `supervisorctl restart <AppName>` instead.")
+        context.console.warning("This command is deprecated. Use `supervisorctl restart <AppName>` instead.")
 
         let package = try Process.swift.package.dump()
         context.console.print("Restarting \(package.name).")

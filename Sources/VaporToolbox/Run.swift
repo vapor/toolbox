@@ -6,7 +6,7 @@ struct Run: AnyCommand {
     let help = "Runs an app from the console.\nEquivalent to `swift run App`.\nThe --enable-test-discovery flag is automatically set if needed."
 
     func run(using context: inout CommandContext) throws {
-        ctx.console.warning("This command is deprecated. Use `swift run App` instead.")
+        context.console.warning("This command is deprecated. Use `swift run App` instead.")
 
         var flags = [String]()
         if isEnableTestDiscoveryFlagNeeded() {
@@ -17,7 +17,31 @@ struct Run: AnyCommand {
         if let confirmOverride = context.console.confirmOverride {
             extraArguments.append(confirmOverride ? "--yes" : "--no")
         }
-        try exec(Process.shell.which("swift"), ["run"] + flags + ["Run"] + context.input.arguments + extraArguments)
+
+        let appName: String
+
+        let filename = "Package.swift"
+        let urlString = FileManager.default.currentDirectoryPath.trailingSlash.appendingPathComponents(filename)
+        let manifestContents: String
+        
+        guard let url = URL(string: urlString) else {
+            throw "Invalid URL: \(urlString)"   
+        }
+        
+        do {
+            manifestContents = try String(contentsOf: url, encoding: .utf8)
+        } catch {
+            context.console.error("Failed to read manifest - are you in the correct directory?")
+            return
+        }
+
+        if manifestContents.contains(".executableTarget(name: \"Run\"") {
+            appName = "Run"
+        } else {
+            appName = "App"
+        }
+
+        try exec(Process.shell.which("swift"), ["run"] + flags + [appName] + context.input.arguments + extraArguments)
     }
 
     func outputHelp(using context: inout CommandContext) {

@@ -11,7 +11,7 @@ struct SupervisorInit: Command {
     }
 
     func run(using context: CommandContext, signature: Signature) throws {
-        ctx.console.warning("This command is deprecated. Follow the docs for the latest instructions at https://docs.vapor.codes/deploy/supervisor/")
+        context.console.warning("This command is deprecated. Follow the docs for the latest instructions at https://docs.vapor.codes/deploy/supervisor/")
 
         let package = try Process.swift.package.dump()
         let cwd = FileManager.default.currentDirectoryPath

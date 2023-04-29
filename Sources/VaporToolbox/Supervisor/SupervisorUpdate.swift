@@ -10,7 +10,7 @@ struct SupervisorUpdate: Command {
     }
 
     func run(using context: CommandContext, signature: Signature) throws {
-        ctx.console.warning("This command is deprecated. Use `supervisorctl update <AppName>` instead.")
+        context.console.warning("This command is deprecated. Use `supervisorctl update <AppName>` instead.")
 
         let package = try Process.swift.package.dump()
         try Process.run(Process.shell.which("supervisorctl"), "update", package.name)

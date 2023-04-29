@@ -8,7 +8,7 @@ struct HerokuPush: Command {
     let help = "Deploys app to Heroku."
 
     func run(using context: CommandContext, signature: Signature) throws {
-        ctx.console.warning("This command is deprecated. Use `git push heroku <branch>` instead.")
+        context.console.warning("This command is deprecated. Use `git push heroku <branch>` instead.")
 
         // Get Swift package name
         let name = try Process.swift.package.dump().name
