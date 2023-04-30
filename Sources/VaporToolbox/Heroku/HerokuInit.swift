@@ -32,6 +32,8 @@ struct HerokuInit: Command {
     let help = "Configures app for deployment to Heroku."
 
     func run(using ctx: CommandContext, signature: Signature) throws {
+        ctx.console.warning("This command is deprecated. Use `heroku init` instead.")
+
         // Get Swift package name
         let name = try Process.swift.package.dump().name
         ctx.console.list(key: "Package", value: name)
