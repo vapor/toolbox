@@ -4,14 +4,18 @@ import Foundation
 try build()
 
 func build() throws {
-    try withVersion(in: "Sources/VaporToolbox/Version.swift", as: currentVersion()) {
-        try foregroundShell(
-            "swift", "build",
-            "--disable-sandbox",
-            "--configuration", "release",
-            "-Xswiftc", "-cross-module-optimization",
-            "--enable-test-discovery"
-        )
+    do {
+        try withVersion(in: "Sources/VaporToolbox/Version.swift", as: currentVersion()) {
+            try foregroundShell(
+                "swift", "build",
+                "--disable-sandbox",
+                "--configuration", "release",
+                "-Xswiftc", "-cross-module-optimization",
+                "--enable-test-discovery"
+            )
+        }
+    } catch error {
+        print(error, error.localizedDescription)
     }
 }
 
