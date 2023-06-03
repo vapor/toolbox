@@ -4,6 +4,7 @@ build:
 	swiftc ./scripts/build.swift
 	./build
 	rm ./build
+install: build
 # if uid does not equal 0
 # user is not root and must use sudo
 ifneq ($(shell id -u), 0)
