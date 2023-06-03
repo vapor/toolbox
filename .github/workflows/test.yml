@@ -46,7 +46,6 @@ jobs:
       - name: TestMakefile
         run: |
           make build
-          make install
           make uninstall
           make clean
   
