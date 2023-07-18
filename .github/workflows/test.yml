@@ -22,7 +22,7 @@ jobs:
           - --fluent.db mongo
         leafflags: [--leaf, --no-leaf]
     runs-on: ubuntu-latest
-    container: swift-5.8:jammy
+    container: swift:5.8-jammy
     steps:
       - name: Check out toolbox
         uses: actions/checkout@v3
