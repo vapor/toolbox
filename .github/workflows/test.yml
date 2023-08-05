@@ -29,11 +29,14 @@ jobs:
       - name: Build toolbox
         run: swift build
       - name: Execute new project command
+        env:
+          FLUENTFLAGS: ${{ matrix.fluentflags }}
+          LEAFFLAGS: ${{ matrix.leafflags }}
         run: |
           swift run \
             vapor new toolbox-test \
                 --no-commit -o /tmp/toolbox-test \
-                ${{ matrix.fluentflags }} ${{ matrix.leafflags }}
+                ${FLUENTFLAGS} ${LEAFFLAGS}
       - name: Test new project
         run: swift test --package-path /tmp/toolbox-test
   
@@ -58,10 +61,13 @@ jobs:
       - name: Build toolbox
         run: swift build
       - name: Execute new project command
+        env:
+          FLUENTFLAGS: ${{ matrix.fluentflags }}
+          LEAFFLAGS: ${{ matrix.leafflags }}
         run: |
           swift run \
             vapor new toolbox-test \
                 --no-commit -o /tmp/toolbox-test \
-                ${{ matrix.fluentflags }} ${{ matrix.leafflags }}
+                ${FLUENTFLAGS} ${LEAFFLAGS}
       - name: Test new project
         run: swift test --package-path /tmp/toolbox-test
