@@ -75,7 +75,7 @@ struct New: AnyCommand {
             // first commit
             if !signature.noCommit {
                 context.console.info("Adding first commit")
-                try Process.git.commit(gitDir: gitDir, workTree: workTree, msg: "first commit")
+                try Process.git.commit(gitDir: gitDir, workTree: workTree, msg: "Generate Vapor project.")
             }
         }
         
