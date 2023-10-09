@@ -1,11 +1,15 @@
-FROM swift:5.2-bionic as build
+FROM swift:5.9-jammy as build
 WORKDIR /build
 COPY . .
-RUN swift build --build-path /build/.build --enable-test-discovery -c release
+RUN swift build --build-path /build/.build --static-swift-stdlib -c release
 
-FROM swift:5.2-bionic-slim
+FROM ubuntu:focal
 RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true && \
-    apt-get -q update && apt-get -q upgrade -y && apt-get install -y --no-install-recommends git \
+    apt-get -q update && apt-get -q upgrade -y && apt-get install -y --no-install-recommends git ca-certificates \
     && rm -r /var/lib/apt/lists/*
 COPY --from=build /build/.build/release/vapor /usr/bin
+
+RUN git config --global user.name "Vapor"
+RUN git config --global user.email "new@vapor.codes"
+
 ENTRYPOINT ["vapor"]

@@ -52,13 +52,45 @@ final class Toolbox: CommandGroup {
 
     private func outputFrameworkVersion(context: CommandContext) {
         do {
-            let packageString = try Process.shell.run("cat", "Package.resolved")
-            let package = try JSONDecoder().decode(PackageResolved.self, from: .init(packageString.utf8))
-            if let vapor = package.object.pins.filter({ $0.package == "vapor" }).first {
-                context.console.output(key: "framework", value: vapor.state.version)
-            } else {
+            func missingVaporOutput() {
                 context.console.output("\("note:", style: .warning) this Swift project does not depend on Vapor.")
                 context.console.output(key: "framework", value: "Vapor framework for this project: this Swift project does not depend on Vapor. Please ensure you are in a Vapor project directory. If you are, ensure you have built the project with `swift build`. You can create a new project with `vapor new MyProject`")
+            }
+            
+            let packageString = try Process.shell.run("cat", "Package.resolved")
+            let data = Data(packageString.utf8)
+            let version = try JSONDecoder().decode(Version.self, from: data)
+            switch version.version {
+            case PackageResolvedV1.version:
+                let v1 = try JSONDecoder().decode(PackageResolvedV1.self, from: data)
+                if let vapor = v1.object.pins.first(where: { $0.package == "vapor" }) {
+                    if let version = vapor.state.version {
+                        context.console.output(key: "framework", value: version)
+                    } else if let branch = vapor.state.branch {
+                        context.console.output(key: "framework", value: "Branch-\(branch) Unknown version")
+                    } else  {
+                        context.console.output(key: "framework", value: "Revision-\(vapor.state.revision) Unknown version")
+                    }
+                } else {
+                    missingVaporOutput()
+                }
+            case PackageResolvedV2.version:
+                let v2 = try JSONDecoder().decode(PackageResolvedV2.self, from: data)
+                if let vapor = v2.pins.first(where: { $0.identity == "vapor" }) {
+                    if let version = vapor.state.version {
+                        context.console.output(key: "framework", value: version)
+                    } else if let branch = vapor.state.branch {
+                        context.console.output(key: "framework", value: "Branch-\(branch) Unknown version")
+                    } else if let revision = vapor.state.revision {
+                        context.console.output(key: "framework", value: "Revision-\(revision) Unknown version")
+                    } else {
+                        context.console.output(key: "framework", value: "Unknown version")
+                    }
+                } else {
+                    missingVaporOutput()
+                }
+            default:
+                context.console.output(key: "framework", value: "Unsupported Package.resolved version")
             }
         } catch {
             context.console.output("\("note:", style: .warning) no Package.resolved file was found. Possibly not currently in a Swift package directory")
@@ -90,20 +122,44 @@ final class Toolbox: CommandGroup {
     }
 }
 
-private struct PackageResolved: Codable {
+private struct Version: Codable {
+    let version: Int
+}
+    
+private struct PackageResolvedV1: Codable {
+    static let version = 1
     struct Object: Codable {
         struct Pin: Codable {
             struct State: Codable {
-                var version: String
+                let revision: String
+                let branch: String?
+                let version: String?
             }
-            var package: String
-            var state: State
+            let package: String?
+            let state: State
         }
-        var pins: [Pin]
+        let pins: [Pin]
     }
-    var object: Object
+    let object: Object
+    let version: Int
 }
 
+private struct PackageResolvedV2: Codable {
+    static let version = 2
+    struct Pin: Codable {
+        struct State: Codable {
+            let branch: String?
+            let revision: String?
+            let version: String?
+        }
+        let identity: String
+        let state: State
+    }
+
+    let pins: [Pin]
+    let version: Int
+}
+    
 public func run() throws {
     signal(SIGINT) { code in
         // kill any background processes running

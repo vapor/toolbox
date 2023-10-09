@@ -1,4 +1,4 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.5
 import PackageDescription
 
 let package = Package(
@@ -11,7 +11,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.18.0"),
-        .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.0"),
+        .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.6"),
         .package(url: "https://github.com/tanner0101/mustache.git", from: "0.1.0"),
         .package(url: "https://github.com/vapor/console-kit.git", from: "4.2.0"),
     ],
@@ -25,7 +25,7 @@ let package = Package(
         .testTarget(name: "VaporToolboxTests", dependencies: [
             .target(name: "VaporToolbox"),
         ]),
-        .target(name: "Executable", dependencies: [
+        .executableTarget(name: "Executable", dependencies: [
             .target(name: "VaporToolbox"),
         ]),
     ]
