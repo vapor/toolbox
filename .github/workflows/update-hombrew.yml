@@ -8,16 +8,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     
-      - name: Get token
-        id: get-token
-        uses: tibdex/github-app-token@v1
-        with:
-          app_id: ${{ vars.PENNY_APP_ID }}
-          private_key: ${{ secrets.PENNY_APP_PRIVATE_KEY }}
+#       - name: Get token
+#         id: get-token
+#         uses: tibdex/github-app-token@v1
+#         with:
+#           app_id: ${{ vars.PENNY_APP_ID }}
+#           private_key: ${{ secrets.PENNY_APP_PRIVATE_KEY }}
       
       - name: Update Homebrew formula
         id: update-formula
         uses: dawidd6/action-homebrew-bump-formula@v3
         with:
-          token: ${{ steps.get-token.outputs.token }}
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
           formula: vapor

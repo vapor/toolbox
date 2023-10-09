@@ -1,4 +1,4 @@
-FROM swift:5.6-focal as build
+FROM swift:5.9-jammy as build
 WORKDIR /build
 COPY . .
 RUN swift build --build-path /build/.build --static-swift-stdlib -c release
