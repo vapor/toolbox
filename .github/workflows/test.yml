@@ -83,6 +83,16 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+      - name: Select Swift 5.8 on Linux
+        if: ${{ startsWith(matrix.runner-os, 'ubuntu') }}
+        uses: vapor/swiftly-action@v0.1
+        with:
+          toolchain: 5.8
+      - name: Select Swift 5.8 on macOS
+        if: ${{ startsWith(matrix.runner-os, 'macos') }}
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '~14.3'
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with: { languages: swift }
