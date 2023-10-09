@@ -1,10 +1,16 @@
 name: test
-on: { pull_request: {} }
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+on:
+  pull_request: { types: [opened, reopened, synchronize, ready_for_review] }
+  push: { branches: [ main ] }
+env:
+  LOG_LEVEL: info
+  SWIFT_DETERMINISTIC_HASHING: 1
 
-
-jobs:  
-  test-new:
-    # Run the workflow on multiple machines
+jobs:
+  integration-linux:
     strategy:
       fail-fast: false
       matrix:
@@ -14,27 +20,23 @@ jobs:
           - --fluent.db postgres
           - --fluent.db sqlite
           - --fluent.db mongo
-        leafflags:
-          - --leaf
-          - --no-leaf
-        os: [ubuntu-latest]
-        image: ["swift:5.8-focal"]
-    runs-on: ${{ matrix.os }}
-    container: ${{ matrix.image }}
+        leafflags: [--leaf, --no-leaf]
+    runs-on: ubuntu-latest
+    container: swift:5.9-jammy
     steps:
-      - name: Install SQLite if needed
-        if: ${{ contains(matrix.fluentflags, 'sqlite') }}
-        run: apt-get -q update && apt-get -q install -y libsqlite3-dev
       - name: Check out toolbox
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Build toolbox
-        run: swift build -c debug
+        run: swift build
       - name: Execute new project command
+        env:
+          FLUENTFLAGS: ${{ matrix.fluentflags }}
+          LEAFFLAGS: ${{ matrix.leafflags }}
         run: |
           swift run \
             vapor new toolbox-test \
                 --no-commit -o /tmp/toolbox-test \
-                ${{ matrix.fluentflags }} ${{ matrix.leafflags }}
+                ${FLUENTFLAGS} ${LEAFFLAGS}
       - name: Test new project
         run: swift test --package-path /tmp/toolbox-test
         
@@ -49,30 +51,64 @@ jobs:
           make uninstall
           make clean
   
-  createJSON:
-    runs-on: ubuntu-latest
-    outputs:
-      environments: ${{ steps.output.outputs.environments }}
-    steps:
-      - id: output
-        run: echo "::set-output name=environments::[{\"os\":\"ubuntu-latest\", \"image\":\"swift:5.6-focal\", \"toolchain\":null},{\"os\":\"ubuntu-latest\", \"image\":\"swift:5.8-focal\", \"toolchain\":null},{\"os\":\"macos-13\", \"image\":null, \"toolchain\":\"latest\"}]"
-  
-  test-toolbox:
-    needs: createJSON
+  integration-macos:
     strategy:
       fail-fast: false
       matrix:
-        env: ${{ fromJSON(needs.createJSON.outputs.environments) }}
-    runs-on: ${{ matrix.env.os }}
-    container: ${{ matrix.env.image }}
+        fluentflags:
+          - --no-fluent
+          - --fluent.db mysql
+          - --fluent.db postgres
+          - --fluent.db sqlite
+          - --fluent.db mongo
+        leafflags: [--leaf, --no-leaf]
+    runs-on: macos-13
     steps:
       - name: Select toolchain
-        uses: maxim-lobanov/setup-xcode@v1.2.1
-        with:
-          xcode-version: ${{ matrix.env.toolchain }}
-        if: ${{ matrix.env.toolchain != '' }}
+        uses: maxim-lobanov/setup-xcode@v1
+        with: { xcode-version: latest-stable }
       - name: Check out toolbox
-        uses: actions/checkout@v2
-      - name: Run tests with Thread Sanitizer
-        timeout-minutes: 20
-        run: swift test --sanitize=thread
+        uses: actions/checkout@v4
+      - name: Build toolbox
+        run: swift build
+      - name: Execute new project command
+        env:
+          FLUENTFLAGS: ${{ matrix.fluentflags }}
+          LEAFFLAGS: ${{ matrix.leafflags }}
+        run: |
+          swift run \
+            vapor new toolbox-test \
+                --no-commit -o /tmp/toolbox-test \
+                ${FLUENTFLAGS} ${LEAFFLAGS}
+      - name: Test new project
+        run: swift test --package-path /tmp/toolbox-test
+
+  gh-codeql:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner-os: ['ubuntu-latest', 'macos-13']
+    runs-on: ${{ matrix.runner-os }}
+    permissions: { actions: write, contents: read, security-events: write }
+    timeout-minutes: 60
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Select Swift 5.8 on Linux
+        if: ${{ startsWith(matrix.runner-os, 'ubuntu') }}
+        uses: vapor/swiftly-action@v0.1
+        with:
+          toolchain: 5.8
+      - name: Select Swift 5.8 on macOS
+        if: ${{ startsWith(matrix.runner-os, 'macos') }}
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '~14.3'
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with: { languages: swift }
+      - name: Perform build
+        run: swift build
+      - name: Run CodeQL analyze
+        uses: github/codeql-action/analyze@v2
+  
