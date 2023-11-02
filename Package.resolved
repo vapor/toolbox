@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/vapor/console-kit.git",
         "state": {
           "branch": null,
-          "revision": "ccd0773b3ad3c67a19918aaef6903678592bb087",
-          "version": "4.9.0"
+          "revision": "21b72c579a0d04a530e2b2f456c551c5b8940cf8",
+          "version": "4.9.1"
         }
       },
       {
@@ -51,8 +51,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio.git",
         "state": {
           "branch": null,
-          "revision": "3db5c4aeee8100d2db6f1eaf3864afdad5dc68fd",
-          "version": "2.59.0"
+          "revision": "853522d90871b4b63262843196685795b5008c46",
+          "version": "2.61.1"
         }
       },
       {
