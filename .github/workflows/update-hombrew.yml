@@ -13,6 +13,7 @@ jobs:
         with:
           app-id: ${{ vars.PENNY_APP_ID }}
           private-key: ${{ secrets.PENNY_APP_PRIVATE_KEY }}
+          owner: vapor
 
       - name: Add path
         run: echo /home/linuxbrew/.linuxbrew/bin >>"${GITHUB_PATH}"
