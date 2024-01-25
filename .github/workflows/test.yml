@@ -94,10 +94,10 @@ jobs:
         with:
           xcode-version: '~14.3'
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
+        uses: github/codeql-action/init@v3
         with: { languages: swift }
       - name: Perform build
         run: swift build
       - name: Run CodeQL analyze
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v3
   
