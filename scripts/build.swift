@@ -1,11 +1,23 @@
 #!/usr/bin/env swift
 import Foundation
 
-try build()
+struct ShellError: Error {
+    var terminationStatus: Int32
+}
 
-func build() throws {
-    try withVersion(in: "Sources/VaporToolbox/Version.swift", as: currentVersion()) {
-        try foregroundShell(
+func main() async {
+    do {
+        try await build()
+    } catch {
+        print("Error: \(error)")
+        exit(1)
+    }
+}
+
+func build() async throws {
+    let version = try await currentVersion()
+    try await withVersion(in: "Sources/VaporToolbox/Version.swift", as: version) {
+        try await foregroundShell(
             "swift", "build",
             "--disable-sandbox",
             "--configuration", "release",
@@ -14,68 +26,96 @@ func build() throws {
     }
 }
 
-func withVersion(in file: String, as version: String, _ closure: () throws -> ()) throws {
+func withVersion(in file: String, as version: String, _ operation: () async throws -> Void) async throws {
     let fileURL = URL(fileURLWithPath: file)
     let originalFileContents = try String(contentsOf: fileURL, encoding: .utf8)
-    // set version
+    
     try originalFileContents
         .replacingOccurrences(of: "nil", with: "\"\(version)\"")
         .write(to: fileURL, atomically: true, encoding: .utf8)
-    defer {
-        // undo set version
-        try! originalFileContents
-            .write(to: fileURL, atomically: true, encoding: .utf8)
+
+    var operationError: Error?
+    do {
+        try await operation()
+    } catch {
+        operationError = error
     }
-    // run closure
-    try closure()
+    
+    // If an error occurred, revert the file change
+    if operationError != nil {
+        try? originalFileContents
+            .write(to: fileURL, atomically: true, encoding: .utf8)
+        if let error = operationError {
+            throw error
+        }
+    }
 }
 
-func currentVersion() throws -> String {
+
+func currentVersion() async throws -> String {
     do {
-        let tag = try backgroundShell("git", "describe", "--tags", "--exact-match")
+        let tag = try await backgroundShell("git", "describe", "--tags", "--exact-match")
         return tag
     } catch {
-        let branch = try backgroundShell("git", "symbolic-ref", "-q", "--short", "HEAD")
-        let commit = try backgroundShell("git", "rev-parse", "--short", "HEAD")
+        let branch = try await backgroundShell("git", "symbolic-ref", "-q", "--short", "HEAD")
+        let commit = try await backgroundShell("git", "rev-parse", "--short", "HEAD")
         return "\(branch) (\(commit))"
     }
 }
 
-func foregroundShell(_ args: String...) throws {
-    print("$", args.joined(separator: " "))
-    let task = Process()
-    task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
-    task.arguments = args
-    try task.run()
-    task.waitUntilExit()
+import Foundation
 
-    guard task.terminationStatus == 0 else {
-        throw ShellError(terminationStatus: task.terminationStatus)
+func foregroundShell(_ args: String...) async throws {
+    try await withCheckedThrowingContinuation { continuation in
+        let task = Process()
+        task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+        task.arguments = args
+
+        task.terminationHandler = { process in
+            if process.terminationStatus == 0 {
+                continuation.resume()
+            } else {
+                continuation.resume(throwing: ShellError(terminationStatus: process.terminationStatus))
+            }
+        }
+
+        do {
+            try task.run()
+        } catch {
+            continuation.resume(throwing: error)
+        }
     }
 }
 
 @discardableResult
-func backgroundShell(_ args: String...) throws -> String {
-    let task = Process()
-    task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
-    task.arguments = args
-    // grab stdout
-    let output = Pipe()
-    task.standardOutput = output
-    // ignore stderr
-    let error = Pipe()
-    task.standardError = error
-    try task.run()
-    task.waitUntilExit()
+func backgroundShell(_ args: String...) async throws -> String {
+    try await withCheckedThrowingContinuation { continuation in
+        let task = Process()
+        task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+        task.arguments = args
+        let output = Pipe()
+        task.standardOutput = output
+        task.standardError = Pipe()
 
-    guard task.terminationStatus == 0 else {
-        throw ShellError(terminationStatus: task.terminationStatus)
+        task.terminationHandler = { process in
+            guard process.terminationStatus == 0 else {
+                continuation.resume(throwing: ShellError(terminationStatus: process.terminationStatus))
+                return
+            }
+
+            let data = output.fileHandleForReading.readDataToEndOfFile()
+            let outputString = String(decoding: data, as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines)
+            continuation.resume(returning: outputString)
+        }
+
+        do {
+            try task.run()
+        } catch {
+            continuation.resume(throwing: error)
+        }
     }
-
-    return String(decoding: output.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self)
-        .trimmingCharacters(in: .whitespacesAndNewlines)
 }
 
-struct ShellError: Swift.Error {
-    var terminationStatus: Int32
+Task {
+    await main()
 }
