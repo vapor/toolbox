@@ -63,8 +63,6 @@ func currentVersion() async throws -> String {
     }
 }
 
-import Foundation
-
 func foregroundShell(_ args: String...) async throws {
     try await withCheckedThrowingContinuation { continuation in
         let task = Process()
