@@ -12,11 +12,11 @@
       },
       {
         "package": "mustache",
-        "repositoryURL": "https://github.com/tanner0101/mustache.git",
+        "repositoryURL": "https://github.com/vapor-community/mustache.git",
         "state": {
           "branch": null,
-          "revision": "d98546e8b8d3287d69391ecddeb5732980986eef",
-          "version": "0.1.1"
+          "revision": "052c0946ab54c3c850eaf1ee1ef58630b7ef3f78",
+          "version": "0.2.0"
         }
       },
       {
