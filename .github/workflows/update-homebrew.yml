@@ -30,4 +30,5 @@ jobs:
             --no-browse \
             --fork-org=vapor \
             --tag="${GITHUB_REF_NAME}" \
-            --revision="${GITHUB_SHA}"
+            --revision="${GITHUB_SHA}" \
+            vapor
