@@ -24,7 +24,7 @@ jobs:
         run: |
           git config --global user.name 'penny-for-vapor[bot]'
           git config --global user.email '${{ vars.PENNY_APP_USER_ID }}+penny-for-vapor[bot]@users.noreply.github.com'
-          #brew tap homebrew/core
+          brew tap --force homebrew/core
           brew bump-formula-pr \
             --no-audit \
             --no-browse \
