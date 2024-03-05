@@ -12,7 +12,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.18.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.6"),
-        .package(url: "https://github.com/tanner0101/mustache.git", from: "0.1.0"),
+        .package(url: "https://github.com/vapor-community/mustache.git", from: "0.2.0"),
         .package(url: "https://github.com/vapor/console-kit.git", from: "4.2.0"),
     ],
     targets: [

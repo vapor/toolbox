@@ -21,13 +21,14 @@ jobs:
       - name: Update Homebrew formula
         env:
           HOMEBREW_GITHUB_API_TOKEN: ${{ steps.get-token.outputs.token }}
+          RELEASE_TARBALL_URL: ${{ github.event.release.tarball_url }}
         run: |
           git config --global user.name 'penny-for-vapor[bot]'
           git config --global user.email '${{ vars.PENNY_APP_USER_ID }}+penny-for-vapor[bot]@users.noreply.github.com'
-          brew tap homebrew/core
+          brew tap --force homebrew/core
           brew bump-formula-pr \
             --no-audit \
             --no-browse \
             --fork-org=vapor \
-            --tag="${GITHUB_REF_NAME}" \
-            --revision="${GITHUB_SHA}"
+            --url="${RELEASE_TARBALL_URL}" \
+            vapor
