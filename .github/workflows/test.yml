@@ -39,6 +39,17 @@ jobs:
                 ${FLUENTFLAGS} ${LEAFFLAGS}
       - name: Test new project
         run: swift test --package-path /tmp/toolbox-test
+        
+  testMakeFile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out toolbox
+        uses: actions/checkout@v3
+      - name: TestMakefile
+        run: |
+          make install
+          make uninstall
+          make clean
   
   integration-macos:
     strategy:

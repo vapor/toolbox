@@ -4,13 +4,21 @@ import Foundation
 try build()
 
 func build() throws {
-    try withVersion(in: "Sources/VaporToolbox/Version.swift", as: currentVersion()) {
-        try foregroundShell(
-            "swift", "build",
-            "--disable-sandbox",
-            "--configuration", "release",
-            "-Xswiftc", "-cross-module-optimization"
-        )
+    do {
+        try withVersion(in: "Sources/VaporToolbox/Version.swift", as: currentVersion()) {
+            do {
+                try foregroundShell(
+                    "swift", "build",
+                    "--disable-sandbox",
+                    "--configuration", "release",
+                    "-Xswiftc", "-cross-module-optimization"
+                )
+            } catch {
+                print("foregroundShell failed.")
+            }
+        }
+    } catch {
+        print("withVerison failed.")
     }
 }
 
@@ -18,16 +26,22 @@ func withVersion(in file: String, as version: String, _ closure: () throws -> ()
     let fileURL = URL(fileURLWithPath: file)
     let originalFileContents = try String(contentsOf: fileURL, encoding: .utf8)
     // set version
-    try originalFileContents
-        .replacingOccurrences(of: "nil", with: "\"\(version)\"")
-        .write(to: fileURL, atomically: true, encoding: .utf8)
-    defer {
-        // undo set version
-        try! originalFileContents
+    do {
+        try originalFileContents
+            .replacingOccurrences(of: "nil", with: "\"\(version)\"")
             .write(to: fileURL, atomically: true, encoding: .utf8)
+
+        defer {
+            // undo set version
+            try! originalFileContents
+                .write(to: fileURL, atomically: true, encoding: .utf8)
+        }
+        // run closure
+        try closure()
+    } catch {
+        print("originalFileContents replacing occurences failed.", error.localizedDescription)
+        throw error
     }
-    // run closure
-    try closure()
 }
 
 func currentVersion() throws -> String {
