@@ -114,6 +114,4 @@ func backgroundShell(_ args: String...) async throws -> String {
     }
 }
 
-Task {
-    await main()
-}
+await main()

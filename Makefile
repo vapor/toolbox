@@ -1,7 +1,6 @@
 DEST := /usr/local/bin/vapor
 
 build:
-        swift build -c release
 	swiftc ./scripts/build.swift
 	./build
 	rm ./build
