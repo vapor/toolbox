@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/vapor-community/mustache.git",
         "state": {
           "branch": null,
-          "revision": "052c0946ab54c3c850eaf1ee1ef58630b7ef3f78",
-          "version": "0.2.0"
+          "revision": "137e1733d0e16a476c6125ddce675fc66083b9b6",
+          "version": "0.2.1"
         }
       },
       {
@@ -69,8 +69,8 @@
         "repositoryURL": "https://github.com/jpsim/Yams.git",
         "state": {
           "branch": null,
-          "revision": "8a835d918245ca22f36663dd3862138805d7f707",
-          "version": "5.1.0"
+          "revision": "9234124cff5e22e178988c18d8b95a8ae8007f76",
+          "version": "5.1.2"
         }
       }
     ]
