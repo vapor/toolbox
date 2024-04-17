@@ -51,7 +51,7 @@ jobs:
           - --fluent.db sqlite
           - --fluent.db mongo
         leafflags: [--leaf, --no-leaf]
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - name: Select toolchain
         uses: maxim-lobanov/setup-xcode@v1
