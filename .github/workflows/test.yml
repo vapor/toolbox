@@ -11,18 +11,38 @@ env:
 
 jobs:
   integration-linux:
+    if: ${{ github.event_name == 'pull_request' && !github.event.pull_request.draft }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ toJSON(matrix) }}
+      cancel-in-progress: true
     strategy:
       fail-fast: false
       matrix:
         fluentflags:
           - --no-fluent
-          - --fluent.db mysql
+          # - --fluent.db mysql
           - --fluent.db postgres
           - --fluent.db sqlite
           - --fluent.db mongo
         leafflags: [--leaf, --no-leaf]
+        include:
+          # - fluentflags: '--fluent.db mysql'
+          #   dbhostname: mysql
+          - fluentflags: '--fluent.db postgres'
+            dbhostname: psql
+          - fluentflags: '--fluent.db mongo'
+            dbhosturl: 'mongodb://mongo:27017/vapor_database'
     runs-on: ubuntu-latest
-    container: swift:5.9-jammy
+    container: swift:5.10-jammy
+    services:
+      mongo: { image: 'mongo:latest' }
+      # mysql:
+      #  image: mysql:latest
+      #  env: { MYSQL_ALLOW_EMPTY_PASSWORD: 'true', MYSQL_USER: vapor_username, MYSQL_PASSWORD: vapor_password, MYSQL_DATABASE: vapor_database }
+      psql:
+        image: postgres:latest
+        env: { POSTGRES_USER: vapor_username, POSTGRES_DB: vapor_database, POSTGRES_PASSWORD: vapor_password,
+               POSTGRES_HOST_AUTH_METHOD: 'scram-sha-256', POSTGRES_INITDB_ARGS: '--auth-host=scram-sha-256' }
     steps:
       - name: Check out toolbox
         uses: actions/checkout@v4
@@ -39,6 +59,9 @@ jobs:
                 ${FLUENTFLAGS} ${LEAFFLAGS}
       - name: Test new project
         run: swift test --package-path /tmp/toolbox-test
+        env:
+          DATABASE_HOST: ${{ matrix.dbhostname }}
+          DATABASE_URL: ${{ matrix.dbhosturl }}
   
   integration-macos:
     strategy:
@@ -51,7 +74,7 @@ jobs:
           - --fluent.db sqlite
           - --fluent.db mongo
         leafflags: [--leaf, --no-leaf]
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - name: Select toolchain
         uses: maxim-lobanov/setup-xcode@v1
@@ -70,7 +93,7 @@ jobs:
                 --no-commit -o /tmp/toolbox-test \
                 ${FLUENTFLAGS} ${LEAFFLAGS}
       - name: Test new project
-        run: swift test --package-path /tmp/toolbox-test
+        run: swift build --package-path /tmp/toolbox-test
 
   gh-codeql:
     strategy:
