@@ -14,6 +14,7 @@ final class Toolbox: CommandGroup {
         "build": Build(),
         "heroku": Heroku(),
         "run": Run(),
+        "resource": Resource(),
         "supervisor": Supervisor(),
     ]
     
