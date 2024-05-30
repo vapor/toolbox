@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/vapor/console-kit.git",
         "state": {
           "branch": null,
-          "revision": "a31f44ebfbd15a2cc0fda705279676773ac16355",
-          "version": "4.14.1"
+          "revision": "9f7932f22ab6f64aafadc14491e694179b7d0f6f",
+          "version": "4.14.3"
         }
       },
       {
@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/vapor-community/mustache.git",
         "state": {
           "branch": null,
-          "revision": "052c0946ab54c3c850eaf1ee1ef58630b7ef3f78",
-          "version": "0.2.0"
+          "revision": "137e1733d0e16a476c6125ddce675fc66083b9b6",
+          "version": "0.2.1"
         }
       },
       {
@@ -51,8 +51,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio.git",
         "state": {
           "branch": null,
-          "revision": "fc63f0cf4e55a4597407a9fc95b16a2bc44b4982",
-          "version": "2.64.0"
+          "revision": "359c461e5561d22c6334828806cc25d759ca7aa6",
+          "version": "2.65.0"
         }
       },
       {
@@ -60,8 +60,8 @@
         "repositoryURL": "https://github.com/apple/swift-system.git",
         "state": {
           "branch": null,
-          "revision": "025bcb1165deab2e20d4eaba79967ce73013f496",
-          "version": "1.2.1"
+          "revision": "f9266c85189c2751589a50ea5aec72799797e471",
+          "version": "1.3.0"
         }
       },
       {
@@ -69,8 +69,8 @@
         "repositoryURL": "https://github.com/jpsim/Yams.git",
         "state": {
           "branch": null,
-          "revision": "8a835d918245ca22f36663dd3862138805d7f707",
-          "version": "5.1.0"
+          "revision": "9234124cff5e22e178988c18d8b95a8ae8007f76",
+          "version": "5.1.2"
         }
       }
     ]
