@@ -19,21 +19,21 @@ jobs:
       fail-fast: false
       matrix:
         fluentflags:
-          - --no-fluent
-          # - --fluent.db mysql
-          - --fluent.db postgres
-          - --fluent.db sqlite
-          - --fluent.db mongo
+          - # --no-fluent
+          # - --fluent mysql
+          - --fluent postgres
+          - --fluent sqlite
+          - --fluent mongo
         leafflags: [--leaf, --no-leaf]
         include:
-          # - fluentflags: '--fluent.db mysql'
+          # - fluentflags: '--fluent mysql'
           #   dbhostname: mysql
-          - fluentflags: '--fluent.db postgres'
+          - fluentflags: '--fluent postgres'
             dbhostname: psql
-          - fluentflags: '--fluent.db mongo'
+          - fluentflags: '--fluent mongo'
             dbhosturl: 'mongodb://mongo:27017/vapor_database'
     runs-on: ubuntu-latest
-    container: swift:5.10-jammy
+    container: swift:noble
     services:
       mongo: { image: 'mongo:latest' }
       # mysql:
@@ -68,11 +68,11 @@ jobs:
       fail-fast: false
       matrix:
         fluentflags:
-          - --no-fluent
-          - --fluent.db mysql
-          - --fluent.db postgres
-          - --fluent.db sqlite
-          - --fluent.db mongo
+          - # --no-fluent
+          - --fluent mysql
+          - --fluent postgres
+          - --fluent sqlite
+          - --fluent mongo
         leafflags: [--leaf, --no-leaf]
     runs-on: macos-14
     steps:
