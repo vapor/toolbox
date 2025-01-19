@@ -7,14 +7,7 @@ extension Process {
         arguments: [String],
         terminationHandler: (@Sendable (Process) -> Void)? = nil
     ) throws -> Process {
-        let process = Self()
-        process.environment = ProcessInfo.processInfo.environment
-        process.executableURL = executableURL
-        process.arguments = arguments
-        process.standardInput = Pipe()
-        process.standardOutput = Pipe()
-        process.standardError = Pipe()
-        process.terminationHandler = terminationHandler
+        let process = Process(executableURL, arguments: arguments, terminationHandler: terminationHandler)
 
         try process.run()
         process.waitUntilExit()
@@ -33,11 +26,26 @@ extension Process {
         return process
     }
 
+    private convenience init(
+        _ executableURL: URL,
+        arguments: [String],
+        terminationHandler: (@Sendable (Process) -> Void)? = nil
+    ) {
+        self.init()
+        self.environment = ProcessInfo.processInfo.environment
+        self.executableURL = executableURL
+        self.arguments = arguments
+        self.standardInput = Pipe()
+        self.standardOutput = Pipe()
+        self.standardError = Pipe()
+        self.terminationHandler = terminationHandler
+    }
+
     fileprivate var outputString: String? {
         (self.standardOutput as? Pipe)?.fileHandleForReading.read()
     }
 
-    fileprivate var errorString: String? {
+    private var errorString: String? {
         (self.standardError as? Pipe)?.fileHandleForReading.read()
     }
 }
