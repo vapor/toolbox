@@ -22,28 +22,45 @@ struct TemplateRenderer {
         }
 
         if let fluentDB = dependencies.fluent {
-            let (module, url, id, version, key, emoji) =
-                switch fluentDB {
-                case .postgres:
-                    ("Postgres", "postgres", "psql", "2.10.0", "is_postgres", "🐘")
-                case .mysql:
-                    ("MySQL", "mysql", "mysql", "4.7.0", "is_mysql", "🐬")
-                case .sqlite:
-                    ("SQLite", "sqlite", "sqlite", "4.8.0", "is_sqlite", "🪶")
-                case .mongo:
-                    ("Mongo", "mongo", "mongo", "1.4.0", "is_mongo", "🌱")
-                }
+            for manifestVariable in self.manifest.variables where manifestVariable.name == "fluent" {
+                guard case .variables(let variablesList) = manifestVariable.type else { continue }
 
-            context["fluent"] = [
-                "db": [
-                    "module": module,
-                    "url": url,
-                    "id": id,
-                    "version": version,
-                    key: "true",
-                    "emoji": emoji,
-                ]
-            ]
+                for dbVariable in variablesList where dbVariable.name == "db" {
+                    guard case .options(let options) = dbVariable.type else { continue }
+
+                    for option in options where option.name.lowercased().hasPrefix(fluentDB.rawValue.lowercased()) {
+                        if let module = option.data["module"],
+                            let url = option.data["url"],
+                            let id = option.data["id"],
+                            let version = option.data["version"],
+                            let emoji = option.data["emoji"]
+                        {
+                            let key =
+                                switch fluentDB {
+                                case .postgres:
+                                    "is_postgres"
+                                case .mysql:
+                                    "is_mysql"
+                                case .sqlite:
+                                    "is_sqlite"
+                                case .mongo:
+                                    "is_mongo"
+                                }
+
+                            context["fluent"] = [
+                                "db": [
+                                    "module": module,
+                                    "url": url,
+                                    "id": id,
+                                    "version": version,
+                                    key: "true",
+                                    "emoji": emoji,
+                                ]
+                            ]
+                        }
+                    }
+                }
+            }
         }
 
         print("Generating project files".colored(.cyan))
