@@ -24,7 +24,7 @@ extension Toolbox {
         var dependencies: DependenciesOptions
 
         @Option(
-            name: .shortAndLong,
+            name: [.customShort("T"), .long],
             help: ArgumentHelp(
                 "The URL of a Git repository to use as a template.",
                 valueName: "url"
