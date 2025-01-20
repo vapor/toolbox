@@ -9,7 +9,7 @@ struct TemplateRenderer {
         project name: String,
         from sourceURL: URL,
         to destinationURL: URL,
-        dependencies: Toolbox.New.DependenciesOptions
+        with dependencies: Vapor.New.DependenciesOptions
     ) throws {
         var context: [String: Any] = [:]
         context["name"] = name
@@ -64,17 +64,16 @@ struct TemplateRenderer {
         }
 
         print("Generating project files".colored(.cyan))
-
         for file in self.manifest.files {
-            try self.render(file: file, from: sourceURL, to: destinationURL, context: context)
+            try self.render(file, from: sourceURL, to: destinationURL, with: context)
         }
     }
 
     private func render(
-        file: TemplateManifest.File,
+        _ file: TemplateManifest.File,
         from sourceURL: URL,
         to destinationURL: URL,
-        context: [String: Any]
+        with context: [String: Any]
     ) throws {
         if let condition = file.condition {
             switch condition {
@@ -108,10 +107,10 @@ struct TemplateRenderer {
             try FileManager.default.createDirectory(at: destinationFileURL, withIntermediateDirectories: false)
             for file in files {
                 try self.render(
-                    file: file,
+                    file,
                     from: sourceURL.appending(path: folder.name, directoryHint: .isDirectory),
                     to: destinationFileURL,
-                    context: context
+                    with: context
                 )
             }
         }

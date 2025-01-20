@@ -3,15 +3,15 @@ import Foundation
 import Yams
 
 @main
-struct Toolbox: ParsableCommand {
+struct Vapor: ParsableCommand {
     static let configuration = CommandConfiguration(
-        abstract: "A tool for creating Vapor projects.",
+        abstract: "Vapor Toolbox (Server-side Swift web framework)",
         subcommands: [New.self],
         defaultSubcommand: New.self
     )
 }
 
-extension Toolbox {
+extension Vapor {
     struct New: ParsableCommand {
         static let configuration = CommandConfiguration(
             abstract: "Generates a new app."
@@ -50,7 +50,7 @@ extension Toolbox {
         @Flag(help: "Skips adding a Git repository to the project folder.")
         var noGit: Bool = false
 
-        @Flag(name: .shortAndLong, help: "Prints additional information when creating a new project.")
+        @Flag(name: .shortAndLong, help: "Prints additional information.")
         var verbose: Bool = false
 
         mutating func run() throws {
@@ -88,7 +88,7 @@ extension Toolbox {
                     project: name,
                     from: templateURL,
                     to: projectURL,
-                    dependencies: dependencies
+                    with: dependencies
                 )
             } else {
                 // If the template doesn't have a manifest (AKA doesn't need templating), just move the files
