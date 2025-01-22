@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "toolbox",
     platforms: [
-        .macOS(.v13)
+        .macOS(.v15)
     ],
     products: [
         .executable(name: "vapor", targets: ["VaporToolbox"])
@@ -24,7 +24,8 @@ let package = Package(
             ],
             swiftSettings: swiftSettings
         )
-    ]
+    ],
+    swiftLanguageModes: [.v5]
 )
 
 var swiftSettings: [SwiftSetting] {
