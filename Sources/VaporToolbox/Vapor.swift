@@ -10,7 +10,7 @@ struct Vapor: ParsableCommand {
         defaultSubcommand: New.self
     )
 
-    static let manifest = Mutex<TemplateManifest?>(nil)
+    nonisolated(unsafe) static var manifest: TemplateManifest? = nil
 
     static func preprocess(_ arguments: [String]) throws {
         let templateWebURL =
@@ -44,9 +44,7 @@ struct Vapor: ParsableCommand {
         if FileManager.default.fileExists(atPath: templateURL.appending(path: "manifest.yml").path()) {
             defer { try? FileManager.default.removeItem(at: templateURL) }
             let yaml = try String(contentsOf: templateURL.appending(path: "manifest.yml"), encoding: .utf8)
-            try Vapor.manifest.withLock {
-                $0 = try YAMLDecoder().decode(TemplateManifest.self, from: yaml)
-            }
+            Vapor.manifest = try YAMLDecoder().decode(TemplateManifest.self, from: yaml)
         }
     }
 }

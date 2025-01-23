@@ -66,9 +66,7 @@ extension Vapor {
             cloneArgs.append(templateURL.path())
             try Process.runUntilExit(gitURL, arguments: cloneArgs)
 
-            if FileManager.default.fileExists(atPath: templateURL.appending(path: "manifest.yml").path()),
-                let manifest = Vapor.manifest.withLock({ $0 })
-            {
+            if let manifest = Vapor.manifest {
                 defer { try? FileManager.default.removeItem(at: templateURL) }
 
                 try FileManager.default.createDirectory(at: projectURL, withIntermediateDirectories: false)
@@ -173,11 +171,9 @@ extension Vapor.New: CustomReflectable {
             Mirror.Child(label: "verbose", value: _verbose)
         ]
         
-        let variableChildren = Vapor.manifest.withLock { manifest in
-            manifest?.variables.flatMap { processNestedVariables($0) }
-        }
+        let variableChildren = Vapor.manifest?.variables.flatMap { processNestedVariables($0) } ?? []
         
-        return Mirror(Vapor.New(), children: baseChildren + (variableChildren ?? []))
+        return Mirror(Vapor.New(), children: baseChildren + variableChildren)
     }
 
     enum CodingKeys: CodingKey {
@@ -205,21 +201,20 @@ extension Vapor.New: CustomReflectable {
                 guard let firstComponent = components.first else { return nil }
                 let baseKey = String(firstComponent)
                 
-                // Check if base key exists
-                let baseExists = Vapor.manifest.withLock { manifest in
-                    guard let variables = manifest?.variables else { return false }
-                    return variables.contains { variable in
-                        if variable.name == baseKey {
-                            // If the base key has nested variables, register both
-                            if case .variables(_) = variable.type { return true }
-                            // Otherwise, register only if it's a single key
-                            return components.count == 1
-                        }
-                        return false
-                    }
+                guard let variables = Vapor.manifest?.variables else {
+                    return nil
                 }
-                
-                if !baseExists { return nil }
+
+                let baseExists = variables.contains { variable in
+                    if variable.name == baseKey {
+                        // If the base key has nested variables, register both
+                        if case .variables(_) = variable.type { return true }
+                        // Otherwise, register only if it's a single key
+                        return components.count == 1
+                    }
+                    return false
+                }
+                guard baseExists else { return nil }
                 
                 // Register both the base key and the full path
                 self = if components.count == 1 {
@@ -258,43 +253,41 @@ extension Vapor.New: CustomReflectable {
         noGit = try container.decode(Flag.self, forKey: .noGit).wrappedValue
         verbose = try container.decode(Flag.self, forKey: .verbose).wrappedValue
 
-        try Vapor.manifest.withLock { manifest in
-            guard let lockVariables = manifest?.variables else { return }
+        guard let lockVariables = Vapor.manifest?.variables else { return }
 
-            func decodeVariable(_ variable: TemplateManifest.Variable, path: String) throws -> Any? {
-                switch variable.type {
-                case .bool:
-                    return try container.decode(Flag.self, forKey: .dynamic(path)).wrappedValue
-                case .string:
-                    return try container.decode(Option<String>.self, forKey: .dynamic(path)).wrappedValue
-                case .options(let options):
-                    let optionName = try container.decode(Option<String>.self, forKey: .dynamic(path)).wrappedValue
-                    guard let option = options.first(where: { $0.name.lowercased().hasPrefix(optionName.lowercased()) }) else {
-                        // TODO: Improve error message
-                        throw DecodingError.dataCorruptedError(forKey: .dynamic(path), in: container, debugDescription: "Option not found")
-                    }
-                    return option.data
-                case .variables(let nestedVars):
-                    // Verify if the base variable is enabled
-                    if let flag = try? container.decodeIfPresent(Flag<Bool>.self, forKey: .dynamic(path))?.wrappedValue, !flag {
-                        return nil
-                    }
+        func decodeVariable(_ variable: TemplateManifest.Variable, path: String) throws -> Any? {
+            switch variable.type {
+            case .bool:
+                return try container.decode(Flag.self, forKey: .dynamic(path)).wrappedValue
+            case .string:
+                return try container.decode(Option<String>.self, forKey: .dynamic(path)).wrappedValue
+            case .options(let options):
+                let optionName = try container.decode(Option<String>.self, forKey: .dynamic(path)).wrappedValue
+                guard let option = options.first(where: { $0.name.lowercased().hasPrefix(optionName.lowercased()) }) else {
+                    // TODO: Improve error message
+                    throw DecodingError.dataCorruptedError(forKey: .dynamic(path), in: container, debugDescription: "Option not found")
+                }
+                return option.data
+            case .variables(let nestedVars):
+                // Verify if the base variable is enabled
+                if let flag = try? container.decodeIfPresent(Flag<Bool>.self, forKey: .dynamic(path))?.wrappedValue, !flag {
+                    return nil
+                }
                     
-                    var nested: [String: Any] = [:]
-                    for nestedVar in nestedVars {
-                        if let value = try decodeVariable(nestedVar, path: "\(path).\(nestedVar.name)") {
-                            nested[nestedVar.name] = value
-                        }
+                var nested: [String: Any] = [:]
+                for nestedVar in nestedVars {
+                    if let value = try decodeVariable(nestedVar, path: "\(path).\(nestedVar.name)") {
+                        nested[nestedVar.name] = value
                     }
-                    return nested.isEmpty ? nil : nested
                 }
+                return nested.isEmpty ? nil : nested
             }
+        }
             
-            // Decode top-level variables
-            for variable in lockVariables {
-                if let value = try decodeVariable(variable, path: variable.name) {
-                    variables[variable.name] = value
-                }
+        // Decode top-level variables
+        for variable in lockVariables {
+            if let value = try decodeVariable(variable, path: variable.name) {
+                variables[variable.name] = value
             }
         }
     }
