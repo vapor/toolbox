@@ -127,7 +127,7 @@ extension Vapor.New: CustomReflectable {
     var customMirror: Mirror {
         func createChild(for variable: TemplateManifest.Variable, prefix: String = "") -> Mirror.Child {
             let name = prefix.isEmpty ? variable.name : "\(prefix)\(variable.name)"
-            
+
             switch variable.type {
             case .bool:
                 return Mirror.Child(label: name, value: Flag(inversion: .prefixedNo, help: ArgumentHelp(variable.description)))
@@ -148,16 +148,16 @@ extension Vapor.New: CustomReflectable {
                 return Mirror.Child(label: name, value: Flag(inversion: .prefixedNo, help: ArgumentHelp(variable.description)))
             }
         }
-        
+
         func processNestedVariables(_ variable: TemplateManifest.Variable, prefix: String = "") -> [Mirror.Child] {
             var children = [createChild(for: variable, prefix: prefix)]
-            
+
             if case .variables(let nestedVars) = variable.type {
                 children += nestedVars.flatMap {
                     processNestedVariables($0, prefix: prefix.isEmpty ? "\(variable.name)." : "\(prefix)\(variable.name).")
                 }
             }
-            
+
             return children
         }
 
@@ -168,11 +168,11 @@ extension Vapor.New: CustomReflectable {
             Mirror.Child(label: "output", value: _output),
             Mirror.Child(label: "noCommit", value: _noCommit),
             Mirror.Child(label: "noGit", value: _noGit),
-            Mirror.Child(label: "verbose", value: _verbose)
+            Mirror.Child(label: "verbose", value: _verbose),
         ]
-        
+
         let variableChildren = Vapor.manifest?.variables.flatMap { processNestedVariables($0) } ?? []
-        
+
         return Mirror(Vapor.New(), children: baseChildren + variableChildren)
     }
 
@@ -200,7 +200,7 @@ extension Vapor.New: CustomReflectable {
                 let components = stringValue.split(separator: ".")
                 guard let firstComponent = components.first else { return nil }
                 let baseKey = String(firstComponent)
-                
+
                 guard let variables = Vapor.manifest?.variables else {
                     return nil
                 }
@@ -215,13 +215,14 @@ extension Vapor.New: CustomReflectable {
                     return false
                 }
                 guard baseExists else { return nil }
-                
+
                 // Register both the base key and the full path
-                self = if components.count == 1 {
-                    .dynamic(baseKey)
-                } else {
-                    .dynamic(stringValue)
-                }
+                self =
+                    if components.count == 1 {
+                        .dynamic(baseKey)
+                    } else {
+                        .dynamic(stringValue)
+                    }
             }
         }
 
@@ -238,8 +239,8 @@ extension Vapor.New: CustomReflectable {
             }
         }
 
-        // Not used  
-        var intValue: Int? { nil }  
+        // Not used
+        var intValue: Int? { nil }
         init?(intValue _: Int) { nil }
     }
 
@@ -273,7 +274,7 @@ extension Vapor.New: CustomReflectable {
                 if let flag = try? container.decodeIfPresent(Flag<Bool>.self, forKey: .dynamic(path))?.wrappedValue, !flag {
                     return nil
                 }
-                    
+
                 var nested: [String: Any] = [:]
                 for nestedVar in nestedVars {
                     if let value = try decodeVariable(nestedVar, path: "\(path).\(nestedVar.name)") {
@@ -283,7 +284,7 @@ extension Vapor.New: CustomReflectable {
                 return nested.isEmpty ? nil : nested
             }
         }
-            
+
         // Decode top-level variables
         for variable in lockVariables {
             if let value = try decodeVariable(variable, path: variable.name) {
