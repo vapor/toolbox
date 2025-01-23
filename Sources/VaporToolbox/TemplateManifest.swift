@@ -1,5 +1,5 @@
-struct TemplateManifest: Decodable {
-    struct Variable: Decodable {
+struct TemplateManifest: Decodable, Sendable {
+    struct Variable: Decodable, Sendable {
         enum Kind {
             case string
             case bool
@@ -46,7 +46,7 @@ struct TemplateManifest: Decodable {
         }
     }
 
-    struct File: Decodable {
+    struct File: Decodable, Sendable {
         enum Kind {
             case file(dynamic: Bool)
             case folder(files: [File])
