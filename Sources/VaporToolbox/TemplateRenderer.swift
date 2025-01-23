@@ -29,12 +29,23 @@ struct TemplateRenderer {
         to destinationURL: URL,
         with context: [String: Any]
     ) throws {
-        if let condition = file.condition {
-            switch condition {
-            case .exists(let variable):
-                guard context.keys.contains(variable) else {
+        if case .exists(let variable) = file.condition {
+            let components = variable.split(separator: ".").map { String($0) }
+            var subContext: Any = context
+
+            for component in components {
+                guard
+                    let dict = subContext as? [String: Any],
+                    let value = dict[component]
+                else {
                     return
                 }
+
+                if let bool = value as? Bool, !bool {
+                    return
+                }
+
+                subContext = value
             }
         }
 
