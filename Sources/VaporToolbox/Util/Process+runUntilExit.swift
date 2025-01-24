@@ -41,7 +41,7 @@ extension Process {
         self.terminationHandler = terminationHandler
     }
 
-    fileprivate var outputString: String? {
+    var outputString: String? {
         (self.standardOutput as? Pipe)?.fileHandleForReading.read()
     }
 

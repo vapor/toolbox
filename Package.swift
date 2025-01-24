@@ -23,6 +23,16 @@ let package = Package(
                 .product(name: "Yams", package: "yams"),
             ],
             swiftSettings: swiftSettings
+        ),
+        .testTarget(
+            name: "VaporToolboxTests",
+            dependencies: [
+                .target(name: "VaporToolbox")
+            ],
+            resources: [
+                .copy("manifest.yml")
+            ],
+            swiftSettings: swiftSettings
         )
     ]
 )

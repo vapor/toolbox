@@ -83,12 +83,11 @@ struct TemplateRenderer {
 }
 
 extension StringProtocol {
-    fileprivate var kebabcased: String {
-        .init(
-            self
-                .flatMap { $0.isWhitespace ? "-" : "\($0)" }
-                .enumerated()
-                .flatMap { $0 > 0 && $1.isUppercase ? "-\($1.lowercased())" : "\($1.lowercased())" }
-        )
+    var kebabcased: String {
+        self
+            .components(separatedBy: .alphanumerics.inverted)
+            .filter { !$0.isEmpty }
+            .map { $0.lowercased() }
+            .joined(separator: "-")
     }
 }
