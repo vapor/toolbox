@@ -99,7 +99,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runner-os: ['ubuntu-latest', 'macos-15']
+        runner-os: ['ubuntu-22.04', 'macos-15']
     runs-on: ${{ matrix.runner-os }}
     permissions: { actions: write, contents: read, security-events: write }
     timeout-minutes: 60
