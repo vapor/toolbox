@@ -5,19 +5,22 @@
         alt="Vapor Toolbox"
    >
    <br>
+   <br>
    <a href="https://docs.vapor.codes/4.0/">
-       <img src="https://img.shields.io/badge/read_the-docs-2196f3.svg" alt="Documentation">
+       <img src="https://design.vapor.codes/images/readthedocs.svg" alt="Documentation">
    </a>
    <a href="https://discord.gg/vapor">
-       <img src="https://img.shields.io/discord/431917998102675485.svg" alt="Team Chat">
+       <img src="https://design.vapor.codes/images/discordchat.svg" alt="Team Chat">
    </a>
    <a href="LICENSE.txt">
-       <img src="https://img.shields.io/badge/license-MIT-brightgreen.svg" alt="MIT License">
+       <img src="https://design.vapor.codes/images/mitlicense.svg" alt="MIT License">
    </a>
    <a href="https://github.com/vapor/toolbox/actions/workflows/test.yml">
-       <img src="https://github.com/vapor/toolbox/actions/workflows/test.yml/badge.svg?event=push" alt="CI">
+       <img src="https://img.shields.io/github/actions/workflow/status/vapor/jwt-kit/test.yml?event=push&style=plastic&logo=github&label=tests&logoColor=%23ccc" alt="CI">
    </a>
    <a href="https://swift.org">
-       <img src="https://img.shields.io/badge/swift-5.5-brightgreen.svg" alt="Swift 5.5">
+       <img src="https://design.vapor.codes/images/swift60up.svg" alt="Swift 6.0">
    </a>
 </p>
+
+🧰 A CLI tool to easily create new Vapor projects
