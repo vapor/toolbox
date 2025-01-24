@@ -110,7 +110,7 @@ jobs:
         if: ${{ startsWith(matrix.runner-os, 'ubuntu') }}
         uses: vapor/swiftly-action@v0.1
         with:
-          toolchain: 6.0
+          toolchain: latest
       - name: Select Swift 6.0 on macOS
         if: ${{ startsWith(matrix.runner-os, 'macos') }}
         uses: maxim-lobanov/setup-xcode@v1
