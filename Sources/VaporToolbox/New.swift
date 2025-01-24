@@ -12,41 +12,45 @@ extension Vapor {
         // Dynamic variables
         var variables: [String: Any] = [:]
 
-        // TODO: Move mandatory options into a OptionGroup
-        @Option(
-            name: [.customShort("T"), .long],
-            help: ArgumentHelp(
-                "The URL of a Git repository to use as a template.",
-                valueName: "url"
+        struct BuildOptions: ParsableArguments {
+            @Option(
+                name: [.customShort("T"), .long],
+                help: ArgumentHelp(
+                    "The URL of a Git repository to use as a template.",
+                    valueName: "url"
+                )
             )
-        )
-        var template: String?
+            var template: String?
 
-        @Option(help: "Template repository branch to use.")
-        var branch: String?
+            @Option(help: "Template repository branch to use.")
+            var branch: String?
 
-        @Option(
-            name: .shortAndLong,
-            help: ArgumentHelp(
-                "The directory to place the new project in.",
-                valueName: "path"
+            @Option(
+                name: .shortAndLong,
+                help: ArgumentHelp(
+                    "The directory to place the new project in.",
+                    valueName: "path"
+                )
             )
-        )
-        var output: String?
+            var output: String?
 
-        @Flag(help: "Skips adding a first commit to the newly created repo.")
-        var noCommit: Bool = false
+            @Flag(help: "Skips adding a first commit to the newly created repo.")
+            var noCommit: Bool = false
 
-        @Flag(help: "Skips adding a Git repository to the project folder.")
-        var noGit: Bool = false
+            @Flag(help: "Skips adding a Git repository to the project folder.")
+            var noGit: Bool = false
 
-        @Flag(name: .shortAndLong, help: "Prints additional information.")
-        var verbose: Bool = false
+            @Flag(name: .shortAndLong, help: "Prints additional information.")
+            var verbose: Bool = false
+        }
+
+        @OptionGroup(title: "Build Options")
+        var buildOptions: BuildOptions
 
         mutating func run() throws {
             let cwd = URL(filePath: FileManager.default.currentDirectoryPath, directoryHint: .isDirectory)
             let projectURL =
-                if let output {
+                if let output = buildOptions.output {
                     URL(filePath: output, directoryHint: .isDirectory)
                 } else {
                     cwd.appending(path: name, directoryHint: .isDirectory)
@@ -57,7 +61,7 @@ extension Vapor {
 
                 try FileManager.default.createDirectory(at: projectURL, withIntermediateDirectories: false)
 
-                let renderer = TemplateRenderer(manifest: manifest, verbose: verbose)
+                let renderer = TemplateRenderer(manifest: manifest, verbose: buildOptions.verbose)
                 try renderer.render(
                     project: name,
                     from: Vapor.templateURL,
@@ -69,7 +73,7 @@ extension Vapor {
                 try FileManager.default.moveItem(at: Vapor.templateURL, to: projectURL)
             }
 
-            if !noGit {
+            if !buildOptions.noGit {
                 let gitDir = projectURL.appending(path: ".git").path()
 
                 print("Creating git repository".colored(.cyan))
@@ -78,12 +82,13 @@ extension Vapor {
                 }
                 try Process.runUntilExit(Vapor.gitURL, arguments: ["--git-dir=\(gitDir)", "init"])
 
-                if !noCommit {
+                if !buildOptions.noCommit {
                     print("Adding first commit".colored(.cyan))
                     let gitDirFlag = "--git-dir=\(gitDir)"
                     let workTreeFlag = "--work-tree=\(projectURL.path())"
                     try Process.runUntilExit(Vapor.gitURL, arguments: [gitDirFlag, workTreeFlag, "add", "."])
-                    try Process.runUntilExit(Vapor.gitURL, arguments: [gitDirFlag, workTreeFlag, "commit", "-m", "Generate Vapor project."])
+                    try Process.runUntilExit(
+                        Vapor.gitURL, arguments: [gitDirFlag, workTreeFlag, "commit", "-m", "Generate Vapor project."])
                 }
             }
 
@@ -94,9 +99,9 @@ extension Vapor {
                 cdInstruction = projectURL.lastPathComponent  // Is in current directory
             }
 
-            if verbose { printDroplet() }
+            if buildOptions.verbose { printDroplet() }
             print("Project \(name.colored(.cyan)) has been created!")
-            if verbose { print() }
+            if buildOptions.verbose { print() }
             print("Use " + "cd \(Process.shell.escapeshellarg(cdInstruction))".colored(.cyan) + " to enter the project directory")
             print(
                 "Then open your project, for example if using Xcode type "
@@ -149,12 +154,7 @@ extension Vapor.New: CustomReflectable {
 
         let baseChildren = [
             Mirror.Child(label: "name", value: _name),
-            Mirror.Child(label: "template", value: _template),
-            Mirror.Child(label: "branch", value: _branch),
-            Mirror.Child(label: "output", value: _output),
-            Mirror.Child(label: "noCommit", value: _noCommit),
-            Mirror.Child(label: "noGit", value: _noGit),
-            Mirror.Child(label: "verbose", value: _verbose),
+            Mirror.Child(label: "buildOptions", value: _buildOptions),
         ]
 
         let variableChildren = Vapor.manifest?.variables.flatMap { processNestedVariables($0) } ?? []
@@ -164,24 +164,14 @@ extension Vapor.New: CustomReflectable {
 
     enum CodingKeys: CodingKey {
         case name
-        case template
-        case branch
-        case output
-        case noCommit
-        case noGit
-        case verbose
+        case buildOptions
 
         case dynamic(String)
 
         init?(stringValue: String) {
             switch stringValue {
             case "name": self = .name
-            case "template": self = .template
-            case "branch": self = .branch
-            case "output": self = .output
-            case "noCommit": self = .noCommit
-            case "noGit": self = .noGit
-            case "verbose": self = .verbose
+            case "buildOptions": self = .buildOptions
             default:
                 let components = stringValue.split(separator: ".")
                 guard let firstComponent = components.first else { return nil }
@@ -215,12 +205,7 @@ extension Vapor.New: CustomReflectable {
         var stringValue: String {
             switch self {
             case .name: return "name"
-            case .template: return "template"
-            case .branch: return "branch"
-            case .output: return "output"
-            case .noCommit: return "noCommit"
-            case .noGit: return "noGit"
-            case .verbose: return "verbose"
+            case .buildOptions: return "buildOptions"
             case .dynamic(let string): return string
             }
         }
@@ -233,12 +218,7 @@ extension Vapor.New: CustomReflectable {
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         name = try container.decode(Argument.self, forKey: .name).wrappedValue
-        template = try container.decodeIfPresent(Option<String>.self, forKey: .template)?.wrappedValue
-        branch = try container.decodeIfPresent(Option<String>.self, forKey: .branch)?.wrappedValue
-        output = try container.decodeIfPresent(Option<String>.self, forKey: .output)?.wrappedValue
-        noCommit = try container.decode(Flag.self, forKey: .noCommit).wrappedValue
-        noGit = try container.decode(Flag.self, forKey: .noGit).wrappedValue
-        verbose = try container.decode(Flag.self, forKey: .verbose).wrappedValue
+        buildOptions = try container.decode(OptionGroup<BuildOptions>.self, forKey: .buildOptions).wrappedValue
 
         guard let lockVariables = Vapor.manifest?.variables else { return }
 
@@ -251,8 +231,7 @@ extension Vapor.New: CustomReflectable {
             case .options(let options):
                 let optionName = try container.decode(Option<String>.self, forKey: .dynamic(path)).wrappedValue
                 guard let option = options.first(where: { $0.name.lowercased().hasPrefix(optionName.lowercased()) }) else {
-                    // TODO: Improve error message
-                    throw DecodingError.dataCorruptedError(forKey: .dynamic(path), in: container, debugDescription: "Option not found")
+                    throw DecodingError.dataCorruptedError(forKey: .dynamic(path), in: container, debugDescription: "The value is invalid.")
                 }
                 return option.data
             case .variables(let nestedVars):
