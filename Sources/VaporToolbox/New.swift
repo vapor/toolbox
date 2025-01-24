@@ -51,36 +51,22 @@ extension Vapor {
                 } else {
                     cwd.appending(path: name, directoryHint: .isDirectory)
                 }
-            let templateURL = projectURL.deletingLastPathComponent().appending(path: ".vapor-template", directoryHint: .isDirectory)
-            let gitURL = URL(filePath: try Process.shell.which("git"))
-
-            // TODO: Remove redundant cloning of template
-            print("Cloning template...".colored(.cyan))
-            try? FileManager.default.removeItem(at: templateURL)  // Is this safe?
-            var cloneArgs = ["clone"]
-            if let branch {
-                cloneArgs.append("--branch")
-                cloneArgs.append(branch)
-            }
-            cloneArgs.append(template ?? "https://github.com/vapor/template")
-            cloneArgs.append(templateURL.path())
-            try Process.runUntilExit(gitURL, arguments: cloneArgs)
 
             if let manifest = Vapor.manifest {
-                defer { try? FileManager.default.removeItem(at: templateURL) }
+                defer { try? FileManager.default.removeItem(at: Vapor.templateURL) }
 
                 try FileManager.default.createDirectory(at: projectURL, withIntermediateDirectories: false)
 
                 let renderer = TemplateRenderer(manifest: manifest, verbose: verbose)
                 try renderer.render(
                     project: name,
-                    from: templateURL,
+                    from: Vapor.templateURL,
                     to: projectURL,
                     with: variables
                 )
             } else {
                 // If the template doesn't have a manifest (AKA doesn't need templating), just move the files
-                try FileManager.default.moveItem(at: templateURL, to: projectURL)
+                try FileManager.default.moveItem(at: Vapor.templateURL, to: projectURL)
             }
 
             if !noGit {
@@ -90,14 +76,14 @@ extension Vapor {
                 if FileManager.default.fileExists(atPath: gitDir) {
                     try FileManager.default.removeItem(atPath: gitDir)  // Clear existing git history
                 }
-                try Process.runUntilExit(gitURL, arguments: ["--git-dir=\(gitDir)", "init"])
+                try Process.runUntilExit(Vapor.gitURL, arguments: ["--git-dir=\(gitDir)", "init"])
 
                 if !noCommit {
                     print("Adding first commit".colored(.cyan))
                     let gitDirFlag = "--git-dir=\(gitDir)"
                     let workTreeFlag = "--work-tree=\(projectURL.path())"
-                    try Process.runUntilExit(gitURL, arguments: [gitDirFlag, workTreeFlag, "add", "."])
-                    try Process.runUntilExit(gitURL, arguments: [gitDirFlag, workTreeFlag, "commit", "-m", "Generate Vapor project."])
+                    try Process.runUntilExit(Vapor.gitURL, arguments: [gitDirFlag, workTreeFlag, "add", "."])
+                    try Process.runUntilExit(Vapor.gitURL, arguments: [gitDirFlag, workTreeFlag, "commit", "-m", "Generate Vapor project."])
                 }
             }
 

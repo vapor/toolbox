@@ -6,11 +6,14 @@ import Yams
 struct Vapor: ParsableCommand {
     static let configuration = CommandConfiguration(
         abstract: "Vapor Toolbox (Server-side Swift web framework)",
+        version: "19.0.0",
         subcommands: [New.self],
         defaultSubcommand: New.self
     )
 
     nonisolated(unsafe) static var manifest: TemplateManifest? = nil
+    static let templateURL: URL = FileManager.default.temporaryDirectory.appending(path: ".vapor-template", directoryHint: .isDirectory)
+    static let gitURL = URL(filePath: try! Process.shell.which("git"))
 
     static func preprocess(_ arguments: [String]) throws {
         let templateWebURL =
@@ -29,8 +32,7 @@ struct Vapor: ParsableCommand {
                 nil
             }
 
-        let templateURL = FileManager.default.temporaryDirectory.appending(path: ".vapor-template", directoryHint: .isDirectory)
-        let gitURL = URL(filePath: try Process.shell.which("git"))
+        try? FileManager.default.removeItem(at: Self.templateURL)
 
         var cloneArgs = ["clone"]
         if let branch {
@@ -38,13 +40,13 @@ struct Vapor: ParsableCommand {
             cloneArgs.append(branch)
         }
         cloneArgs.append(templateWebURL)
-        cloneArgs.append(templateURL.path())
-        try Process.runUntilExit(gitURL, arguments: cloneArgs)
+        cloneArgs.append(Self.templateURL.path())
+        try Process.runUntilExit(Self.gitURL, arguments: cloneArgs)
 
-        if FileManager.default.fileExists(atPath: templateURL.appending(path: "manifest.yml").path()) {
-            defer { try? FileManager.default.removeItem(at: templateURL) }
-            let yaml = try String(contentsOf: templateURL.appending(path: "manifest.yml"), encoding: .utf8)
-            Vapor.manifest = try YAMLDecoder().decode(TemplateManifest.self, from: yaml)
+        let manifestURL = Self.templateURL.appending(path: "manifest.yml")
+        if FileManager.default.fileExists(atPath: manifestURL.path()) {
+            let yaml = try String(contentsOf: manifestURL, encoding: .utf8)
+            Self.manifest = try YAMLDecoder().decode(TemplateManifest.self, from: yaml)
         }
     }
 }
