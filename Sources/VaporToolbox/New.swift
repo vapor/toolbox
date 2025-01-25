@@ -235,8 +235,8 @@ extension Vapor.New: CustomReflectable {
                 }
                 return option.data
             case .variables(let nestedVars):
-                // Verify if the base variable is enabled
-                if let flag = try? container.decodeIfPresent(Flag<Bool>.self, forKey: .dynamic(path))?.wrappedValue, !flag {
+                let flag = (try? container.decode(Flag<Bool>.self, forKey: .dynamic(path)).wrappedValue) ?? false
+                if !flag {
                     return nil
                 }
 
