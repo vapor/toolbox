@@ -235,18 +235,23 @@ extension Vapor.New: CustomReflectable {
                 }
                 return option.data
             case .variables(let nestedVars):
-                let flag = (try? container.decode(Flag<Bool>.self, forKey: .dynamic(path)).wrappedValue) ?? false
-                if !flag {
-                    return nil
-                }
-
                 var nested: [String: Any] = [:]
+    
+                // Decode all nested variables first
                 for nestedVar in nestedVars {
-                    if let value = try decodeVariable(nestedVar, path: "\(path).\(nestedVar.name)") {
+                    if let value = try? decodeVariable(nestedVar, path: "\(path).\(nestedVar.name)") {
                         nested[nestedVar.name] = value
                     }
                 }
-                return nested.isEmpty ? nil : nested
+                
+                // If there are no nested variables, check the parent flag
+                if nested.isEmpty {
+                    let parentFlag = (try? container.decode(Flag.self, forKey: .dynamic(path)).wrappedValue) ?? false
+                    return parentFlag ? [:] : nil
+                }
+                
+                // If there are nested variables, always return
+                return nested
             }
         }
 
