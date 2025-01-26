@@ -9,9 +9,11 @@ extension Vapor {
         @Argument(help: "Name of project and folder.")
         var name: String
 
-        // Dynamic variables
+        /// Dynamic variables taken from the template manifest.
         var variables: [String: Any] = [:]
 
+        /// Options shared by all templates, independent of the manifest.
+        /// They control the build process of the project.
         struct BuildOptions: ParsableArguments {
             @Option(
                 name: [.customShort("T"), .long],
@@ -50,10 +52,10 @@ extension Vapor {
         mutating func run() throws {
             let cwd = URL(filePath: FileManager.default.currentDirectoryPath, directoryHint: .isDirectory)
             let projectURL =
-                if let output = buildOptions.output {
+                if let output = self.buildOptions.output {
                     URL(filePath: output, directoryHint: .isDirectory)
                 } else {
-                    cwd.appending(path: name, directoryHint: .isDirectory)
+                    cwd.appending(path: self.name, directoryHint: .isDirectory)
                 }
 
             if let manifest = Vapor.manifest {
@@ -61,19 +63,19 @@ extension Vapor {
 
                 try FileManager.default.createDirectory(at: projectURL, withIntermediateDirectories: false)
 
-                let renderer = TemplateRenderer(manifest: manifest, verbose: buildOptions.verbose)
+                let renderer = TemplateRenderer(manifest: manifest, verbose: self.buildOptions.verbose)
                 try renderer.render(
-                    project: name,
+                    project: self.name,
                     from: Vapor.templateURL,
                     to: projectURL,
-                    with: variables
+                    with: self.variables
                 )
             } else {
                 // If the template doesn't have a manifest (AKA doesn't need templating), just move the files
                 try FileManager.default.moveItem(at: Vapor.templateURL, to: projectURL)
             }
 
-            if !buildOptions.noGit {
+            if !self.buildOptions.noGit {
                 let gitDir = projectURL.appending(path: ".git").path()
 
                 print("Creating git repository".colored(.cyan))
@@ -82,13 +84,12 @@ extension Vapor {
                 }
                 try Process.runUntilExit(Vapor.gitURL, arguments: ["--git-dir=\(gitDir)", "init"])
 
-                if !buildOptions.noCommit {
+                if !self.buildOptions.noCommit {
                     print("Adding first commit".colored(.cyan))
                     let gitDirFlag = "--git-dir=\(gitDir)"
                     let workTreeFlag = "--work-tree=\(projectURL.path())"
                     try Process.runUntilExit(Vapor.gitURL, arguments: [gitDirFlag, workTreeFlag, "add", "."])
-                    try Process.runUntilExit(
-                        Vapor.gitURL, arguments: [gitDirFlag, workTreeFlag, "commit", "-m", "Generate Vapor project."])
+                    try Process.runUntilExit(Vapor.gitURL, arguments: [gitDirFlag, workTreeFlag, "commit", "-m", "Generate Vapor project"])
                 }
             }
 
@@ -99,9 +100,9 @@ extension Vapor {
                 cdInstruction = projectURL.lastPathComponent  // Is in current directory
             }
 
-            if buildOptions.verbose { printDroplet() }
-            print("Project \(name.colored(.cyan)) has been created!")
-            if buildOptions.verbose { print() }
+            if self.buildOptions.verbose { printDroplet() }
+            print("Project \(self.name.colored(.cyan)) has been created!")
+            if self.buildOptions.verbose { print() }
             print("Use " + "cd \(Process.shell.escapeshellarg(cdInstruction))".colored(.cyan) + " to enter the project directory")
             print(
                 "Then open your project, for example if using Xcode type "
@@ -114,6 +115,8 @@ extension Vapor {
     }
 }
 
+// MARK: - CustomReflectable
+// The custom reflection is used to dynamically generate the command line arguments based on the template manifest.
 extension Vapor.New: CustomReflectable {
     var customMirror: Mirror {
         func createChild(for variable: TemplateManifest.Variable, prefix: String = "") -> Mirror.Child {
@@ -162,6 +165,7 @@ extension Vapor.New: CustomReflectable {
         return Mirror(Vapor.New(), children: baseChildren + variableChildren)
     }
 
+    // MARK: - Decodable
     enum CodingKeys: CodingKey {
         case name
         case buildOptions
@@ -177,9 +181,7 @@ extension Vapor.New: CustomReflectable {
                 guard let firstComponent = components.first else { return nil }
                 let baseKey = String(firstComponent)
 
-                guard let variables = Vapor.manifest?.variables else {
-                    return nil
-                }
+                guard let variables = Vapor.manifest?.variables else { return nil }
 
                 let baseExists = variables.contains { variable in
                     if variable.name == baseKey {
@@ -217,48 +219,51 @@ extension Vapor.New: CustomReflectable {
 
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        name = try container.decode(Argument.self, forKey: .name).wrappedValue
-        buildOptions = try container.decode(OptionGroup<BuildOptions>.self, forKey: .buildOptions).wrappedValue
+        self.name = try container.decode(Argument.self, forKey: .name).wrappedValue
+        self.buildOptions = try container.decode(OptionGroup<BuildOptions>.self, forKey: .buildOptions).wrappedValue
 
-        guard let lockVariables = Vapor.manifest?.variables else { return }
+        guard let variables = Vapor.manifest?.variables else { return }
 
         func decodeVariable(_ variable: TemplateManifest.Variable, path: String) throws -> Any? {
             switch variable.type {
             case .bool:
                 return try container.decode(Flag.self, forKey: .dynamic(path)).wrappedValue
             case .string:
-                return try container.decode(Option<String>.self, forKey: .dynamic(path)).wrappedValue
+                return try container.decodeIfPresent(Option<String>.self, forKey: .dynamic(path))?.wrappedValue
             case .options(let options):
-                let optionName = try container.decode(Option<String>.self, forKey: .dynamic(path)).wrappedValue
-                guard let option = options.first(where: { $0.name.lowercased().hasPrefix(optionName.lowercased()) }) else {
-                    throw DecodingError.dataCorruptedError(forKey: .dynamic(path), in: container, debugDescription: "The value is invalid.")
-                }
+                guard
+                    let optionName = try container.decodeIfPresent(Option<String>.self, forKey: .dynamic(path))?.wrappedValue,
+                    let option = options.first(where: { $0.name.lowercased().hasPrefix(optionName.lowercased()) })
+                else { return nil }
                 return option.data
             case .variables(let nestedVars):
                 var nested: [String: Any] = [:]
-    
+
                 // Decode all nested variables first
                 for nestedVar in nestedVars {
-                    if let value = try? decodeVariable(nestedVar, path: "\(path).\(nestedVar.name)") {
+                    if let value = try decodeVariable(nestedVar, path: "\(path).\(nestedVar.name)") {
                         nested[nestedVar.name] = value
                     }
                 }
-                
+
                 // If there are no nested variables, check the parent flag
                 if nested.isEmpty {
-                    let parentFlag = (try? container.decode(Flag.self, forKey: .dynamic(path)).wrappedValue) ?? false
-                    return parentFlag ? [:] : nil
+                    if let parentFlag = try container.decodeIfPresent(Flag<Bool>.self, forKey: .dynamic(path))?.wrappedValue {
+                        return parentFlag ? [:] : false
+                    } else {
+                        return nil
+                    }
                 }
-                
+
                 // If there are nested variables, always return
                 return nested
             }
         }
 
         // Decode top-level variables
-        for variable in lockVariables {
+        for variable in variables {
             if let value = try decodeVariable(variable, path: variable.name) {
-                variables[variable.name] = value
+                self.variables[variable.name] = value
             }
         }
     }

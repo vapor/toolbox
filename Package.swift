@@ -33,7 +33,7 @@ let package = Package(
                 .copy("manifest.yml")
             ],
             swiftSettings: swiftSettings
-        )
+        ),
     ]
 )
 

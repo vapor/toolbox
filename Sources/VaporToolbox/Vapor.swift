@@ -15,6 +15,13 @@ struct Vapor: ParsableCommand {
     static let templateURL: URL = FileManager.default.temporaryDirectory.appending(path: ".vapor-template", directoryHint: .isDirectory)
     static let gitURL = URL(filePath: try! Process.shell.which("git"))
 
+    /// Get the template's `manifest.yml` file, decode it and save it.
+    ///
+    /// This function has to be called before the main command is executed.
+    /// It will clone the template repository,
+    /// decode the `manifest.yml` file and store it in the ``Vapor/manifest`` `static` property for later use.
+    ///
+    /// - Parameter arguments: The command line arguments.
     static func preprocess(_ arguments: [String]) throws {
         let templateWebURL =
             if let index = arguments.firstIndex(of: "--template") {
@@ -34,6 +41,9 @@ struct Vapor: ParsableCommand {
 
         try? FileManager.default.removeItem(at: Self.templateURL)
 
+        if !arguments.contains("-h") && !arguments.contains("--help") {
+            print("Cloning template...".colored(.cyan))
+        }
         var cloneArgs = ["clone"]
         if let branch {
             cloneArgs.append("--branch")

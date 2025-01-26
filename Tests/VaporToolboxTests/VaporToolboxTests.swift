@@ -12,7 +12,7 @@ struct VaporToolboxTests {
         try Vapor.preprocess([])
         #expect(Vapor.manifest != nil)
     }
-    
+
     @Test("Template Manifest")
     func templateManifest() throws {
         let manifestPath = URL(filePath: #filePath).deletingLastPathComponent().appending(path: "manifest.yml")
