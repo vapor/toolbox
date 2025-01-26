@@ -17,23 +17,14 @@ extension Vapor {
         struct BuildOptions: ParsableArguments {
             @Option(
                 name: [.customShort("T"), .long],
-                help: ArgumentHelp(
-                    "The URL of a Git repository to use as a template.",
-                    valueName: "url"
-                )
+                help: ArgumentHelp("The URL of a Git repository to use as a template.", valueName: "url")
             )
             var template: String?
 
             @Option(help: "Template repository branch to use.")
             var branch: String?
 
-            @Option(
-                name: .shortAndLong,
-                help: ArgumentHelp(
-                    "The directory to place the new project in.",
-                    valueName: "path"
-                )
-            )
+            @Option(name: .shortAndLong, help: ArgumentHelp("The directory to place the new project in.", valueName: "path"))
             var output: String?
 
             @Flag(help: "Skips adding a first commit to the newly created repo.")
@@ -41,6 +32,9 @@ extension Vapor {
 
             @Flag(help: "Skips adding a Git repository to the project folder.")
             var noGit: Bool = false
+
+            @Flag(name: [.customShort("n"), .customLong("no")], help: "Automatically answer no to all questions.")
+            var noQuestions: Bool = false
 
             @Flag(name: .shortAndLong, help: "Prints additional information.")
             var verbose: Bool = false
@@ -63,7 +57,11 @@ extension Vapor {
 
                 try FileManager.default.createDirectory(at: projectURL, withIntermediateDirectories: false)
 
-                let renderer = TemplateRenderer(manifest: manifest, verbose: self.buildOptions.verbose)
+                let renderer = TemplateRenderer(
+                    manifest: manifest,
+                    verbose: self.buildOptions.verbose,
+                    noQuestions: self.buildOptions.noQuestions
+                )
                 try renderer.render(
                     project: self.name,
                     from: Vapor.templateURL,

@@ -9,6 +9,9 @@ struct TemplateRenderer {
     /// A flag that indicates whether the renderer should print verbose output.
     let verbose: Bool
 
+    /// A flag that indicates whether the renderer should automatically answer "no" to all questions.
+    let noQuestions: Bool
+
     /// Renders a project using the ``TemplateRendered/manifest``.
     ///
     /// - Parameters:
@@ -129,6 +132,10 @@ struct TemplateRenderer {
         /// - Returns: The user's answer.
         func askBool(_ question: String) -> Bool {
             print(question)
+            if self.noQuestions {
+                print("y/n> ".colored(.cyan) + "no".colored(.yellow))
+                return false
+            }
             print("y/n> ".colored(.cyan), terminator: "")
             var input = readLine()?.lowercased() ?? ""
             while !input.hasPrefix("y") && !input.hasPrefix("n") {
