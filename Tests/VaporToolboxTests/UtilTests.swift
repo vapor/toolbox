@@ -20,7 +20,7 @@ struct UtilTests {
 
     @Test("which")
     func which() throws {
-        #expect(try Process.shell.which("ls") == "/bin/ls")
+        #expect(try Process.shell.which("ls").path() == "/bin/ls")
     }
 
     @Test("escapeshellarg")

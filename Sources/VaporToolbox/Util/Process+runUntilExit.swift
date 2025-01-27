@@ -70,14 +70,14 @@ extension Process {
 struct Shell {
     fileprivate let shell: URL
 
-    func which(_ program: String) throws -> String {
-        if program.hasPrefix("/") { return program }
+    func which(_ program: String) throws -> URL {
+        if program.hasPrefix("/") { return URL(filePath: program) }
 
         let result = try Process.runUntilExit(self.shell, arguments: ["-c", "'\(escapeshellarg("which"))' \(program)"]).outputString!
         guard result.hasPrefix("/") else {
             throw ShellError.missingExecutable(program)
         }
-        return result
+        return URL(filePath: result)
     }
 
     /// Styled after PHP's function of the same name. How far we've fallen...

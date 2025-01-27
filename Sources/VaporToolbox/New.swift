@@ -141,6 +141,15 @@ extension Vapor.New: CustomReflectable {
             }
         }
 
+        /// Recursively process nested variables (if there are any) and return them as a list of children.
+        ///
+        /// If the variable doesn't have nested variables, it will return only the base variable.
+        ///
+        /// - Parameters:
+        ///   - variable: The ``TemplateManifest/Variable`` to process.
+        ///   - prefix: The prefix to add to the variable name. Used for nested variables.
+        ///
+        /// - Returns: A list of children for the given variable.
         func processNestedVariables(_ variable: TemplateManifest.Variable, prefix: String = "") -> [Mirror.Child] {
             var children = [createChild(for: variable, prefix: prefix)]
 

@@ -160,6 +160,8 @@ struct TemplateRenderer {
         to destinationURL: URL,
         with context: [String: Any]
     ) throws {
+        // If the file has a condition on whether it should be rendered or not
+        // check for the condition in the context, including nested variables.
         if case .exists(let variable) = file.condition {
             let components = variable.split(separator: ".").map { String($0) }
             var subContext: Any = context
