@@ -6,7 +6,7 @@ import Yams
 struct Vapor: ParsableCommand {
     static let configuration = CommandConfiguration(
         abstract: "Vapor Toolbox (Server-side Swift web framework)",
-        version: "19.0.0",
+        version: Self.version,
         subcommands: [New.self],
         defaultSubcommand: New.self
     )
@@ -41,7 +41,7 @@ struct Vapor: ParsableCommand {
 
         try? FileManager.default.removeItem(at: Self.templateURL)
 
-        if !arguments.contains("-h") && !arguments.contains("--help") {
+        if !arguments.contains("-h"), !arguments.contains("--help"), !arguments.contains("--version") {
             print("Cloning template...".colored(.cyan))
         }
         var cloneArgs = ["clone"]
@@ -57,6 +57,31 @@ struct Vapor: ParsableCommand {
         if FileManager.default.fileExists(atPath: manifestURL.path()) {
             let yaml = try String(contentsOf: manifestURL, encoding: .utf8)
             Self.manifest = try YAMLDecoder().decode(TemplateManifest.self, from: yaml)
+        }
+    }
+
+    private static var version: String {
+        do {
+            if let version = staticVersion {
+                // compiled with static version, use that
+                return "toolbox: \(version.colored(.cyan))"
+            } else {
+                // determine version through homebrew
+                let brewString = try Process.shell.brewInfo("vapor")
+                let versionFinder = try NSRegularExpression(pattern: #"(\d+\.)(\d+\.)(\d)"#)
+                let versionString = String(brewString.split(separator: "\n")[0])
+                if let match = versionFinder.firstMatch(
+                    in: versionString, range: .init(location: 0, length: versionString.utf16.count)
+                ) {
+                    let version = versionString[Range(match.range, in: versionString)!]
+                    return "toolbox: " + "\(version)".colored(.cyan)
+                } else {
+                    return "toolbox: \(versionString.colored(.cyan))"
+                }
+            }
+        } catch {
+            return "note: ".colored(.yellow) + "could not determine toolbox version." + "\n"
+                + "toolbox: " + "not found".colored(.cyan)
         }
     }
 }

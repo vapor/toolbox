@@ -80,6 +80,13 @@ struct Shell {
         return URL(filePath: result)
     }
 
+    func brewInfo(_ package: String) throws -> String {
+        try Process.runUntilExit(
+            self.shell,
+            arguments: ["-c", "'\(escapeshellarg("brew"))' \(escapeshellarg("info")) \(escapeshellarg(package))"]
+        ).outputString!
+    }
+
     /// Styled after PHP's function of the same name. How far we've fallen...
     func escapeshellarg(_ command: String) -> String {
         #if os(Windows)
