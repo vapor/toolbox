@@ -98,21 +98,13 @@ jobs:
   gh-codeql:
     strategy:
       fail-fast: false
-      matrix:
-        runner-os: ['ubuntu-22.04', 'macos-15']
-    runs-on: ${{ matrix.runner-os }}
+    runs-on: macos-15
     permissions: { actions: write, contents: read, security-events: write }
     timeout-minutes: 60
     steps:
       - name: Check out code
         uses: actions/checkout@v4
-      - name: Select Swift 6.0 on Linux
-        if: ${{ startsWith(matrix.runner-os, 'ubuntu') }}
-        uses: vapor/swiftly-action@v0.1
-        with:
-          toolchain: latest
       - name: Select Swift 6.0 on macOS
-        if: ${{ startsWith(matrix.runner-os, 'macos') }}
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: latest-stable
