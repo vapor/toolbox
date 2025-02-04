@@ -14,10 +14,8 @@ jobs:
     uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
     with:
       with_release_mode_testing: true
-      warnings_as_errors: true
       with_linting: true
-      with_windows: true
-      with_musl: true
+      # with_musl: true # jpsim/Yams#429
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 

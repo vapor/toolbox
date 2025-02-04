@@ -107,7 +107,7 @@ extension TemplateManifest {
             case dynamic
             case condition
             case `if`
-            case dynamic_name
+            case dynamicName = "dynamic_name"
         }
 
         init(from decoder: any Decoder) throws {
@@ -126,7 +126,7 @@ extension TemplateManifest {
                 if let variable = try container.decodeIfPresent(String.self, forKey: .if) {
                     self.condition = .exists(variable: variable)
                 }
-                self.dynamicName = try container.decodeIfPresent(String.self, forKey: .dynamic_name)
+                self.dynamicName = try container.decodeIfPresent(String.self, forKey: .dynamicName)
             }
         }
     }

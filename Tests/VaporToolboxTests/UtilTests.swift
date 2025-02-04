@@ -20,6 +20,7 @@ struct UtilTests {
 
     @Test("which")
     func which() throws {
+        print(try Process.shell.which("ls").path())
         #expect(try Process.shell.which("ls").path() == "/bin/ls")
         #expect(try Process.shell.which("cat").path() == "/bin/cat")  // Issue #403
     }
