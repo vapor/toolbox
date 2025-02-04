@@ -10,6 +10,17 @@ env:
   SWIFT_DETERMINISTIC_HASHING: 1
 
 jobs:
+  unit-tests:
+    uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
+    with:
+      with_release_mode_testing: true
+      warnings_as_errors: true
+      with_linting: true
+      with_windows: true
+      with_musl: true
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
   integration-linux:
     if: ${{ github.event_name == 'pull_request' && !github.event.pull_request.draft }}
     concurrency:
