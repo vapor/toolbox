@@ -9,7 +9,7 @@ enum ANSIColor: String {
     case white = "\u{001B}[37m"
 }
 
-extension String {
+extension StringProtocol {
     func colored(_ color: ANSIColor) -> String {
         color.rawValue + self + "\u{001B}[0m"
     }

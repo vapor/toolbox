@@ -13,6 +13,11 @@ struct VaporToolboxTests {
         #expect(Vapor.manifest != nil)
     }
 
+    @Test("Vapor.version")
+    func version() {
+        #expect(Vapor.version.contains("toolbox: "))
+    }
+
     @Test("Template Manifest")
     func templateManifest() throws {
         let manifestPath = URL(filePath: #filePath).deletingLastPathComponent().appending(path: "manifest.yml")

@@ -45,6 +45,10 @@ struct UtilTests {
         let coloredString = string.colored(color)
         #expect(coloredString == "\u{001B}[30mHello, World!\u{001B}[0m")
 
+        let substring = "Hello, World!".prefix(5)
+        let coloredSubstring = substring.colored(color)
+        #expect(coloredSubstring == "\u{001B}[30mHello\u{001B}[0m")
+
         let character: Character = "H"
         let coloredCharacter = character.colored(color)
         #expect(coloredCharacter == "\u{001B}[30mH\u{001B}[0m")
@@ -52,5 +56,10 @@ struct UtilTests {
         let noColor: ANSIColor? = nil
         let noColoredCharacter = character.colored(noColor)
         #expect(noColoredCharacter == "H")
+    }
+
+    @Test("printDroplet()")
+    func droplet() async throws {
+        printDroplet()
     }
 }

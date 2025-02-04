@@ -60,21 +60,18 @@ struct Vapor: ParsableCommand {
         }
     }
 
-    private static var version: String {
+    static var version: String {
         do {
-            if let version = staticVersion {
-                // compiled with static version, use that
-                return "toolbox: \(version.colored(.cyan))"
+            if let staticVersion {
+                // Compiled with static version, use that
+                return "toolbox: \(staticVersion.colored(.cyan))"
             } else {
-                // determine version through homebrew
+                // Determine version through Homebrew
                 let brewString = try Process.shell.brewInfo("vapor")
-                let versionFinder = try NSRegularExpression(pattern: #"(\d+\.)(\d+\.)(\d)"#)
-                let versionString = String(brewString.split(separator: "\n")[0])
-                if let match = versionFinder.firstMatch(
-                    in: versionString, range: .init(location: 0, length: versionString.utf16.count)
-                ) {
-                    let version = versionString[Range(match.range, in: versionString)!]
-                    return "toolbox: " + "\(version)".colored(.cyan)
+                let version = /(\d+\.)(\d+\.)(\d)/
+                let versionString = brewString.split(separator: "\n")[0]
+                if let match = try version.firstMatch(in: versionString) {
+                    return "toolbox: " + "\(match.0)".colored(.cyan)
                 } else {
                     return "toolbox: \(versionString.colored(.cyan))"
                 }
