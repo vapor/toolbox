@@ -28,9 +28,7 @@ struct Vapor: ParsableCommand {
 
     /// Get the template's `manifest.yml` file, decode it and save it.
     ///
-    /// This function has to be called before the main command is executed.
-    /// It will clone the template repository,
-    /// decode the `manifest.yml` file and store it in the ``Vapor/manifest`` `static` property for later use.
+    /// Clones the template repository, decodes the `manifest.yml` file and stores it in the ``Vapor/manifest`` `static` property for later use.
     ///
     /// - Parameter arguments: The command line arguments.
     static func preprocess(_ arguments: [String]) throws {
@@ -71,6 +69,7 @@ struct Vapor: ParsableCommand {
         }
     }
 
+    /// The version of this Vapor Toolbox.
     static var version: String {
         do {
             if let staticVersion {

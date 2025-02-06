@@ -99,6 +99,7 @@ files:
   - folder: Sources
     files:
       - folder: App
+        dynamic_name: "{{name}}"
         files:
           - file: entrypoint.swift
           - file: configure.swift
