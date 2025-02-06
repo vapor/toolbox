@@ -3,6 +3,7 @@ import Foundation
 import Synchronization
 import Yams
 
+@main
 struct Vapor: ParsableCommand {
     static let configuration = CommandConfiguration(
         abstract: "Vapor Toolbox (Server-side Swift web framework)",
@@ -14,6 +15,16 @@ struct Vapor: ParsableCommand {
     nonisolated(unsafe) static var manifest: TemplateManifest? = nil
     static let templateURL: URL = FileManager.default.temporaryDirectory.appending(path: ".vapor-template", directoryHint: .isDirectory)
     static let gitURL = try! Process.shell.which("git")
+
+    static func main() {
+        do {
+            try Self.preprocess(CommandLine.arguments)
+            var command = try parseAsRoot(nil)
+            try command.run()
+        } catch {
+            exit(withError: error)
+        }
+    }
 
     /// Get the template's `manifest.yml` file, decode it and save it.
     ///
