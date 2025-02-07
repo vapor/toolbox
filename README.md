@@ -101,15 +101,11 @@ You will be asked for all the necessary information to create the project.
 > [!TIP]
 > If you want to skip the questions, you can pass the `-n` flag to the command and automatically answer "no" to all questions.
 
-Once the command finishes, you will have a new folder in the current directory containing the project.
-
-> [!TIP]
-> If you want to create the project in a specific folder, you can pass the `--output` flag to the command with the path to the folder.
+Once the command finishes, you will have a new folder in the current directory containing the project. If you want to create the project in a specific folder, you can pass the `--output` flag to the command with the path to the folder.
 
 By default, a Git repository is initialized in the project folder and a commit is made with the initial project structure.
-
-> [!TIP]
-> If you don't want to initialize a Git repository, you can pass the `--no-git` flag to the command. If you just want to skip the initial commit, but still want a Git repo, pass the `--no-commit` flag.
+If you don't want to initialize a Git repository, you can pass the `--no-git` flag to the command.
+If you just want to skip the initial commit, but still want a Git repo, pass the `--no-commit` flag.
 
 To show help information for the Toolbox, run:
 
@@ -132,7 +128,9 @@ If the template is not in the `main` branch, you can specify the branch with the
 
 #### Creating a Custom Template
 
-If you are creating a custom template and want to dynamically generate the project depending on some variable given to the Toolbox, you have to add to the template a `manifest.yml` file.
+If you are creating a custom template and want to dynamically generate the project depending on some variable given to the Toolbox, you have to add to the template a manifest YAML file.
+
+By default, the Toolbox looks for a file named `manifest.yml` in the root of the template, but you can specify a different file path with the `--manifest` flag.
 
 This file should contain a list of variables that will be asked for during project generation and a list of all template files and folders, which will be processed based on the variables.
 
@@ -157,7 +155,7 @@ files:
 
 ##### Variables
 
-There are four kinds of variables you can define in the `manifest.yml` file:
+There are four kinds of variables you can define in the manifest file:
 
 - **Boolean**: the user can answer "yes" or "no"
 ```yaml

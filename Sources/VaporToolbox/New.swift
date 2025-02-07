@@ -24,6 +24,9 @@ extension Vapor {
             @Option(help: "Template repository branch to use.")
             var branch: String?
 
+            @Option(help: ArgumentHelp("The path of the manifest file. Defaults to `manifest.yml`.", valueName: "file"))
+            var manifest: String?
+
             @Option(name: .shortAndLong, help: ArgumentHelp("The directory to place the new project in.", valueName: "path"))
             var output: String?
 
