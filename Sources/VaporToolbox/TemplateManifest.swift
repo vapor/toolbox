@@ -39,7 +39,7 @@ extension TemplateManifest {
         /// An option that the user can choose from.
         struct Option: Decodable, Equatable {
             var name: String
-            var description: String
+            var description: String?
 
             /// The data associated with the option that will be stored in the context.
             var data: [String: String]

@@ -9,7 +9,6 @@ variables:
         type: option
         options:
           - name: Postgres (Recommended)
-            description: ""
             data:
               module: Postgres
               url: postgres
@@ -18,7 +17,6 @@ variables:
               is_postgres: true
               emoji: "\U0001F418"
           - name: MySQL
-            description: ""
             data:
               module: MySQL
               url: mysql
@@ -27,7 +25,6 @@ variables:
               is_mysql: true
               emoji: "\U0001F42C"
           - name: SQLite
-            description: ""
             data:
               module: SQLite
               url: sqlite
@@ -36,7 +33,6 @@ variables:
               is_sqlite: true
               emoji: "\U0001FAB6"
           - name: Mongo
-            description: ""
             data:
               module: Mongo
               url: mongo
@@ -80,7 +76,6 @@ variables:
         data:
           url: "https://fly.io/"
       - name: DigitalOcean
-        description: ""
         data:
           url: "https://www.digitalocean.com/"
   - name: hello

@@ -27,6 +27,21 @@ struct VaporToolboxTests {
         #expect(manifest.name == "Testing Vapor Template")
         #expect(manifest.variables.count == 6)
         #expect(manifest.files.count == 10)
+
+        guard let deployOptions = manifest.variables.first(where: { $0.name == "deploy" })?.type,
+            case let .options(options) = deployOptions
+        else {
+            Issue.record()
+            return
+        }
+
+        for option in options {
+            if option.name == "DigitalOcean" {
+                #expect(option.description == nil)
+            } else {
+                #expect(option.description != nil)
+            }
+        }
     }
 
     @Test("Kebab Cased")
