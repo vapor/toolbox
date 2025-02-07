@@ -26,6 +26,7 @@ struct VaporToolboxTests {
 
         #expect(manifest.name == "Testing Vapor Template")
         #expect(manifest.variables.count == 6)
+        #expect(manifest.variables[1].type == .bool)
         #expect(manifest.files.count == 10)
 
         guard let deployOptions = manifest.variables.first(where: { $0.name == "deploy" })?.type,

@@ -86,19 +86,6 @@ struct Shell {
             arguments: ["-c", "'\(escapeshellarg("brew"))' \(escapeshellarg("info")) \(escapeshellarg(package))"]
         ).outputString!
     }
-
-    /// Styled after PHP's function of the same name. How far we've fallen...
-    func escapeshellarg(_ command: String) -> String {
-        #if os(Windows)
-            let escaped = command.replacingOccurrences(of: "\"", with: "^\"")
-                .replacingOccurrences(of: "%", with: "^%")
-                .replacingOccurrences(of: "!", with: "^!")
-                .replacingOccurrences(of: "^", with: "^^")
-            return "\"\(escaped)\""
-        #else
-            "'\(command.replacingOccurrences(of: "'", with: "'\\''"))'"
-        #endif
-    }
 }
 
 enum ShellError: Error {

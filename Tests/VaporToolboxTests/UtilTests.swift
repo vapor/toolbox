@@ -41,7 +41,7 @@ struct UtilTests {
     @Test("escapeshellarg")
     func escapeshellarg() {
         var string: String
-        var escapedString: String { Process.shell.escapeshellarg(string) }
+        var escapedString: String { VaporToolbox.escapeshellarg(string) }
 
         string = "Hello, World!"
         #expect(escapedString == "'Hello, World!'")
@@ -72,8 +72,15 @@ struct UtilTests {
         #expect(noColoredCharacter == "H")
     }
 
-    @Test("printDroplet()")
-    func droplet() async throws {
-        printDroplet()
+    @Test("Removing ANSI Colors")
+    func removingANSIColors() {
+        let string = "Hello".colored(.red) + ", " + "World".colored(.blue) + "!"
+        #expect(string.removingANSIColors == "Hello, World!")
+        #expect(string.colored(.black).removingANSIColors == "Hello, World!")
+    }
+
+    @Test("Print New Project")
+    func printNewProject() async throws {
+        printNew(project: "Test", with: "Test", verbose: true)
     }
 }

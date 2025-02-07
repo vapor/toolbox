@@ -98,17 +98,7 @@ extension Vapor {
                 cdInstruction = projectURL.lastPathComponent  // Is in current directory
             }
 
-            if self.buildOptions.verbose { printDroplet() }
-            print("Project \(self.name.colored(.cyan)) has been created!")
-            if self.buildOptions.verbose { print() }
-            print("Use " + "cd \(Process.shell.escapeshellarg(cdInstruction))".colored(.cyan) + " to enter the project directory")
-            print(
-                "Then open your project, for example if using Xcode type "
-                    + "open Package.swift".colored(.cyan)
-                    + " or "
-                    + "code .".colored(.cyan)
-                    + " if using VSCode"
-            )
+            printNew(project: self.name, with: cdInstruction, verbose: self.buildOptions.verbose)
         }
     }
 }
