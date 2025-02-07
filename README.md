@@ -90,7 +90,26 @@ vapor Hello -n
 
 ### Getting Started
 
-To create a new Vapor project, see the [Getting Started](https://docs.vapor.codes/getting-started/hello-world/#new-project) guide.
+To create a new Vapor project, open a terminal and, replacing `<ProjectName>` with the name of your project, run the following command:
+
+```sh
+vapor new <ProjectName>
+```
+
+You will be asked for all the necessary information to create the project.
+
+> [!TIP]
+> If you want to skip the questions, you can pass the `-n` flag to the command and automatically answer "no" to all questions.
+
+Once the command finishes, you will have a new folder in the current directory containing the project.
+
+> [!TIP]
+> If you want to create the project in a specific folder, you can pass the `--output` flag to the command with the path to the folder.
+
+By default, a Git repository is initialized in the project folder and a commit is made with the initial project structure.
+
+> [!TIP]
+> If you don't want to initialize a Git repository, you can pass the `--no-git` flag to the command. If you just want to skip the initial commit, but still want a Git repo, pass the `--no-commit` flag.
 
 To show help information for the Toolbox, run:
 
@@ -98,7 +117,9 @@ To show help information for the Toolbox, run:
 vapor --help
 ```
 
-### Custom Templates & Manifests
+You can also see the [Getting Started](https://docs.vapor.codes/getting-started/hello-world/#new-project) guide to learn more about creating a new project with the Toolbox.
+
+### Custom Templates
 
 The Toolbox uses templates to create new projects.
 By default, it uses the official [Vapor template](https://github.com/vapor/template).
@@ -106,14 +127,120 @@ By default, it uses the official [Vapor template](https://github.com/vapor/templ
 You can also specify a custom template by passing a URL of a Git repository to the `--template` flag.
 If the template is not in the `main` branch, you can specify the branch with the `--branch` flag.
 
-If you want to dynamically generate the project depending on some variable given to the Toolbox, you have to add to the template a `manifest.yml` file.
+> [!TIP]
+> Add the `--help` flag to the command, along with the `--template` and optionally the `--branch` flags, to see all the available options for the custom template.
+
+#### Creating a Custom Template
+
+If you are creating a custom template and want to dynamically generate the project depending on some variable given to the Toolbox, you have to add to the template a `manifest.yml` file.
+
 This file should contain a list of variables that will be asked for during project generation and a list of all template files and folders, which will be processed based on the variables.
 
-You can define boolean, string and multiple-choice (option) variables, as well as nested variables.
+```yaml
+name: Custom Vapor Template
+variables:
+  - name: fluent
+    description: Would you like to use Fluent (ORM)?
+    type: nested
+    variables:
+      ...
+  - name: leaf
+    description: Would you like to use Leaf (templating)?
+    type: bool
+files:
+  - file: Package.swift
+    dynamic: true
+  - folder: Sources
+    files:
+      ...
+```
 
-You can specify if some file or folder should be added to the project based on the value of a variable.
+##### Variables
+
+There are four kinds of variables you can define in the `manifest.yml` file:
+
+- **Boolean**: the user can answer "yes" or "no"
+```yaml
+- name: leaf
+  description: Would you like to use Leaf (templating)?
+  type: bool
+```
+
+- **String**: the user can answer with any string
+```yaml
+- name: hello
+  description: What would you like to display on the `/hello` route?
+  type: string
+```
+
+- **Option**: the user can choose one of the options and its associated data will be passed to the template
+```yaml
+- name: db
+  description: Which database would you like to use?
+  type: option
+  options:
+    - name: Postgres (Recommended)
+      data:
+        module: Postgres
+        id: psql
+        version: "2.8.0"
+    - name: MySQL
+      data:
+        module: MySQL
+        id: mysql
+        version: "4.4.0"
+    - name: SQLite
+      data:
+        module: SQLite
+        id: sqlite
+        version: "4.6.0"
+```
+
+- **Nested**: a variable that contains other variables; the value of the nested variable will be a dictionary with the values of the nested variables
+```yaml
+- name: fluent
+  description: Would you like to use Fluent (ORM)?
+  type: nested
+  variables:
+    - name: db
+      ...
+    - name: model
+      description: How would you like to name your model?
+      type: string
+```
+
+##### Files and Folders
+
+You can specify if some file or folder should be added to the project based on the value of a variable by adding an `if` key.
+
+```yaml
+- folder: Migrations
+  if: fluent
+  files:
+    - CreateTodo.swift
+- folder: Controllers
+  files:
+    - file: TodoController.swift
+      if: fluent
+```
+
 You can also have files and folders with dynamic names: they must be Mustache templates and will be processed based on the variables.
+
+```yaml
+- folder: AppTests
+  dynamic_name: "{{name}}Tests"
+  files:
+    - file: AppTests.swift
+    dynamic_name: "{{name}}Tests.swift"
+```
+
 The content of a file can also be a Mustache template, and if you define it as `dynamic`, it will be processed using the variables.
 
-You can take a look at the [`manifest.yml` file](https://github.com/vapor/template/blob/main/manifest.yml) of the official Vapor template and [an overly complicated one](Tests/VaporToolboxTests/manifest.yml) we use for testing.
+```yaml
+- file: Package.swift
+  dynamic: true
+```
+
+> [!TIP]
+> You can take a look at the [`manifest.yml` file](https://github.com/vapor/template/blob/main/manifest.yml) of the official Vapor template and [an overly complicated one](Tests/VaporToolboxTests/manifest.yml) we use for testing.
 It may also be helpful to look at the [manifest's structure](Sources/VaporToolbox/TemplateManifest.swift).

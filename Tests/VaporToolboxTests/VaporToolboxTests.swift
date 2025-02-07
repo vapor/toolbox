@@ -29,7 +29,7 @@ struct VaporToolboxTests {
         #expect(manifest.files.count == 10)
 
         guard let deployOptions = manifest.variables.first(where: { $0.name == "deploy" })?.type,
-            case let .options(options) = deployOptions
+            case .options(let options) = deployOptions
         else {
             Issue.record()
             return
