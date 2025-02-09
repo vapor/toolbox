@@ -41,12 +41,21 @@ extension Vapor {
 
             @Flag(name: .shortAndLong, help: "Prints additional information.")
             var verbose: Bool = false
+
+            @Flag(help: ArgumentHelp("Dump the manifest's variables as JSON and exit.", visibility: .hidden))
+            var json: Bool = false
         }
 
         @OptionGroup(title: "Build Options")
         var buildOptions: BuildOptions
 
         mutating func run() throws {
+            if self.buildOptions.json {
+                let jsonData = try JSONEncoder().encode(Vapor.manifest?.variables)
+                print(String(data: jsonData, encoding: .utf8)!)
+                return
+            }
+
             let cwd = URL(filePath: FileManager.default.currentDirectoryPath, directoryHint: .isDirectory)
             let projectURL =
                 if let output = self.buildOptions.output {

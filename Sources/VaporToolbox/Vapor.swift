@@ -50,7 +50,14 @@ struct Vapor: ParsableCommand {
 
         try? FileManager.default.removeItem(at: Self.templateURL)
 
-        if !arguments.contains("-h"), !arguments.contains("--help"), !arguments.contains("--version") {
+        if !arguments.contains("-h"),
+            !arguments.contains("--help"),
+            !arguments.contains("-help"),
+            !arguments.contains("--help-hidden"),
+            !arguments.contains("-help-hidden"),
+            !arguments.contains("--version"),
+            !arguments.contains("--json")
+        {
             print("Cloning template...".colored(.cyan))
         }
         var cloneArgs = ["clone"]

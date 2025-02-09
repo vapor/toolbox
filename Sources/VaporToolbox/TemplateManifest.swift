@@ -7,7 +7,7 @@ struct TemplateManifest: Decodable, Sendable {
 
 extension TemplateManifest {
     /// A variable that the user has to provide and that will be used to render the template files.
-    struct Variable: Decodable, Sendable, Equatable {
+    struct Variable: Codable, Sendable, Equatable {
         var name: String
         var description: String
         var type: Kind
@@ -37,7 +37,7 @@ extension TemplateManifest {
         }
 
         /// An option that the user can choose from.
-        struct Option: Decodable, Equatable {
+        struct Option: Codable, Equatable {
             var name: String
             var description: String?
 
@@ -45,7 +45,7 @@ extension TemplateManifest {
             var data: [String: String]
         }
 
-        // MARK: - Decodable
+        // MARK: - Codable
         enum CodingKeys: String, CodingKey {
             case name
             case description
@@ -72,6 +72,25 @@ extension TemplateManifest {
                 default:
                     fatalError("Unknown variable type")
                 }
+        }
+
+        func encode(to encoder: any Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(self.name, forKey: .name)
+            try container.encode(self.description, forKey: .description)
+            
+            switch self.type {
+            case .string:
+                try container.encode("string", forKey: .type)
+            case .bool:
+                try container.encode("bool", forKey: .type)
+            case .options(let options):
+                try container.encode("option", forKey: .type)
+                try container.encode(options, forKey: .options)
+            case .variables(let variables):
+                try container.encode("nested", forKey: .type)
+                try container.encode(variables, forKey: .variables)
+            }
         }
     }
 }
