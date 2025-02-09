@@ -78,7 +78,7 @@ extension TemplateManifest {
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(self.name, forKey: .name)
             try container.encode(self.description, forKey: .description)
-            
+
             switch self.type {
             case .string:
                 try container.encode("string", forKey: .type)
