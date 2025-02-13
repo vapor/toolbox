@@ -16,7 +16,7 @@ jobs:
       with_release_mode_testing: true
       with_api_check: false
       with_linting: true
-      # with_musl: true # jpsim/Yams#429
+      with_musl: true
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
