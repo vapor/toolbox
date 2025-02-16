@@ -56,7 +56,7 @@ struct Vapor: ParsableCommand {
             !arguments.contains("--help-hidden"),
             !arguments.contains("-help-hidden"),
             !arguments.contains("--version"),
-            !arguments.contains("--json")
+            !arguments.contains("--dump-variables")
         {
             print("Cloning template...".colored(.cyan))
         }

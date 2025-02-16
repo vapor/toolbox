@@ -42,16 +42,24 @@ extension Vapor {
             @Flag(name: .shortAndLong, help: "Prints additional information.")
             var verbose: Bool = false
 
-            @Flag(help: ArgumentHelp("Dump the manifest's variables as JSON and exit.", visibility: .hidden))
-            var json: Bool = false
+            @Flag(
+                help: ArgumentHelp(
+                    "Dumps template variables as JSON.",
+                    discussion: "This flag is experimental and unstable. Future releases may change its behavior or remove it.",
+                    visibility: .hidden
+                )
+            )
+            var dumpVariables: Bool = false
         }
 
         @OptionGroup(title: "Build Options")
         var buildOptions: BuildOptions
 
         mutating func run() throws {
-            if self.buildOptions.json {
-                let jsonData = try JSONEncoder().encode(Vapor.manifest?.variables)
+            if self.buildOptions.dumpVariables {
+                let encoder = JSONEncoder()
+                encoder.outputFormatting = .prettyPrinted
+                let jsonData = try encoder.encode(Vapor.manifest?.variables)
                 print(String(data: jsonData, encoding: .utf8)!)
                 return
             }
