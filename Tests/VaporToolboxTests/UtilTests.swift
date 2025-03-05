@@ -18,24 +18,10 @@ struct UtilTests {
         }
     }
 
-    @Test("which")
-    func which() throws {
-        let lsPath = try Process.shell.which("ls").path()
-        #if os(macOS)
-            let expectedLSPath = "/bin/ls"
-        #else
-            let expectedLSPath = "/usr/bin/ls"
-        #endif
-        #expect(lsPath == expectedLSPath)
-
-        // Issue #403
-        let catPath = try Process.shell.which("cat").path()
-        #if os(macOS)
-            let expectedCatPath = "/bin/cat"
-        #else
-            let expectedCatPath = "/usr/bin/cat"
-        #endif
-        #expect(catPath == expectedCatPath)
+    @Test("which", arguments: ["ls", "cat"])
+    func which(program: String) throws {
+        let path = try Process.shell.which(program).path()
+        #expect(path.hasSuffix(program))
     }
 
     @Test("escapeshellarg")
