@@ -102,7 +102,7 @@ private func printDroplet() {
         // the escaping `\` make these lines look weird, but they're correct
         "\\ \\  /  / /\\  | |_) / / \\ | |_) ",
         " \\_\\/  /_/--\\ |_|   \\_\\_/ |_| \\ ",
-        "   a web framework for Swift    ",
+        "  a server framework for Swift  ",
         "                                ",
     ]
 
