@@ -21,19 +21,6 @@ extension TemplateManifest {
 
             /// This variable contains other nested variables.
             case variables([Variable])
-
-            static func == (lhs: Kind, rhs: Kind) -> Bool {
-                switch (lhs, rhs) {
-                case (.string, .string), (.bool, .bool):
-                    return true
-                case (.options(let lhs), .options(let rhs)):
-                    return lhs == rhs
-                case (.variables(let lhs), .variables(let rhs)):
-                    return lhs == rhs
-                default:
-                    return false
-                }
-            }
         }
 
         /// An option that the user can choose from.
