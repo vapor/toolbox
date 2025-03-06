@@ -121,7 +121,7 @@ The Toolbox uses templates to create new projects.
 By default, it uses the official [Vapor template](https://github.com/vapor/template).
 
 You can also specify a custom template by passing a URL of a Git repository to the `--template` flag.
-If the template is not in the `main` branch, you can specify the branch with the `--branch` flag.
+By default, the toolbox uses the `main` branch. If you want to use a different branch, you can use the `--branch` flag.
 
 > [!TIP]
 > Add the `--help` flag to the command, along with the `--template` and optionally the `--branch` flags, to see all the available options for the custom template.
