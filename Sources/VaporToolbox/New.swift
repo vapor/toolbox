@@ -60,7 +60,11 @@ extension Vapor {
                 let encoder = JSONEncoder()
                 encoder.outputFormatting = .prettyPrinted
                 let jsonData = try encoder.encode(Vapor.manifest?.variables)
-                print(String(data: jsonData, encoding: .utf8)!)
+                if let jsonString = String(data: jsonData, encoding: .utf8) {
+                    print(jsonString)
+                } else {
+                    print("error:".colored(.red) + " unable to encode JSON data as a UTF-8 string.")
+                }
                 return
             }
 
