@@ -1,6 +1,5 @@
 import ArgumentParser
 import Foundation
-import Synchronization
 import Yams
 
 @main
