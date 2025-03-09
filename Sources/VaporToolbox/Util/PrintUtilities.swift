@@ -14,9 +14,7 @@ extension String {
 
         var longestLine = 0
         for line in uncoloredLines {
-            if line.count > longestLine {
-                longestLine = line.count
-            }
+            longestLine = max(longestLine, line.count)
         }
 
         // Calculate the padding and make sure it's greater than or equal to 0
