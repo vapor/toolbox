@@ -118,7 +118,7 @@ extension Vapor {
             // Figure out the shortest relative path to the new project
             let cwdPath = cwd.path()
             var cdInstruction = projectURL.path()
-            if projectURL.deletingLastPathComponent().path().commonPrefix(with: cwdPath) == cwdPath {
+            if projectURL.deletingLastPathComponent().path().starts(with: cwdPath) {
                 cdInstruction = projectURL.lastPathComponent  // Is in current directory
             }
 
