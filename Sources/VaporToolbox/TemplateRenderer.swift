@@ -138,7 +138,7 @@ struct TemplateRenderer {
             }
             print("y/n> ".colored(.cyan), terminator: "")
             var input = readLine()?.lowercased() ?? ""
-            while !input.hasPrefix("y") && !input.hasPrefix("n") {
+            while !input.starts(with: "y") && !input.starts(with: "n") {
                 print(question)
                 print("[y]es or [n]o> ".colored(.cyan), terminator: "")
                 input = readLine()?.lowercased() ?? ""
