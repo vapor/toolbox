@@ -218,8 +218,7 @@ struct TemplateRenderer {
 extension StringProtocol {
     var kebabcased: String {
         self
-            .components(separatedBy: .alphanumerics.inverted)
-            .filter { !$0.isEmpty }
+            .split(whereSeparator: { !$0.isLetter })
             .map { $0.lowercased() }
             .joined(separator: "-")
     }
