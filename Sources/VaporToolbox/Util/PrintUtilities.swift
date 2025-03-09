@@ -22,7 +22,7 @@ extension String {
 
         // Apply the padding to each line
         for i in lines.indices {
-            lines[i].insert(String(repeating: " ", count: padding), at: lines[i].startIndex)
+            lines[i].insert(contentsOf: String(repeating: " ", count: padding), at: lines[i].startIndex)
         }
 
         return lines.joined(separator: "\n")
