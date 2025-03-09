@@ -12,7 +12,7 @@ struct Vapor: ParsableCommand {
     )
 
     nonisolated(unsafe) static var manifest: TemplateManifest? = nil
-    static let templateURL: URL = FileManager.default.temporaryDirectory.appending(path: ".vapor-template", directoryHint: .isDirectory)
+    static let templateURL = URL.temporaryDirectory.appending(path: ".vapor-template", directoryHint: .isDirectory)
     static let gitURL = try! Process.shell.which("git")
 
     static func main() {
