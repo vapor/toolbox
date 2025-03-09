@@ -227,9 +227,9 @@ extension Vapor.New: CustomReflectable {
 
         var stringValue: String {
             switch self {
-            case .name: return "name"
-            case .buildOptions: return "buildOptions"
-            case .dynamic(let string): return string
+            case .name: "name"
+            case .buildOptions: "buildOptions"
+            case .dynamic(let string): string
             }
         }
 
