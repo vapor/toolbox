@@ -68,7 +68,7 @@ extension Vapor {
                 return
             }
 
-            let cwd = URL(filePath: FileManager.default.currentDirectoryPath, directoryHint: .isDirectory)
+            let cwd = URL.currentDirectory()
             let projectURL =
                 if let output = self.buildOptions.output {
                     URL(filePath: output, directoryHint: .isDirectory)
