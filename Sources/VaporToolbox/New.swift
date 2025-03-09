@@ -15,10 +15,7 @@ extension Vapor {
         ///
         /// They control the build process of the project.
         struct BuildOptions: ParsableArguments {
-            @Option(
-                name: [.short, .customShort("T"), .long],
-                help: ArgumentHelp("The URL of a Git repository to use as a template.", valueName: "url")
-            )
+            @Option(name: .shortAndLong, help: ArgumentHelp("The URL of a Git repository to use as a template.", valueName: "url"))
             var template: String?
 
             @Option(help: "Template repository branch to use.")

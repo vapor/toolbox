@@ -36,9 +36,6 @@ struct Vapor: ParsableCommand {
                 arguments[index + 1]
             } else if let index = arguments.firstIndex(of: "-t") {
                 arguments[index + 1]
-            } else if let index = arguments.firstIndex(of: "-T") {
-                // This is a deprecated alias for `--template` kept for backwards compatibility
-                arguments[index + 1]
             } else {
                 "https://github.com/vapor/template"
             }
