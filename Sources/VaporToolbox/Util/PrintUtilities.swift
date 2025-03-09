@@ -65,13 +65,13 @@ private var terminalSize: (width: Int, height: Int) {
 /// How far we've fallen...
 func escapeshellarg(_ command: String) -> String {
     #if os(Windows)
-        let escaped = command.replacingOccurrences(of: "\"", with: "^\"")
-            .replacingOccurrences(of: "%", with: "^%")
-            .replacingOccurrences(of: "!", with: "^!")
-            .replacingOccurrences(of: "^", with: "^^")
+        let escaped = command.replacing("\"", with: "^\"")
+            .replacing("%", with: "^%")
+            .replacing("!", with: "^!")
+            .replacing("^", with: "^^")
         return "\"\(escaped)\""
     #else
-        "'\(command.replacingOccurrences(of: "'", with: "'\\''"))'"
+        "'\(command.replacing("'", with: "'\\''"))'"
     #endif
 }
 
