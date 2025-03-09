@@ -98,13 +98,13 @@ extension Vapor {
             }
 
             if !self.buildOptions.noGit {
-                let gitDir = projectURL.appending(path: ".git").path()
+                let gitDir = projectURL.appending(path: ".git")
 
                 print("Creating git repository".colored(.cyan))
-                if FileManager.default.fileExists(atPath: gitDir) {
-                    try FileManager.default.removeItem(atPath: gitDir)  // Clear existing git history
+                if (try? gitDir.checkResourceIsReachable()) ?? false {
+                    try FileManager.default.removeItem(at: gitDir)  // Clear existing git history
                 }
-                try Process.runUntilExit(Vapor.gitURL, arguments: ["--git-dir=\(gitDir)", "init"])
+                try Process.runUntilExit(Vapor.gitURL, arguments: ["--git-dir=\(gitDir.path(percentEncoded: false))", "init"])
 
                 if !self.buildOptions.noCommit {
                     print("Adding first commit".colored(.cyan))
