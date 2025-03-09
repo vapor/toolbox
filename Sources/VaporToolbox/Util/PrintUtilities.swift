@@ -21,10 +21,8 @@ extension String {
         let padding = max(0, (terminalSize.width - longestLine) / 2)
 
         // Apply the padding to each line
-        for i in 0..<lines.count {
-            for _ in 0..<padding {
-                lines[i].insert(" ", at: startIndex)
-            }
+        for i in lines.indices {
+            lines[i].insert(String(repeating: " ", count: padding), at: lines[i].startIndex)
         }
 
         return lines.joined(separator: "\n")
