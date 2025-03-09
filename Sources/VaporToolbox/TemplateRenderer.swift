@@ -143,7 +143,7 @@ struct TemplateRenderer {
                 print("[y]es or [n]o> ".colored(.cyan), terminator: "")
                 input = readLine()?.lowercased() ?? ""
             }
-            return input.hasPrefix("y")
+            return input.starts(with: "y")
         }
     }
 
