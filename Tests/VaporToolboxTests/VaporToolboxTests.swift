@@ -1,3 +1,4 @@
+#if canImport(Testing)
 import Foundation
 import Testing
 import Yams
@@ -51,3 +52,4 @@ struct VaporToolboxTests {
         #expect(string.kebabcased == "hello-world")
     }
 }
+#endif  // canImport(Testing)
