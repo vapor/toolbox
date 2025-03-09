@@ -32,21 +32,21 @@ jobs:
       matrix:
         fluentflags:
           - --no-fluent
-          # - --fluent.db mysql
+          - --fluent.db mysql
           - --fluent.db postgres
           - --fluent.db sqlite
         leafflags: [--leaf, --no-leaf]
         include:
-          # - fluentflags: '--fluent.db mysql'
-          #   dbhostname: mysql
+          - fluentflags: '--fluent.db mysql'
+            dbhostname: mysql
           - fluentflags: '--fluent.db postgres'
             dbhostname: psql
     runs-on: ubuntu-latest
     container: swift:6.0-noble
     services:
-      # mysql:
-      #  image: mysql:latest
-      #  env: { MYSQL_ALLOW_EMPTY_PASSWORD: 'true', MYSQL_USER: vapor_username, MYSQL_PASSWORD: vapor_password, MYSQL_DATABASE: vapor_database }
+      mysql:
+        image: mysql:latest
+        env: { MYSQL_ALLOW_EMPTY_PASSWORD: 'true', MYSQL_USER: vapor_username, MYSQL_PASSWORD: vapor_password, MYSQL_DATABASE: vapor_database }
       psql:
         image: postgres:latest
         env: { POSTGRES_USER: vapor_username, POSTGRES_DB: vapor_database, POSTGRES_PASSWORD: vapor_password,
