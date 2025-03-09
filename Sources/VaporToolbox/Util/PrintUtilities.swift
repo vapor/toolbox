@@ -5,7 +5,7 @@ extension String {
         // Split the string into lines
         var lines = self.split(separator: "\n").map(String.init)
 
-        guard lines.count > 0 else {
+        guard !lines.isEmpty else {
             return ""
         }
 
