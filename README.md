@@ -87,7 +87,7 @@ vapor new <ProjectName>
 You will be asked for all the necessary information to create the project.
 
 > [!TIP]
-> If you want to skip the questions, you can pass the `-n` flag to the command and automatically answer "no" to all questions.
+> If you want to skip the questions, you can pass the `-n` flag to the command to automatically answer "no" to all questions.
 
 Once the command finishes, you will have a new folder in the current directory containing the project. If you want to create the project in a specific folder, you can pass the `--output` flag to the command with the path to the folder.
 
