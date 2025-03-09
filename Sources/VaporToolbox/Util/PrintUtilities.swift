@@ -3,7 +3,7 @@ import Foundation
 extension String {
     fileprivate var centered: String {
         // Split the string into lines
-        var lines = self.split(separator: Character("\n")).map(String.init)
+        var lines = self.split(separator: "\n").map(String.init)
 
         guard lines.count > 0 else {
             return ""
