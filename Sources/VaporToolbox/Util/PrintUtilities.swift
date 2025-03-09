@@ -97,9 +97,8 @@ private func printDroplet() {
         "          *************         ",
         "                                ",
         " _       __    ___   ___   ___  ",
-        // the escaping `\` make these lines look weird, but they're correct
-        "\\ \\  /  / /\\  | |_) / / \\ | |_) ",
-        " \\_\\/  /_/--\\ |_|   \\_\\_/ |_| \\ ",
+        #"\ \  /  / /\  | |_) / / \ | |_) "#,
+        #" \_\/  /_/--\ |_|   \_\_/ |_| \ "#,
         "  a server framework for Swift  ",
         "                                ",
     ]
