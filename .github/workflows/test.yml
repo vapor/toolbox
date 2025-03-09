@@ -17,6 +17,8 @@ jobs:
       with_api_check: false
       with_linting: true
       with_musl: true
+      with_android: true
+      with_windows: true
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -43,7 +45,7 @@ jobs:
           - fluentflags: '--fluent.db mongo'
             dbhosturl: 'mongodb://mongo:27017/vapor_database'
     runs-on: ubuntu-latest
-    container: swift:noble
+    container: swift:6.0-noble
     services:
       mongo: { image: 'mongo:latest' }
       # mysql:
