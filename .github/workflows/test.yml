@@ -35,19 +35,15 @@ jobs:
           # - --fluent.db mysql
           - --fluent.db postgres
           - --fluent.db sqlite
-          - --fluent.db mongo
         leafflags: [--leaf, --no-leaf]
         include:
           # - fluentflags: '--fluent.db mysql'
           #   dbhostname: mysql
           - fluentflags: '--fluent.db postgres'
             dbhostname: psql
-          - fluentflags: '--fluent.db mongo'
-            dbhosturl: 'mongodb://mongo:27017/vapor_database'
     runs-on: ubuntu-latest
     container: swift:6.0-noble
     services:
-      mongo: { image: 'mongo:latest' }
       # mysql:
       #  image: mysql:latest
       #  env: { MYSQL_ALLOW_EMPTY_PASSWORD: 'true', MYSQL_USER: vapor_username, MYSQL_PASSWORD: vapor_password, MYSQL_DATABASE: vapor_database }
@@ -84,7 +80,6 @@ jobs:
           - --fluent.db mysql
           - --fluent.db postgres
           - --fluent.db sqlite
-          - --fluent.db mongo
         leafflags: [--leaf, --no-leaf]
     runs-on: macos-15
     steps:
