@@ -57,7 +57,7 @@ extension TemplateManifest {
                 case "nested":
                     try .variables(container.decode([Variable].self, forKey: .variables))
                 default:
-                    fatalError("Unknown variable type")
+                    throw DecodingError.dataCorruptedError(forKey: .type, in: container, debugDescription: "Unknown variable type")
                 }
         }
 
