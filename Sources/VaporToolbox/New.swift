@@ -105,7 +105,7 @@ extension Vapor {
 
                 if !self.buildOptions.noCommit {
                     print("Adding first commit".colored(.cyan))
-                    let gitDirFlag = "--git-dir=\(gitDir)"
+                    let gitDirFlag = "--git-dir=\(gitDir.path())"
                     let workTreeFlag = "--work-tree=\(projectURL.path())"
                     try Process.runUntilExit(Vapor.gitURL, arguments: [gitDirFlag, workTreeFlag, "add", "."])
                     try Process.runUntilExit(Vapor.gitURL, arguments: [gitDirFlag, workTreeFlag, "commit", "-m", "Generate Vapor project"])
