@@ -4,6 +4,10 @@ import Foundation
 import Android
 #endif
 
+#if os(Windows)
+import WinSDK
+#endif
+
 extension String {
     fileprivate var centered: String {
         // Split the string into lines
