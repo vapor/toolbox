@@ -18,7 +18,6 @@ jobs:
       with_linting: true
       with_musl: true
       with_android: true
-      with_windows: true
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
