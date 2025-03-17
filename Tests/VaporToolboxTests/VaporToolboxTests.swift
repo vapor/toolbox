@@ -1,31 +1,55 @@
-@testable import VaporToolbox
-import XCTest
+#if canImport(Testing)
+import Foundation
+import Testing
+import Yams
 
-final class VaporToolboxTests: XCTestCase {
-    
-    func testStub() throws {
-        XCTAssertTrue(true)
+@testable import VaporToolbox
+
+@Suite("VaporToolbox Tests")
+struct VaporToolboxTests {
+    @Test("Vapor.preprocess")
+    func preprocess() throws {
+        #expect(Vapor.manifest == nil)
+        try Vapor.preprocess([])
+        #expect(Vapor.manifest != nil)
     }
-    
-    /// Assures that when Swift version can be detected it produces the right result.
-    /// - Note: As this test relies on conditional compilation it can only test one specific version (the one which is currently compiling the test).
-    func testSwiftVersionDetection() throws {
-        if let version = RuntimeSwiftVersion() {
-#if swift(>=5.5)
-            XCTAssertTrue(version.major > 5 || (version.major == 5 && version.minor >= 5))
-#elseif swift(>=5.4)
-            XCTAssertTrue(version.major == 5 && version.minor == 4)
-#elseif swift(>=5.3)
-            XCTAssertTrue(version.major == 5 && version.minor == 3)
-#elseif swift(>=5.2)
-            XCTAssertTrue(version.major == 5 && version.minor == 2)
-#else
-            XCTAssertTrue( !(version.major > 5 || (version.major == 5 && version.minor >= 2)))
-#endif
-        } else {
-            // Swift version detection may fail but it doesn't cause any wrong result then it should pass the test.
-            XCTAssertTrue(true)
+
+    @Test("Vapor.version")
+    func version() {
+        #expect(Vapor.version.contains("toolbox: "))
+    }
+
+    @Test("Template Manifest")
+    func templateManifest() throws {
+        let manifestPath = URL(filePath: #filePath).deletingLastPathComponent().appending(path: "manifest.yml")
+        let manifestData = try Data(contentsOf: manifestPath)
+        let manifest = try YAMLDecoder().decode(TemplateManifest.self, from: manifestData)
+
+        #expect(manifest.name == "Testing Vapor Template")
+        #expect(manifest.variables.count == 6)
+        #expect(manifest.variables[1].type == .bool)
+        #expect(manifest.files.count == 10)
+
+        guard let deployOptions = manifest.variables.first(where: { $0.name == "deploy" })?.type,
+            case .options(let options) = deployOptions
+        else {
+            Issue.record()
+            return
+        }
+
+        for option in options {
+            if option.name == "DigitalOcean" {
+                #expect(option.description == nil)
+            } else {
+                #expect(option.description != nil)
+            }
         }
     }
-    
+
+    @Test("Kebab Cased")
+    func kebabcased() {
+        let string = "Hello, World!"
+        #expect(string.kebabcased == "hello-world")
+    }
 }
+#endif  // canImport(Testing)

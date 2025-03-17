@@ -29,7 +29,7 @@ func build() async throws {
 func withVersion(in file: String, as version: String, _ operation: () async throws -> Void) async throws {
     let fileURL = URL(fileURLWithPath: file)
     let originalFileContents = try String(contentsOf: fileURL, encoding: .utf8)
-    
+
     try originalFileContents
         .replacingOccurrences(of: "nil", with: "\"\(version)\"")
         .write(to: fileURL, atomically: true, encoding: .utf8)
@@ -40,7 +40,7 @@ func withVersion(in file: String, as version: String, _ operation: () async thro
     } catch {
         operationError = error
     }
-    
+
     // If an error occurred, revert the file change
     if operationError != nil {
         try? originalFileContents
@@ -50,7 +50,6 @@ func withVersion(in file: String, as version: String, _ operation: () async thro
         }
     }
 }
-
 
 func currentVersion() async throws -> String {
     do {
