@@ -24,7 +24,7 @@ Vapor Toolbox supports macOS 13.0+ and all Linux distributions that Swift 6.0 su
 
 #### Homebrew
 
-On macOS and Linux, Toolbox is distributed via Homebrew. If you do not have Homebrew yet, visit [brew.sh](https://brew.sh/) for install instructions.
+On macOS and Linux, the Toolbox is distributed via Homebrew. If you do not have Homebrew yet, visit [brew.sh](https://brew.sh/) for install instructions.
 
 ```sh
 brew install vapor
