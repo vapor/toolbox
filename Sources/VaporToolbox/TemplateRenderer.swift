@@ -232,9 +232,12 @@ extension String {
 
     /// A Boolean value indicating whether the string is a valid name for a Swift target, file or type.
     var isValidName: Bool {
-        self.wholeMatch(of: #/
-            (?:\p{L}|_)         # match Letter or underscore
-            (?:\p{L}|\p{N}|_)*  # match zero or more Letters, Numbers, and/or underscores
-        /#) != nil
+        self.wholeMatch(
+            of:
+                #/
+                (?:\p{L}|_)         # match Letter or underscore
+                (?:\p{L}|\p{N}|_)*  # match zero or more Letters, Numbers, and/or underscores
+                /#
+        ) != nil
     }
 }
