@@ -26,7 +26,7 @@ struct TemplateRenderer {
         with variables: [String: Any]
     ) throws {
         var context = variables
-        context["name"] = name
+        context["name"] = name.isValidName ? name : name.pascalcased
         context["name_kebab"] = name.kebabcased
 
         if self.verbose { print("name: \(name.colored(.cyan))") }
@@ -215,11 +215,29 @@ struct TemplateRenderer {
     }
 }
 
-extension StringProtocol {
+extension String {
     var kebabcased: String {
         self
             .split(whereSeparator: { !$0.isLetter })
             .map { $0.lowercased() }
             .joined(separator: "-")
+    }
+
+    var pascalcased: String {
+        self
+            .split(whereSeparator: { !$0.isLetter })
+            .map { $0.capitalized }
+            .joined()
+    }
+
+    /// A Boolean value indicating whether the string is a valid name for a Swift target, file or type.
+    var isValidName: Bool {
+        self.wholeMatch(
+            of:
+                #/
+                (?:\p{L}|_)         # match Letter or underscore
+                (?:\p{L}|\p{N}|_)*  # match zero or more Letters, Numbers, and/or underscores
+                /#
+        ) != nil
     }
 }
