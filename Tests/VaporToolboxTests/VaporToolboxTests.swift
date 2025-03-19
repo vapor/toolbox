@@ -46,10 +46,27 @@ struct VaporToolboxTests {
         }
     }
 
-    @Test("Kebab Cased")
-    func kebabcased() {
-        let string = "Hello, World!"
+    @Test("Kebab Cased", arguments: ["Hello, World!", "hello-world", "21_hello-World"])
+    func kebabcased(_ string: String) {
         #expect(string.kebabcased == "hello-world")
+    }
+
+    @Test("Pascal Cased", arguments: ["Hello, World!", "hello-world", "21_hello-World"])
+    func pascalcased(_ string: String) {
+        #expect(string.pascalcased == "HelloWorld")
+    }
+
+    @Test("Is Valid Name")
+    func isValidName() {
+        let validNames = ["hello_world", "helloWorld", "HelloWorld", "helloWorld123", "__helloWorld_123"]
+        for name in validNames {
+            #expect(name.isValidName)
+        }
+
+        let invalidNames = ["hello world", "hello-world", "hello@world", "hello.world", "hello, world", "21helloWorld", ""]
+        for name in invalidNames {
+            #expect(!name.isValidName)
+        }
     }
 }
 #endif  // canImport(Testing)
