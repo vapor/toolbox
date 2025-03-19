@@ -25,9 +25,9 @@ struct Vapor: ParsableCommand {
         }
     }
 
-    /// Get the template's manifest YAML file, decode it and save it.
+    /// Get the template's manifest file, decode it and save it.
     ///
-    /// Clones the template repository, decodes the manifest YAML file and stores it in the ``Vapor/manifest`` `static` property for later use.
+    /// Clones the template repository, decodes the manifest file and stores it in the ``Vapor/manifest`` `static` property for later use.
     ///
     /// - Parameter arguments: The command line arguments.
     static func preprocess(_ arguments: [String]) throws {
@@ -77,8 +77,13 @@ struct Vapor: ParsableCommand {
 
         let manifestURL = Self.templateURL.appending(path: manifestPath)
         if FileManager.default.fileExists(atPath: manifestURL.path()) {
-            let yaml = try String(contentsOf: manifestURL, encoding: .utf8)
-            Self.manifest = try YAMLDecoder().decode(TemplateManifest.self, from: yaml)
+            let manifestData = try Data(contentsOf: manifestURL)
+            Self.manifest =
+                if manifestURL.pathExtension == "json" {
+                    try JSONDecoder().decode(TemplateManifest.self, from: manifestData)
+                } else {
+                    try YAMLDecoder().decode(TemplateManifest.self, from: manifestData)
+                }
         }
     }
 

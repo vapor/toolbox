@@ -116,9 +116,9 @@ By default, the toolbox uses the `main` branch. If you want to use a different b
 
 #### Creating a Custom Template
 
-If you are creating a custom template and want to dynamically generate the project depending on some variable given to the Toolbox, you have to add to the template a manifest YAML file.
+If you are creating a custom template and want to dynamically generate the project depending on some variable given to the Toolbox, you have to add to the template a manifest file.
 
-By default, the Toolbox looks for a file named `manifest.yml` in the root of the template, but you can specify a different file path with the `--manifest` flag.
+By default, the Toolbox looks for a YAML file named `manifest.yml` in the root of the template, but you can specify a different file path with the `--manifest` flag. You can also write the manifest file in JSON format, specifying the correct file extension in the `--manifest` flag.
 
 This file should contain a list of variables that will be asked for during project generation and a list of all template files and folders, which will be processed based on the variables.
 
