@@ -215,7 +215,7 @@ struct TemplateRenderer {
     }
 }
 
-extension StringProtocol {
+extension String {
     var kebabcased: String {
         self
             .split(whereSeparator: { !$0.isLetter })
