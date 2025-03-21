@@ -1,4 +1,4 @@
-/// The structure of the manifest YAML file.
+/// The structure of the manifest file.
 struct TemplateManifest: Decodable, Sendable {
     var name: String
     var variables: [Variable]

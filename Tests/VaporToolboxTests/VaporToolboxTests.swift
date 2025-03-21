@@ -19,11 +19,16 @@ struct VaporToolboxTests {
         #expect(Vapor.version.contains("toolbox: "))
     }
 
-    @Test("Template Manifest")
-    func templateManifest() throws {
-        let manifestPath = URL(filePath: #filePath).deletingLastPathComponent().appending(path: "manifest.yml")
+    @Test("Template Manifest", arguments: ["manifest.yml", "manifest.json"])
+    func templateManifest(_ file: String) throws {
+        let manifestPath = URL(filePath: #filePath).deletingLastPathComponent().appending(path: file)
         let manifestData = try Data(contentsOf: manifestPath)
-        let manifest = try YAMLDecoder().decode(TemplateManifest.self, from: manifestData)
+        let manifest =
+            if manifestPath.pathExtension == "json" {
+                try JSONDecoder().decode(TemplateManifest.self, from: manifestData)
+            } else {
+                try YAMLDecoder().decode(TemplateManifest.self, from: manifestData)
+            }
 
         #expect(manifest.name == "Testing Vapor Template")
         #expect(manifest.variables.count == 6)
