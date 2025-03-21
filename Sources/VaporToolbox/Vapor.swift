@@ -68,14 +68,16 @@ struct Vapor: ParsableCommand {
         cloneArgs.append(Self.templateURL.path())
         try Process.runUntilExit(Self.gitURL, arguments: cloneArgs)
 
-        let manifestPath =
-            if let index = arguments.firstIndex(of: "--manifest") {
-                arguments[index + 1]
-            } else {
-                "manifest.yml"
+        var manifestURL: URL
+        if let index = arguments.firstIndex(of: "--manifest") {
+            manifestURL = Self.templateURL.appending(path: arguments[index + 1])
+        } else {
+            manifestURL = Self.templateURL.appending(path: "manifest.yml")
+            if !FileManager.default.fileExists(atPath: manifestURL.path()) {
+                manifestURL = Self.templateURL.appending(path: "manifest.json")
             }
+        }
 
-        let manifestURL = Self.templateURL.appending(path: manifestPath)
         if FileManager.default.fileExists(atPath: manifestURL.path()) {
             let manifestData = try Data(contentsOf: manifestURL)
             Self.manifest =
