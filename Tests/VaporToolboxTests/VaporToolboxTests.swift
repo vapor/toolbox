@@ -19,11 +19,16 @@ struct VaporToolboxTests {
         #expect(Vapor.version.contains("toolbox: "))
     }
 
-    @Test("Template Manifest")
-    func templateManifest() throws {
-        let manifestPath = URL(filePath: #filePath).deletingLastPathComponent().appending(path: "manifest.yml")
+    @Test("Template Manifest", arguments: ["manifest.yml", "manifest.json"])
+    func templateManifest(_ file: String) throws {
+        let manifestPath = URL(filePath: #filePath).deletingLastPathComponent().appending(path: file)
         let manifestData = try Data(contentsOf: manifestPath)
-        let manifest = try YAMLDecoder().decode(TemplateManifest.self, from: manifestData)
+        let manifest =
+            if manifestPath.pathExtension == "json" {
+                try JSONDecoder().decode(TemplateManifest.self, from: manifestData)
+            } else {
+                try YAMLDecoder().decode(TemplateManifest.self, from: manifestData)
+            }
 
         #expect(manifest.name == "Testing Vapor Template")
         #expect(manifest.variables.count == 6)
@@ -46,10 +51,27 @@ struct VaporToolboxTests {
         }
     }
 
-    @Test("Kebab Cased")
-    func kebabcased() {
-        let string = "Hello, World!"
+    @Test("Kebab Cased", arguments: ["Hello, World!", "hello-world", "21_hello-World", "hello1world"])
+    func kebabcased(_ string: String) {
         #expect(string.kebabcased == "hello-world")
+    }
+
+    @Test("Pascal Cased", arguments: ["Hello, World!", "hello-world", "21_hello-World", "hello1world"])
+    func pascalcased(_ string: String) {
+        #expect(string.pascalcased == "HelloWorld")
+    }
+
+    @Test("Is Valid Name")
+    func isValidName() {
+        let validNames = ["hello_world", "helloWorld", "HelloWorld", "helloWorld123", "__helloWorld_123", "_123"]
+        for name in validNames {
+            #expect(name.isValidName)
+        }
+
+        let invalidNames = ["hello world", "hello-world", "hello@world", "hello.world", "hello, world", "21helloWorld", ""]
+        for name in invalidNames {
+            #expect(!name.isValidName)
+        }
     }
 }
 #endif  // canImport(Testing)
