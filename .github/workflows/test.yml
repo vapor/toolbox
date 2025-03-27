@@ -41,9 +41,9 @@ jobs:
       - name: Test Makefile
         run: |
           make build
-          make install
-          vapor --version
-          make uninstall
+          make install DEST=/tmp/vapor
+          /tmp/vapor --version
+          make uninstall DEST=/tmp/vapor
           make clean
 
   integration-linux:
