@@ -28,7 +28,9 @@ jobs:
       - name: Check out toolbox
         uses: actions/checkout@v4
       - name: Install make
-        run: apt-get install build-essential
+        run: |
+          apt-get update
+          apt-get install -y make
       - name: Test Makefile
         run: |
           make build
