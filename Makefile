@@ -3,7 +3,12 @@ SUDO ?= true
 
 _USE_SUDO := $(shell test $(shell id -u) -ne 0 -a "$(SUDO)" = "true" && echo "sudo" || echo "")
 
-build:
+init-git:
+	@if [ ! -d .git ]; then \
+		git init; \
+		git commit --allow-empty -m "first commit"; \
+	fi
+build: init-git
 	swiftc ./scripts/build.swift
 	./build
 	rm ./build
