@@ -42,6 +42,7 @@ jobs:
         run: |
           make build
           make install
+          vapor --version
           make uninstall
           make clean
 
