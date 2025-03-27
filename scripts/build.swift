@@ -72,6 +72,7 @@ func foregroundShell(_ args: String...) async throws {
             if process.terminationStatus == 0 {
                 continuation.resume()
             } else {
+                print("Error in foregroundShell (\(args)): \(process.terminationReason)")
                 continuation.resume(throwing: ShellError(terminationStatus: process.terminationStatus))
             }
         }
@@ -96,6 +97,7 @@ func backgroundShell(_ args: String...) async throws -> String {
 
         task.terminationHandler = { process in
             guard process.terminationStatus == 0 else {
+                print("Error in backgroundShell (\(args)): \(process.terminationReason)")
                 continuation.resume(throwing: ShellError(terminationStatus: process.terminationStatus))
                 return
             }

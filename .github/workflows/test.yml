@@ -22,7 +22,7 @@ jobs:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   
   test-makefile:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     container: swift:6.0-noble
     steps:
       - name: Check out toolbox
