@@ -1,26 +1,16 @@
-DEST := /usr/local/bin/vapor
+DEST ?= /usr/local/bin/vapor
+SUDO ?= true
+
+USE_SUDO := $(shell test $(shell id -u) -ne 0 -a "$(SUDO)" = "true" && echo "sudo" || echo "")
 
 build:
 	swiftc ./scripts/build.swift
 	./build
 	rm ./build
 install: build
-# if uid does not equal 0
-# user is not root and must use sudo
-ifneq ($(shell id -u), 0)
-	sudo mv .build/release/vapor ${DEST}
-	sudo chmod 755 ${DEST}
-# if uid is 0
-# user is root and perhaps sudo is not available
-else
-	mv .build/release/vapor ${DEST}
-	chmod 755 ${DEST}
-endif
+	$(USE_SUDO) mv .build/release/vapor ${DEST}
+	$(USE_SUDO) chmod 755 ${DEST}
 uninstall:
-ifneq ($(shell id -u), 0)
-	sudo rm ${DEST}
-else
-	rm ${DEST}
-endif
+	$(USE_SUDO) rm ${DEST}
 clean:
 	rm -rf .build
