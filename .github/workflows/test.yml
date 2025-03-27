@@ -23,6 +23,7 @@ jobs:
   
   test-makefile:
     runs-on: ubuntu-latest
+    container: swift:6.0-noble
     steps:
       - name: Check out toolbox
         uses: actions/checkout@v4
