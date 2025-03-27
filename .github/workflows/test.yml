@@ -20,6 +20,18 @@ jobs:
       with_android: true
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  
+  test-makefile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out toolbox
+        uses: actions/checkout@v4
+      - name: Test Makefile
+        run: |
+          make build
+          make install
+          make uninstall
+          make clean
 
   integration-linux:
     if: ${{ github.event_name == 'pull_request' && !github.event.pull_request.draft }}
