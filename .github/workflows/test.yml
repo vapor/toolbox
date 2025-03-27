@@ -22,7 +22,7 @@ jobs:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   
   test-makefile:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     container: swift:6.0-noble
     steps:
       - name: Check out toolbox
@@ -31,14 +31,12 @@ jobs:
         run: |
           apt-get update
           apt-get install -y make
-      - name: Build toolbox with Makefile
-        run: make build
-      - name: Install toolbox with Makefile
-        run: make install
-      - name: Uninstall toolbox with Makefile
-        run: make uninstall
-      - name: Clean up
-        run: make clean
+      - name: Test Makefile
+        run: |
+          make build
+          make install
+          make uninstall
+          make clean
 
   integration-linux:
     if: ${{ github.event_name == 'pull_request' && !github.event.pull_request.draft }}
