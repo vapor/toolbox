@@ -31,12 +31,14 @@ jobs:
         run: |
           apt-get update
           apt-get install -y make
-      - name: Test Makefile
-        run: |
-          make build
-          make install
-          make uninstall
-          make clean
+      - name: Build toolbox with Makefile
+        run: make build
+      - name: Install toolbox with Makefile
+        run: make install
+      - name: Uninstall toolbox with Makefile
+        run: make uninstall
+      - name: Clean up
+        run: make clean
 
   integration-linux:
     if: ${{ github.event_name == 'pull_request' && !github.event.pull_request.draft }}
