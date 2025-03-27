@@ -49,6 +49,18 @@ git checkout <desired version>
 make install
 ```
 
+If you want to specify a different location, pass the `DEST` variable to the `make install` command.
+
+```sh
+make install DEST=/usr/local/bin/vapor
+```
+
+If you don't want to use `sudo`, pass the `SUDO` variable to the `make install` command.
+
+```sh
+make install SUDO=false
+```
+
 Double check the installation was successful by printing help.
 
 ```sh
