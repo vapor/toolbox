@@ -31,6 +31,8 @@ jobs:
         run: |
           apt-get update
           apt-get install -y make
+      - name: Config Git
+        run: git config --global --add safe.directory /__w/toolbox/toolbox
       - name: Test Makefile
         run: |
           make build
