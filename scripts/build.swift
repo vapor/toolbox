@@ -79,7 +79,6 @@ func foregroundShell(_ args: String...) async throws {
 
         do {
             try task.run()
-            task.waitUntilExit()
         } catch {
             continuation.resume(throwing: error)
         }
@@ -94,11 +93,14 @@ func backgroundShell(_ args: String...) async throws -> String {
         task.arguments = args
         let output = Pipe()
         task.standardOutput = output
-        task.standardError = Pipe()
+        let stderr = Pipe()
+        task.standardError = stderr
 
         task.terminationHandler = { process in
             guard process.terminationStatus == 0 else {
-                print("build.swift: Error in backgroundShell (\(args)): \(process.terminationReason)")
+                print("build.swift: Error in backgroundShell (\(args))")
+                print("  stdout: \(String(data: output.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? "none")")
+                print("  stderr: \(String(data: stderr.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? "none")")
                 continuation.resume(throwing: ShellError(terminationStatus: process.terminationStatus))
                 return
             }
@@ -110,7 +112,6 @@ func backgroundShell(_ args: String...) async throws -> String {
 
         do {
             try task.run()
-            task.waitUntilExit()
         } catch {
             continuation.resume(throwing: error)
         }
