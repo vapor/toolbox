@@ -31,6 +31,10 @@ struct Vapor: ParsableCommand {
     ///
     /// - Parameter arguments: The command line arguments.
     static func preprocess(_ arguments: [String]) throws {
+        guard !arguments.contains("--version") else {
+            return
+        }
+
         let templateWebURL =
             if let index = arguments.firstIndex(of: "--template") {
                 arguments[index + 1]
@@ -54,7 +58,6 @@ struct Vapor: ParsableCommand {
             !arguments.contains("-help"),
             !arguments.contains("--help-hidden"),
             !arguments.contains("-help-hidden"),
-            !arguments.contains("--version"),
             !arguments.contains("--dump-variables")
         {
             print("Cloning template...".colored(.cyan))

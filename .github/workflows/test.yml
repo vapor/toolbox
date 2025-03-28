@@ -20,6 +20,31 @@ jobs:
       with_android: true
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  
+  test-makefile:
+    runs-on: ubuntu-latest
+    container: swift:6.0-noble
+    steps:
+      - name: Check out toolbox
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Install make
+        run: |
+          apt-get update
+          apt-get install -y make
+      - name: Config Git
+        run: |
+          git config --global --add safe.directory /__w/toolbox/toolbox
+          git checkout -b temp-branch
+      - name: Test Makefile
+        run: |
+          make build
+          make install DEST=/tmp/vapor
+          /tmp/vapor --version
+          make uninstall DEST=/tmp/vapor
+          make clean
 
   integration-linux:
     if: ${{ github.event_name == 'pull_request' && !github.event.pull_request.draft }}
