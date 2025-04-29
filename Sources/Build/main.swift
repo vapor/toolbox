@@ -1,3 +1,4 @@
+import Foundation
 import Subprocess
 
 func main() async {
@@ -27,7 +28,7 @@ func withVersion(in file: String, as version: String, _ operation: () async thro
         .replacingOccurrences(of: "nil", with: "\"\(version)\"")
         .write(to: fileURL, atomically: true, encoding: .utf8)
 
-    var operationError: Error?
+    var operationError: (any Error)?
     do {
         try await operation()
     } catch {
@@ -48,7 +49,7 @@ var currentVersion: String {
     get async throws {
         do {
             let tag = try await Subprocess.run(.path("/usr/bin/env"), arguments: ["git", "describe", "--tags", "--exact-match"])
-            return tag
+            return tag.standardOutput ?? "error"
         } catch {
             let branch = try await Subprocess.run(.path("/usr/bin/env"), arguments: ["git", "symbolic-ref", "-q", "--short", "HEAD"])
             let commit = try await Subprocess.run(.path("/usr/bin/env"), arguments: ["git", "rev-parse", "--short", "HEAD"])

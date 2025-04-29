@@ -8,9 +8,9 @@ import Yams
 @Suite("VaporToolbox Tests")
 struct VaporToolboxTests {
     @Test("Vapor.preprocess")
-    func preprocess() throws {
+    func preprocess() async throws {
         #expect(Vapor.manifest == nil)
-        try Vapor.preprocess([])
+        try await Vapor.preprocess([])
         #expect(Vapor.manifest != nil)
     }
 

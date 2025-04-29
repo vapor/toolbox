@@ -40,7 +40,7 @@ let package = Package(
         .executableTarget(
             name: "Build",
             dependencies: [
-                .product(name: "Subprocess", package: "swift-subprocess"),
+                .product(name: "Subprocess", package: "swift-subprocess")
             ],
             swiftSettings: swiftSettings
         ),
