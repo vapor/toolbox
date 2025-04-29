@@ -19,8 +19,8 @@ struct VaporToolboxTests {
     }
 
     @Test("Vapor.version")
-    func version() {
-        #expect(Vapor.version.contains("toolbox: "))
+    func version() async {
+        #expect(await Vapor.version.contains("toolbox: "))
     }
 
     @Test("Template Manifest", arguments: ["manifest.yml", "manifest.json"])
