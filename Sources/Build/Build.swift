@@ -7,9 +7,9 @@ struct Build {
         do {
             try await Self.withVersion(in: "Sources/VaporToolbox/Version.swift", as: Self.currentVersion) {
                 _ = try await Subprocess.run(
-                    .path("/usr/bin/env"),
+                    .name("swift"),
                     arguments: [
-                        "swift", "build",
+                        "build",
                         "--disable-sandbox",
                         "--configuration", "release",
                         "-Xswiftc", "-cross-module-optimization",
