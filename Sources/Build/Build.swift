@@ -46,8 +46,9 @@ struct Build {
                 return tag.trimmingCharacters(in: .whitespacesAndNewlines)
             }
 
-            let branchResult = try await Subprocess.run(.name("git"), arguments: ["symbolic-ref", "-q", "--short", "HEAD"])
-            let commitResult = try await Subprocess.run(.name("git"), arguments: ["rev-parse", "--short", "HEAD"])
+            async let branchSubprocess = Subprocess.run(.name("git"), arguments: ["symbolic-ref", "-q", "--short", "HEAD"])
+            async let commitSubprocess = Subprocess.run(.name("git"), arguments: ["rev-parse", "--short", "HEAD"])
+            let (branchResult, commitResult) = try await (branchSubprocess, commitSubprocess)
             if let branch = branchResult.standardOutput, !branch.isEmpty,
                 let commit = commitResult.standardOutput, !commit.isEmpty
             {

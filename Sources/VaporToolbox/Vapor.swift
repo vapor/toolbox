@@ -115,9 +115,9 @@ struct Vapor: AsyncParsableCommand {
                             .name("brew"),
                             arguments: ["info", "vapor", "--formula"]
                         ).standardOutput ?? "unknown"
-                    let version = /(\d+\.)(\d+\.)(\d)/
+
                     let versionString = brewString.split(separator: "\n")[0]
-                    if let match = try version.firstMatch(in: versionString) {
+                    if let match = try /(\d+\.)(\d+\.)(\d)/.firstMatch(in: versionString) {
                         return "toolbox: " + "\(match.0)".colored(.cyan)
                     } else {
                         return "toolbox: \(versionString.colored(.cyan))"
