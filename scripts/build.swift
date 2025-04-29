@@ -1,28 +1,22 @@
 #!/usr/bin/env swift
-import Foundation
-
-struct ShellError: Error {
-    var terminationStatus: Int32
-}
+import Subprocess
 
 func main() async {
     do {
-        try await build()
+        try await withVersion(in: "Sources/VaporToolbox/Version.swift", as: currentVersion) {
+            _ = try await Subprocess.run(
+                .path("/usr/bin/env"),
+                arguments: [
+                    "swift", "build",
+                    "--disable-sandbox",
+                    "--configuration", "release",
+                    "-Xswiftc", "-cross-module-optimization",
+                ]
+            )
+        }
     } catch {
         print("Error: \(error)")
         exit(1)
-    }
-}
-
-func build() async throws {
-    let version = try await currentVersion()
-    try await withVersion(in: "Sources/VaporToolbox/Version.swift", as: version) {
-        try await foregroundShell(
-            "swift", "build",
-            "--disable-sandbox",
-            "--configuration", "release",
-            "-Xswiftc", "-cross-module-optimization"
-        )
     }
 }
 
@@ -51,69 +45,15 @@ func withVersion(in file: String, as version: String, _ operation: () async thro
     }
 }
 
-func currentVersion() async throws -> String {
-    do {
-        let tag = try await backgroundShell("git", "describe", "--tags", "--exact-match")
-        return tag
-    } catch {
-        let branch = try await backgroundShell("git", "symbolic-ref", "-q", "--short", "HEAD")
-        let commit = try await backgroundShell("git", "rev-parse", "--short", "HEAD")
-        return "\(branch) (\(commit))"
-    }
-}
-
-func foregroundShell(_ args: String...) async throws {
-    try await withCheckedThrowingContinuation { continuation in
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
-        task.arguments = args
-
-        task.terminationHandler = { process in
-            if process.terminationStatus == 0 {
-                continuation.resume()
-            } else {
-                print("build.swift: Error in foregroundShell (\(args)): \(process.terminationReason)")
-                continuation.resume(throwing: ShellError(terminationStatus: process.terminationStatus))
-            }
-        }
-
+var currentVersion: String {
+    get async throws {
         do {
-            try task.run()
+            let tag = try await Subprocess.run(.path("/usr/bin/env"), arguments: ["git", "describe", "--tags", "--exact-match"])
+            return tag
         } catch {
-            continuation.resume(throwing: error)
-        }
-    }
-}
-
-@discardableResult
-func backgroundShell(_ args: String...) async throws -> String {
-    try await withCheckedThrowingContinuation { continuation in
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
-        task.arguments = args
-        let output = Pipe()
-        task.standardOutput = output
-        let stderr = Pipe()
-        task.standardError = stderr
-
-        task.terminationHandler = { process in
-            guard process.terminationStatus == 0 else {
-                print("build.swift: Error in backgroundShell (\(args))")
-                print("  stdout: \(String(data: output.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? "none")")
-                print("  stderr: \(String(data: stderr.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? "none")")
-                continuation.resume(throwing: ShellError(terminationStatus: process.terminationStatus))
-                return
-            }
-
-            let data = output.fileHandleForReading.readDataToEndOfFile()
-            let outputString = String(decoding: data, as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines)
-            continuation.resume(returning: outputString)
-        }
-
-        do {
-            try task.run()
-        } catch {
-            continuation.resume(throwing: error)
+            let branch = try await Subprocess.run(.path("/usr/bin/env"), arguments: ["git", "symbolic-ref", "-q", "--short", "HEAD"])
+            let commit = try await Subprocess.run(.path("/usr/bin/env"), arguments: ["git", "rev-parse", "--short", "HEAD"])
+            return "\(branch) (\(commit))"
         }
     }
 }
