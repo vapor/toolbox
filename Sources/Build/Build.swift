@@ -1,10 +1,5 @@
-import Subprocess
-
-#if canImport(FoundationEssentials)
-import FoundationEssentials
-#else
 import Foundation
-#endif
+import Subprocess
 
 @main
 struct Build {

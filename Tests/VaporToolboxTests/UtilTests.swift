@@ -1,24 +1,15 @@
 #if canImport(Testing)
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 import Testing
 
 @testable import VaporToolbox
 
 @Suite("Util Tests")
 struct UtilTests {
-    @Test("Process.runUntilExit")
-    func runUntilExit() throws {
-        let process = try Process.runUntilExit(URL(filePath: "/bin/sh"), arguments: ["-c", "echo 'Hello, World!'"])
-        #expect(process.outputString == "Hello, World!")
-
-        #expect {
-            try Process.runUntilExit(URL(filePath: "/bin/sh"), arguments: ["-c", "exit 1"])
-        } throws: { error in
-            guard let error = error as? ProcessError else { return false }
-            return error.description == ""
-        }
-    }
-
     @Test("escapeshellarg")
     func escapeshellarg() {
         var string: String

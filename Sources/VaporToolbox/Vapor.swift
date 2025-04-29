@@ -1,13 +1,17 @@
 import ArgumentParser
-import Foundation
 import Subprocess
 import Yams
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+
 @main
 struct Vapor: AsyncParsableCommand {
-    static let configuration = CommandConfiguration(
+    nonisolated(unsafe) static var configuration = CommandConfiguration(
         abstract: "Vapor Toolbox (Server-side Swift web framework)",
-        version: Self.version,
         subcommands: [New.self],
         defaultSubcommand: New.self
     )
@@ -36,6 +40,7 @@ struct Vapor: AsyncParsableCommand {
     /// - Parameter arguments: The command line arguments.
     static func preprocess(_ arguments: [String]) async throws {
         guard !arguments.contains("--version") else {
+            Self.configuration.version = await Self.version
             return
         }
 
@@ -98,24 +103,30 @@ struct Vapor: AsyncParsableCommand {
 
     /// The version of this Vapor Toolbox.
     static var version: String {
-        do {
-            if let staticVersion {
-                // Compiled with static version, use that
-                return "toolbox: \(staticVersion.colored(.cyan))"
-            } else {
-                // Determine version through Homebrew
-                let brewString = try Process.shell.brewInfo("vapor")
-                let version = /(\d+\.)(\d+\.)(\d)/
-                let versionString = brewString.split(separator: "\n")[0]
-                if let match = try version.firstMatch(in: versionString) {
-                    return "toolbox: " + "\(match.0)".colored(.cyan)
+        get async {
+            do {
+                if let staticVersion {
+                    // Compiled with static version, use that
+                    return "toolbox: \(staticVersion.colored(.cyan))"
                 } else {
-                    return "toolbox: \(versionString.colored(.cyan))"
+                    // Determine version through Homebrew
+                    let brewString =
+                        try await Subprocess.run(
+                            .name("brew"),
+                            arguments: ["info", "vapor", "--formula"]
+                        ).standardOutput ?? "unknown"
+                    let version = /(\d+\.)(\d+\.)(\d)/
+                    let versionString = brewString.split(separator: "\n")[0]
+                    if let match = try version.firstMatch(in: versionString) {
+                        return "toolbox: " + "\(match.0)".colored(.cyan)
+                    } else {
+                        return "toolbox: \(versionString.colored(.cyan))"
+                    }
                 }
+            } catch {
+                return "note: ".colored(.yellow) + "could not determine toolbox version." + "\n"
+                    + "toolbox: " + "not found".colored(.cyan)
             }
-        } catch {
-            return "note: ".colored(.yellow) + "could not determine toolbox version." + "\n"
-                + "toolbox: " + "not found".colored(.cyan)
         }
     }
 }
