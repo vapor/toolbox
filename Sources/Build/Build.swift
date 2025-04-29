@@ -46,8 +46,8 @@ let tagResult = try await Subprocess.run(.name("git"), arguments: ["describe", "
                 return tag.trimmingCharacters(in: .whitespacesAndNewlines)
             }
 
-            let branchResult = try await Subprocess.run(.path("/usr/bin/env"), arguments: ["git", "symbolic-ref", "-q", "--short", "HEAD"])
-            let commitResult = try await Subprocess.run(.path("/usr/bin/env"), arguments: ["git", "rev-parse", "--short", "HEAD"])
+            let branchResult = try await Subprocess.run(.name("git"), arguments: ["symbolic-ref", "-q", "--short", "HEAD"])
+            let commitResult = try await Subprocess.run(.name("git"), arguments: ["rev-parse", "--short", "HEAD"])
             if let branch = branchResult.standardOutput, !branch.isEmpty,
                 let commit = commitResult.standardOutput, !commit.isEmpty
             {
