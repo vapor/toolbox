@@ -29,7 +29,8 @@ let package = Package(
         .testTarget(
             name: "VaporToolboxTests",
             dependencies: [
-                .target(name: "VaporToolbox")
+                .target(name: "VaporToolbox"),
+                .target(name: "Build"),
             ],
             resources: [
                 .copy("manifest.yml"),

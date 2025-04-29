@@ -23,7 +23,7 @@ struct Build {
     }
 
     static func withVersion(in file: String, as version: String, _ operation: @Sendable () async throws -> Void) async throws {
-        let fileURL = URL(fileURLWithPath: file)
+        let fileURL = URL(filePath: file)
         let originalFileContents = try String(contentsOf: fileURL, encoding: .utf8)
 
         try originalFileContents
@@ -43,7 +43,7 @@ struct Build {
         get async throws {
             let tagResult = try await Subprocess.run(.path("/usr/bin/env"), arguments: ["git", "describe", "--tags", "--exact-match"])
             if let tag = tagResult.standardOutput, !tag.isEmpty {
-                return tag
+                return tag.trimmingCharacters(in: .whitespacesAndNewlines)
             }
 
             let branchResult = try await Subprocess.run(.path("/usr/bin/env"), arguments: ["git", "symbolic-ref", "-q", "--short", "HEAD"])
@@ -51,7 +51,8 @@ struct Build {
             if let branch = branchResult.standardOutput, !branch.isEmpty,
                 let commit = commitResult.standardOutput, !commit.isEmpty
             {
-                return "\(branch) (\(commit))"
+                return
+                    "\(branch.trimmingCharacters(in: .whitespacesAndNewlines)) (\(commit.trimmingCharacters(in: .whitespacesAndNewlines)))"
             }
 
             return "unknown"
