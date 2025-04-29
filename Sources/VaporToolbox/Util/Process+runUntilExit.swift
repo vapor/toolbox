@@ -70,24 +70,10 @@ extension Process {
 struct Shell {
     fileprivate let shell: URL
 
-    func which(_ program: String) throws -> URL {
-        if program.hasPrefix("/") { return URL(filePath: program) }
-
-        let result = try Process.runUntilExit(self.shell, arguments: ["-c", "'\(escapeshellarg("which"))' \(program)"]).outputString!
-        guard result.hasPrefix("/") else {
-            throw ShellError.missingExecutable(program)
-        }
-        return URL(filePath: result)
-    }
-
     func brewInfo(_ package: String) throws -> String {
         try Process.runUntilExit(
             self.shell,
             arguments: ["-c", "'\(escapeshellarg("brew"))' \(escapeshellarg("info")) \(escapeshellarg(package))"]
         ).outputString!
     }
-}
-
-enum ShellError: Error {
-    case missingExecutable(String)
 }

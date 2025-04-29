@@ -19,12 +19,6 @@ struct UtilTests {
         }
     }
 
-    @Test("which", arguments: ["ls", "cat"])
-    func which(program: String) throws {
-        let path = try Process.shell.which(program).path()
-        #expect(path.hasSuffix(program))
-    }
-
     @Test("escapeshellarg")
     func escapeshellarg() {
         var string: String

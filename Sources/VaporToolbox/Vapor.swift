@@ -1,9 +1,10 @@
 import ArgumentParser
 import Foundation
+import Subprocess
 import Yams
 
 @main
-struct Vapor: ParsableCommand {
+struct Vapor: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         abstract: "Vapor Toolbox (Server-side Swift web framework)",
         version: Self.version,
@@ -13,13 +14,16 @@ struct Vapor: ParsableCommand {
 
     nonisolated(unsafe) static var manifest: TemplateManifest? = nil
     static let templateURL = URL.temporaryDirectory.appending(path: ".vapor-template", directoryHint: .isDirectory)
-    static let gitURL = try! Process.shell.which("git")
 
-    static func main() {
+    static func main() async {
         do {
-            try Self.preprocess(CommandLine.arguments)
+            try await Self.preprocess(CommandLine.arguments)
             var command = try parseAsRoot(nil)
-            try command.run()
+            if var asyncCommand = command as? any AsyncParsableCommand {
+                try await asyncCommand.run()
+            } else {
+                try command.run()
+            }
         } catch {
             exit(withError: error)
         }
@@ -30,7 +34,7 @@ struct Vapor: ParsableCommand {
     /// Clones the template repository, decodes the manifest file and stores it in the ``Vapor/manifest`` `static` property for later use.
     ///
     /// - Parameter arguments: The command line arguments.
-    static func preprocess(_ arguments: [String]) throws {
+    static func preprocess(_ arguments: [String]) async throws {
         guard !arguments.contains("--version") else {
             return
         }
@@ -69,7 +73,7 @@ struct Vapor: ParsableCommand {
         }
         cloneArgs.append(templateWebURL)
         cloneArgs.append(Self.templateURL.path())
-        try Process.runUntilExit(Self.gitURL, arguments: cloneArgs)
+        _ = try await Subprocess.run(.name("git"), arguments: Arguments(cloneArgs))
 
         var manifestURL: URL
         if let index = arguments.firstIndex(of: "--manifest") {

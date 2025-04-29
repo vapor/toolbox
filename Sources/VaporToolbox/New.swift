@@ -1,8 +1,9 @@
 import ArgumentParser
 import Foundation
+import Subprocess
 
 extension Vapor {
-    struct New: ParsableCommand {
+    struct New: AsyncParsableCommand {
         static let configuration = CommandConfiguration(abstract: "Generates a new app.")
 
         @Argument(help: "Name of project and folder.")
@@ -52,7 +53,7 @@ extension Vapor {
         @OptionGroup(title: "Build Options")
         var buildOptions: BuildOptions
 
-        mutating func run() throws {
+        mutating func run() async throws {
             if self.buildOptions.dumpVariables {
                 let encoder = JSONEncoder()
                 encoder.outputFormatting = .prettyPrinted
@@ -101,14 +102,17 @@ extension Vapor {
                 if (try? gitDir.checkResourceIsReachable()) ?? false {
                     try FileManager.default.removeItem(at: gitDir)  // Clear existing git history
                 }
-                try Process.runUntilExit(Vapor.gitURL, arguments: ["--git-dir=\(gitDir.path(percentEncoded: false))", "init"])
+                _ = try await Subprocess.run(.name("git"), arguments: ["--git-dir=\(gitDir.path(percentEncoded: false))", "init"])
 
                 if !self.buildOptions.noCommit {
                     print("Adding first commit".colored(.cyan))
                     let gitDirFlag = "--git-dir=\(gitDir.path())"
                     let workTreeFlag = "--work-tree=\(projectURL.path())"
-                    try Process.runUntilExit(Vapor.gitURL, arguments: [gitDirFlag, workTreeFlag, "add", "."])
-                    try Process.runUntilExit(Vapor.gitURL, arguments: [gitDirFlag, workTreeFlag, "commit", "-m", "Generate Vapor project"])
+                    _ = try await Subprocess.run(.name("git"), arguments: [gitDirFlag, workTreeFlag, "add", "."])
+                    _ = try await Subprocess.run(
+                        .name("git"),
+                        arguments: [gitDirFlag, workTreeFlag, "commit", "-m", "Initial Commit"]
+                    )
                 }
             }
 
