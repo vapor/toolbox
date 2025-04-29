@@ -41,7 +41,7 @@ struct Build {
 
     static var currentVersion: String {
         get async throws {
-let tagResult = try await Subprocess.run(.name("git"), arguments: ["describe", "--tags", "--exact-match"])
+            let tagResult = try await Subprocess.run(.name("git"), arguments: ["describe", "--tags", "--exact-match"])
             if let tag = tagResult.standardOutput, !tag.isEmpty {
                 return tag.trimmingCharacters(in: .whitespacesAndNewlines)
             }

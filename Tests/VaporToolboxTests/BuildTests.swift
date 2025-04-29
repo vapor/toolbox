@@ -10,7 +10,7 @@ import Testing
 
 @Suite("Build Tests")
 struct BuildTests {
-    @Test("currentVersion")
+    @Test("Get Current Version from Git")
     func currentVersion() async throws {
         let version = try await Build.currentVersion
 
@@ -22,7 +22,7 @@ struct BuildTests {
         #expect(version.contains(branchAndCommit) || version.contains(semver))
     }
 
-    @Test("withVersion", arguments: [true, false])
+    @Test("Update Version.swift File", arguments: [true, false])
     func withVersion(operationThrows: Bool) async throws {
         let file = URL(filePath: #filePath).deletingLastPathComponent().appending(path: "TestingVersion.swift")
         let originalFileContents: String = try String(contentsOf: file, encoding: .utf8)
