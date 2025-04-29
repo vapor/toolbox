@@ -9,9 +9,7 @@ init-git:
 		git commit --allow-empty -m "first commit"; \
 	fi
 build: init-git
-	swiftc ./scripts/build.swift
-	./build
-	rm ./build
+	swift run Build
 install: build
 	$(_USE_SUDO) mv .build/release/vapor ${DEST}
 	$(_USE_SUDO) chmod 755 ${DEST}

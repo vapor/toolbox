@@ -1,4 +1,3 @@
-#!/usr/bin/env swift
 import Subprocess
 
 func main() async {
