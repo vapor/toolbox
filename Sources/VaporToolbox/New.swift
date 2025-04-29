@@ -1,6 +1,11 @@
 import ArgumentParser
-import Foundation
 import Subprocess
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
 
 extension Vapor {
     struct New: AsyncParsableCommand {

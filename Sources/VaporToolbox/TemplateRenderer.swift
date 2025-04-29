@@ -1,5 +1,10 @@
-import Foundation
 import Mustache
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
 
 /// A struct that renders the template Mustache files.
 struct TemplateRenderer {
