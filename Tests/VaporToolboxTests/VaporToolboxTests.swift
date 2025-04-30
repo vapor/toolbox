@@ -9,7 +9,7 @@ import Yams
 
 @testable import VaporToolbox
 
-@Suite("VaporToolbox Tests")
+@Suite("Vapor Toolbox Tests")
 struct VaporToolboxTests {
     @Test("Vapor.preprocess")
     func preprocess() async throws {

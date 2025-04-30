@@ -6,10 +6,10 @@ import Foundation
 #endif
 import Testing
 
-@testable import Build
+@testable import BuildToolbox
 
-@Suite("Build Tests")
-struct BuildTests {
+@Suite("Build Toolbox Tests")
+struct BuildToolboxTests {
     @Test("Get Current Version from Git")
     func currentVersion() async throws {
         let version = try await Build.currentVersion

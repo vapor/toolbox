@@ -30,7 +30,7 @@ let package = Package(
             name: "VaporToolboxTests",
             dependencies: [
                 .target(name: "VaporToolbox"),
-                .target(name: "Build"),
+                .target(name: "BuildToolbox"),
             ],
             resources: [
                 .copy("manifest.yml"),
@@ -39,7 +39,7 @@ let package = Package(
             swiftSettings: swiftSettings
         ),
         .executableTarget(
-            name: "Build",
+            name: "BuildToolbox",
             dependencies: [
                 .product(name: "Subprocess", package: "swift-subprocess")
             ],
