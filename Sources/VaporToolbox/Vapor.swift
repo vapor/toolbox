@@ -67,7 +67,8 @@ struct Vapor: AsyncParsableCommand {
             !arguments.contains("-help"),
             !arguments.contains("--help-hidden"),
             !arguments.contains("-help-hidden"),
-            !arguments.contains("--dump-variables")
+            !arguments.contains("--dump-variables"),
+            !arguments.contains("--experimental-dump-help")
         {
             print("Cloning template...".colored(.cyan))
         }
