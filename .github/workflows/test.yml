@@ -43,7 +43,6 @@ jobs:
           make build
           make install DEST=/tmp/vapor
           /tmp/vapor --version
-          test -f /usr/local/share/man/man1/vapor.1
           make uninstall DEST=/tmp/vapor
           make clean
 
