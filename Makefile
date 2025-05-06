@@ -10,7 +10,7 @@ init-git:
 		git commit --allow-empty -m "first commit"; \
 	fi
 generate-manual:
-	swift package generate-manual
+	swift package --disable-sandbox generate-manual
 build: init-git generate-manual
 	swift run BuildToolbox
 install: build
