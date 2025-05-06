@@ -17,6 +17,7 @@ install: build
 	$(_USE_SUDO) mv .build/release/vapor ${DEST}
 	$(_USE_SUDO) chmod 755 ${DEST}
 	# Install manpage
+	$(_USE_SUDO) mkdir -p $(MANDEST_DIR)
 	$(_USE_SUDO) cp .build/plugins/GenerateManual/outputs/vapor/vapor.1 $(MANDEST_DIR)/vapor.1
 uninstall:
 	$(_USE_SUDO) rm ${DEST}
