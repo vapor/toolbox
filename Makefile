@@ -9,9 +9,9 @@ init-git:
 		git init; \
 		git commit --allow-empty -m "first commit"; \
 	fi
-generate-manual:
-	swift package --disable-sandbox generate-manual
-build: init-git generate-manual
+generate-manual: init-git
+	swift package generate-manual
+build: generate-manual
 	swift run BuildToolbox
 install: build
 	$(_USE_SUDO) mv .build/release/vapor ${DEST}
