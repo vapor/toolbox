@@ -33,7 +33,7 @@ jobs:
       - name: Install dependencies
         run: |
           apt-get update
-          apt-get install -y make man groff
+          apt-get install -y make man less
       - name: Config Git
         run: |
           git config --global --add safe.directory /__w/toolbox/toolbox
