@@ -50,7 +50,7 @@ jobs:
           grep -q '^\.Nm vapor' /tmp/vapor-man/man1/vapor.1
       - name: Uninstall with Makefile
         run: |
-          make uninstall DEST=/tmp/vapor
+          make uninstall DEST=/tmp/vapor MANDEST_DIR=/tmp/vapor-man/man1
           make clean
 
   integration-linux:
