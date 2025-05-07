@@ -32,8 +32,8 @@ jobs:
           fetch-tags: true
       - name: Install dependencies
         run: |
-          apt-get update
-          apt-get install -y make man-db groff manpages less
+          apt-get -qq update
+          apt-get -qq install -y make
       - name: Config Git
         run: |
           git config --global --add safe.directory /__w/toolbox/toolbox
@@ -43,9 +43,11 @@ jobs:
       - name: Install with Makefile
         run: make install DEST=/tmp/vapor MANDEST_DIR=/tmp/vapor-man/man1
       - name: Test installation
+        run: /tmp/vapor --version
+      - name: Test manpage
         run: |
-          /tmp/vapor --version
-          man -l /tmp/vapor-man/man1/vapor.1 | head -n1 | grep -q "VAPOR(1)"
+          test -f /tmp/vapor-man/man1/vapor.1
+          grep -q '^\.Nm vapor' /tmp/vapor-man/man1/vapor.1
       - name: Uninstall with Makefile
         run: |
           make uninstall DEST=/tmp/vapor
