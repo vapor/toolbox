@@ -30,19 +30,24 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
-      - name: Install make
+      - name: Install dependencies
         run: |
           apt-get update
-          apt-get install -y make
+          apt-get install -y make man
       - name: Config Git
         run: |
           git config --global --add safe.directory /__w/toolbox/toolbox
           git checkout -b temp-branch
-      - name: Test Makefile
+      - name: Build with Makefile
+        run: make build
+      - name: Install with Makefile
+        run: make install DEST=/tmp/vapor MANDEST_DIR=/tmp/vapor-man/man1
+      - name: Test installation
         run: |
-          make build
-          make install DEST=/tmp/vapor
           /tmp/vapor --version
+          man /tmp/vapor-man/man1/vapor.1 | head -n1 | grep -q "VAPOR(1)"
+      - name: Uninstall with Makefile
+        run: |
           make uninstall DEST=/tmp/vapor
           make clean
 
