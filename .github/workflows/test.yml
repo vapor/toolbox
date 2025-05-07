@@ -33,7 +33,7 @@ jobs:
       - name: Install dependencies
         run: |
           apt-get update
-          apt-get install -y make man less
+          apt-get install -y make man-db groff manpages less
       - name: Config Git
         run: |
           git config --global --add safe.directory /__w/toolbox/toolbox
@@ -45,7 +45,7 @@ jobs:
       - name: Test installation
         run: |
           /tmp/vapor --version
-          man /tmp/vapor-man/man1/vapor.1 | head -n1 | grep -q "VAPOR(1)"
+          man -l /tmp/vapor-man/man1/vapor.1 | head -n1 | grep -q "VAPOR(1)"
       - name: Uninstall with Makefile
         run: |
           make uninstall DEST=/tmp/vapor
