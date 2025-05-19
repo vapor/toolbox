@@ -23,7 +23,7 @@ jobs:
   
   test-makefile:
     runs-on: ubuntu-latest
-    container: swift:6.0-noble
+    container: swift:6.1-noble
     steps:
       - name: Check out toolbox
         uses: actions/checkout@v4
@@ -73,7 +73,7 @@ jobs:
           - fluentflags: '--fluent.db postgres'
             dbhostname: psql
     runs-on: ubuntu-latest
-    container: swift:6.0-noble
+    container: swift:6.1-noble
     services:
       # mysql:
       #   image: mysql:latest
