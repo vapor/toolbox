@@ -1,4 +1,5 @@
 import ArgumentParser
+import ConsoleKit
 import Subprocess
 import Yams
 
@@ -16,6 +17,7 @@ struct Vapor: AsyncParsableCommand {
         defaultSubcommand: New.self
     )
 
+    static let console = Terminal()
     nonisolated(unsafe) static var manifest: TemplateManifest? = nil
     static let templateURL = URL.temporaryDirectory.appending(path: ".vapor-template", directoryHint: .isDirectory)
 
@@ -70,7 +72,7 @@ struct Vapor: AsyncParsableCommand {
             !arguments.contains("--dump-variables"),
             !arguments.contains("--experimental-dump-help")
         {
-            print("Cloning template...".colored(.cyan))
+            Self.console.info("Cloning template...")
         }
         var cloneArgs = ["clone"]
         if let branch {
@@ -108,7 +110,7 @@ struct Vapor: AsyncParsableCommand {
             do {
                 if let staticVersion {
                     // Compiled with static version, use that
-                    return "toolbox: \(staticVersion.colored(.cyan))"
+                    return "toolbox: \(staticVersion.stylized(.info))"
                 } else {
                     // Determine version through Homebrew
                     let brewString =
@@ -119,14 +121,14 @@ struct Vapor: AsyncParsableCommand {
 
                     let versionString = brewString.split(separator: "\n")[0]
                     if let match = try /(\d+\.)(\d+\.)(\d)/.firstMatch(in: versionString) {
-                        return "toolbox: " + "\(match.0)".colored(.cyan)
+                        return "toolbox: " + "\(match.0)".stylized(.info)
                     } else {
-                        return "toolbox: \(versionString.colored(.cyan))"
+                        return "toolbox: \(versionString.stylized(.info))"
                     }
                 }
             } catch {
-                return "note: ".colored(.yellow) + "could not determine toolbox version." + "\n"
-                    + "toolbox: " + "not found".colored(.cyan)
+                return "note: ".stylized(.warning) + "could not determine toolbox version." + "\n"
+                    + "toolbox: " + "not found".stylized(.info)
             }
         }
     }
