@@ -20,12 +20,15 @@ struct VaporToolboxTests {
         #expect(Vapor.version.contains("toolbox: "))
     }
 
-    @Test("Template Manifest", arguments: ["manifest.yml", "manifest.json"])
-    func templateManifest(_ file: String) throws {
-        let manifestPath = URL(filePath: #filePath).deletingLastPathComponent().appending(path: "Manifests").appending(path: file)
+    @Test("Template Manifest", arguments: ["yml", "json"])
+    func templateManifest(_ fileExtension: String) throws {
+        guard let manifestPath = Bundle.module.url(forResource: "manifest", withExtension: fileExtension) else {
+            Issue.record("manifest.\(fileExtension) not found")
+            return
+        }
         let manifestData = try Data(contentsOf: manifestPath)
         let manifest =
-            if manifestPath.pathExtension == "json" {
+            if fileExtension == "json" {
                 try JSONDecoder().decode(TemplateManifest.self, from: manifestData)
             } else {
                 try YAMLDecoder().decode(TemplateManifest.self, from: manifestData)
@@ -39,7 +42,7 @@ struct VaporToolboxTests {
         guard let deployOptions = manifest.variables.first(where: { $0.name == "deploy" })?.type,
             case .options(let options) = deployOptions
         else {
-            Issue.record()
+            Issue.record("Deploy options not found in manifest")
             return
         }
 
