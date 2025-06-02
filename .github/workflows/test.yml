@@ -18,6 +18,9 @@ jobs:
       with_linting: true
       with_musl: true
       with_android: true
+      android_copy_files: |
+        Tests/VaporToolboxTests/manifest.yml
+        Tests/VaporToolboxTests/manifest.json
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   
