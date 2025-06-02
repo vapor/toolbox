@@ -1,4 +1,3 @@
-#if canImport(Testing)
 import Foundation
 import Testing
 
@@ -71,4 +70,3 @@ struct UtilTests {
         printNew(project: "Test", with: "Test", verbose: true)
     }
 }
-#endif  // canImport(Testing)

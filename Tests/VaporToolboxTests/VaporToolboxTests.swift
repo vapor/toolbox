@@ -1,4 +1,3 @@
-#if canImport(Testing)
 import Foundation
 import Testing
 import Yams
@@ -7,12 +6,14 @@ import Yams
 
 @Suite("VaporToolbox Tests")
 struct VaporToolboxTests {
+    #if !os(Android)
     @Test("Vapor.preprocess")
     func preprocess() throws {
         #expect(Vapor.manifest == nil)
         try Vapor.preprocess([])
         #expect(Vapor.manifest != nil)
     }
+    #endif
 
     @Test("Vapor.version")
     func version() {
@@ -21,7 +22,7 @@ struct VaporToolboxTests {
 
     @Test("Template Manifest", arguments: ["manifest.yml", "manifest.json"])
     func templateManifest(_ file: String) throws {
-        let manifestPath = URL(filePath: #filePath).deletingLastPathComponent().appending(path: file)
+        let manifestPath = URL(filePath: #filePath).deletingLastPathComponent().appending(path: "Manifests").appending(path: file)
         let manifestData = try Data(contentsOf: manifestPath)
         let manifest =
             if manifestPath.pathExtension == "json" {
@@ -74,4 +75,3 @@ struct VaporToolboxTests {
         }
     }
 }
-#endif  // canImport(Testing)
