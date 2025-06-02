@@ -20,15 +20,13 @@ struct VaporToolboxTests {
         #expect(Vapor.version.contains("toolbox: "))
     }
 
-    @Test("Template Manifest", arguments: ["yml", "json"])
-    func templateManifest(_ fileExtension: String) throws {
-        guard let manifestPath = Bundle.module.url(forResource: "manifest", withExtension: fileExtension) else {
-            Issue.record("manifest.\(fileExtension) not found")
-            return
-        }
+    #if !os(Android)
+    @Test("Template Manifest", arguments: ["manifest.yml", "manifest.json"])
+    func templateManifest(_ file: String) throws {
+        let manifestPath = URL(filePath: #filePath).deletingLastPathComponent().appending(path: "Manifests").appending(path: file)
         let manifestData = try Data(contentsOf: manifestPath)
         let manifest =
-            if fileExtension == "json" {
+            if manifestPath.pathExtension == "json" {
                 try JSONDecoder().decode(TemplateManifest.self, from: manifestData)
             } else {
                 try YAMLDecoder().decode(TemplateManifest.self, from: manifestData)
@@ -54,6 +52,7 @@ struct VaporToolboxTests {
             }
         }
     }
+    #endif
 
     @Test("Kebab Cased", arguments: ["Hello, World!", "hello-world", "21_hello-World", "hello1world"])
     func kebabcased(_ string: String) {
