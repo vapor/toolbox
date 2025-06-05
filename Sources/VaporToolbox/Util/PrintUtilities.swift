@@ -1,70 +1,4 @@
-import Foundation
-
-#if canImport(Android)
-import Android
-#endif
-
-#if os(Windows)
-import WinSDK
-#endif
-
-extension String {
-    fileprivate var centered: String {
-        // Split the string into lines
-        var lines = self.split(separator: "\n").map(String.init)
-
-        guard !lines.isEmpty else {
-            return ""
-        }
-
-        // Remove ANSI color codes to get the true length of the string
-        let uncoloredLines = lines.map { $0.removingANSIColors }
-
-        var longestLine = 0
-        for line in uncoloredLines {
-            longestLine = max(longestLine, line.count)
-        }
-
-        // Calculate the padding and make sure it's greater than or equal to 0
-        let padding = max(0, (terminalSize.width - longestLine) / 2)
-
-        // Apply the padding to each line
-        for i in lines.indices {
-            lines[i].insert(contentsOf: String(repeating: " ", count: padding), at: lines[i].startIndex)
-        }
-
-        return lines.joined(separator: "\n")
-    }
-
-    var removingANSIColors: String {
-        var result = ""
-        var isEscaped = false
-        for char in self {
-            if isEscaped {
-                if char == "m" {
-                    isEscaped = false
-                }
-            } else if char == "\u{1B}" {
-                isEscaped = true
-            } else {
-                result.append(char)
-            }
-        }
-        return result
-    }
-}
-
-private var terminalSize: (width: Int, height: Int) {
-    #if os(Windows)
-    var csbi = CONSOLE_SCREEN_BUFFER_INFO()
-    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi)
-    return (Int(csbi.dwSize.X), Int(csbi.dwSize.Y))
-    #else
-    var w = winsize()
-    _ = ioctl(STDOUT_FILENO, UInt(TIOCGWINSZ), &w)
-    return (Int(w.ws_col), Int(w.ws_row))
-    #endif
-}
+import ConsoleKit
 
 /// Styled after PHP's function of the same name.
 ///
@@ -81,7 +15,7 @@ func escapeshellarg(_ command: String) -> String {
     #endif
 }
 
-private func printDroplet() {
+private func printDroplet(on console: some Console) {
     let asciiArt: [String] = [
         "                                ",
         "               **               ",
@@ -109,7 +43,7 @@ private func printDroplet() {
         "                                ",
     ]
 
-    let colors: [Character: ANSIColor] = [
+    let colors: [Character: ConsoleColor] = [
         "*": .magenta,
         "~": .blue,
         "+": .cyan,
@@ -121,31 +55,47 @@ private func printDroplet() {
         ")": .magenta,
     ]
 
-    for line in asciiArt {
-        let centeredLine = line.centered
-        for char in centeredLine {
-            print(char.colored(colors[char]), terminator: "")
+    for line in console.center(asciiArt) {
+        for character in line {
+            console.output(String(character).consoleText(color: colors[character]), newLine: false)
         }
-        print()
+        console.output("", style: .plain, newLine: true)
     }
 }
 
-func printNew(project name: String, with path: String, verbose: Bool = false) {
-    if verbose { printDroplet() }
+func printNew(project name: String, with cdInstruction: String, on console: some Console, verbose: Bool = false) {
+    if verbose { printDroplet(on: console) }
 
-    let projectCreated = "Project \(name.colored(.cyan)) has been created!"
-    print(verbose ? projectCreated.centered : projectCreated)
+    let projectCreated = "Project \(name.consoleText(.info)) has been created!".consoleText()
+    console.output(verbose ? console.center([projectCreated]).first ?? projectCreated : projectCreated)
 
-    if verbose { print() }
+    if verbose { console.output("") }
 
-    let cdInstruction = "Use " + "cd \(escapeshellarg(path))".colored(.cyan) + " to enter the project directory"
-    print(verbose ? cdInstruction.centered : cdInstruction)
+    let cdInstruction = "Use " + "cd \(escapeshellarg(cdInstruction))".consoleText(.info) + " to enter the project directory"
+    console.output(verbose ? console.center([cdInstruction]).first ?? cdInstruction : cdInstruction)
 
     let openProject =
         "Then open your project, for example if using Xcode type "
-        + "open Package.swift".colored(.cyan)
+        + "open Package.swift".consoleText(.info)
         + " or "
-        + "code .".colored(.cyan)
+        + "code .".consoleText(.info)
         + " if using VSCode"
-    print(verbose ? openProject.centered : openProject)
+    console.output(verbose ? console.center([openProject]).first ?? openProject : openProject)
+}
+
+extension Console {
+    /// Outputs to the ``Console`` a combined ``ConsoleText`` from a `key` and `value`.
+    ///
+    /// ```swift
+    /// console.output(key: "name", value: "Vapor")
+    /// // name: Vapor
+    /// ```
+    ///
+    /// - Parameters:
+    ///   - key: `String` to use as the key, which will precede the `value` an a colon.
+    ///   - value: `String` to use as the value.
+    ///   - style: ``ConsoleStyle`` to use for printing the `value`.
+    public func output(key: String, value: String, style: ConsoleStyle = .info) {
+        self.output(key.consoleText() + ": " + value.consoleText(style))
+    }
 }

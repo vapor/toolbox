@@ -1,5 +1,7 @@
 import ArgumentParser
+import ConsoleKit
 import Subprocess
+import Synchronization
 import Yams
 
 #if canImport(FoundationEssentials)
@@ -10,13 +12,34 @@ import Foundation
 
 @main
 struct Vapor: AsyncParsableCommand {
-    nonisolated(unsafe) static var configuration = CommandConfiguration(
-        abstract: "Vapor Toolbox (Server-side Swift web framework)",
-        subcommands: [New.self],
-        defaultSubcommand: New.self
+    static let _configuration = Mutex(
+        CommandConfiguration(
+            abstract: "Vapor Toolbox (Server-side Swift web framework)",
+            subcommands: [New.self],
+            defaultSubcommand: New.self
+        )
     )
+    static var configuration: CommandConfiguration {
+        get {
+            Self._configuration.withLock { $0 }
+        }
+        set {
+            Self._configuration.withLock { $0 = newValue }
+        }
+    }
 
-    nonisolated(unsafe) static var manifest: TemplateManifest? = nil
+    static let console = Terminal()
+
+    static let _manifest: Mutex<TemplateManifest?> = .init(nil)
+    static var manifest: TemplateManifest? {
+        get {
+            Self._manifest.withLock { $0 }
+        }
+        set {
+            Self._manifest.withLock { $0 = newValue }
+        }
+    }
+
     static let templateURL = URL.temporaryDirectory.appending(path: ".vapor-template", directoryHint: .isDirectory)
 
     static func main() async {
@@ -71,7 +94,7 @@ struct Vapor: AsyncParsableCommand {
             !arguments.contains("--dump-variables"),
             !arguments.contains("--experimental-dump-help")
         {
-            print("Cloning template...".colored(.cyan))
+            Self.console.info("Cloning template...")
         }
         var cloneArgs = ["clone"]
         if let branch {
@@ -109,7 +132,7 @@ struct Vapor: AsyncParsableCommand {
             do {
                 if let staticVersion {
                     // Compiled with static version, use that
-                    return "toolbox: \(staticVersion.colored(.cyan))"
+                    return "toolbox: \(staticVersion.consoleStylized(.info))"
                 } else {
                     // Determine version through Homebrew
                     let brewString =
@@ -120,14 +143,14 @@ struct Vapor: AsyncParsableCommand {
 
                     let versionString = brewString.split(separator: "\n")[0]
                     if let match = try /(\d+\.)(\d+\.)(\d)/.firstMatch(in: versionString) {
-                        return "toolbox: " + "\(match.0)".colored(.cyan)
+                        return "toolbox: " + "\(match.0)".consoleStylized(.info)
                     } else {
-                        return "toolbox: \(versionString.colored(.cyan))"
+                        return "toolbox: \(versionString.consoleStylized(.info))"
                     }
                 }
             } catch {
-                return "note: ".colored(.yellow) + "could not determine toolbox version." + "\n"
-                    + "toolbox: " + "not found".colored(.cyan)
+                return "note: ".consoleStylized(.warning) + "could not determine toolbox version." + "\n"
+                    + "toolbox: " + "not found".consoleStylized(.info)
             }
         }
     }

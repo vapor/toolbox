@@ -1,4 +1,5 @@
 import ArgumentParser
+import ConsoleKit
 import Foundation
 import Subprocess
 
@@ -65,10 +66,12 @@ extension Vapor {
                 if let jsonString = String(data: jsonData, encoding: .utf8) {
                     print(jsonString)
                 } else {
-                    print("error:".colored(.red) + " unable to encode JSON data as a UTF-8 string.")
+                    Vapor.console.output(key: "error", value: "unable to encode JSON data as a UTF-8 string.", style: .error)
                 }
                 return
             }
+
+            Vapor.console.confirmOverride = !self.buildOptions.noQuestions
 
             let cwd = URL.currentDirectory()
             let projectURL =
@@ -86,7 +89,7 @@ extension Vapor {
                 let renderer = TemplateRenderer(
                     manifest: manifest,
                     verbose: self.buildOptions.verbose,
-                    noQuestions: self.buildOptions.noQuestions
+                    console: Vapor.console
                 )
                 try renderer.render(
                     project: self.name,
@@ -102,14 +105,14 @@ extension Vapor {
             if !self.buildOptions.noGit {
                 let gitDir = projectURL.appending(path: ".git")
 
-                print("Creating git repository".colored(.cyan))
+                Vapor.console.info("Creating git repository")
                 if (try? gitDir.checkResourceIsReachable()) ?? false {
                     try FileManager.default.removeItem(at: gitDir)  // Clear existing git history
                 }
                 _ = try await Subprocess.run(.name("git"), arguments: ["--git-dir=\(gitDir.path(percentEncoded: false))", "init"])
 
                 if !self.buildOptions.noCommit {
-                    print("Adding first commit".colored(.cyan))
+                    Vapor.console.info("Adding first commit")
                     let gitDirFlag = "--git-dir=\(gitDir.path())"
                     let workTreeFlag = "--work-tree=\(projectURL.path())"
                     _ = try await Subprocess.run(.name("git"), arguments: [gitDirFlag, workTreeFlag, "add", "."])
@@ -127,7 +130,7 @@ extension Vapor {
                 cdInstruction = projectURL.lastPathComponent  // Is in current directory
             }
 
-            printNew(project: self.name, with: cdInstruction, verbose: self.buildOptions.verbose)
+            printNew(project: self.name, with: cdInstruction, on: Vapor.console, verbose: self.buildOptions.verbose)
         }
     }
 }
