@@ -110,7 +110,7 @@ struct Vapor: AsyncParsableCommand {
             do {
                 if let staticVersion {
                     // Compiled with static version, use that
-                    return "toolbox: \(staticVersion.stylized(.info))"
+                    return "toolbox: \(staticVersion.consoleStylized(.info))"
                 } else {
                     // Determine version through Homebrew
                     let brewString =
@@ -121,14 +121,14 @@ struct Vapor: AsyncParsableCommand {
 
                     let versionString = brewString.split(separator: "\n")[0]
                     if let match = try /(\d+\.)(\d+\.)(\d)/.firstMatch(in: versionString) {
-                        return "toolbox: " + "\(match.0)".stylized(.info)
+                        return "toolbox: " + "\(match.0)".consoleStylized(.info)
                     } else {
-                        return "toolbox: \(versionString.stylized(.info))"
+                        return "toolbox: \(versionString.consoleStylized(.info))"
                     }
                 }
             } catch {
-                return "note: ".stylized(.warning) + "could not determine toolbox version." + "\n"
-                    + "toolbox: " + "not found".stylized(.info)
+                return "note: ".consoleStylized(.warning) + "could not determine toolbox version." + "\n"
+                    + "toolbox: " + "not found".consoleStylized(.info)
             }
         }
     }

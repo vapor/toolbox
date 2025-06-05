@@ -57,7 +57,7 @@ private func printDroplet(on console: some Console) {
 
     for line in console.center(asciiArt) {
         for character in line {
-            console.output(character.consoleText(color: colors[character]), newLine: false)
+            console.output(String(character).consoleText(color: colors[character]), newLine: false)
         }
         console.output("", style: .plain, newLine: true)
     }

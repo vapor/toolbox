@@ -7,7 +7,7 @@
       "location" : "https://github.com/fpseverino/console-kit.git",
       "state" : {
         "branch" : "update",
-        "revision" : "c1be8abbde18b1cae57006d231cb984e4f46f5a7"
+        "revision" : "cfdebd28feae27fb6f93a069d4e6b5d25804b0ff"
       }
     },
     {
@@ -61,7 +61,7 @@
       "location" : "https://github.com/swiftlang/swift-subprocess.git",
       "state" : {
         "branch" : "main",
-        "revision" : "48d9d5736b0c2b7afed798225acb4e258497680f"
+        "revision" : "e62036c30a319787323f6d9297d312f15f92cc12"
       }
     },
     {
