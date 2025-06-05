@@ -67,18 +67,35 @@ func printNew(project name: String, with cdInstruction: String, on console: some
     if verbose { printDroplet(on: console) }
 
     let projectCreated = "Project \(name.consoleText(.info)) has been created!".consoleText()
-    console.output(verbose ? console.center(projectCreated) : projectCreated)
+    console.output(verbose ? console.center([projectCreated]).first ?? projectCreated : projectCreated)
 
     if verbose { console.output("") }
 
     let cdInstruction = "Use " + "cd \(escapeshellarg(cdInstruction))".consoleText(.info) + " to enter the project directory"
-    console.output(verbose ? console.center(cdInstruction) : cdInstruction)
+    console.output(verbose ? console.center([cdInstruction]).first ?? cdInstruction : cdInstruction)
 
-    let openProject = "Then open your project, for example if using Xcode type "
+    let openProject =
+        "Then open your project, for example if using Xcode type "
         + "open Package.swift".consoleText(.info)
         + " or "
         + "code .".consoleText(.info)
         + " if using VSCode"
-    console.output(verbose ? console.center(openProject) : openProject, newLine: false)
-    console.output("", newLine: true)
+    console.output(verbose ? console.center([openProject]).first ?? openProject : openProject)
+}
+
+extension Console {
+    /// Outputs to the ``Console`` a combined ``ConsoleText`` from a `key` and `value`.
+    ///
+    /// ```swift
+    /// console.output(key: "name", value: "Vapor")
+    /// // name: Vapor
+    /// ```
+    ///
+    /// - Parameters:
+    ///   - key: `String` to use as the key, which will precede the `value` an a colon.
+    ///   - value: `String` to use as the value.
+    ///   - style: ``ConsoleStyle`` to use for printing the `value`.
+    public func output(key: String, value: String, style: ConsoleStyle = .info) {
+        self.output(key.consoleText() + ": " + value.consoleText(style))
+    }
 }

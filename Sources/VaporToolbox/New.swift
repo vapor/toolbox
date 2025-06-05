@@ -67,6 +67,8 @@ extension Vapor {
                 return
             }
 
+            Vapor.console.confirmOverride = !self.buildOptions.noQuestions
+
             let cwd = URL.currentDirectory()
             let projectURL =
                 if let output = self.buildOptions.output {
@@ -83,7 +85,6 @@ extension Vapor {
                 let renderer = TemplateRenderer(
                     manifest: manifest,
                     verbose: self.buildOptions.verbose,
-                    noQuestions: self.buildOptions.noQuestions,
                     console: Vapor.console
                 )
                 try renderer.render(

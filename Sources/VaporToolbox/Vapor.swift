@@ -39,7 +39,7 @@ struct Vapor: AsyncParsableCommand {
             Self._manifest.withLock { $0 = newValue }
         }
     }
-    
+
     static let templateURL = URL.temporaryDirectory.appending(path: ".vapor-template", directoryHint: .isDirectory)
 
     static func main() async {

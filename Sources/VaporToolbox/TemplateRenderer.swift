@@ -15,9 +15,6 @@ struct TemplateRenderer {
     /// A flag that indicates whether the renderer should print verbose output.
     let verbose: Bool
 
-    /// A flag that indicates whether the renderer should automatically answer "no" to all questions.
-    let noQuestions: Bool
-
     /// The console to use for I/O operations.
     let console: Terminal
 
