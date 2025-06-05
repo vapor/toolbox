@@ -85,6 +85,14 @@ struct Vapor: AsyncParsableCommand {
 
         try? FileManager.default.removeItem(at: Self.templateURL)
 
+        var cloneArgs = ["clone"]
+        if let branch {
+            cloneArgs.append("--branch")
+            cloneArgs.append(branch)
+        }
+        cloneArgs.append(templateWebURL)
+        cloneArgs.append(Self.templateURL.path())
+
         if !arguments.contains("-h"),
             !arguments.contains("--help"),
             !arguments.contains("-help"),
@@ -94,16 +102,13 @@ struct Vapor: AsyncParsableCommand {
             !arguments.contains("--dump-variables"),
             !arguments.contains("--experimental-dump-help")
         {
-            Self.console.info("Cloning template...")
+            let loadingBar = Self.console.loadingBar(title: "Cloning template...")
+            try await loadingBar.withActivityIndicator {
+                try await Subprocess.run(.name("git"), arguments: Arguments(cloneArgs)).terminationStatus.isSuccess
+            }
+        } else {
+            _ = try await Subprocess.run(.name("git"), arguments: Arguments(cloneArgs))
         }
-        var cloneArgs = ["clone"]
-        if let branch {
-            cloneArgs.append("--branch")
-            cloneArgs.append(branch)
-        }
-        cloneArgs.append(templateWebURL)
-        cloneArgs.append(Self.templateURL.path())
-        _ = try await Subprocess.run(.name("git"), arguments: Arguments(cloneArgs))
 
         var manifestURL: URL
         if let index = arguments.firstIndex(of: "--manifest") {
