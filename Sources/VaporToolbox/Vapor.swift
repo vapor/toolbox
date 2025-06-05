@@ -1,6 +1,7 @@
 import ArgumentParser
 import ConsoleKit
 import Subprocess
+import Synchronization
 import Yams
 
 #if canImport(FoundationEssentials)
@@ -11,14 +12,34 @@ import Foundation
 
 @main
 struct Vapor: AsyncParsableCommand {
-    nonisolated(unsafe) static var configuration = CommandConfiguration(
-        abstract: "Vapor Toolbox (Server-side Swift web framework)",
-        subcommands: [New.self],
-        defaultSubcommand: New.self
+    static let _configuration = Mutex(
+        CommandConfiguration(
+            abstract: "Vapor Toolbox (Server-side Swift web framework)",
+            subcommands: [New.self],
+            defaultSubcommand: New.self
+        )
     )
+    static var configuration: CommandConfiguration {
+        get {
+            Self._configuration.withLock { $0 }
+        }
+        set {
+            Self._configuration.withLock { $0 = newValue }
+        }
+    }
 
     static let console = Terminal()
-    nonisolated(unsafe) static var manifest: TemplateManifest? = nil
+
+    static let _manifest: Mutex<TemplateManifest?> = .init(nil)
+    static var manifest: TemplateManifest? {
+        get {
+            Self._manifest.withLock { $0 }
+        }
+        set {
+            Self._manifest.withLock { $0 = newValue }
+        }
+    }
+    
     static let templateURL = URL.temporaryDirectory.appending(path: ".vapor-template", directoryHint: .isDirectory)
 
     static func main() async {
