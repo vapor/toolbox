@@ -33,8 +33,7 @@ let package = Package(
                 .target(name: "BuildToolbox"),
             ],
             resources: [
-                .copy("manifest.yml"),
-                .copy("manifest.json"),
+                .copy("Manifests")
             ],
             swiftSettings: swiftSettings
         ),

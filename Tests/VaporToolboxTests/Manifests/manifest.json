@@ -250,6 +250,10 @@
           {
             "file": "vapor.code-snippets",
             "if": "vscode.snippets"
+          },
+          {
+            "file": "extensions.json",
+            "if": "!vscode.snippets"
           }
         ]
       },

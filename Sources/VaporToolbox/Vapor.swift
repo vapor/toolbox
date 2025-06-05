@@ -67,6 +67,7 @@ struct Vapor: AsyncParsableCommand {
             !arguments.contains("-help"),
             !arguments.contains("--help-hidden"),
             !arguments.contains("-help-hidden"),
+            !arguments.contains("--generate-completion-script"),
             !arguments.contains("--dump-variables"),
             !arguments.contains("--experimental-dump-help")
         {

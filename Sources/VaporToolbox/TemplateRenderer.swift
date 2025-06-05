@@ -167,7 +167,15 @@ struct TemplateRenderer {
     ) throws {
         // If the file has a condition on whether it should be rendered or not
         // check for the condition in the context, including nested variables.
-        if case .exists(let variable) = file.condition {
+        if case .exists(let rawVariable) = file.condition {
+            // Check if the condition starts with "!" to invert the condition
+            var variable = rawVariable
+            var invert = false
+            if variable.hasPrefix("!") {
+                invert = true
+                variable.removeFirst()
+            }
+
             let components = variable.split(separator: ".").map { String($0) }
             var subContext: Any = context
 
@@ -176,11 +184,17 @@ struct TemplateRenderer {
                     let dict = subContext as? [String: Any],
                     let value = dict[component]
                 else {
-                    return
+                    // If here, it means the variable doesn't exist in the context.
+                    // If invert==true, continue to render the file, otherwise return.
+                    if invert { break } else { return }
                 }
 
-                if let bool = value as? Bool, !bool {
-                    return
+                if let bool = value as? Bool {
+                    // If the condition in the manifest doesn't start with "!", `invert` is false,
+                    // so if the value is false, return and don't render the file.
+                    if bool == invert {
+                        return
+                    }
                 }
 
                 subContext = value
