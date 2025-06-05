@@ -39,8 +39,8 @@ extension Vapor {
             @Flag(help: "Skips adding a Git repository to the project folder.")
             var noGit: Bool = false
 
-            @Flag(name: [.customShort("n"), .customLong("no")], help: "Automatically answer no to all questions.")
-            var noQuestions: Bool = false
+            @Flag(help: "Automatically answer yes or no to all questions.")
+            var confirmOverride: ConfirmOverride?
 
             @Flag(name: .shortAndLong, help: "Prints additional information.")
             var verbose: Bool = false
@@ -53,6 +53,18 @@ extension Vapor {
                 )
             )
             var dumpVariables: Bool = false
+
+            enum ConfirmOverride: String, EnumerableFlag {
+                case yes
+                case no
+
+                static func name(for value: Self) -> NameSpecification {
+                    switch value {
+                    case .yes: .shortAndLong
+                    case .no: .shortAndLong
+                    }
+                }
+            }
         }
 
         @OptionGroup(title: "Build Options")
@@ -71,7 +83,14 @@ extension Vapor {
                 return
             }
 
-            Vapor.console.confirmOverride = !self.buildOptions.noQuestions
+            Vapor.console.confirmOverride =
+                if self.buildOptions.confirmOverride == .yes {
+                    true
+                } else if self.buildOptions.confirmOverride == .no {
+                    false
+                } else {
+                    nil
+                }
 
             let cwd = URL.currentDirectory()
             let projectURL =
