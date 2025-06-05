@@ -58,6 +58,7 @@ struct Vapor: ParsableCommand {
             !arguments.contains("-help"),
             !arguments.contains("--help-hidden"),
             !arguments.contains("-help-hidden"),
+            !arguments.contains("--generate-completion-script"),
             !arguments.contains("--dump-variables")
         {
             print("Cloning template...".colored(.cyan))

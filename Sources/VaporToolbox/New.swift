@@ -24,7 +24,11 @@ extension Vapor {
             @Option(help: ArgumentHelp("The path of the manifest file. Defaults to `manifest.yml`.", valueName: "file"))
             var manifest: String?
 
-            @Option(name: .shortAndLong, help: ArgumentHelp("The directory to place the new project in.", valueName: "path"))
+            @Option(
+                name: .shortAndLong,
+                help: ArgumentHelp("The directory to place the new project in.", valueName: "path"),
+                completion: .directory
+            )
             var output: String?
 
             @Flag(help: "Skips adding a first commit to the newly created repo.")
@@ -143,7 +147,8 @@ extension Vapor.New: CustomReflectable {
                         help: ArgumentHelp(
                             variable.description + " (values: " + options.map(\.name).joined(separator: ", ") + ")",
                             valueName: variable.name
-                        )
+                        ),
+                        completion: .list(options.map { $0.name })
                     )
                 )
             case .variables(_):
