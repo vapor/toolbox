@@ -1,12 +1,13 @@
+import Testing
+import Yams
+
+@testable import VaporToolbox
+
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
-import Testing
-import Yams
-
-@testable import VaporToolbox
 
 @Suite("Vapor Toolbox Tests")
 struct VaporToolboxTests {

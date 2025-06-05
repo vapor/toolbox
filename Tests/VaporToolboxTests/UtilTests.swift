@@ -1,11 +1,12 @@
+import Testing
+
+@testable import VaporToolbox
+
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
-import Testing
-
-@testable import VaporToolbox
 
 @Suite("Util Tests")
 struct UtilTests {

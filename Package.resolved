@@ -1,13 +1,13 @@
 {
-  "originHash" : "c0058286cd86284423fafbe762bce4c37a994ce18b714f5f35e328639d304d52",
+  "originHash" : "adbf609e70b8bede7b73086ccc63eeeb169e028d4736b3e81c39855fceebef5b",
   "pins" : [
     {
       "identity" : "swift-argument-parser",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-argument-parser.git",
       "state" : {
-        "revision" : "41982a3656a71c768319979febd796c6fd111d5c",
-        "version" : "1.5.0"
+        "revision" : "011f0c765fb46d9cac61bca19be0527e99c98c8b",
+        "version" : "1.5.1"
       }
     },
     {
@@ -25,7 +25,7 @@
       "location" : "https://github.com/swiftlang/swift-subprocess.git",
       "state" : {
         "branch" : "main",
-        "revision" : "0f9a610a3445357bd9778a2020d7ba27fe417361"
+        "revision" : "e62036c30a319787323f6d9297d312f15f92cc12"
       }
     },
     {
@@ -33,8 +33,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-system",
       "state" : {
-        "revision" : "a34201439c74b53f0fd71ef11741af7e7caf01e1",
-        "version" : "1.4.2"
+        "revision" : "61e4ca4b81b9e09e2ec863b00c340eb13497dac6",
+        "version" : "1.5.0"
       }
     },
     {
