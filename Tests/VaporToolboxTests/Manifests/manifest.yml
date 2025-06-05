@@ -141,6 +141,8 @@ files:
     if: vscode
     files:
       - file: vapor.code-snippets
-        if: vscode.snippets
+        if: vscode.snippets # Nested condition
+      - file: extensions.json
+        if: "!vscode.snippets" # Inverse condition
   - .gitignore
   - .dockerignore

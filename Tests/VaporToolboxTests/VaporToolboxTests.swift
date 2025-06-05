@@ -1,4 +1,3 @@
-#if canImport(Testing)
 import Foundation
 import Testing
 import Yams
@@ -7,21 +6,24 @@ import Yams
 
 @Suite("VaporToolbox Tests")
 struct VaporToolboxTests {
+    #if !os(Android)
     @Test("Vapor.preprocess")
     func preprocess() throws {
         #expect(Vapor.manifest == nil)
         try Vapor.preprocess([])
         #expect(Vapor.manifest != nil)
     }
+    #endif
 
     @Test("Vapor.version")
     func version() {
         #expect(Vapor.version.contains("toolbox: "))
     }
 
+    #if !os(Android)
     @Test("Template Manifest", arguments: ["manifest.yml", "manifest.json"])
     func templateManifest(_ file: String) throws {
-        let manifestPath = URL(filePath: #filePath).deletingLastPathComponent().appending(path: file)
+        let manifestPath = URL(filePath: #filePath).deletingLastPathComponent().appending(path: "Manifests").appending(path: file)
         let manifestData = try Data(contentsOf: manifestPath)
         let manifest =
             if manifestPath.pathExtension == "json" {
@@ -38,7 +40,7 @@ struct VaporToolboxTests {
         guard let deployOptions = manifest.variables.first(where: { $0.name == "deploy" })?.type,
             case .options(let options) = deployOptions
         else {
-            Issue.record()
+            Issue.record("Deploy options not found in manifest")
             return
         }
 
@@ -50,6 +52,7 @@ struct VaporToolboxTests {
             }
         }
     }
+    #endif
 
     @Test("Kebab Cased", arguments: ["Hello, World!", "hello-world", "21_hello-World", "hello1world"])
     func kebabcased(_ string: String) {
@@ -74,4 +77,3 @@ struct VaporToolboxTests {
         }
     }
 }
-#endif  // canImport(Testing)

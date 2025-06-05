@@ -30,8 +30,7 @@ let package = Package(
                 .target(name: "VaporToolbox")
             ],
             resources: [
-                .copy("manifest.yml"),
-                .copy("manifest.json"),
+                .copy("Manifests")
             ],
             swiftSettings: swiftSettings
         ),
