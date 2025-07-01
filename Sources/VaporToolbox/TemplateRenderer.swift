@@ -18,7 +18,7 @@ struct TemplateRenderer {
     /// The console to use for I/O operations.
     let console: Terminal
 
-    /// Renders a project using the ``TemplateRendered/manifest``.
+    /// Renders a project using the ``TemplateRenderer/manifest``.
     ///
     /// - Parameters:
     ///   - name: The name of the project.

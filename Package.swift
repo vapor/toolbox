@@ -10,7 +10,7 @@ let package = Package(
         .executable(name: "vapor", targets: ["VaporToolbox"])
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.5.0"),
+        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.6.0"),
         .package(url: "https://github.com/fpseverino/console-kit.git", branch: "update"),
         .package(url: "https://github.com/swiftlang/swift-subprocess.git", branch: "main"),
         .package(url: "https://github.com/hummingbird-project/swift-mustache.git", from: "2.0.0"),
