@@ -69,6 +69,14 @@ vapor --help
 
 You should see a list of available commands.
 
+#### Mise
+
+You can also use [Mise](https://mise.jdx.dev) to install the toolbox and create a new project. Mise will compile the toolbox from the sources:
+
+```bash
+mise x spm:vapor/toolbox@latest -- vapor new Hello -n
+```
+
 ## Overview
 
 The Vapor Toolbox is a command line tool that helps you create new Vapor projects.
