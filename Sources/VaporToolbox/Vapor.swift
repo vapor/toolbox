@@ -102,8 +102,8 @@ struct Vapor: AsyncParsableCommand {
             !arguments.contains("--dump-variables"),
             !arguments.contains("--experimental-dump-help")
         {
-            let loadingBar = Self.console.loadingBar(title: "Cloning template...")
-            try await loadingBar.withActivityIndicator {
+            try await Self.console.loadingBar(title: "Cloning template...").withActivityIndicator {
+                // TODO: remove the boolean return
                 try await Subprocess.run(.name("git"), arguments: Arguments(cloneArgs)).terminationStatus.isSuccess
             }
         } else {
