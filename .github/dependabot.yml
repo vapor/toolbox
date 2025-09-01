@@ -1,5 +1,4 @@
 version: 2
-enable-beta-ecosystems: true
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -7,16 +6,5 @@ updates:
       interval: "daily"
     groups:
       dependencies:
-        patterns:
-          - "*"
-  - package-ecosystem: "swift"
-    directory: "/"
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 6
-    allow:
-      - dependency-type: all
-    groups:
-      all-dependencies:
         patterns:
           - "*"
