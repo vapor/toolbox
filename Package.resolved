@@ -1,5 +1,5 @@
 {
-  "originHash" : "de2867336540164343b8fc3b7e94d055cf56e61527c7437f4fc15b06698cff0a",
+  "originHash" : "95c3660ff7676a02439cf08650771fefd9d228afcb82cb06861b8514a4ec1a82",
   "pins" : [
     {
       "identity" : "console-kit",
@@ -7,7 +7,7 @@
       "location" : "https://github.com/vapor/console-kit.git",
       "state" : {
         "branch" : "consolekit-5",
-        "revision" : "ca482c44a3f7b646056e33ceffa0e0ecaa545b27"
+        "revision" : "1b5d770ae7597a2fb96d28dd71287a6c3bf5a4aa"
       }
     },
     {
@@ -51,8 +51,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/hummingbird-project/swift-mustache.git",
       "state" : {
-        "revision" : "9de71fc4d10f0efc0ac758d0acf14e75d39b47b4",
-        "version" : "2.0.0"
+        "revision" : "534f9f9e60ccc1ecc947cababb71c5f91497f4a2",
+        "version" : "2.0.1"
       }
     },
     {
@@ -60,8 +60,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swiftlang/swift-subprocess.git",
       "state" : {
-        "branch" : "main",
-        "revision" : "e62036c30a319787323f6d9297d312f15f92cc12"
+        "revision" : "44be5d56aa4b26dc2003a67c0288a6a68366a87d",
+        "version" : "0.1.0"
       }
     },
     {

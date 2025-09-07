@@ -102,12 +102,11 @@ struct Vapor: AsyncParsableCommand {
             !arguments.contains("--dump-variables"),
             !arguments.contains("--experimental-dump-help")
         {
-            try await Self.console.loadingBar(title: "Cloning template...").withActivityIndicator {
-                // TODO: remove the boolean return
-                try await Subprocess.run(.name("git"), arguments: Arguments(cloneArgs)).terminationStatus.isSuccess
+            try await Self.console.loadingBar(title: "Cloning template...").withActivityIndicator { [cloneArgs] in
+                _ = try await Subprocess.run(.name("git"), arguments: Arguments(cloneArgs), output: .discarded)
             }
         } else {
-            _ = try await Subprocess.run(.name("git"), arguments: Arguments(cloneArgs))
+            _ = try await Subprocess.run(.name("git"), arguments: Arguments(cloneArgs), output: .discarded)
         }
 
         var manifestURL: URL
@@ -143,7 +142,8 @@ struct Vapor: AsyncParsableCommand {
                     let brewString =
                         try await Subprocess.run(
                             .name("brew"),
-                            arguments: ["info", "vapor", "--formula"]
+                            arguments: ["info", "vapor", "--formula"],
+                            output: .string(limit: 4096)
                         ).standardOutput ?? "unknown"
 
                     let versionString = brewString.split(separator: "\n")[0]

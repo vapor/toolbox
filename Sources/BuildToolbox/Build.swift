@@ -13,7 +13,8 @@ struct Build {
                         "--disable-sandbox",
                         "--configuration", "release",
                         "-Xswiftc", "-cross-module-optimization",
-                    ]
+                    ],
+                    output: .discarded
                 )
             }
         } catch {
@@ -41,13 +42,25 @@ struct Build {
 
     static var currentVersion: String {
         get async throws {
-            let tagResult = try await Subprocess.run(.name("git"), arguments: ["describe", "--tags", "--exact-match"])
+            let tagResult = try await Subprocess.run(
+                .name("git"),
+                arguments: ["describe", "--tags", "--exact-match"],
+                output: .string(limit: 4096)
+            )
             if let tag = tagResult.standardOutput, !tag.isEmpty {
                 return tag.trimmingCharacters(in: .whitespacesAndNewlines)
             }
 
-            async let branchSubprocess = Subprocess.run(.name("git"), arguments: ["symbolic-ref", "-q", "--short", "HEAD"])
-            async let commitSubprocess = Subprocess.run(.name("git"), arguments: ["rev-parse", "--short", "HEAD"])
+            async let branchSubprocess = Subprocess.run(
+                .name("git"),
+                arguments: ["symbolic-ref", "-q", "--short", "HEAD"],
+                output: .string(limit: 4096)
+            )
+            async let commitSubprocess = Subprocess.run(
+                .name("git"),
+                arguments: ["rev-parse", "--short", "HEAD"],
+                output: .string(limit: 4096)
+            )
             let (branchResult, commitResult) = try await (branchSubprocess, commitSubprocess)
             if let branch = branchResult.standardOutput, !branch.isEmpty,
                 let commit = commitResult.standardOutput, !commit.isEmpty

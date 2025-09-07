@@ -19,8 +19,7 @@ jobs:
       with_musl: true
       with_android: true
       android_copy_files: Tests/VaporToolboxTests/Manifests/
-    secrets:
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+    secrets: inherit
   
   test-makefile:
     runs-on: ubuntu-latest

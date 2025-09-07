@@ -128,16 +128,21 @@ extension Vapor {
                 if (try? gitDir.checkResourceIsReachable()) ?? false {
                     try FileManager.default.removeItem(at: gitDir)  // Clear existing git history
                 }
-                _ = try await Subprocess.run(.name("git"), arguments: ["--git-dir=\(gitDir.path(percentEncoded: false))", "init"])
+                _ = try await Subprocess.run(
+                    .name("git"),
+                    arguments: ["--git-dir=\(gitDir.path(percentEncoded: false))", "init"],
+                    output: .discarded
+                )
 
                 if !self.buildOptions.noCommit {
                     Vapor.console.info("Adding first commit")
                     let gitDirFlag = "--git-dir=\(gitDir.path())"
                     let workTreeFlag = "--work-tree=\(projectURL.path())"
-                    _ = try await Subprocess.run(.name("git"), arguments: [gitDirFlag, workTreeFlag, "add", "."])
+                    _ = try await Subprocess.run(.name("git"), arguments: [gitDirFlag, workTreeFlag, "add", "."], output: .discarded)
                     _ = try await Subprocess.run(
                         .name("git"),
-                        arguments: [gitDirFlag, workTreeFlag, "commit", "-m", "Initial Commit"]
+                        arguments: [gitDirFlag, workTreeFlag, "commit", "-m", "Initial Commit"],
+                        output: .discarded
                     )
                 }
             }
