@@ -1,12 +1,12 @@
-#if canImport(Testing)
+import Testing
+
+@testable import BuildToolbox
+
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
-import Testing
-
-@testable import BuildToolbox
 
 @Suite("Build Toolbox Tests")
 struct BuildToolboxTests {
@@ -46,4 +46,3 @@ struct BuildToolboxTests {
         #expect(revertedFileContents == originalFileContents)
     }
 }
-#endif  // canImport(Testing)

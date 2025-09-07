@@ -21,37 +21,38 @@ jobs:
       android_copy_files: Tests/VaporToolboxTests/Manifests/
     secrets: inherit
   
-  test-makefile:
-    runs-on: ubuntu-latest
-    container: swift:6.1-noble
-    steps:
-      - name: Check out toolbox
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-          fetch-tags: true
-      - name: Install dependencies
-        run: |
-          apt-get -qq update
-          apt-get -qq install -y make
-      - name: Config Git
-        run: |
-          git config --global --add safe.directory /__w/toolbox/toolbox
-          git checkout -b temp-branch
-      - name: Build with Makefile
-        run: make build
-      - name: Install with Makefile
-        run: make install DEST=/tmp/vapor MANDEST_DIR=/tmp/vapor-man/man1
-      - name: Test installation
-        run: /tmp/vapor --version
-      - name: Test manpage
-        run: |
-          test -f /tmp/vapor-man/man1/vapor.1
-          grep -q '^\.Nm vapor' /tmp/vapor-man/man1/vapor.1
-      - name: Uninstall with Makefile
-        run: |
-          make uninstall DEST=/tmp/vapor MANDEST_DIR=/tmp/vapor-man/man1
-          make clean
+  # The generate-manual plugin from ArgumentParser is currently broken
+  # test-makefile:
+  #   runs-on: ubuntu-latest
+  #   container: swift:6.1-noble
+  #   steps:
+  #     - name: Check out toolbox
+  #       uses: actions/checkout@v5
+  #       with:
+  #         fetch-depth: 0
+  #         fetch-tags: true
+  #     - name: Install dependencies
+  #       run: |
+  #         apt-get -qq update
+  #         apt-get -qq install -y make
+  #     - name: Config Git
+  #       run: |
+  #         git config --global --add safe.directory /__w/toolbox/toolbox
+  #         git checkout -b temp-branch
+  #     - name: Build with Makefile
+  #       run: make build
+  #     - name: Install with Makefile
+  #       run: make install DEST=/tmp/vapor MANDEST_DIR=/tmp/vapor-man/man1
+  #     - name: Test installation
+  #       run: /tmp/vapor --version
+  #     - name: Test manpage
+  #       run: |
+  #         test -f /tmp/vapor-man/man1/vapor.1
+  #         grep -q '^\.Nm vapor' /tmp/vapor-man/man1/vapor.1
+  #     - name: Uninstall with Makefile
+  #       run: |
+  #         make uninstall DEST=/tmp/vapor MANDEST_DIR=/tmp/vapor-man/man1
+  #         make clean
 
   integration-linux:
     if: ${{ github.event_name == 'pull_request' && !github.event.pull_request.draft }}
