@@ -67,6 +67,8 @@ struct Vapor: AsyncParsableCommand {
             return
         }
 
+        guard !arguments.contains("--experimental-dump-help") else { return }
+
         let templateWebURL =
             if let index = arguments.firstIndex(of: "--template") {
                 arguments[index + 1]
@@ -99,8 +101,7 @@ struct Vapor: AsyncParsableCommand {
             !arguments.contains("--help-hidden"),
             !arguments.contains("-help-hidden"),
             !arguments.contains("--generate-completion-script"),
-            !arguments.contains("--dump-variables"),
-            !arguments.contains("--experimental-dump-help")
+            !arguments.contains("--dump-variables")
         {
             try await Self.console.loadingBar(title: "Cloning template...").withActivityIndicator { [cloneArgs] in
                 _ = try await Subprocess.run(.name("git"), arguments: Arguments(cloneArgs), output: .discarded)
