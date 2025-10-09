@@ -93,7 +93,7 @@ extension Vapor {
                 try Process.runUntilExit(gitURL, arguments: pullArgs)
             } else {
                 try? FileManager.default.removeItem(at: templateURL)
-                var cloneArgs = ["clone"]
+                var cloneArgs = ["clone", "--depth", "1"]
                 if options.branch != nil,
                     let branch = options.branch
                 {
