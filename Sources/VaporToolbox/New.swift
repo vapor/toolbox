@@ -1,5 +1,6 @@
 import ArgumentParser
 import Foundation
+import Yams
 
 extension Vapor {
     struct New: ParsableCommand {
@@ -16,13 +17,13 @@ extension Vapor {
         /// They control the build process of the project.
         struct BuildOptions: ParsableArguments {
             @Option(name: .shortAndLong, help: ArgumentHelp("The URL of a Git repository to use as a template.", valueName: "url"))
-            var template: String?
+            var template: String = "https://github.com/vapor/template"
 
             @Option(help: "Template repository branch to use.")
             var branch: String?
 
-            @Option(help: ArgumentHelp("The path of the manifest file. Defaults to `manifest.yml`.", valueName: "file"))
-            var manifest: String?
+            @Option(help: ArgumentHelp("The path of the manifest file.", valueName: "file"))
+            var manifest: String = "manifest.yml"
 
             @Option(
                 name: .shortAndLong,
@@ -56,7 +57,80 @@ extension Vapor {
         @OptionGroup(title: "Build Options")
         var buildOptions: BuildOptions
 
+        static let gitURL = {
+            do {
+                let path = try Process.shell.which("git")
+                return path
+            } catch {
+                print("error:".colored(.red) + " unable to find git")
+                print("Do you have git installed?")
+                Vapor.New.exit(withError: ExitCode(1))
+            }
+        }()
+
+        struct PreProcessArgs {
+            let template: String
+            let branch: String?
+            let manifest: String
+
+            init(template: String, branch: String?, manifest: String) {
+                self.template = template
+                self.branch = branch
+                self.manifest = manifest
+            }
+        }
+
+        /// Get the template's manifest file, decode it and save it.
+        ///
+        /// Clones the template repository, decodes the manifest file and stores it in the ``Vapor/manifest`` `static` property for later use.
+        ///
+        ///
+        func preprocess(options: PreProcessArgs, gitURL: URL, templateURL: URL) throws {
+            if options.template == "https://github.com/vapor/template",
+                FileManager.default.fileExists(atPath: templateURL.path)
+            {
+                let pullArgs = ["-C", templateURL.path, "pull"]
+                try Process.runUntilExit(gitURL, arguments: pullArgs)
+            } else {
+                try? FileManager.default.removeItem(at: templateURL)
+                var cloneArgs = ["clone", "--depth", "1"]
+                if options.branch != nil,
+                    let branch = options.branch
+                {
+                    cloneArgs.append("--branch")
+                    cloneArgs.append(branch)
+                }
+                cloneArgs.append(options.template)
+                cloneArgs.append(templateURL.path())
+                print("Cloning template...".colored(.cyan))
+                try Process.runUntilExit(gitURL, arguments: cloneArgs)
+            }
+
+            let manifestURL = templateURL.appending(path: options.manifest)
+
+            var result: TemplateManifest? = nil
+
+            if FileManager.default.fileExists(atPath: manifestURL.path()) {
+                let manifestData = try Data(contentsOf: manifestURL)
+                result =
+                    if manifestURL.pathExtension == "json" {
+                        try JSONDecoder().decode(TemplateManifest.self, from: manifestData)
+                    } else {
+                        try YAMLDecoder().decode(TemplateManifest.self, from: manifestData)
+                    }
+            }
+            Vapor.manifest = result
+
+        }
+
         mutating func run() throws {
+
+            let preProcessArgs = PreProcessArgs(
+                template: self.buildOptions.template,
+                branch: self.buildOptions.branch,
+                manifest: self.buildOptions.manifest)
+            try preprocess(options: preProcessArgs, gitURL: Self.gitURL, templateURL: Vapor.templateURL)
+
             if self.buildOptions.dumpVariables {
                 let encoder = JSONEncoder()
                 encoder.outputFormatting = .prettyPrinted
@@ -78,7 +152,6 @@ extension Vapor {
                 }
 
             if let manifest = Vapor.manifest {
-                defer { try? FileManager.default.removeItem(at: Vapor.templateURL) }
 
                 try FileManager.default.createDirectory(at: projectURL, withIntermediateDirectories: false)
 
@@ -95,7 +168,7 @@ extension Vapor {
                 )
             } else {
                 // If the template doesn't have a manifest (AKA doesn't need templating), just move the files
-                try FileManager.default.moveItem(at: Vapor.templateURL, to: projectURL)
+                try FileManager.default.copyItem(at: Vapor.templateURL, to: projectURL)
             }
 
             if !self.buildOptions.noGit {
@@ -105,14 +178,15 @@ extension Vapor {
                 if (try? gitDir.checkResourceIsReachable()) ?? false {
                     try FileManager.default.removeItem(at: gitDir)  // Clear existing git history
                 }
-                try Process.runUntilExit(Vapor.gitURL, arguments: ["--git-dir=\(gitDir.path(percentEncoded: false))", "init"])
+                try Process.runUntilExit(Vapor.New.gitURL, arguments: ["--git-dir=\(gitDir.path(percentEncoded: false))", "init"])
 
                 if !self.buildOptions.noCommit {
                     print("Adding first commit".colored(.cyan))
                     let gitDirFlag = "--git-dir=\(gitDir.path())"
                     let workTreeFlag = "--work-tree=\(projectURL.path())"
-                    try Process.runUntilExit(Vapor.gitURL, arguments: [gitDirFlag, workTreeFlag, "add", "."])
-                    try Process.runUntilExit(Vapor.gitURL, arguments: [gitDirFlag, workTreeFlag, "commit", "-m", "Generate Vapor project"])
+                    try Process.runUntilExit(Vapor.New.gitURL, arguments: [gitDirFlag, workTreeFlag, "add", "."])
+                    try Process.runUntilExit(
+                        Vapor.New.gitURL, arguments: [gitDirFlag, workTreeFlag, "commit", "-m", "Generate Vapor project"])
                 }
             }
 
@@ -244,7 +318,6 @@ extension Vapor.New: CustomReflectable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.name = try container.decode(Argument.self, forKey: .name).wrappedValue
         self.buildOptions = try container.decode(OptionGroup<BuildOptions>.self, forKey: .buildOptions).wrappedValue
-
         guard let variables = Vapor.manifest?.variables else { return }
 
         func decodeVariable(_ variable: TemplateManifest.Variable, path: String) throws -> Any? {
