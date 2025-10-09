@@ -7,10 +7,12 @@ import Yams
 @Suite("VaporToolbox Tests")
 struct VaporToolboxTests {
     #if !os(Android)
-    @Test("Vapor.preprocess")
+    @Test("Vapor.New.preprocess")
     func preprocess() throws {
+        let options = Vapor.New.PreProcessArgs(template: "https://github.com/vapor/template", branch: nil, manifest: "manifest.yml")
+        let vaporNew = Vapor.New()
         #expect(Vapor.manifest == nil)
-        try Vapor.preprocess([])
+        try vaporNew.preprocess(options: options, gitURL: Vapor.New.gitURL, templateURL: Vapor.templateURL)
         #expect(Vapor.manifest != nil)
     }
     #endif

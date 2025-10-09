@@ -211,7 +211,7 @@ struct TemplateRenderer {
                 try MustacheTemplate(string: template).render(context)
                     .write(to: destinationFileURL, atomically: true, encoding: .utf8)
             } else {
-                try FileManager.default.moveItem(at: sourceURL.appending(path: file.name), to: destinationFileURL)
+                try FileManager.default.copyItem(at: sourceURL.appending(path: file.name), to: destinationFileURL)
             }
             if self.verbose { print("+ " + file.name) }
         case .folder(let files):
