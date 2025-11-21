@@ -1,13 +1,13 @@
 {
-  "originHash" : "1b1cf391c64f1f9f1dce726f28151cde1cc1c647d24f5f6aaee20aebe896a3c7",
+  "originHash" : "494c7a8e46c08438fd53741568f52b4446b0859eb6e2a667f6de1d12ac9f0cea",
   "pins" : [
     {
       "identity" : "console-kit",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/vapor/console-kit.git",
       "state" : {
-        "branch" : "5.0.0-alpha.1",
-        "revision" : "774e9c8a918ea1587b545db1d03293be8882a393"
+        "revision" : "774e9c8a918ea1587b545db1d03293be8882a393",
+        "version" : "5.0.0-alpha.1"
       }
     },
     {
