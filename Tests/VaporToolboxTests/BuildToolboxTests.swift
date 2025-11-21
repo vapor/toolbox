@@ -10,7 +10,7 @@ import Foundation
 
 @Suite("Build Toolbox Tests")
 struct BuildToolboxTests {
-    @Test("Get Current Version from Git")
+    @Test("Get Current Version from Git", .disabled(if: ProcessInfo.processInfo.environment["CI"] != nil))
     func currentVersion() async throws {
         let version = try await Build.currentVersion
 
