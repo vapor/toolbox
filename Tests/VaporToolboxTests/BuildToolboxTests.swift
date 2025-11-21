@@ -40,7 +40,7 @@ struct BuildToolboxTests {
 
         // Revert the file change
         try originalFileContents
-            .replacingOccurrences(of: "\"\(newVersion)\"", with: "nil")
+            .replacing("\"\(newVersion)\"", with: "nil")
             .write(to: file, atomically: true, encoding: .utf8)
         let revertedFileContents = try String(contentsOf: file, encoding: .utf8)
         #expect(revertedFileContents == originalFileContents)

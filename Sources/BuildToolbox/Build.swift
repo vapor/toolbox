@@ -28,7 +28,7 @@ struct Build {
         let originalFileContents = try String(contentsOf: fileURL, encoding: .utf8)
 
         try originalFileContents
-            .replacingOccurrences(of: "nil", with: "\"\(version)\"")
+            .replacing("nil", with: "\"\(version)\"")
             .write(to: fileURL, atomically: true, encoding: .utf8)
 
         do {
