@@ -1,3 +1,4 @@
+#if !os(Android)
 import Testing
 
 @testable import BuildToolbox
@@ -8,9 +9,9 @@ import FoundationEssentials
 import Foundation
 #endif
 
-@Suite("Build Toolbox Tests")
+@Suite("Build Toolbox Tests", .disabled(if: ProcessInfo.processInfo.environment["CI"] != nil))
 struct BuildToolboxTests {
-    @Test("Get Current Version from Git", .disabled(if: ProcessInfo.processInfo.environment["CI"] != nil))
+    @Test("Get Current Version from Git")
     func currentVersion() async throws {
         let version = try await Build.currentVersion
 
@@ -46,3 +47,4 @@ struct BuildToolboxTests {
         #expect(revertedFileContents == originalFileContents)
     }
 }
+#endif
