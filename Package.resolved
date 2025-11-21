@@ -1,13 +1,13 @@
 {
-  "originHash" : "95c3660ff7676a02439cf08650771fefd9d228afcb82cb06861b8514a4ec1a82",
+  "originHash" : "1b1cf391c64f1f9f1dce726f28151cde1cc1c647d24f5f6aaee20aebe896a3c7",
   "pins" : [
     {
       "identity" : "console-kit",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/vapor/console-kit.git",
       "state" : {
-        "branch" : "consolekit-5",
-        "revision" : "1b5d770ae7597a2fb96d28dd71287a6c3bf5a4aa"
+        "branch" : "5.0.0-alpha.1",
+        "revision" : "774e9c8a918ea1587b545db1d03293be8882a393"
       }
     },
     {
@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-argument-parser.git",
       "state" : {
-        "revision" : "309a47b2b1d9b5e991f36961c983ecec72275be3",
-        "version" : "1.6.1"
+        "revision" : "cdd0ef3755280949551dc26dee5de9ddeda89f54",
+        "version" : "1.6.2"
       }
     },
     {
@@ -51,8 +51,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/hummingbird-project/swift-mustache.git",
       "state" : {
-        "revision" : "534f9f9e60ccc1ecc947cababb71c5f91497f4a2",
-        "version" : "2.0.1"
+        "revision" : "2e2a84698dd8a5fff2fe28857f0f95bb03d21d64",
+        "version" : "2.0.2"
       }
     },
     {
@@ -60,8 +60,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swiftlang/swift-subprocess.git",
       "state" : {
-        "revision" : "44be5d56aa4b26dc2003a67c0288a6a68366a87d",
-        "version" : "0.1.0"
+        "revision" : "44922dfe46380cd354ca4b0208e717a3e92b13dd",
+        "version" : "0.2.1"
       }
     },
     {
@@ -78,8 +78,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/jpsim/Yams.git",
       "state" : {
-        "revision" : "d41ba4e7164c0838c6d48351f7575f7f762151fe",
-        "version" : "6.1.0"
+        "revision" : "51b5127c7fb6ffac106ad6d199aaa33c5024895f",
+        "version" : "6.2.0"
       }
     }
   ],

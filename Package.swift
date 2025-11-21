@@ -10,11 +10,11 @@ let package = Package(
         .executable(name: "vapor", targets: ["VaporToolbox"])
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.6.1"),
-        .package(url: "https://github.com/vapor/console-kit.git", branch: "consolekit-5"),
-        .package(url: "https://github.com/swiftlang/swift-subprocess.git", from: "0.1.0"),
-        .package(url: "https://github.com/hummingbird-project/swift-mustache.git", from: "2.0.0"),
-        .package(url: "https://github.com/jpsim/Yams.git", from: "6.1.0"),
+        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.6.2"),
+        .package(url: "https://github.com/vapor/console-kit.git", branch: "5.0.0-alpha.1"),
+        .package(url: "https://github.com/swiftlang/swift-subprocess.git", from: "0.2.1"),
+        .package(url: "https://github.com/hummingbird-project/swift-mustache.git", from: "2.0.2"),
+        .package(url: "https://github.com/jpsim/Yams.git", from: "6.2.0"),
     ],
     targets: [
         .executableTarget(
