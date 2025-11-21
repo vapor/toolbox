@@ -1,8 +1,10 @@
 import ArgumentParser
+import ConsoleKit
 import Foundation
+import Subprocess
 
 extension Vapor {
-    struct New: ParsableCommand {
+    struct New: AsyncParsableCommand {
         static let configuration = CommandConfiguration(abstract: "Generates a new app.")
 
         @Argument(help: "Name of project and folder.")
@@ -37,8 +39,8 @@ extension Vapor {
             @Flag(help: "Skips adding a Git repository to the project folder.")
             var noGit: Bool = false
 
-            @Flag(name: [.customShort("n"), .customLong("no")], help: "Automatically answer no to all questions.")
-            var noQuestions: Bool = false
+            @Flag(help: "Automatically answer yes or no to all questions.")
+            var confirmOverride: ConfirmOverride?
 
             @Flag(name: .shortAndLong, help: "Prints additional information.")
             var verbose: Bool = false
@@ -51,12 +53,24 @@ extension Vapor {
                 )
             )
             var dumpVariables: Bool = false
+
+            enum ConfirmOverride: String, EnumerableFlag {
+                case yes
+                case no
+
+                static func name(for value: Self) -> NameSpecification {
+                    switch value {
+                    case .yes: .shortAndLong
+                    case .no: .shortAndLong
+                    }
+                }
+            }
         }
 
         @OptionGroup(title: "Build Options")
         var buildOptions: BuildOptions
 
-        mutating func run() throws {
+        mutating func run() async throws {
             if self.buildOptions.dumpVariables {
                 let encoder = JSONEncoder()
                 encoder.outputFormatting = .prettyPrinted
@@ -64,10 +78,19 @@ extension Vapor {
                 if let jsonString = String(data: jsonData, encoding: .utf8) {
                     print(jsonString)
                 } else {
-                    print("error:".colored(.red) + " unable to encode JSON data as a UTF-8 string.")
+                    Vapor.console.output(key: "error", value: "unable to encode JSON data as a UTF-8 string.", style: .error)
                 }
                 return
             }
+
+            Vapor.console.confirmOverride =
+                if self.buildOptions.confirmOverride == .yes {
+                    true
+                } else if self.buildOptions.confirmOverride == .no {
+                    false
+                } else {
+                    nil
+                }
 
             let cwd = URL.currentDirectory()
             let projectURL =
@@ -85,7 +108,7 @@ extension Vapor {
                 let renderer = TemplateRenderer(
                     manifest: manifest,
                     verbose: self.buildOptions.verbose,
-                    noQuestions: self.buildOptions.noQuestions
+                    console: Vapor.console
                 )
                 try renderer.render(
                     project: self.name,
@@ -101,18 +124,26 @@ extension Vapor {
             if !self.buildOptions.noGit {
                 let gitDir = projectURL.appending(path: ".git")
 
-                print("Creating git repository".colored(.cyan))
+                Vapor.console.info("Creating git repository")
                 if (try? gitDir.checkResourceIsReachable()) ?? false {
                     try FileManager.default.removeItem(at: gitDir)  // Clear existing git history
                 }
-                try Process.runUntilExit(Vapor.gitURL, arguments: ["--git-dir=\(gitDir.path(percentEncoded: false))", "init"])
+                _ = try await Subprocess.run(
+                    .name("git"),
+                    arguments: ["--git-dir=\(gitDir.path(percentEncoded: false))", "init"],
+                    output: .discarded
+                )
 
                 if !self.buildOptions.noCommit {
-                    print("Adding first commit".colored(.cyan))
+                    Vapor.console.info("Adding first commit")
                     let gitDirFlag = "--git-dir=\(gitDir.path())"
                     let workTreeFlag = "--work-tree=\(projectURL.path())"
-                    try Process.runUntilExit(Vapor.gitURL, arguments: [gitDirFlag, workTreeFlag, "add", "."])
-                    try Process.runUntilExit(Vapor.gitURL, arguments: [gitDirFlag, workTreeFlag, "commit", "-m", "Generate Vapor project"])
+                    _ = try await Subprocess.run(.name("git"), arguments: [gitDirFlag, workTreeFlag, "add", "."], output: .discarded)
+                    _ = try await Subprocess.run(
+                        .name("git"),
+                        arguments: [gitDirFlag, workTreeFlag, "commit", "-m", "Initial Commit"],
+                        output: .discarded
+                    )
                 }
             }
 
@@ -123,7 +154,7 @@ extension Vapor {
                 cdInstruction = projectURL.lastPathComponent  // Is in current directory
             }
 
-            printNew(project: self.name, with: cdInstruction, verbose: self.buildOptions.verbose)
+            printNew(project: self.name, with: cdInstruction, on: Vapor.console, verbose: self.buildOptions.verbose)
         }
     }
 }

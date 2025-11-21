@@ -11,14 +11,14 @@
     <a href="LICENSE.txt"><img src="https://design.vapor.codes/images/mitlicense.svg" alt="MIT License"></a>
     <a href="https://github.com/vapor/toolbox/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/vapor/toolbox/test.yml?event=push&style=plastic&logo=github&label=tests&logoColor=%23ccc" alt="CI"></a>
     <a href="https://codecov.io/github/vapor/toolbox"><img src="https://img.shields.io/codecov/c/github/vapor/toolbox?style=plastic&logo=codecov&label=codecov"></a>
-    <a href="https://swift.org"><img src="https://design.vapor.codes/images/swift60up.svg" alt="Swift 6.0"></a>
+    <a href="https://swift.org"><img src="https://design.vapor.codes/images/swift61up.svg" alt="Swift 6.1"></a>
 </p>
 
 🧰 A CLI tool to easily create new Vapor projects.
 
 ### Supported Platforms
 
-Vapor Toolbox supports macOS 13.0+ and all Linux distributions that Swift 6.0 supports.
+Vapor Toolbox supports macOS 15.0+ and all Linux distributions that Swift 6.1 supports.
 
 ### Installation
 

@@ -1,23 +1,28 @@
-import Foundation
 import Testing
 import Yams
 
 @testable import VaporToolbox
 
-@Suite("VaporToolbox Tests")
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+
+@Suite("Vapor Toolbox Tests")
 struct VaporToolboxTests {
     #if !os(Android)
     @Test("Vapor.preprocess")
-    func preprocess() throws {
+    func preprocess() async throws {
         #expect(Vapor.manifest == nil)
-        try Vapor.preprocess([])
+        try await Vapor.preprocess([])
         #expect(Vapor.manifest != nil)
     }
     #endif
 
     @Test("Vapor.version")
-    func version() {
-        #expect(Vapor.version.contains("toolbox: "))
+    func version() async {
+        #expect(await Vapor.version.contains("toolbox: "))
     }
 
     #if !os(Android)
@@ -64,16 +69,13 @@ struct VaporToolboxTests {
         #expect(string.pascalcased == "HelloWorld")
     }
 
-    @Test("Is Valid Name")
-    func isValidName() {
-        let validNames = ["hello_world", "helloWorld", "HelloWorld", "helloWorld123", "__helloWorld_123", "_123"]
-        for name in validNames {
-            #expect(name.isValidName)
-        }
+    @Test("Valid Name", arguments: ["hello_world", "helloWorld", "HelloWorld", "helloWorld123", "__helloWorld_123", "_123"])
+    func isValidName(_ string: String) {
+        #expect(string.isValidName)
+    }
 
-        let invalidNames = ["hello world", "hello-world", "hello@world", "hello.world", "hello, world", "21helloWorld", ""]
-        for name in invalidNames {
-            #expect(!name.isValidName)
-        }
+    @Test("Invalid Name", arguments: ["hello world", "hello-world", "hello@world", "hello.world", "hello, world", "21helloWorld", ""])
+    func isInvalidName(_ string: String) {
+        #expect(!string.isValidName)
     }
 }

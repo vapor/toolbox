@@ -1,5 +1,11 @@
-import Foundation
+import ConsoleKit
 import Mustache
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
 
 /// A struct that renders the template Mustache files.
 struct TemplateRenderer {
@@ -9,10 +15,10 @@ struct TemplateRenderer {
     /// A flag that indicates whether the renderer should print verbose output.
     let verbose: Bool
 
-    /// A flag that indicates whether the renderer should automatically answer "no" to all questions.
-    let noQuestions: Bool
+    /// The console to use for I/O operations.
+    let console: Terminal
 
-    /// Renders a project using the ``TemplateRendered/manifest``.
+    /// Renders a project using the ``TemplateRenderer/manifest``.
     ///
     /// - Parameters:
     ///   - name: The name of the project.
@@ -29,14 +35,14 @@ struct TemplateRenderer {
         context["name"] = name.isValidName ? name : name.pascalcased
         context["name_kebab"] = name.kebabcased
 
-        if self.verbose { print("name: \(name.colored(.cyan))") }
+        if self.verbose { self.console.output(key: "name", value: name) }
 
         // Ask for variables not provided as arguments
         for variable in self.manifest.variables {
             try ask(variable: variable, to: &context)
         }
 
-        print("Generating project files".colored(.cyan))
+        self.console.info("Generating project files")
         for file in self.manifest.files {
             try self.render(file, from: sourceURL, to: destinationURL, with: context)
         }
@@ -59,23 +65,21 @@ struct TemplateRenderer {
         case .bool:
             if context.keys.contains(variable.name) {
                 let confirm = context[variable.name] as? Bool ?? false
-                print("\(variable.name): " + (confirm ? "Yes" : "No").colored(.cyan))
+                self.console.output(key: variable.name, value: confirm ? "Yes" : "No")
                 return
             }
-            let input = askBool(variable.description + " (--\(optionName)/--no-\(optionName))".colored(.cyan))
+            let input = self.console.confirm("\(variable.description) \("(--\(optionName)/--no-\(optionName))", style: .info)")
             context[variable.name] = input
-            print("\(variable.name): " + (input ? "Yes" : "No").colored(.cyan))
+            self.console.output(key: variable.name, value: input ? "Yes" : "No")
         case .string:
             if context.keys.contains(variable.name) {
                 let input = context[variable.name] as? String ?? ""
-                print("\(variable.name): " + input.colored(.cyan))
+                self.console.output(key: variable.name, value: input)
                 return
             }
-            print(variable.description + " (--\(optionName))".colored(.cyan))
-            print("> ".colored(.cyan), terminator: "")
-            let input = readLine() ?? ""
+            let input = self.console.ask("\(variable.description) \("(--\(optionName))", style: .info)")
             context[variable.name] = input
-            print("\(variable.name): " + input.colored(.cyan))
+            self.console.output(key: variable.name, value: input)
         case .options(let options):
             if context.keys.contains(variable.name) {
                 guard
@@ -85,36 +89,28 @@ struct TemplateRenderer {
                 else {
                     return
                 }
-                print("\(variable.name): " + option.name.colored(.cyan))
+                self.console.output(key: variable.name, value: option.name)
                 return
             }
-            print(variable.description + " (--\(optionName))".colored(.cyan))
-            for (index, option) in options.enumerated() {
-                print("\(index + 1): ".colored(.cyan) + option.name)
+            let choice = self.console.choose(
+                "\(variable.description) \("(--\(optionName))", style: .info)",
+                from: options
+            ) {
+                $0.name.consoleText()
             }
-            var choice = 0
-            while choice <= 0 || choice > options.count {
-                print("> ".colored(.cyan), terminator: "")
-                if let input = readLine(),
-                    let inputChoice = Int(input),
-                    inputChoice > 0 && inputChoice <= options.count
-                {
-                    choice = inputChoice
-                }
-            }
-            context[variable.name] = options[choice - 1].data
-            print("\(variable.name): " + options[choice - 1].name.colored(.cyan))
+            context[variable.name] = choice.data
+            self.console.output(key: variable.name, value: choice.name)
         case .variables(let nestedVars):
             if !context.keys.contains(variable.name) {
-                let confirm = askBool(variable.description + " (--\(optionName)/--no-\(optionName))".colored(.cyan))
-                print("\(variable.name): " + (confirm ? "Yes" : "No").colored(.cyan))
+                let confirm = self.console.confirm("\(variable.description) \("(--\(optionName)/--no-\(optionName))", style: .info)")
+                self.console.output(key: variable.name, value: confirm ? "Yes" : "No")
                 guard confirm else { return }
             } else {
                 if let confirm = context[variable.name] as? Bool {
-                    print("\(variable.name): " + (confirm ? "Yes" : "No").colored(.cyan))
+                    self.console.output(key: variable.name, value: confirm ? "Yes" : "No")
                     guard confirm else { return }
                 } else if context[variable.name] != nil {
-                    print("\(variable.name): " + "Yes".colored(.cyan))
+                    self.console.output(key: variable.name, value: "Yes")
                 }
             }
 
@@ -123,27 +119,6 @@ struct TemplateRenderer {
                 try ask(variable: nestedVar, to: &nestedContext, prefix: optionName + ".")
             }
             context[variable.name] = nestedContext
-        }
-
-        /// Asks the user a boolean question.
-        ///
-        /// - Parameter question: The text to display to the user.
-        ///
-        /// - Returns: The user's answer.
-        func askBool(_ question: String) -> Bool {
-            print(question)
-            if self.noQuestions {
-                print("y/n> ".colored(.cyan) + "no".colored(.yellow))
-                return false
-            }
-            print("y/n> ".colored(.cyan), terminator: "")
-            var input = readLine()?.lowercased() ?? ""
-            while !input.starts(with: "y") && !input.starts(with: "n") {
-                print(question)
-                print("[y]es or [n]o> ".colored(.cyan), terminator: "")
-                input = readLine()?.lowercased() ?? ""
-            }
-            return input.starts(with: "y")
         }
     }
 
@@ -213,7 +188,7 @@ struct TemplateRenderer {
             } else {
                 try FileManager.default.moveItem(at: sourceURL.appending(path: file.name), to: destinationFileURL)
             }
-            if self.verbose { print("+ " + file.name) }
+            if self.verbose { self.console.print("+ " + file.name) }
         case .folder(let files):
             let folder = file
             try FileManager.default.createDirectory(at: destinationFileURL, withIntermediateDirectories: false)

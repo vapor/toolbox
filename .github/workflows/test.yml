@@ -19,32 +19,38 @@ jobs:
       with_musl: true
       with_android: true
       android_copy_files: Tests/VaporToolboxTests/Manifests/
-    secrets:
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+    secrets: inherit
   
   test-makefile:
     runs-on: ubuntu-latest
-    container: swift:6.0-noble
+    container: swift:6.1-noble
     steps:
       - name: Check out toolbox
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
           fetch-tags: true
-      - name: Install make
+      - name: Install dependencies
         run: |
-          apt-get update
-          apt-get install -y make
+          apt-get -qq update
+          apt-get -qq install -y make
       - name: Config Git
         run: |
           git config --global --add safe.directory /__w/toolbox/toolbox
           git checkout -b temp-branch
-      - name: Test Makefile
+      - name: Build with Makefile
+        run: make build
+      - name: Install with Makefile
+        run: make install DEST=/tmp/vapor MANDEST_DIR=/tmp/vapor-man/man1
+      - name: Test installation
+        run: /tmp/vapor --version
+      - name: Test manpage
         run: |
-          make build
-          make install DEST=/tmp/vapor
-          /tmp/vapor --version
-          make uninstall DEST=/tmp/vapor
+          test -f /tmp/vapor-man/man1/vapor.1
+          grep -q '^\.Nm vapor' /tmp/vapor-man/man1/vapor.1
+      - name: Uninstall with Makefile
+        run: |
+          make uninstall DEST=/tmp/vapor MANDEST_DIR=/tmp/vapor-man/man1
           make clean
 
   integration-linux:
@@ -67,7 +73,7 @@ jobs:
           - fluentflags: '--fluent.db postgres'
             dbhostname: psql
     runs-on: ubuntu-latest
-    container: swift:6.0-noble
+    container: swift:6.1-noble
     services:
       # mysql:
       #   image: mysql:latest

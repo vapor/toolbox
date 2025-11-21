@@ -1,25 +1,56 @@
 import ArgumentParser
-import Foundation
+import ConsoleKit
+import Subprocess
+import Synchronization
 import Yams
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+
 @main
-struct Vapor: ParsableCommand {
-    static let configuration = CommandConfiguration(
-        abstract: "Vapor Toolbox (Server-side Swift web framework)",
-        version: Self.version,
-        subcommands: [New.self],
-        defaultSubcommand: New.self
+struct Vapor: AsyncParsableCommand {
+    static let _configuration = Mutex(
+        CommandConfiguration(
+            abstract: "Vapor Toolbox (Server-side Swift web framework)",
+            subcommands: [New.self],
+            defaultSubcommand: New.self
+        )
     )
+    static var configuration: CommandConfiguration {
+        get {
+            Self._configuration.withLock { $0 }
+        }
+        set {
+            Self._configuration.withLock { $0 = newValue }
+        }
+    }
 
-    nonisolated(unsafe) static var manifest: TemplateManifest? = nil
+    static let console = Terminal()
+
+    static let _manifest: Mutex<TemplateManifest?> = .init(nil)
+    static var manifest: TemplateManifest? {
+        get {
+            Self._manifest.withLock { $0 }
+        }
+        set {
+            Self._manifest.withLock { $0 = newValue }
+        }
+    }
+
     static let templateURL = URL.temporaryDirectory.appending(path: ".vapor-template", directoryHint: .isDirectory)
-    static let gitURL = try! Process.shell.which("git")
 
-    static func main() {
+    static func main() async {
         do {
-            try Self.preprocess(CommandLine.arguments)
+            try await Self.preprocess(CommandLine.arguments)
             var command = try parseAsRoot(nil)
-            try command.run()
+            if var asyncCommand = command as? any AsyncParsableCommand {
+                try await asyncCommand.run()
+            } else {
+                try command.run()
+            }
         } catch {
             exit(withError: error)
         }
@@ -30,10 +61,13 @@ struct Vapor: ParsableCommand {
     /// Clones the template repository, decodes the manifest file and stores it in the ``Vapor/manifest`` `static` property for later use.
     ///
     /// - Parameter arguments: The command line arguments.
-    static func preprocess(_ arguments: [String]) throws {
+    static func preprocess(_ arguments: [String]) async throws {
         guard !arguments.contains("--version") else {
+            Self.configuration.version = await Self.version
             return
         }
+
+        guard !arguments.contains("--experimental-dump-help") else { return }
 
         let templateWebURL =
             if let index = arguments.firstIndex(of: "--template") {
@@ -53,6 +87,14 @@ struct Vapor: ParsableCommand {
 
         try? FileManager.default.removeItem(at: Self.templateURL)
 
+        var cloneArgs = ["clone"]
+        if let branch {
+            cloneArgs.append("--branch")
+            cloneArgs.append(branch)
+        }
+        cloneArgs.append(templateWebURL)
+        cloneArgs.append(Self.templateURL.path())
+
         if !arguments.contains("-h"),
             !arguments.contains("--help"),
             !arguments.contains("-help"),
@@ -61,16 +103,12 @@ struct Vapor: ParsableCommand {
             !arguments.contains("--generate-completion-script"),
             !arguments.contains("--dump-variables")
         {
-            print("Cloning template...".colored(.cyan))
+            try await Self.console.loadingBar(title: "Cloning template...").withActivityIndicator { [cloneArgs] in
+                _ = try await Subprocess.run(.name("git"), arguments: Arguments(cloneArgs), output: .discarded)
+            }
+        } else {
+            _ = try await Subprocess.run(.name("git"), arguments: Arguments(cloneArgs), output: .discarded)
         }
-        var cloneArgs = ["clone"]
-        if let branch {
-            cloneArgs.append("--branch")
-            cloneArgs.append(branch)
-        }
-        cloneArgs.append(templateWebURL)
-        cloneArgs.append(Self.templateURL.path())
-        try Process.runUntilExit(Self.gitURL, arguments: cloneArgs)
 
         var manifestURL: URL
         if let index = arguments.firstIndex(of: "--manifest") {
@@ -95,24 +133,31 @@ struct Vapor: ParsableCommand {
 
     /// The version of this Vapor Toolbox.
     static var version: String {
-        do {
-            if let staticVersion {
-                // Compiled with static version, use that
-                return "toolbox: \(staticVersion.colored(.cyan))"
-            } else {
-                // Determine version through Homebrew
-                let brewString = try Process.shell.brewInfo("vapor")
-                let version = /(\d+\.)(\d+\.)(\d)/
-                let versionString = brewString.split(separator: "\n")[0]
-                if let match = try version.firstMatch(in: versionString) {
-                    return "toolbox: " + "\(match.0)".colored(.cyan)
+        get async {
+            do {
+                if let staticVersion {
+                    // Compiled with static version, use that
+                    return "toolbox: \(staticVersion.consoleStylized(.info))"
                 } else {
-                    return "toolbox: \(versionString.colored(.cyan))"
+                    // Determine version through Homebrew
+                    let brewString =
+                        try await Subprocess.run(
+                            .name("brew"),
+                            arguments: ["info", "vapor", "--formula"],
+                            output: .string(limit: 4096)
+                        ).standardOutput ?? "unknown"
+
+                    let versionString = brewString.split(separator: "\n")[0]
+                    if let match = try /(\d+\.)(\d+\.)(\d)/.firstMatch(in: versionString) {
+                        return "toolbox: " + "\(match.0)".consoleStylized(.info)
+                    } else {
+                        return "toolbox: \(versionString.consoleStylized(.info))"
+                    }
                 }
+            } catch {
+                return "note: ".consoleStylized(.warning) + "could not determine toolbox version." + "\n"
+                    + "toolbox: " + "not found".consoleStylized(.info)
             }
-        } catch {
-            return "note: ".colored(.yellow) + "could not determine toolbox version." + "\n"
-                + "toolbox: " + "not found".colored(.cyan)
         }
     }
 }
