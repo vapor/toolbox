@@ -18,7 +18,7 @@
 
 ### Supported Platforms
 
-Vapor Toolbox supports macOS 13.0+ and all Linux distributions that Swift 6.1 supports.
+Vapor Toolbox supports macOS 15.0+ and all Linux distributions that Swift 6.1 supports.
 
 ### Installation
 
