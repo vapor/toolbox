@@ -75,11 +75,10 @@ func printNew(project name: String, with cdInstruction: String, on console: some
     console.output(verbose ? console.center([cdInstruction]).first ?? cdInstruction : cdInstruction)
 
     let openProject =
-        "Then open your project, for example if using Xcode type "
+        "Then to open your project with Xcode type: "
         + "open Package.swift".consoleText(.info)
-        + " or "
+        + " or to open with Visual Studio Code type: "
         + "code .".consoleText(.info)
-        + " if using VSCode"
     console.output(verbose ? console.center([openProject]).first ?? openProject : openProject)
 }
 
