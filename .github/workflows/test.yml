@@ -31,7 +31,7 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
-    container: swift:6.2-noble
+    container: swift:6.3-noble
     steps:
       - name: Check out toolbox
         uses: actions/checkout@v7
@@ -83,7 +83,7 @@ jobs:
           - fluentflags: '--fluent.db postgres'
             dbhostname: psql
     runs-on: ubuntu-latest
-    container: swift:6.2-noble
+    container: swift:6.3-noble
     services:
       # mysql:
       #   image: mysql:latest
