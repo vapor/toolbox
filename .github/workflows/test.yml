@@ -34,7 +34,7 @@ jobs:
     container: swift:6.2-noble
     steps:
       - name: Check out toolbox
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           fetch-tags: true
@@ -94,7 +94,7 @@ jobs:
                POSTGRES_HOST_AUTH_METHOD: 'scram-sha-256', POSTGRES_INITDB_ARGS: '--auth-host=scram-sha-256' }
     steps:
       - name: Check out toolbox
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Build toolbox
         run: swift build
       - name: Execute new project command
@@ -129,7 +129,7 @@ jobs:
         uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1.7.0
         with: { xcode-version: latest-stable }
       - name: Check out toolbox
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Build toolbox
         run: swift build
       - name: Execute new project command
