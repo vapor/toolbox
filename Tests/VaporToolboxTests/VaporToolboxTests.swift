@@ -1,3 +1,4 @@
+import ArgumentParser
 import Testing
 import Yams
 
@@ -11,18 +12,72 @@ import Foundation
 
 @Suite("Vapor Toolbox Tests")
 struct VaporToolboxTests {
-    #if !os(Android)
-    @Test("Vapor.preprocess")
-    func preprocess() async throws {
-        #expect(Vapor.manifest == nil)
-        try await Vapor.preprocess([])
-        #expect(Vapor.manifest != nil)
-    }
-    #endif
-
     @Test("Vapor.version")
     func version() async {
         #expect(await Vapor.version.contains("toolbox: "))
+    }
+
+    /// These tests modify the global `Vapor.manifest` variable,
+    /// so they must be serialized to avoid race conditions.
+    @Suite("Vapor.manifest Tests", .serialized)
+    struct VaporManifestTests {
+        #if !os(Android)
+        @Test("Vapor.preprocess")
+        func preprocess() async throws {
+            defer { Vapor.manifest = nil }
+
+            #expect(Vapor.manifest == nil)
+            try await Vapor.preprocess([])
+            #expect(Vapor.manifest != nil)
+        }
+        #endif
+
+        @Test("New command parses nested flag and nested options", arguments: [["--fluent"], []])
+        func parseNestedOptions(flags: [String]) throws {
+            defer { Vapor.manifest = nil }
+
+            let manifestJSON = #"""
+                {
+                    "name": "Testing Vapor Template",
+                    "variables": [
+                        {
+                            "name": "fluent",
+                            "description": "Would you like to use Fluent (ORM)?",
+                            "type": "nested",
+                            "variables": [
+                                {
+                                    "name": "db",
+                                    "description": "Which database would you like to use?",
+                                    "type": "option",
+                                    "options": [
+                                        { "name": "Postgres", "data": { "id": "psql" } },
+                                        { "name": "MySQL", "data": { "id": "mysql" } },
+                                        { "name": "SQLite", "data": { "id": "sqlite" } }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "name": "leaf",
+                            "description": "Would you like to use Leaf (templating)?",
+                            "type": "bool"
+                        }
+                    ],
+                    "files": []
+                }
+                """#
+            Vapor.manifest = try JSONDecoder().decode(TemplateManifest.self, from: Data(manifestJSON.utf8))
+
+            let command = try #require(
+                Vapor.New.parseAsRoot(["PersonalSite", "--fluent.db", "MySQL", "--leaf"] + flags) as? Vapor.New
+            )
+
+            let fluent = command.variables["fluent"] as? [String: Any]
+            let fluentDB = fluent?["db"] as? [String: String]
+
+            #expect(fluentDB?["id"] == "mysql")
+            #expect(command.variables["leaf"] as? Bool == true)
+        }
     }
 
     #if !os(Android)
