@@ -281,7 +281,7 @@ extension Vapor.New: CustomReflectable {
         func decodeVariable(_ variable: TemplateManifest.Variable, path: String) throws -> Any? {
             switch variable.type {
             case .bool:
-                return try container.decode(Flag.self, forKey: .dynamic(path)).wrappedValue
+                return try container.decode(Flag<Bool>.self, forKey: .dynamic(path)).wrappedValue
             case .string:
                 return try container.decodeIfPresent(Option<String>.self, forKey: .dynamic(path))?.wrappedValue
             case .options(let options):
@@ -291,6 +291,7 @@ extension Vapor.New: CustomReflectable {
                 else { return nil }
                 return option.data
             case .variables(let nestedVars):
+                let parentFlag = try container.decodeIfPresent(Flag<Bool>.self, forKey: .dynamic(path))?.wrappedValue
                 var nested: [String: Any] = [:]
 
                 // Decode all nested variables first
@@ -300,9 +301,13 @@ extension Vapor.New: CustomReflectable {
                     }
                 }
 
+                if parentFlag == false, !nested.isEmpty {
+                    throw ValidationError("Cannot pass nested options for --\(path) when --no-\(path) is set.")
+                }
+
                 // If there are no nested variables, check the parent flag
                 if nested.isEmpty {
-                    if let parentFlag = try container.decodeIfPresent(Flag<Bool>.self, forKey: .dynamic(path))?.wrappedValue {
+                    if let parentFlag {
                         return parentFlag ? [:] : false
                     } else {
                         return nil
