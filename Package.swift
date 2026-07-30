@@ -1,4 +1,4 @@
-// swift-tools-version:6.1
+// swift-tools-version:6.2
 import PackageDescription
 
 let package = Package(
@@ -10,11 +10,11 @@ let package = Package(
         .executable(name: "vapor", targets: ["VaporToolbox"])
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.6.2"),
-        .package(url: "https://github.com/vapor/console-kit.git", exact: "5.0.0-alpha.1"),
-        .package(url: "https://github.com/swiftlang/swift-subprocess.git", .upToNextMinor(from: "0.2.1")),
-        .package(url: "https://github.com/hummingbird-project/swift-mustache.git", from: "2.0.2"),
-        .package(url: "https://github.com/jpsim/Yams.git", from: "6.2.0"),
+        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.8.2"),
+        .package(url: "https://github.com/vapor/console-kit.git", exact: "5.0.0-beta.1"),
+        .package(url: "https://github.com/swiftlang/swift-subprocess.git", exact: "1.0.0-beta.1"),
+        .package(url: "https://github.com/hummingbird-project/swift-mustache.git", from: "2.1.0"),
+        .package(url: "https://github.com/jpsim/Yams.git", from: "6.2.2"),
     ],
     targets: [
         .executableTarget(
@@ -52,6 +52,10 @@ let package = Package(
 var swiftSettings: [SwiftSetting] {
     [
         .enableUpcomingFeature("ExistentialAny"),
+        .enableUpcomingFeature("InternalImportsByDefault"),
         .enableUpcomingFeature("MemberImportVisibility"),
+        .enableUpcomingFeature("InferIsolatedConformances"),
+        .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
+        .enableUpcomingFeature("ImmutableWeakCaptures"),
     ]
 }

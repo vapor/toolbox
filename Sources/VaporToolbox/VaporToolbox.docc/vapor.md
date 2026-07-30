@@ -18,7 +18,8 @@ vapor [--help]
 Generates a new app.
 
 ```
-vapor new <name> [--template=<url>] [--branch=<branch>] [--manifest=<file>] [--output=<path>] [--no-commit] [--no-git] [--yes] [--no] [--verbose]  [--help]
+vapor new <name> [--template=<url>] [--branch=<branch>] [--manifest=<file>]
+  [--output=<path>] [--no-commit] [--no-git] [--yes] [--no] [--verbose] [--help]
 ```
 
 **name:**
@@ -83,7 +84,7 @@ vapor new <name> [--template=<url>] [--branch=<branch>] [--manifest=<file>] [--o
 Show subcommand help information.
 
 ```
-vapor help [<subcommands>...] 
+vapor help [<subcommands>...]
 ```
 
 **subcommands:**

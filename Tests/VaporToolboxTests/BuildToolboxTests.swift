@@ -23,7 +23,7 @@ struct BuildToolboxTests {
         #expect(version.contains(branchAndCommit) || version.contains(semver))
     }
 
-    @Test("Update Version.swift File", arguments: [true, false])
+    @Test("Update Version.swift File", .serialized, arguments: [true, false])
     func withVersion(operationThrows: Bool) async throws {
         let file = URL(filePath: #filePath).deletingLastPathComponent().appending(path: "TestingVersion.swift")
         let originalFileContents: String = try String(contentsOf: file, encoding: .utf8)
