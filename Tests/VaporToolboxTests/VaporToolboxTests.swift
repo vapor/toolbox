@@ -69,14 +69,14 @@ struct VaporToolboxTests {
             Vapor.manifest = try JSONDecoder().decode(TemplateManifest.self, from: Data(manifestJSON.utf8))
 
             let command = try #require(
-                Vapor.New.parseAsRoot(["PersonalSite", "--fluent.db", "MySQL", "--leaf"] + flags) as? Vapor.New
+                Vapor.New.parseAsRoot(["PersonalSite", "--fluent.db", "MySQL"] + flags) as? Vapor.New
             )
 
             let fluent = command.variables["fluent"] as? [String: Any]
             let fluentDB = fluent?["db"] as? [String: String]
 
             #expect(fluentDB?["id"] == "mysql")
-            #expect(command.variables["leaf"] as? Bool == true)
+            #expect(command.variables["leaf"] as? Bool == nil)
         }
     }
 

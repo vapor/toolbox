@@ -281,7 +281,7 @@ extension Vapor.New: CustomReflectable {
         func decodeVariable(_ variable: TemplateManifest.Variable, path: String) throws -> Any? {
             switch variable.type {
             case .bool:
-                return try container.decode(Flag<Bool>.self, forKey: .dynamic(path)).wrappedValue
+                return try container.decode(Flag.self, forKey: .dynamic(path)).wrappedValue
             case .string:
                 return try container.decodeIfPresent(Option<String>.self, forKey: .dynamic(path))?.wrappedValue
             case .options(let options):
