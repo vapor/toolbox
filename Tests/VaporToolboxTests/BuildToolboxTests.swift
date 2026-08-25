@@ -1,3 +1,4 @@
+#if !os(Android)
 import Testing
 
 @testable import BuildToolbox
@@ -46,3 +47,4 @@ struct BuildToolboxTests {
         #expect(revertedFileContents == originalFileContents)
     }
 }
+#endif
