@@ -42,12 +42,12 @@ struct Build {
 
     static var currentVersion: String {
         get async throws {
-            let tagResult = try await Subprocess.run(
+            let tag = try await Subprocess.run(
                 .name("git"),
                 arguments: ["describe", "--tags", "--exact-match"],
                 output: .string(limit: 4096)
-            )
-            if let tag = tagResult.standardOutput, !tag.isEmpty {
+            ).standardOutput
+            if !tag.isEmpty {
                 return tag.trimmingCharacters(in: .whitespacesAndNewlines)
             }
 
@@ -61,10 +61,8 @@ struct Build {
                 arguments: ["rev-parse", "--short", "HEAD"],
                 output: .string(limit: 4096)
             )
-            let (branchResult, commitResult) = try await (branchSubprocess, commitSubprocess)
-            if let branch = branchResult.standardOutput, !branch.isEmpty,
-                let commit = commitResult.standardOutput, !commit.isEmpty
-            {
+            let (branch, commit) = try await (branchSubprocess.standardOutput, commitSubprocess.standardOutput)
+            if !branch.isEmpty, !commit.isEmpty {
                 return
                     "\(branch.trimmingCharacters(in: .whitespacesAndNewlines)) (\(commit.trimmingCharacters(in: .whitespacesAndNewlines)))"
             }

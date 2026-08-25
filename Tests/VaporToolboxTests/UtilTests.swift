@@ -2,12 +2,6 @@ import Testing
 
 @testable import VaporToolbox
 
-#if canImport(FoundationEssentials)
-import FoundationEssentials
-#else
-import Foundation
-#endif
-
 @Suite("Util Tests")
 struct UtilTests {
     @Test("escapeshellarg")

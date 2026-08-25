@@ -140,14 +140,12 @@ struct Vapor: AsyncParsableCommand {
                     return "toolbox: \(staticVersion.consoleStylized(.info))"
                 } else {
                     // Determine version through Homebrew
-                    let brewString =
+                    let versionString =
                         try await Subprocess.run(
                             .name("brew"),
                             arguments: ["info", "vapor", "--formula"],
                             output: .string(limit: 4096)
-                        ).standardOutput ?? "unknown"
-
-                    let versionString = brewString.split(separator: "\n")[0]
+                        ).standardOutput.split(separator: "\n")[0]
                     if let match = try /(\d+\.)(\d+\.)(\d)/.firstMatch(in: versionString) {
                         return "toolbox: " + "\(match.0)".consoleStylized(.info)
                     } else {
