@@ -1,13 +1,13 @@
 {
-  "originHash" : "78ed5daaccd9fa29e933e437fb4bb47d9fadbd047e0327e8ab29849d61f13398",
+  "originHash" : "d03259c067adc9dfef083684dd69c749c03cf00d6a60249addc6e0cc3d9217d3",
   "pins" : [
     {
       "identity" : "console-kit",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/vapor/console-kit.git",
       "state" : {
-        "revision" : "ebd3ee6f857eb78ed2ab34a23ec72ff81d3fd9a4",
-        "version" : "5.0.0-beta.1"
+        "revision" : "27a3a13fcbc16295f7010d1c119a1c7990291aa7",
+        "version" : "5.0.0-beta.2"
       }
     },
     {
@@ -78,8 +78,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swiftlang/swift-subprocess.git",
       "state" : {
-        "revision" : "40243d063b41485e17501ccb9d434006bdf837a5",
-        "version" : "1.0.0-beta.1"
+        "revision" : "b3937ab85dd32f6e9435914599c1519074769c1a",
+        "version" : "1.0.0"
       }
     },
     {
