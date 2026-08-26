@@ -16,26 +16,55 @@ func escapeshellarg(_ command: String) -> String {
 }
 
 private func printDroplet(on console: some Console) {
-    let asciiArt: [String] = [
-        "                                ",
-        "               **               ",
-        "             **~~**             ",
-        "           **~~~~~~**           ",
-        "         **~~~~~~~~~~**         ",
-        "       **~~~~~~~~~~~~~~**       ",
-        "     **~~~~~~~~~~~~~~~~~~**     ",
-        "   **~~~~~~~~~~~~~~~~~~~~~~**   ",
-        "  **~~~~~~~~~~~~~~~~~~~~~~~~**  ",
-        " **~~~~~~~~~~~~~~~~~~~~~~~~~~** ",
-        "**~~~~~~~~~~~~~~~~~~~~~~~~~~~~**",
-        "**~~~~~~~~~~~~~~~~~~~~~~~~~~~~**",
-        "**~~~~~~~~~~~~~~~~~~~~~++++~~~**",
-        " **~~~~~~~~~~~~~~~~~~~++++~~~** ",
-        "  ***~~~~~~~~~~~~~~~++++~~~***  ",
-        "    ****~~~~~~~~~~++++~~****    ",
-        "       *****~~~~~~~~~*****      ",
-        "          *************         ",
-        "                                ",
+    let dropletArt: [String] = [
+        "                                                                                                    ",
+        "                                                 ==                                                 ",
+        "                                               ======                                               ",
+        "                                              ========                                              ",
+        "                                             ==========                                             ",
+        "                                           ==============                                           ",
+        "                                          ================                                          ",
+        "                                           ==============                                           ",
+        "                                                                                                    ",
+        "                                      ++++                ++++                                      ",
+        "                                     ++++++++++++++++++++++++++                                     ",
+        "                                    ++++++++++++++++++++++++++++                                    ",
+        "                                   ++++++++++++++++++++++++++++++                                   ",
+        "                                  ++++++++++++++++++++++++++++++++                                  ",
+        "                                  ++++++++++++++++++++++++++++++++                                  ",
+        "                               *    ++++++++++++++++++++++++++++    *                               ",
+        "                              ***       ++++++++++++++++++++       ***                              ",
+        "                             ******                              ******                             ",
+        "                            ************                    ************                            ",
+        "                           **********************************************                           ",
+        "                           **********************************************                           ",
+        "                           **********************************************                           ",
+        "                            ********************************************                            ",
+        "                        #     ****************************************     #                        ",
+        "                       ####       ********************************       ####                       ",
+        "                       ######           ********************           ######                       ",
+        "                      ###########                                  ###########                      ",
+        "                      ####################                ####################                      ",
+        "                      ########################################################                      ",
+        "                      ########################################################                      ",
+        "                       ######################################################                       ",
+        "                         ##################################################                         ",
+        "                            ############################################                            ",
+        "                       ++        ##################################        ++                       ",
+        "                        +++++               ############               +++++                        ",
+        "                         ++++++++++                              ++++++++++                         ",
+        "                          ++++++++++++++++++++++++++++++++++++++++++++++++                          ",
+        "                           ++++++++++++++++++++++++++++++++++++++++++++++                           ",
+        "                            ++++++++++++++++++++++++++++++++++++++++++++                            ",
+        "                              ++++++++++++++++++++++++++++++++++++++++                              ",
+        "                                ++++++++++++++++++++++++++++++++++++                                ",
+        "                                  ++++++++++++++++++++++++++++++++                                  ",
+        "                                     ++++++++++++++++++++++++++                                     ",
+        "                                         ++++++++++++++++++                                         ",
+        "                                                                                                    ",
+    ]
+
+    let textArt: [String] = [
         " _       __    ___   ___   ___  ",
         #"\ \  /  / /\  | |_) / / \ | |_) "#,
         #" \_\/  /_/--\ |_|   \_\_/ |_| \ "#,
@@ -43,10 +72,7 @@ private func printDroplet(on console: some Console) {
         "                                ",
     ]
 
-    let colors: [Character: ConsoleColor] = [
-        "*": .magenta,
-        "~": .blue,
-        "+": .cyan,
+    let textColors: [Character: ConsoleColor] = [
         "_": .magenta,
         "/": .magenta,
         "\\": .magenta,
@@ -55,9 +81,34 @@ private func printDroplet(on console: some Console) {
         ")": .magenta,
     ]
 
-    for line in console.center(asciiArt) {
+    // `+` appears in both the upper ring (lines 9–16) and the lower ring (lines 33–43).
+    // Pick a threshold between those ranges so each ring gets its own color.
+    let lowerRingStart = 25
+    func dropletColor(for character: Character, lineIndex: Int) -> ConsoleColor? {
+        switch character {
+        case "=": .custom(r: 63, g: 184, b: 248)
+        case "+": lineIndex < lowerRingStart
+            ? .custom(r: 74, g: 125, b: 232)
+            : .custom(r: 217, g: 79, b: 227)
+        case "*": .custom(r: 91, g: 90, b: 200)
+        case "#": .custom(r: 154, g: 85, b: 232)
+        default: nil
+        }
+    }
+
+    for (lineIndex, line) in console.center(dropletArt).enumerated() {
         for character in line {
-            console.output(String(character).consoleText(color: colors[character]), newLine: false)
+            console.output(
+                String(character).consoleText(color: dropletColor(for: character, lineIndex: lineIndex)),
+                newLine: false
+            )
+        }
+        console.output("", style: .plain, newLine: true)
+    }
+
+    for line in console.center(textArt) {
+        for character in line {
+            console.output(String(character).consoleText(color: textColors[character]), newLine: false)
         }
         console.output("", style: .plain, newLine: true)
     }
